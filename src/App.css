@@ -1,1 +1,62 @@
 @import "tailwindcss";
+
+@font-face {
+    font-family: 'Raleway';
+    src: url('./assets/fonts/Raleway-VariableFont_wght.ttf') format('truetype');
+    font-weight: 100 900;
+    font-display: swap;
+  }
+  
+  @font-face {
+    font-family: 'Raleway';
+    src: url('./assets/fonts/Raleway-Italic-VariableFont_wght.ttf') format('truetype');
+    font-style: italic;
+    font-weight: 100 900;
+    font-display: swap;
+  }
+  
+  
+  @theme{
+    --font-raleway: 'Raleway', sans-serif;
+   /* 🌞 Primary */
+  --color-primary-light-default: #FEFEFE;
+  --color-primary-light-hover: #F7F7F7;
+  --color-primary-light-active: #FDFDFD;
+
+  --color-primary-normal-default: #F7F7F7;
+  --color-primary-normal-hover: #DEDEDE;
+  --color-primary-normal-active: #C6C6C6;
+
+  --color-primary-dark-default: #B9B9B9;
+  --color-primary-dark-hover: #949494;
+  --color-primary-dark-active: #6F6F6F;
+  --color-primary-dark-darker: #565656;
+
+  /* 💜 Secondary */
+  --color-secondary-light-default: #F2EAF9;
+  --color-secondary-light-hover: #EBDFF5;
+  --color-secondary-light-active: #D6BEEB;
+
+  --color-secondary-normal-default: #7B2CBF;
+  --color-secondary-normal-hover: #6F28AC;
+  --color-secondary-normal-active: #622399;
+
+  --color-secondary-dark-default: #5C218F;
+  --color-secondary-dark-hover: #4A1A73;
+  --color-secondary-dark-active: #371456;
+  --color-secondary-dark-darker: #2B0F43;
+
+  /* ⚫ Tertiary */
+  --color-tertiary-light-default: #EAEAEA;
+  --color-tertiary-light-hover: #E0E0E0;
+  --color-tertiary-light-active: #BEBEBE;
+
+  --color-tertiary-normal-default: #2D2D2D;
+  --color-tertiary-normal-hover: #292929;
+  --color-tertiary-normal-active: #242424;
+
+  --color-tertiary-dark-default: #222222;
+  --color-tertiary-dark-hover: #1B1B1B;
+  --color-tertiary-dark-active: #141414;
+  --color-tertiary-dark-darker: #101010;
+  }

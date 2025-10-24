@@ -3,63 +3,64 @@ module.exports = {
   content: ["./src/**/*.{html,js,ts,jsx,tsx}"],
   theme: {
     extend: {
+      fontFamily: {
+        raleway: "var(--font-raleway)",
+      },
       colors: {
         primary: {
           light: {
-            default: "#FEFEFE",
-            hover: "#F7F7F7",
-            active: "#FDFDFD",
+            DEFAULT: "var(--color-primary-light-default)",
+            hover: "var(--color-primary-light-hover)",
+            active: "var(--color-primary-light-active)",
           },
           normal: {
-            default: "#F7F7F7",
-            hover: "#DEDEDE",
-            active: "#C6C6C6",
+            DEFAULT: "var(--color-primary-normal-default)",
+            hover: "var(--color-primary-normal-hover)",
+            active: "var(--color-primary-normal-active)",
           },
           dark: {
-            default: "#B9B9B9",
-            hover: "#949494",
-            active: "#6F6F6F",
-            darker: "#565656",
+            DEFAULT: "var(--color-primary-dark-default)",
+            hover: "var(--color-primary-dark-hover)",
+            active: "var(--color-primary-dark-active)",
+            darker: "var(--color-primary-dark-darker)",
           },
         },
         secondary: {
           light: {
-            default: "#F2EAF9",
-            hover: "#EBDFF5",
-            active: "#D6BEEB",
+            DEFAULT: "var(--color-secondary-light-default)",
+            hover: "var(--color-secondary-light-hover)",
+            active: "var(--color-secondary-light-active)",
           },
           normal: {
-            default: "#7B2CBF",
-            hover: "#6F28AC",
-            active: "#622399",
+            DEFAULT: "var(--color-secondary-normal-default)",
+            hover: "var(--color-secondary-normal-hover)",
+            active: "var(--color-secondary-normal-active)",
           },
           dark: {
-            default: "#5C218F",
-            hover: "#4A1A73",
-            active: "#371456",
-            darker: "#2B0F43",
+            DEFAULT: "var(--color-secondary-dark-default)",
+            hover: "var(--color-secondary-dark-hover)",
+            active: "var(--color-secondary-dark-active)",
+            darker: "var(--color-secondary-dark-darker)",
           },
-
         },
         tertiary: {
           light: {
-            default: "#EAEAEA",
-            hover: "#E0E0E0",
-            active: "#BEBEBE",
+            DEFAULT: "var(--color-tertiary-light-default)",
+            hover: "var(--color-tertiary-light-hover)",
+            active: "var(--color-tertiary-light-active)",
           },
           normal: {
-            default: "#2D2D2D",
-            hover: "#292929",
-            active: "#242424",
+            DEFAULT: "var(--color-tertiary-normal-default)",
+            hover: "var(--color-tertiary-normal-hover)",
+            active: "var(--color-tertiary-normal-active)",
           },
           dark: {
-            default: "#222222",
-            hover: "#1B1B1B",
-            active: "#141414",
-            darker: "#101010",
+            DEFAULT: "var(--color-tertiary-dark-default)",
+            hover: "var(--color-tertiary-dark-hover)",
+            active: "var(--color-tertiary-dark-active)",
+            darker: "var(--color-tertiary-dark-darker)",
           },
-
-        }
+        },
       },
     },
   },
