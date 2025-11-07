@@ -167,5 +167,22 @@
   --text-Display-3xl-ExtraBold--font-weight: 800;
 
   /* radius */
+  --radius-sm: 10px;
   --radius-md: 40px;
+  --radius-lg: 100px;
+
+  /* padding */
+  --padding-x-sm: 10px;
+  --padding-y-sm: 10px;
+
+  /* shadows */
+  
+  --shadow-blur: 4px;
+  --shadow-spread: 0px;
+  --shadow-color-rgb: 0, 0, 0; /* black */
+  --shadow-alpha: 0.05; /* 5% opacity */
+  --box-shadow:    0px 4px 4px 0px rgba(var(--shadow-color-rgb), var(--shadow-alpha));
 }
+
+/* utility classes you can call from JSX */
+.shadow  { box-shadow: var(--box-shadow) !important; }

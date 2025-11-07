@@ -6,12 +6,12 @@ import Button from './components/ui/button';
 function App() {
   return (
   <>
-  <div className="font-raleway">
+  <div className="font-raleway bg-black">
 
   <h1 className='text-green-600'>Hello World
 
   </h1>
-  <Button disabled={true}>Elysium</Button>
+  <Button >Contact Us</Button>
   </div>
   </>
   );

@@ -62,6 +62,10 @@ module.exports = {
           },
         },
       },
+      spcaing: {
+        "px-1": "30px",
+        "py-1": "30px",
+      }
     },
   },
   plugins: [require("tailwindcss-animate")],
