@@ -7,7 +7,7 @@ function App() {
   <>
   <div className="font-raleway">
 
-  <h1 className='text-xl  text-green-600 '>Hello World</h1>
+  <h1 className='text-green-600'>Hello World</h1>
   </div>
   </>
   );
