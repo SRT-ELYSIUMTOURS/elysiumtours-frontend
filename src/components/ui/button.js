@@ -17,7 +17,7 @@ const Button = ({
   const baseStyles = '' 
   const variants = {} 
   const sizes = {}
-  const disabledStyles = ''
+  const disabledStyles = 'bg-secondary-light-active'
 
   return (
   
