@@ -165,4 +165,7 @@
   --text-Display-3xl-bold--font-weight: 700;
   --text-Display-3xl-ExtraBold: 76px;
   --text-Display-3xl-ExtraBold--font-weight: 800;
+
+  /* radius */
+  --radius-md: 40px;
 }

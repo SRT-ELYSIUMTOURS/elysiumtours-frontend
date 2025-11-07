@@ -14,7 +14,7 @@ const Button = ({
   ...props
 }) => {
 
-  const baseStyles = 'border-r' 
+  const baseStyles = 'border-r rounded-md' 
   const variants = {
     secondary: 'active:bg-secondary-normal-active hover:bg-secondary-normal-hover bg-secondary-normal-default text-primary-light-default',
   } 
