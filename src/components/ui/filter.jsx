@@ -60,7 +60,7 @@ const FilterOption = React.forwardRef(({
   ...props
 }, ref) => {
 
-  const baseStyles = 'rounded-md shadow px-[var(--padding-x-sm)] py-[var(--padding-y-sm)]  border border-solid transition-all hover:text-tertiary-light-default hover:bg-secondary-normal-hover hover:border-secondary-normal-hover shadow-lg' ;
+  const baseStyles = 'rounded-md shadow px-[var(--padding-x-sm)] py-[var(--padding-y-sm)]  border border-solid transition-all duration-300 ease-in hover:text-tertiary-light-default hover:bg-secondary-normal-hover hover:border-secondary-normal-hover shadow-lg' ;
   
   const variants = {
     default: 'border-primary-dark-default text-primary-dark-default',
