@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { classNames } from '../../utils/classNames';
 const Button = ({
   children,
-  variant = "primary",
+  variant = "secondary",
   size = "medium",
   type = "button",
   onClick,
@@ -14,10 +14,12 @@ const Button = ({
   ...props
 }) => {
 
-  const baseStyles = '' 
-  const variants = {} 
+  const baseStyles = 'border-r' 
+  const variants = {
+    secondary: 'active:bg-secondary-normal-active hover:bg-secondary-normal-hover bg-secondary-normal-default text-primary-light-default',
+  } 
   const sizes = {}
-  const disabledStyles = 'bg-secondary-light-active'
+  const disabledStyles = 'bg-secondary-light-active text-primary-dark-darker'
 
   return (
   
