@@ -1,4 +1,5 @@
 @import "tailwindcss";
+<<<<<<< HEAD
 
 @theme {
   --font-raleway: "Raleway", sans-serif;
@@ -166,3 +167,5 @@
   --text-Display-3xl-ExtraBold: 76px;
   --text-Display-3xl-ExtraBold--font-weight: 800;
 }
+=======
+>>>>>>> parent of c07e958 (Merge pull request #3 from SRT-ELYSIUMTOURS/main)
