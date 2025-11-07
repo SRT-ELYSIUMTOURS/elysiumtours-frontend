@@ -182,7 +182,12 @@
   --shadow-color-rgb: 0, 0, 0; /* black */
   --shadow-alpha: 0.05; /* 5% opacity */
   --box-shadow:    0px 4px 4px 0px rgba(var(--shadow-color-rgb), var(--shadow-alpha));
+  --box-shadow-lg: 0px 4px 20px 0px rgba(var(--shadow-color-rgb), var(--shadow-alpha));
+  
+  /* gap */
+  --gap-md: 16px;
 }
 
 /* utility classes you can call from JSX */
 .shadow  { box-shadow: var(--box-shadow) !important; }
+.shadow-lg { box-shadow: var(--box-shadow-lg) !important; }
