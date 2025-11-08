@@ -3,6 +3,7 @@ import "./App.css";
 import Button from "./components/ui/button";
 import { Filter, FilterOption } from "./components/ui/filter";
 import { SearchButton } from "./components/ui/search";
+import Toast from "./components/ui/toast";
 import {
   Pagination,
   PaginationItem,
@@ -13,6 +14,7 @@ import {
 import { Breadcrumb, BreadcrumbItem } from "./components/ui/breadcrumb";
 function App() {
   const [currentPage, setCurrentPage] = useState(1);
+  const [showToast, setShowToast] = useState(true);
   const totalPages = 5;
   return (
     <>
@@ -60,6 +62,24 @@ function App() {
           <BreadcrumbItem href="/subcategory">Subcategory</BreadcrumbItem>
           <BreadcrumbItem>Current Page</BreadcrumbItem>
         </Breadcrumb>
+
+        <Button
+          variant="secondary"
+          size="small"
+          endIcon={
+            <img src="src\assets\breadcrumbIcon.svg" width="24" height="24" />
+          }
+        >
+          Hello
+        </Button>
+        {showToast && (
+          <Toast
+            variant="info"
+            Heading="Success!"
+            text={<p>Your operation was completed successfully.</p>}
+            onCancel={() => setShowToast(false)}
+          />
+        )}
       </div>
     </>
   );

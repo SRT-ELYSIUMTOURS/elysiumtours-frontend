@@ -14,7 +14,7 @@ const Button = ({
   ...props
 }) => {
 
-  const baseStyles = 'border-r rounded-md shadow px-[var(--padding-x-sm)] py-[var(--padding-y-sm)]' 
+  const baseStyles = 'border-r flex flex-row rounded-md shadow px-x-sm py-y-sm' 
   const variants = {
     secondary: 'active:bg-secondary-normal-active hover:bg-secondary-normal-hover bg-secondary-normal-default active:border-secondary-normal-active hover:border-secondary-normal-hover border-secondary-normal-default text-primary-light-default',
     secondaryOutline: 'bg-transparent border border-solid border-secondary-normal-default hover:border-secondary-normal-hover active:border-secondary-normal-active text-secondary-normal-default active:text-secondary-normal-active hover:text-secondary-normal-hover',
