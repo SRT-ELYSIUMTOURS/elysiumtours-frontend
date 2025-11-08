@@ -1,5 +1,4 @@
 @import "tailwindcss";
-<<<<<<< HEAD
 
 @theme {
   --font-raleway: "Raleway", sans-serif;
@@ -166,6 +165,29 @@
   --text-Display-3xl-bold--font-weight: 700;
   --text-Display-3xl-ExtraBold: 76px;
   --text-Display-3xl-ExtraBold--font-weight: 800;
+
+  /* radius */
+  --radius-sm: 10px;
+  --radius-md: 40px;
+  --radius-lg: 100px;
+
+  /* padding */
+  --padding-x-sm: 10px;
+  --padding-y-sm: 10px;
+
+  /* shadows */
+  
+  --shadow-blur: 4px;
+  --shadow-spread: 0px;
+  --shadow-color-rgb: 0, 0, 0; /* black */
+  --shadow-alpha: 0.05; /* 5% opacity */
+  --box-shadow:    0px 4px 4px 0px rgba(var(--shadow-color-rgb), var(--shadow-alpha));
+  --box-shadow-lg: 0px 4px 20px 0px rgba(var(--shadow-color-rgb), var(--shadow-alpha));
+  
+  /* gap */
+  --gap-md: 16px;
 }
-=======
->>>>>>> parent of c07e958 (Merge pull request #3 from SRT-ELYSIUMTOURS/main)
+
+/* utility classes you can call from JSX */
+.shadow  { box-shadow: var(--box-shadow) !important; }
+.shadow-lg { box-shadow: var(--box-shadow-lg) !important; }
