@@ -13,7 +13,7 @@ import { classNames } from "../../utils/classNames";
 
 const QuestionIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-    <rect x="1" y="1" width="22" height="22" rx="4" stroke="#d6beeb" strokeWidth="1.5"/>
+    {/* <rect x="1" y="1" width="22" height="22" rx="4" stroke="#d6beeb" strokeWidth="1.5"/> */}
     <path d="M9.5 9.5c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5c0 1.5-1.5 2-2.5 2.5" stroke="#7b2cbf" strokeWidth="1.5" strokeLinecap="round"/>
     <circle cx="12" cy="16.5" r="0.8" fill="#7b2cbf"/>
   </svg>
