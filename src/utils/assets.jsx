@@ -39,8 +39,8 @@ export const NextPageIcon = ({
       <path
         d="M8.75 5.75L10.513 7.49731C11.9189 8.89075 12.6219 9.58748 12.7301 10.4367C12.7566 10.6447 12.7566 10.8553 12.7301 11.0633C12.6219 11.9125 11.9189 12.6092 10.513 14.0027L8.75 15.75M20.75 10.75C20.75 16.2728 16.2728 20.75 10.75 20.75C5.22715 20.75 0.75 16.2728 0.75 10.75C0.75 5.22715 5.22715 0.75 10.75 0.75C16.2728 0.75 20.75 5.22715 20.75 10.75Z"
         stroke={stroke}
-        stroke-width="1.5"
-        stroke-linecap="round"
+        strokeWidth="1.5"
+        strokeLinecap="round"
       />
     </svg>
   );
@@ -55,7 +55,7 @@ export const BreadcrumbIcon = ({
 }) => {
   return (
     <svg
-    className={className}
+      className={className}
       width={width}
       height={height}
       viewBox="0 0 24 24"
@@ -65,8 +65,8 @@ export const BreadcrumbIcon = ({
       <path
         d="M10 7L11.763 8.74731C13.1689 10.1408 13.8719 10.8375 13.9801 11.6867C14.0066 11.8947 14.0066 12.1053 13.9801 12.3133C13.8719 13.1625 13.1689 13.8592 11.763 15.2527L10 17"
         stroke={stroke}
-        stroke-width="1.5"
-        stroke-linecap="round"
+        strokeWidth="1.5"
+        strokeLinecap="round"
       />
     </svg>
   );
