@@ -1,0 +1,36 @@
+      {/* Figma Frame 13 — 1728×379, bg:#fefefe, 3 cards side-by-side gap:24 */}
+      <Section title="12 — TestimonialCard (new)" bg="bg-primary-light-default">
+        {/* Section label — matches Figma "TESTIMONIALS" header pattern */}
+        <div className="flex items-center gap-2 mb-2">
+          <div className="w-[46px] h-[1px] bg-secondary-dark-darker" />
+          <span className="text-med-small-bold text-secondary-dark-darker tracking-widest">TESTIMONIALS</span>
+        </div>
+        <p className="text-High-md-bold text-tertiary-normal-default mb-8">What Our Travelers Say</p>
+        {/* 3 cards horizontal gap:24 — matches Figma Frame 68 layout:HORIZONTAL gap:24 */}
+        <div className="flex gap-[24px]">
+          <TestimonialCard
+            quote="Elysium Tours made my trip to Ghana absolutely amazing!"
+            body="Elysium Tours made my trip to Ghana absolutely amazing! Our guide was so knowledgeable and friendly, and every destination felt thoughtfully chosen. I especially loved the Cape Coast tour....."
+            attribution="Sarah M., United Kingdom"
+            reviewerName="Estella Sackey"
+            timestamp="2 weeks ago"
+            rating={4}
+          />
+          <TestimonialCard
+            quote="Elysium Tours made my trip to Ghana absolutely amazing!"
+            body="Elysium Tours made my trip to Ghana absolutely amazing! Our guide was so knowledgeable and friendly, and every destination felt thoughtfully chosen. I especially loved the Cape Coast tour....."
+            attribution="Sarah M., United Kingdom"
+            reviewerName="Sam Smith"
+            timestamp="2 weeks ago"
+            rating={4}
+          />
+          <TestimonialCard
+            quote="Elysium Tours made my trip to Ghana absolutely amazing!"
+            body="Elysium Tours made my trip to Ghana absolutely amazing! Our guide was so knowledgeable and friendly, and every destination felt thoughtfully chosen. I especially loved the Cape Coast tour....."
+            attribution="Sarah M., United Kingdom"
+            reviewerName="Sam Smith"
+            timestamp="2 weeks ago"
+            rating={4}
+          />
+        </div>
+      </Section>
