@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { BrowserRouter } from "react-router-dom";
 import "./App.css";
+import "flag-icons/css/flag-icons.min.css";
 
 import Navbar from "./components/shared/Navbar";
 import Button from "./components/ui/button";
@@ -27,6 +28,13 @@ import FilterPanel from "./components/ui/FilterPanel";
 import CommentSection from "./components/ui/CommentSection";
 import ContactForm from "./components/ui/ContactForm";
 import VideoPlayer from "./components/ui/VideoPlayer";
+import Footer from "./components/ui/Footer";
+import TextArea from "./components/ui/TextArea";
+import ShareActionBar from "./components/ui/ShareActionBar";
+import NotFoundDisplay from "./components/ui/NotFoundDisplay";
+import PhoneInput from "./components/ui/PhoneInput";
+import HeroImageSlider from "./components/ui/HeroImageSlider";
+
 import PopularTourCard from "./components/cards/PopularTourCard";
 import PartnerHighlightCard from "./components/cards/PartnerHighlightCard";
 import FeaturedDestinationCard from "./components/cards/FeaturedDestinationCard";
@@ -34,6 +42,8 @@ import TestimonialCard from "./components/cards/TestimonialCard";
 import CountryTourCard from "./components/cards/CountryTourCard";
 import BlogContentCard from "./components/cards/BlogContentCard";
 import GalleryMasonryCard from "./components/cards/GalleryMasonryCard";
+
+
 
 const IMG = {
   tour1: "https://picsum.photos/seed/ghana1/360/280",
@@ -419,6 +429,17 @@ function AppContent() {
       </Section>
 
       <ToastContainer toasts={toasts} onDismiss={dismissToast} position="top-right" />
+
+      <Section>
+      
+        {/* <ShareActionBar /> */}
+        <NotFoundDisplay />
+      <HeroImageSlider />
+        <PhoneInput />
+        <TextArea />
+        <Footer />
+      
+      </Section>
     </div>
   );
 }
