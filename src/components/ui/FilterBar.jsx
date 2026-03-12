@@ -72,7 +72,7 @@ const FilterBar = React.forwardRef(({
   return (
     <div
       ref={ref}
-      className={classNames("inline-flex items-center flex-wrap gap-[16px]", className)}
+      className={classNames("inline-flex items-center flex-wrap gap-md", className)}
       {...props}
     >
       {options.map((opt) => (

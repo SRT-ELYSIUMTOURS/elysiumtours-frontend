@@ -27,7 +27,7 @@ const SectionHeadline = React.forwardRef(({
     <div
       ref={ref}
       className={classNames(
-        "flex flex-col gap-[16px]",
+        "flex flex-col gap-md",
         align === "center" ? "items-center text-center" : "items-start text-left",
         className
       )}
@@ -36,16 +36,16 @@ const SectionHeadline = React.forwardRef(({
       {/* Eyebrow label row — Line + text (from Figma Frame 19: gap:8) */}
       {label && (
         <div className="flex items-center gap-[8px]">
-          <div className="w-[46px] h-[1px] shrink-0" style={{ backgroundColor: labelColor }} />
+          <div className="w-[46px] h-px shrink-0" style={{ backgroundColor: labelColor }} />
           <span style={{ fontSize: "13px", fontWeight: 700, color: labelColor, letterSpacing: "0.05em", lineHeight: "18px", fontFamily: "Raleway, sans-serif" }}>
             {label}
           </span>
         </div>
       )}
 
-      {/* Title — [25px/700] */}
+      {/* Title — [20px/700] */}
       {title && (
-        <h2 style={{ fontSize: "25px", fontWeight: 700, color: titleColor, lineHeight: "34px", fontFamily: "Raleway, sans-serif" }}>
+        <h2 style={{ fontSize: "20px", fontWeight: 700, color: titleColor, lineHeight: "34px", fontFamily: "Raleway, sans-serif" }}>
           {title}
         </h2>
       )}
@@ -78,7 +78,7 @@ const CardHeadline = React.forwardRef(({
         {title}
       </span>
       {/* Decorative white underline — LINE stroke:#ffffff */}
-      <div className="h-[1px] w-full bg-white opacity-60" />
+      <div className="h-px w-full bg-white opacity-60" />
     </div>
   );
 });

@@ -46,7 +46,7 @@ const BlogContentCard = React.forwardRef(({
         ...dims,
         backgroundColor: "#000000",
         border: "1px solid #d6beeb",
-        borderRadius: "40px",
+        borderRadius: "var(--radius-md)",
       }}
       {...props}
     >
@@ -91,7 +91,7 @@ const BlogContentCard = React.forwardRef(({
         )}
 
         {/* White underline — from Figma Line 3 stroke:#ffffff */}
-        <div className="w-full h-[1px] bg-white opacity-60" />
+        <div className="w-full h-px bg-white opacity-60" />
 
         {/* Sub-label — [16px/400] #f7f7f7 e.g. "28 Pictures" */}
         {subLabel && (

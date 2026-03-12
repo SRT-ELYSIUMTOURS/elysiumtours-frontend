@@ -3,16 +3,17 @@ import { classNames } from "../../utils/classNames";
 
 // Star icon — filled or empty
 const StarIcon = ({ filled = true, size = 16 }) => (
-  <svg width={size} height={size} viewBox="0 0 16 16" fill="none">
+  <svg width={size} height={size} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path
       d="M8 1.5l1.854 3.756 4.146.603-3 2.924.708 4.127L8 10.771l-3.708 1.939.708-4.127-3-2.924 4.146-.603L8 1.5Z"
-      fill={filled ? "#7b2cbf" : "none"}
-      stroke={filled ? "#7b2cbf" : "#b9b9b9"}
+      fill={filled ? "#7b2cbf" : "#eaeaea"}
+      stroke={filled ? "#7b2cbf" : "#eaeaea"}
       strokeWidth="1.2"
       strokeLinejoin="round"
     />
   </svg>
 );
+
 
 // StarRating — from Figma: star (26×33) ×5, rating value beside it
 const StarRating = React.forwardRef(({

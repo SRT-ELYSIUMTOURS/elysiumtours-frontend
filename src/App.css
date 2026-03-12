@@ -78,15 +78,15 @@
   --text-md-ExtraBold: 16px;
   --text-md-ExtraBold--font-weight: 800;
 
-  --text-semi-md-regular: 20px;
+  --text-semi-md-regular: 18px;
   --text-semi-md-regular--font-weight: 400;
-  --text-semi-md-Medium: 20px;
+  --text-semi-md-Medium: 18px;
   --text-semi-md-Medium--font-weight: 500;
-  --text-semi-md-semibold: 20px;
+  --text-semi-md-semibold: 18px;
   --text-semi-md-semibold--font-weight: 600;
-  --text-semi-md-bold: 20px;
+  --text-semi-md-bold: 18px;
   --text-semi-md-bold--font-weight: 700;
-  --text-semi-md-ExtraBold: 20px;
+  --text-semi-md-ExtraBold: 18px;
   --text-semi-md-ExtraBold--font-weight: 800;
 
   --text-High-md-regular: 25px;
@@ -100,15 +100,15 @@
   --text-High-md-ExtraBold: 25px;
   --text-High-md-ExtraBold--font-weight: 800;
 
-  --text-Display-small-regular: 31px;
+  --text-Display-small-regular: 26px;
   --text-Display-small-regular--font-weight: 400;
-  --text-Display-small-Medium: 31px;
+  --text-Display-small-Medium: 26px;
   --text-Display-small-Medium--font-weight: 500;
-  --text-Display-small-semibold: 31px;
+  --text-Display-small-semibold: 26px;
   --text-Display-small-semibold--font-weight: 600;
-  --text-Display-small-bold: 31px;
+  --text-Display-small-bold: 26px;
   --text-Display-small-bold--font-weight: 700;
-  --text-Display-small-ExtraBold: 31px;
+  --text-Display-small-ExtraBold: 26px;
   --text-Display-small-ExtraBold--font-weight: 800;
 
   --text-Display-md-small-regular: 39px;

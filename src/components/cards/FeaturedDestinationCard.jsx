@@ -27,7 +27,7 @@ const FeaturedDestinationCard = React.forwardRef(({
       ref={ref}
       onClick={onClick}
       className={classNames(
-        "relative w-full rounded-[var(--radius-md)] overflow-hidden",
+        "relative w-full rounded-3xl overflow-hidden shadow-sm",
         "cursor-pointer group transition-all duration-300 ease-in",
         sizes[size] || sizes.default,
         className
@@ -46,16 +46,16 @@ const FeaturedDestinationCard = React.forwardRef(({
       )}
 
       {/* Gradient overlay — dark at bottom for text legibility */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+      <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent" />
 
       {/* Text — bottom left */}
       <div className="absolute bottom-0 left-0 right-0 p-5 flex flex-col gap-1">
         {/* Name — [20px/700] #fefefe */}
-        <h3 className="text-semi-md-bold text-primary-light-default leading-tight">
+        <h3 className="text-[20px] font-bold text-white leading-tight">
           {name}
         </h3>
         {/* Subtitle — [16px/600] #fefefe */}
-        <p className="text-md-semibold text-primary-light-default opacity-90 line-clamp-1">
+        <p className="text-[14px] font-medium text-white/90 leading-[1.3] whitespace-pre-line mt-1">
           {subtitle}
         </p>
       </div>

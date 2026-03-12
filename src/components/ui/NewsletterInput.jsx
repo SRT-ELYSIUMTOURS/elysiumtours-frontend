@@ -38,7 +38,7 @@ const NewsletterInput = React.forwardRef(({
   return (
     <div
       ref={ref}
-      className={classNames("flex flex-col gap-[14px] w-[379px]", className)}
+      className={classNames("flex flex-col gap-md w-full", className)}
       {...props}
     >
       {/* Label — [16px/600] #292929 */}
@@ -53,10 +53,10 @@ const NewsletterInput = React.forwardRef(({
         onSubmit={handleSubmit}
         className={classNames(
           "flex items-center w-full h-[56px]",
-          "rounded-[var(--radius-md)]",          // r:40
+          "rounded-md",          // r:40
           "border border-secondary-light-active", // stroke:#d6beeb
           "bg-primary-light-default",
-          "overflow-hidden pl-5"
+          "overflow-hidden pl-5 transition-all duration-300 ease-in focus-within:border-secondary-normal-default focus-within:shadow-md"
         )}
       >
         {/* Email input — placeholder: [13px/500] #2d2d2d */}
@@ -68,7 +68,7 @@ const NewsletterInput = React.forwardRef(({
           className={classNames(
             "flex-1 bg-transparent outline-none",
             "text-med-small-Medium text-tertiary-normal-default",
-            "placeholder:text-primary-dark-darker"
+            "placeholder:text-primary-dark-active"
           )}
         />
 
@@ -76,7 +76,7 @@ const NewsletterInput = React.forwardRef(({
         <button
           type="submit"
           className={classNames(
-            "h-[48px] px-6 my-[4px] mr-[4px] rounded-[var(--radius-md)]",
+            "h-[48px] px-6 my-[4px] mr-[4px] rounded-md",
             "bg-secondary-normal-default",
             "text-md-semibold text-primary-light-default",
             "shrink-0 transition-all duration-300 ease-in",

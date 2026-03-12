@@ -50,7 +50,7 @@ const GalleryMasonryCard = React.forwardRef(({
         height,
         backgroundColor: "#000000",
         border: "1px solid #d6beeb",
-        borderRadius: "40px",
+        borderRadius: "var(--radius-md)",
       }}
       {...props}
     >
@@ -89,7 +89,7 @@ const GalleryMasonryCard = React.forwardRef(({
         )}
 
         {/* White underline */}
-        {title && <div className="w-full h-[1px] bg-white opacity-60" />}
+        {title && <div className="w-full h-px bg-white opacity-60" />}
 
         {/* Count — [16px/400] #f7f7f7, only on small cards */}
         {count && isSmall && (

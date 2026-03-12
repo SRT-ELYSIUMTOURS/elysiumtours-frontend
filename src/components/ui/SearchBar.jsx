@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { classNames } from "../../utils/classNames";
 
 // From Figma: Frame 15 (134:1493) — Hero search bar, 957×88
@@ -36,7 +36,7 @@ const SearchBar = React.forwardRef(({
       className={classNames(
         // Frame 15: HORIZONTAL, 957×88, two sections side by side
         "flex w-full overflow-hidden",
-        "rounded-[var(--radius-md)]",          // pill shape
+        "rounded-full",          // perfect pill shape
         "border border-secondary-light-active", // stroke:#d6beeb overall
         "bg-primary-light-default shadow",
         className
@@ -44,7 +44,7 @@ const SearchBar = React.forwardRef(({
       {...props}
     >
       {/* LEFT — Frame 10: "Where to?" — stroke:#d6beeb on right side only */}
-      <div className="flex-1 flex flex-col justify-center px-6 py-4 border-r border-secondary-light-active">
+      <div className="flex-1 flex flex-col justify-center pl-[48px] pr-6 py-4 border-r border-secondary-light-active text-left">
         {/* Label — [16px/600] #2d2d2d */}
         <span className="text-md-semibold text-tertiary-normal-default leading-none mb-1">
           Where to?
@@ -60,8 +60,8 @@ const SearchBar = React.forwardRef(({
       </div>
 
       {/* RIGHT — Frame 11: "When?" */}
-      <div className="flex-1 flex items-center justify-between px-6 py-4">
-        <div className="flex flex-col justify-center">
+      <div className="flex-1 flex items-center justify-between pl-[48px] pr-4 py-4">
+        <div className="flex flex-col justify-center text-left">
           {/* Label — [16px/600] #2d2d2d */}
           <span className="text-md-semibold text-tertiary-normal-default leading-none mb-1">
             When?

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState } from "react";
 import { classNames } from "../../utils/classNames";
 import StarRating from "./StarRating";
 
@@ -77,7 +77,7 @@ const FilterPanel = React.forwardRef(({
   const [priceRange, setPriceRange] = useState([0, 100]);
   const [rating, setRating] = useState(null);
   const [accessibility, setAccessibility] = useState({ wheelchair: false, family: false, kids: false, elder: false, fullday: false, multiday: false });
-  const sliderRef = useRef(null);
+
 
   const toggle = (setter, key) => setter(prev => ({ ...prev, [key]: !prev[key] }));
 
@@ -109,7 +109,7 @@ const FilterPanel = React.forwardRef(({
       <div className="flex flex-col gap-[24px] flex-1">
 
         {/* Time Of Day */}
-        <div className="flex flex-col gap-[16px]">
+        <div className="flex flex-col gap-md">
           <SectionLabel>Time Of Day</SectionLabel>
           <div className="flex gap-[82px]">
             <Checkbox checked={timeOfDay.morning}   onChange={() => toggle(setTimeOfDay,'morning')}   label="Morning"        subLabel="Starts Before 12pm" />
@@ -121,7 +121,7 @@ const FilterPanel = React.forwardRef(({
         <SectionDivider />
 
         {/* Duration */}
-        <div className="flex flex-col gap-[16px]">
+        <div className="flex flex-col gap-md">
           <SectionLabel>Duration</SectionLabel>
           <div className="flex flex-col gap-[15px]">
             <div className="flex gap-[82px]">
@@ -140,7 +140,7 @@ const FilterPanel = React.forwardRef(({
         <SectionDivider />
 
         {/* Price Range — Group 3285 771×64 */}
-        <div className="flex flex-col gap-[16px]">
+        <div className="flex flex-col gap-md">
           <SectionLabel>Price Range</SectionLabel>
           <div className="flex flex-col gap-[8px]">
             <span style={{ fontSize:"13px", fontWeight:400, color:"#565656", fontFamily:"Raleway,sans-serif" }}>
@@ -170,7 +170,7 @@ const FilterPanel = React.forwardRef(({
         <SectionDivider />
 
         {/* Ratings */}
-        <div className="flex flex-col gap-[16px]">
+        <div className="flex flex-col gap-md">
           <SectionLabel>Ratings</SectionLabel>
           <div className="flex flex-col gap-[15px]">
             <div className="flex gap-[82px]">
@@ -189,7 +189,7 @@ const FilterPanel = React.forwardRef(({
         <SectionDivider />
 
         {/* Accessibility */}
-        <div className="flex flex-col gap-[16px]">
+        <div className="flex flex-col gap-md">
           <SectionLabel>Accessibility</SectionLabel>
           <div className="flex flex-col gap-[15px]">
             <div className="flex gap-[82px]">
@@ -214,7 +214,7 @@ const FilterPanel = React.forwardRef(({
           Clear All
         </button>
         <button type="button" onClick={() => onApply?.({ timeOfDay, duration, priceRange, rating, accessibility })}
-          className="px-6 rounded-[40px] bg-secondary-normal-default hover:bg-secondary-normal-hover active:bg-secondary-normal-active transition-all duration-300 ease-in"
+          className="px-6 rounded-md bg-secondary-normal-default hover:bg-secondary-normal-hover active:bg-secondary-normal-active transition-all duration-300 ease-in"
           style={{ height:"56px", fontSize:"16px", fontWeight:600, color:"#fefefe", fontFamily:"Raleway,sans-serif" }}>
           See {resultCount} Results
         </button>
