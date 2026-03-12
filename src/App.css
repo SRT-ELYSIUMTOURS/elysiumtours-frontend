@@ -185,7 +185,24 @@
   --box-shadow-lg: 0px 4px 20px 0px rgba(var(--shadow-color-rgb), var(--shadow-alpha));
   
   /* gap */
+  --gap-sm: 8px;
   --gap-md: 16px;
+  --gap-lg: 24px;
+  --gap-xl: 32px;
+  --gap-2xl: 48px;
+
+  /* additional radius */
+  --radius-xl: 20px;
+  --radius-2xl: 40px;
+
+  /* overlays */
+  --color-overlay-dark: rgba(0, 0, 0, 0.6);
+  --color-overlay-medium: rgba(0, 0, 0, 0.4);
+  --color-overlay-light: rgba(0, 0, 0, 0.5);
+
+  /* additional shadows */
+  --shadow-navbar: 4px 4px 30px 0px rgba(123, 44, 191, 0.1);
+  --shadow-card: 0px 4px 20px 0px rgba(0, 0, 0, 0.05);
 }
 
 /* utility classes you can call from JSX */
