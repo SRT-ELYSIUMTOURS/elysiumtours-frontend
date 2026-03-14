@@ -12,11 +12,11 @@ const CtaSection = React.forwardRef(({ className, ...props }, ref) => {
       )}
       {...props}
     >
-      <div className="max-w-[1728px] mx-auto relative min-h-[500px] lg:min-h-[732px]">
+      <div className="max-w-[1728px]  mx-auto relative min-h-[500px] lg:min-h-[732px]">
         {/* Rotated decorative images — visible on large screens */}
         <div className="hidden lg:block">
           <div
-            className="absolute top-[-258px] left-[101px] w-[347px] h-[708px] rounded-t-[208px] rounded-b-[300px] overflow-hidden shadow-[--shadow-card] opacity-80"
+            className="absolute top-[-258px] left-[101px] w-[347px] h-[708px] rounded-t-[208px] rounded-b-[208px] overflow-hidden shadow-[--shadow-card] opacity-80"
             style={{ transform: "rotate(22.56deg)" }}
           >
             <img
@@ -27,7 +27,7 @@ const CtaSection = React.forwardRef(({ className, ...props }, ref) => {
             />
           </div>
           <div
-            className="absolute bottom-[-204px] left-[362px] w-[329px] h-[669px] rounded-t-[208px] rounded-b-[300px] overflow-hidden shadow-[--shadow-card] opacity-80"
+            className="absolute bottom-[-204px] left-[362px] w-[329px] h-[669px] rounded-t-[208px] rounded-b-[208px] overflow-hidden shadow-[--shadow-card] opacity-80"
             style={{ transform: "rotate(22.56deg)" }}
           >
             <img
@@ -42,7 +42,7 @@ const CtaSection = React.forwardRef(({ className, ...props }, ref) => {
         {/* Content — right aligned */}
         <div className="relative z-10 flex items-center justify-center lg:justify-end min-h-[500px] lg:min-h-[732px] px-6 md:px-[30px]">
           <div className="flex flex-col items-center lg:items-end gap-lg max-w-[581px] py-16 lg:py-0 lg:mr-[156px]">
-            <h2 className="font-raleway font-bold text-[32px] leading-[40px] lg:text-Display-xl lg:leading-[66px] text-primary-light-default text-center lg:text-right">
+            <h2 className="font-raleway font-bold text-[32px] leading-[40px] lg:text-Display-xl-bold lg:leading-[66px] text-primary-light-default text-center lg:text-right">
               Join Elysium Tours in Redefining the Future of Ghanaian Travel
             </h2>
             <p className="font-raleway font-normal text-[14px] leading-[22px] lg:text-md-regular lg:leading-[24px] text-primary-light-default text-center lg:text-right max-w-[483px]">

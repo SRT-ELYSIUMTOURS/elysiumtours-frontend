@@ -49,13 +49,13 @@ const FeaturedDestinationCard = React.forwardRef(({
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
 
       {/* Text — bottom left */}
-      <div className="absolute bottom-0 left-0 right-0 p-5 flex flex-col gap-1">
+      <div className="absolute bottom-0 left-0 right-0 px-6 py-5 flex flex-col gap-1">
         {/* Name — [20px/700] #fefefe */}
         <h3 className="text-semi-md-bold text-primary-light-default leading-tight">
           {name}
         </h3>
         {/* Subtitle — [16px/600] #fefefe */}
-        <p className="text-md-semibold text-primary-light-default opacity-90 line-clamp-1">
+        <p className="text-md-semibold max-w-[277px] text-primary-light-default opacity-90 line-clamp-2">
           {subtitle}
         </p>
       </div>

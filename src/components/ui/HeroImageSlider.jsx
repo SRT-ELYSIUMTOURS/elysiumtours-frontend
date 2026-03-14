@@ -8,9 +8,9 @@ const SliderDot = ({ isActive, onClick }) => (
     onClick={onClick}
     aria-label={isActive ? "Current slide" : "Go to slide"}
     className={classNames(
-      "w-4 h-4 rounded-full border border-solid transition-all duration-300 ease-in",
+      "w-4 h-4 rounded-full border-2 border-solid transition-all duration-300 ease-in",
       isActive
-        ? "bg-purple-700 border-purple-700" // Tailwind color, replace with your theme
+        ? "bg-[#D6BEEB] border-[#F7F7F7]" // Tailwind color, replace with your theme
         : "bg-transparent border-gray-400 hover:border-purple-500"
     )}
   />
@@ -53,7 +53,7 @@ const HeroImageSlider = ({
   return (
     <div
       className={classNames(
-        "relative w-full overflow-hidden bg-gray-800", // fallback bg
+        "relative w-full  overflow-hidden bg-gray-800", // fallback bg
         className
       )}
       style={{ height }}
@@ -66,7 +66,7 @@ const HeroImageSlider = ({
           <div
             key={slide.id || i}
             className={classNames(
-              "absolute inset-0 w-full h-full transition-opacity duration-700 ease-in-out",
+              "absolute inset-0 z-0 w-full h-full transition-opacity duration-700 ease-in-out",
               isActive ? "opacity-100 z-20" : "opacity-0 z-10 pointer-events-none"
             )}
           >
@@ -97,7 +97,7 @@ const HeroImageSlider = ({
 
       {/* Dot navigation */}
       {slides.length > 1 && (
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 z-40">
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 z-30">
           {slides.map((_, i) => (
             <SliderDot key={i} isActive={i === current} onClick={() => goTo(i)} />
           ))}

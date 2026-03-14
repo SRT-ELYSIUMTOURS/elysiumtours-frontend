@@ -16,7 +16,7 @@ const Button = React.forwardRef(({
   ...props
 }, ref) => {
 
-  const baseStyles = 'flex flex-row items-center justify-center shadow px-x-sm py-y-sm transition-all duration-300 ease-in';
+  const baseStyles = 'flex flex-row cursor-pointer items-center justify-center shadow px-x-sm py-y-sm transition-all duration-300 ease-in';
 
   const variants = {
     secondary: 'active:bg-secondary-normal-active hover:bg-secondary-normal-hover bg-secondary-normal-default active:border-secondary-normal-active hover:border-secondary-normal-hover border-secondary-normal-default text-primary-light-default border border-solid',

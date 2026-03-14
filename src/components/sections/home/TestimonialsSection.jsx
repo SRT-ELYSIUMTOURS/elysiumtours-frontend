@@ -46,7 +46,7 @@ const TestimonialsSection = React.forwardRef(
         )}
         {...props}
       >
-        <div className="max-w-[1728px] mx-auto px-6 md:px-[30px]">
+        <div className="max-w-[1728px] mx-auto px-6 md:px-[30px] lg:px-[164px]">
           <div className="flex flex-col lg:flex-row justify-between items-start gap-8 mb-12 lg:mb-16">
             <div className="flex items-center gap-sm shrink-0">
               <div className="w-[46px] h-[2px] bg-secondary-dark-darker" />

@@ -8,33 +8,33 @@ const DESTINATIONS = {
       id: 1,
       name: "Kakum National Park",
       subtitle: "Discover Ghana's most captivating destinations",
-      image: "https://picsum.photos/seed/dest1/454/300",
+      image: "./src/assets/homeAssets/Image-6.webp",
     },
     {
       id: 2,
       name: "National Theater",
       subtitle: "Discover Ghana's most captivating destinations",
-      image: "https://picsum.photos/seed/dest2/454/300",
+      image: "./src/assets/homeAssets/Image-7.webp",
     },
   ],
   center: {
     id: 3,
     name: "Independence Square",
     subtitle: "Discover Ghana's most captivating destinations",
-    image: "https://picsum.photos/seed/dest3/451/656",
+    image: "./src/assets/homeAssets/Image-8.webp",
   },
   rightCol: [
     {
       id: 4,
       name: "Kakum National Park",
       subtitle: "Discover Ghana's most captivating destinations",
-      image: "https://picsum.photos/seed/dest4/454/300",
+      image: "./src/assets/homeAssets/Image-9.webp",
     },
     {
       id: 5,
       name: "Boti Falls",
       subtitle: "Discover Ghana's most captivating destinations",
-      image: "https://picsum.photos/seed/dest5/454/300",
+      image: "./src/assets/homeAssets/Image-10.webp",
     },
   ],
 };
@@ -45,7 +45,7 @@ const FeaturedDestinationsSection = React.forwardRef(
       <section
         ref={ref}
         className={classNames(
-          "bg-primary-light-default py-16 md:py-20 lg:py-24",
+          "bg-primary-light-default font-raleway py-16 px-[164px] md:py-20 lg:py-24",
           className
         )}
         {...props}
@@ -54,7 +54,7 @@ const FeaturedDestinationsSection = React.forwardRef(
           <div className="flex flex-col lg:flex-row justify-between items-start gap-8 mb-12 lg:mb-16">
             <div className="flex items-center gap-sm shrink-0">
               <div className="w-[46px] h-[2px] bg-secondary-dark-darker" />
-              <span className="font-raleway font-bold text-med-small-bold text-secondary-dark-darker uppercase tracking-wide">
+              <span className=" font-bold text-med-small-bold text-secondary-dark-darker uppercase tracking-wide">
                 Featured Destinations
               </span>
             </div>
@@ -63,7 +63,7 @@ const FeaturedDestinationsSection = React.forwardRef(
               <h2 className="font-raleway font-bold text-[22px] leading-[30px] lg:text-High-md-bold lg:leading-[34px] text-tertiary-normal-default text-right">
                 Discover Ghana&apos;s Hidden Gems
               </h2>
-              <p className="font-raleway font-medium text-[14px] leading-[22px] lg:text-md-Medium lg:leading-[26px] text-primary-dark-active text-right">
+              <p className="font-raleway  lg:pl-[111px] text-[14px] leading-[22px] lg:text-md-Regular lg:leading-[26px] text-primary-dark-active text-right">
                 Discover Ghana&apos;s most captivating destinations handpicked
                 by Elysium Tours. From the historic castles of Cape Coast to the
                 serene shores of Lake Volta and the vibrant streets of Accra,
@@ -74,9 +74,9 @@ const FeaturedDestinationsSection = React.forwardRef(
           </div>
 
           {/* Desktop masonry grid */}
-          <div className="hidden lg:flex gap-[29px] items-start">
+          <div className="hidden lg:grid lg:grid-cols-3 gap-[29px] items-start">
             {/* Left column — 2 short cards */}
-            <div className="flex flex-col gap-2xl w-[454px]">
+            <div className="flex flex-col gap-2xl ">
               {DESTINATIONS.leftCol.map((dest) => (
                 <FeaturedDestinationCard
                   key={dest.id}
@@ -94,11 +94,11 @@ const FeaturedDestinationsSection = React.forwardRef(
               name={DESTINATIONS.center.name}
               subtitle={DESTINATIONS.center.subtitle}
               size="large"
-              className="w-[451px]"
+              className=" lg:h-full"
             />
 
             {/* Right column — 2 short cards */}
-            <div className="flex flex-col gap-2xl w-[454px]">
+            <div className="flex flex-col gap-2xl">
               {DESTINATIONS.rightCol.map((dest) => (
                 <FeaturedDestinationCard
                   key={dest.id}
