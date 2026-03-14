@@ -184,10 +184,44 @@
   --box-shadow:    0px 4px 4px 0px rgba(var(--shadow-color-rgb), var(--shadow-alpha));
   --box-shadow-lg: 0px 4px 20px 0px rgba(var(--shadow-color-rgb), var(--shadow-alpha));
   
+  /* noise */
+--noise-opacity: 0.3;
+
   /* gap */
+  --gap-sm: 8px;
   --gap-md: 16px;
+  --gap-lg: 24px;
+  --gap-xl: 32px;
+  --gap-2xl: 48px;
+
+  /* additional radius */
+  --radius-xl: 20px;
+  --radius-2xl: 40px;
+
+  /* overlays */
+  --color-overlay-dark: rgba(0, 0, 0, 0.6);
+  --color-overlay-medium: rgba(0, 0, 0, 0.4);
+  --color-overlay-light: rgba(0, 0, 0, 0.5);
+
+  /* additional shadows */
+  --shadow-navbar: 4px 4px 30px 0px rgba(123, 44, 191, 0.1);
+  --shadow-card: 0px 4px 20px 0px rgba(0, 0, 0, 0.05);
 }
 
 /* utility classes you can call from JSX */
 .shadow  { box-shadow: var(--box-shadow) !important; }
 .shadow-lg { box-shadow: var(--box-shadow-lg) !important; }
+
+
+/* Monotone noise — Size 1, Density 100%, #000000 30% (matches Figma) */
+.noise::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: var(--noise-opacity);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 200px 200px;
+}

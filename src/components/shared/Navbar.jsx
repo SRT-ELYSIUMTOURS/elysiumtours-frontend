@@ -5,19 +5,7 @@ import Button from "../ui/button";
 
 // ── Logo SVG — matches Figma cursive Elysium script ──────────────────────────
 const ElysiumLogo = () => (
-  <svg width="100" height="40" viewBox="0 0 200 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <text
-      x="0" y="44"
-      fontFamily="Georgia, 'Times New Roman', serif"
-      fontSize="48"
-      fontStyle="italic"
-      fontWeight="400"
-      fill="#7b2cbf"
-      letterSpacing="-1"
-    >
-      Elysium
-    </text>
-  </svg>
+  <img src="./src/assets/ElysiumAssets/Logo.png" width={80} height={80} alt="" />
 );
 
 // ── Chevrons ──────────────────────────────────────────────────────────────────
