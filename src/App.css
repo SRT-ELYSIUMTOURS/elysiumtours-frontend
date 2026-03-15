@@ -206,6 +206,8 @@
   /* additional shadows */
   --shadow-navbar: 4px 4px 30px 0px rgba(123, 44, 191, 0.1);
   --shadow-card: 0px 4px 20px 0px rgba(0, 0, 0, 0.05);
+  --shadow-breadcrumb: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+  --shadow-card-inset: inset 0px 4px 20px 0px rgba(0, 0, 0, 0.25);
 }
 
 /* utility classes you can call from JSX */

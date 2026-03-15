@@ -1,0 +1,83 @@
+import React from "react";
+import { classNames } from "../../../utils/classNames";
+import {
+  Pagination,
+  PaginationItem,
+  PaginationEllipsis,
+  PaginationNext,
+} from "../../ui/pagination";
+import Button from "../../ui/button";
+
+const BlogPaginationBar = React.forwardRef(({
+  currentPage = 1,
+  totalPages = 20,
+  totalResults = 200,
+  resultsPerPage = 12,
+  onPageChange,
+  onLoadMore,
+  className = "",
+  ...props
+}, ref) => {
+  const startResult = (currentPage - 1) * resultsPerPage + 1;
+  const endResult = Math.min(currentPage * resultsPerPage, totalResults);
+
+  const getVisiblePages = () => {
+    const pages = [1];
+    if (currentPage > 3) pages.push("ellipsis-start");
+    for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 2); i++) {
+      if (!pages.includes(i)) pages.push(i);
+    }
+    if (currentPage < totalPages - 3) pages.push("ellipsis-end");
+    if (totalPages > 1 && !pages.includes(totalPages)) pages.push(totalPages);
+    return pages;
+  };
+
+  return (
+    <div
+      ref={ref}
+      className={classNames("flex flex-col items-center gap-md", className)}
+      {...props}
+    >
+      {/* Load More button */}
+      <Button
+        variant="secondaryOutline"
+        shape="pill"
+        size="small"
+        className="h-[40px] px-[24px]"
+        onClick={onLoadMore}
+      >
+        Load More
+      </Button>
+
+      {/* Pagination */}
+      <Pagination>
+        {getVisiblePages().map((page, i) => {
+          if (typeof page === "string") {
+            return <PaginationEllipsis key={page} />;
+          }
+          return (
+            <PaginationItem
+              key={page}
+              isActive={page === currentPage}
+              onClick={() => onPageChange?.(page)}
+            >
+              {page}
+            </PaginationItem>
+          );
+        })}
+        <PaginationNext
+          onClick={() => onPageChange?.(Math.min(currentPage + 1, totalPages))}
+          disabled={currentPage === totalPages}
+        />
+      </Pagination>
+
+      {/* Results text */}
+      <p className="font-raleway font-normal text-[13px] leading-[18px] text-primary-dark-darker">
+        Showing results {startResult}-{endResult} of {totalResults}
+      </p>
+    </div>
+  );
+});
+
+BlogPaginationBar.displayName = "BlogPaginationBar";
+export default BlogPaginationBar;
