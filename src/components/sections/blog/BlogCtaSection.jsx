@@ -7,7 +7,7 @@ const BlogCtaSection = React.forwardRef(({ className, ...props }, ref) => {
     <section
       ref={ref}
       className={classNames(
-        "relative w-full bg-secondary-dark-darker overflow-hidden",
+        "relative w-full bg-secondary-dark-darker drop-shadow-xl noise overflow-hidden",
         className
       )}
       {...props}
@@ -20,26 +20,26 @@ const BlogCtaSection = React.forwardRef(({ className, ...props }, ref) => {
           <img
             src="https://picsum.photos/seed/blog-cta/711/559"
             alt="Ghana landscape"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover "
           />
         </div>
 
         {/* Decorative rotated images behind */}
-        <div className="absolute top-[-387px] left-[1303px] w-[329px] h-[818px] overflow-hidden opacity-80" style={{ transform: "rotate(30.2deg)" }}>
-          <img
+        <div className="absolute top-[-387px] bg-[#EBDFF5] rounded-full   blur-[40px]   left-[1303px] w-[329px] h-[818px] overflow-hidden opacity-20" style={{ transform: "rotate(30.2deg)" }}>
+          {/* <img
             src="https://picsum.photos/seed/cta-deco1/329/818"
             alt=""
             className="w-full h-full object-cover"
             aria-hidden="true"
-          />
+          /> */}
         </div>
-        <div className="absolute bottom-[-434px] left-[-265px] w-[329px] h-[818px] overflow-hidden opacity-80" style={{ transform: "rotate(-149.8deg)" }}>
-          <img
+        <div className="absolute bottom-[-434px] left-[-265px] w-[329px] bg-[#EBDFF5] rounded-full   blur-[40px] h-[818px] overflow-hidden opacity-20" style={{ transform: "rotate(-149.8deg)" }}>
+          {/* <img
             src="https://picsum.photos/seed/cta-deco2/329/818"
             alt=""
             className="w-full h-full object-cover"
             aria-hidden="true"
-          />
+          /> */}
         </div>
 
         {/* Right — text content */}
@@ -53,7 +53,7 @@ const BlogCtaSection = React.forwardRef(({ className, ...props }, ref) => {
           <Button
             variant="white"
             shape="pill"
-            className="h-[64px] gap-md"
+            className="h-[64px] px-[25px]! gap-md"
           >
             Partner With Us
           </Button>
