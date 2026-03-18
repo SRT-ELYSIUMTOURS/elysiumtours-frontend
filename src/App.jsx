@@ -5,6 +5,9 @@ import TouristLayout from "./layout/touristLayout.jsx";
 import HomePage from "./pages/tourist/HomePage";
 import BlogPage from "./pages/tourist/BlogPage";
 import BlogCategoryPage from "./pages/tourist/BlogCategoryPage";
+import TourPage from "./pages/tourist/TourPage";
+import TourCountryPage from "./pages/tourist/TourCountryPage";
+import TourDetailPage from "./pages/tourist/TourDetailPage";
 
 function App() {
   return (
@@ -15,6 +18,9 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/blog" element={<BlogPage />} />
           <Route path="/blog/:category" element={<BlogCategoryPage />} />
+          <Route path="/tours" element={<TourPage />} />
+          <Route path="/tours/:country" element={<TourCountryPage />} />
+          <Route path="/tours/:country/:tour" element={<TourDetailPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
