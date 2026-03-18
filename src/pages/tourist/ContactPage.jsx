@@ -6,8 +6,7 @@ import ContactInfoPill from "../../components/ui/ContactInfoPill";
 import FAQAccordion from "../../components/ui/FAQAccordion";
 import MapEmbed from "../../components/ui/MapEmbed";
 import { ToastItem } from "../../components/ui/toast";
-import { Breadcrumb, BreadcrumbItem } from "../../components/ui/breadcrumb";
-import Button from "../../components/ui/button";
+import BlogBreadcrumbBar from "../../components/sections/blog/BlogBreadcrumbBar";
 
 // ─── Hero slides ─────────────────────────────────────────────────────────────
 const CONTACT_HERO_SLIDES = [
@@ -21,7 +20,7 @@ const FAQ_ITEMS = [
   // col 1 — index 0
   {
     question: "How do I book a tour with Elysium Tours?",
-    answer: "You can easily book through our website. . Once submitted, our team will confirm availability and send your booking details via email.",
+    answer: "You can easily book through our website. Once submitted, our team will confirm availability and send your booking details via email.",
   },
   // col 2 — index 1
   {
@@ -72,7 +71,7 @@ const FAQ_ITEMS = [
 
 const FAQ_TABS = ["General FAQs", "Booking Questions", "Safety Questions", "Traveling Questions"];
 
-// ─── Shared section label ─────────────────────────────────────────────────────
+// ─── Shared section label (line + uppercase text) ─────────────────────────────
 const SectionLabel = ({ text }) => (
   <div className="flex items-center gap-[8px]">
     <div className="w-[46px] h-[1px] shrink-0 bg-[#2b0f43]" />
@@ -81,7 +80,7 @@ const SectionLabel = ({ text }) => (
         fontSize: "13px", fontWeight: 700,
         color: "#2b0f43", letterSpacing: "0.05em",
         lineHeight: "18px", fontFamily: "Raleway, sans-serif",
-        textTransform: "uppercase",
+        textTransform: "uppercase", padding: "10px 0",
       }}
     >
       {text}
@@ -100,13 +99,12 @@ const PhoneIcon = () => (
 );
 
 const LocationIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+  <svg width="16" height="21" viewBox="0 0 24 24" fill="none" aria-hidden="true">
     <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" stroke="#7b2cbf" strokeWidth="1.5" />
     <circle cx="12" cy="9" r="2.5" stroke="#7b2cbf" strokeWidth="1.5" />
   </svg>
 );
 
-// Figma: question-solid icon used for the email pill
 const QuestionIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
     <path d="M9.5 9.5c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5c0 1.5-1.5 2-2.5 2.5" stroke="#7b2cbf" strokeWidth="1.5" strokeLinecap="round" />
@@ -115,9 +113,15 @@ const QuestionIcon = () => (
 );
 
 const SearchBtnIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
     <circle cx="11" cy="11" r="8" stroke="#fefefe" strokeWidth="1.5" />
     <path d="m21 21-4.35-4.35" stroke="#fefefe" strokeWidth="1.5" strokeLinecap="round" />
+  </svg>
+);
+
+const ArrowRightIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path d="M5 12h14M13 6l6 6-6 6" stroke="#2b0f43" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
@@ -141,161 +145,223 @@ const ContactPage = React.forwardRef(({ className, ...props }, ref) => {
   return (
     <div ref={ref} className={classNames("w-full", className)} {...props}>
 
+      {/* ── BREADCRUMB BAR — sits between navbar and hero ───────────────────── */}
+      <BlogBreadcrumbBar
+        items={[
+          { label: "Home", href: "/" },
+          { label: "Contact Us" },
+        ]}
+      />
+
       {/* ── 1. HERO ─────────────────────────────────────────────────────────── */}
       <section className="relative w-full">
         <HeroImageSlider slides={CONTACT_HERO_SLIDES} autoPlay interval={5000} height={717} />
 
-        {/* Breadcrumb bar — on top of hero, bg #f2eaf9, h-[53px] */}
-        <div className="absolute top-0 left-0 right-0 z-30 h-[53px] bg-[#f2eaf9] flex items-center px-4 md:px-[156px]">
-          <Breadcrumb>
-            <BreadcrumbItem href="/" className="font-raleway font-medium text-[13px] leading-[22px]">
-              Home
-            </BreadcrumbItem>
-            <BreadcrumbItem className="font-raleway font-medium text-[13px] leading-[22px]">
-              Contact Us
-            </BreadcrumbItem>
-          </Breadcrumb>
-        </div>
-
-        {/* Hero text */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center z-20 px-4 md:px-8">
-          <div className="flex flex-col items-center gap-[32px] max-w-[957px] w-full">
-            <div className="flex flex-col items-center gap-[16px] w-full">
+        {/* Hero text — centered over slider */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center z-20 px-4">
+          <div className="flex flex-col items-center gap-[32px] w-[957px] max-w-full">
+            <div className="flex flex-col items-center gap-[16px]">
               <h1
                 className="text-center"
-                style={{ fontSize: "56px", fontWeight: 700, color: "#fefefe", lineHeight: "66px", fontFamily: "Raleway, sans-serif" }}
+                style={{ fontSize: "56px", fontWeight: 700, color: "#fefefe", lineHeight: "66px", fontFamily: "Raleway, sans-serif", width: "957px", maxWidth: "100%" }}
               >
                 Let&apos;s Help You Plan Your Next Adventure
               </h1>
-              <p
-                className="text-center"
-                style={{ fontSize: "16px", fontWeight: 500, color: "#fefefe", lineHeight: "26px", fontFamily: "Raleway, sans-serif", maxWidth: "850px" }}
-              >
-                We&apos;re just a message away and always happy to assist! Whether you&apos;re curious
-                about our tour packages, need help planning your trip, or have a special request, our
-                friendly support team is here to guide you every step of the way. You can reach out to
-                us through our contact form, email, or phone
-              </p>
+              <div style={{ width: "867px", maxWidth: "100%", padding: "10px" }}>
+                <p
+                  className="text-center"
+                  style={{ fontSize: "16px", fontWeight: 500, color: "#fefefe", lineHeight: "26px", fontFamily: "Raleway, sans-serif", width: "850px", maxWidth: "100%" }}
+                >
+                  We&apos;re just a message away and always happy to assist! Whether you&apos;re curious
+                  about our tour packages, need help planning your trip, or have a special request, our
+                  friendly support team is here to guide you every step of the way. You can reach out to
+                  us through our contact form, email, or phone
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       {/* ── 2. QUICK ASSISTANCE ─────────────────────────────────────────────── */}
-      <section className="w-full bg-[#f2eaf9] py-[60px] px-4 md:px-[80px]">
-        {/* Top row: label LEFT, title+body RIGHT */}
-        <div className="flex items-start justify-between mb-[40px]">
-          <SectionLabel text="Help Desk" />
-          <div className="flex flex-col items-end gap-[8px] max-w-[597px]">
-            <h2
-              style={{ fontSize: "25px", fontWeight: 700, color: "#2d2d2d", lineHeight: "34px", fontFamily: "Raleway, sans-serif", textAlign: "right" }}
-            >
-              Need Quick Assistance?
-            </h2>
-            <p
-              style={{ fontSize: "16px", fontWeight: 400, color: "#2d2d2d", lineHeight: "24px", fontFamily: "Raleway, sans-serif", textAlign: "right", maxWidth: "565px" }}
-            >
-              Our support team is ready to help with bookings, inquiries, or travel concerns.
-              Reach out via email or phone — we&apos;ll get back to you as soon as possible.
-            </p>
+      {/* Figma: bg #f2eaf9, h 392px, content starts at top 80px, left 156px */}
+      <section className="w-full bg-[#f2eaf9] overflow-hidden" style={{ minHeight: "392px" }}>
+        <div className="px-[156px] pt-[80px] pb-[60px]">
+          {/* Top row: label LEFT, title+body RIGHT — justify-between */}
+          <div className="flex items-start justify-between">
+            <SectionLabel text="Help Desk" />
+            {/* Right column — items-end, gap 16px, max-w 597px */}
+            <div className="flex flex-col items-end gap-[16px]" style={{ width: "597px" }}>
+              <div style={{ height: "37px", width: "597px", display: "flex", alignItems: "center", justifyContent: "flex-end", paddingLeft: "10px", paddingTop: "10px", paddingBottom: "10px" }}>
+                <h2
+                  style={{ fontSize: "25px", fontWeight: 700, color: "#2d2d2d", lineHeight: "34px", fontFamily: "Raleway, sans-serif", textAlign: "right" }}
+                >
+                  Need Quick Assistance?
+                </h2>
+              </div>
+              <div style={{ width: "597px", paddingLeft: "10px", paddingRight: "1px", paddingTop: "10px", paddingBottom: "10px", display: "flex", justifyContent: "flex-end" }}>
+                <p
+                  style={{ fontSize: "16px", fontWeight: 400, color: "#2d2d2d", lineHeight: "24px", fontFamily: "Raleway, sans-serif", textAlign: "right", width: "565px" }}
+                >
+                  Our support team is ready to help with bookings, inquiries, or travel concerns.
+                  Reach out via email or phone — we&apos;ll get back to you as soon as possible.
+                </p>
+              </div>
+            </div>
           </div>
-        </div>
-        {/* Pills row — centered */}
-        <div className="flex flex-wrap gap-[40px] items-center justify-center">
-          <ContactInfoPill icon={<QuestionIcon />} text="info@elysiumtours.com" href="mailto:info@elysiumtours.com" />
-          <ContactInfoPill icon={<PhoneIcon />} text="+233 24 522 4993" href="tel:+233245224993" />
-          <ContactInfoPill icon={<LocationIcon />} text="First Central Link -Adgringanor" />
+
+          {/* Pills row — right-aligned, gap 40px */}
+          {/* Figma: pills at absolute left 724px (= 156px margin + 568px offset), so right-aligned */}
+          <div className="flex items-center gap-[40px] justify-end mt-[40px]">
+            {/* Email pill — 249×57px */}
+            <ContactInfoPill
+              icon={<QuestionIcon />}
+              text="info@elysiumtours.com"
+              href="mailto:info@elysiumtours.com"
+            />
+            {/* Phone pill — 204×57px */}
+            <ContactInfoPill
+              icon={<PhoneIcon />}
+              text="+233 24 522 4993"
+              href="tel:+233245224993"
+            />
+            {/* Location pill — 313×57px */}
+            <ContactInfoPill
+              icon={<LocationIcon />}
+              text="First Central Link -Adgringanor"
+            />
+          </div>
         </div>
       </section>
 
       {/* ── 3. CONTACT FORM ─────────────────────────────────────────────────── */}
-      <section className="w-full py-[60px] px-4 md:px-[80px]">
-        {/* Section label */}
-        <SectionLabel text="Contact Us" />
-
-        <div className="mt-[40px] flex flex-col lg:flex-row gap-[80px] items-start">
-          {/* Left — image */}
-          <div
-            className="relative rounded-[40px] overflow-hidden shrink-0 hidden lg:block"
-            style={{ width: 500, height: 620 }}
-          >
-            {/* Blurred background */}
-            <img
-              src="./src/assets/homeAssets/hero1.webp"
-              alt=""
-              className="absolute inset-0 w-full h-full object-cover blur-[10px] scale-110"
-              aria-hidden="true"
-            />
-            <div className="absolute inset-0 bg-[rgba(0,0,0,0.5)]" />
-            {/* Foreground image card — bottom right */}
-            <div
-              className="absolute overflow-hidden"
-              style={{ bottom: 0, right: 0, width: "80%", height: "77%", borderRadius: "40px 40px 40px 0" }}
-            >
-              <img
-                src="https://picsum.photos/seed/contact-bus/400/480"
-                alt="Ghana street scene"
-                className="w-full h-full object-cover"
-              />
+      {/* Figma: bg #fefefe, h 1182px, content at left 156px, top 80px */}
+      <section className="w-full bg-[#fefefe] overflow-hidden">
+        <div className="px-[156px] pt-[80px] pb-[80px]">
+          {/* Section header row — label LEFT, title+body RIGHT */}
+          <div className="flex items-start justify-between">
+            <SectionLabel text="Contact Us" />
+            <div className="flex flex-col items-end gap-[16px]" style={{ width: "597px" }}>
+              <div style={{ height: "37px", width: "597px", display: "flex", alignItems: "center", justifyContent: "flex-end", paddingLeft: "10px", paddingTop: "10px", paddingBottom: "10px" }}>
+                <h2
+                  style={{ fontSize: "25px", fontWeight: 700, color: "#2d2d2d", lineHeight: "34px", fontFamily: "Raleway, sans-serif", textAlign: "right" }}
+                >
+                  Get in Touch With Us
+                </h2>
+              </div>
+              <div style={{ width: "597px", paddingLeft: "10px", paddingRight: "1px", paddingTop: "10px", paddingBottom: "10px", display: "flex", justifyContent: "flex-end" }}>
+                <p
+                  style={{ fontSize: "16px", fontWeight: 400, color: "#2d2d2d", lineHeight: "24px", fontFamily: "Raleway, sans-serif", textAlign: "right", width: "565px" }}
+                >
+                  We&apos;d love to hear from you! Whether you have questions about a tour, want to
+                  discuss partnership opportunities, or simply need more details about your next
+                  adventure, our team is here to help. Fill out the form below with your details and
+                  message, and we&apos;ll get back to you as soon as possible.
+                </p>
+              </div>
             </div>
           </div>
 
-          {/* Right — heading + form */}
-          <div className="flex-1 flex flex-col gap-[16px]">
-            <div className="flex flex-col items-end gap-[8px]">
-              <h2
-                style={{ fontSize: "25px", fontWeight: 700, color: "#2d2d2d", lineHeight: "34px", fontFamily: "Raleway, sans-serif", textAlign: "right" }}
+          {/* Content row: image (697px) + gap (~129px) + form (576px) = 1402px ≈ 1416px content */}
+          <div className="flex items-start gap-[129px] mt-[80px]">
+            {/* Left image collage — Figma: 697×746px, border-radius 40px */}
+            <div
+              className="relative shrink-0 rounded-[40px] overflow-hidden"
+              style={{ width: "697px", height: "746px", boxShadow: "0px 4px 20px 0px rgba(0,0,0,0.05)" }}
+            >
+              {/* Blurred background fill */}
+              <img
+                src="./src/assets/homeAssets/hero1.webp"
+                alt=""
+                className="absolute inset-0 w-full h-full object-cover"
+                style={{ filter: "blur(10px)", transform: "scale(1.1)" }}
+                aria-hidden="true"
+              />
+              {/* Dark overlays */}
+              <div className="absolute inset-0" style={{ background: "rgba(0,0,0,0.4)" }} />
+              <div className="absolute inset-0" style={{ background: "rgba(0,0,0,0.1)" }} />
+              {/* Foreground image card — Figma: 439×568px, br-[40px] bl-[40px] tl-[40px], bottom-right anchored */}
+              <div
+                className="absolute overflow-hidden"
+                style={{
+                  bottom: 0,
+                  right: 0,
+                  width: "439px",
+                  height: "568px",
+                  borderRadius: "40px 40px 40px 0",
+                }}
               >
-                Get in Touch With Us
-              </h2>
-              <p
-                style={{ fontSize: "16px", fontWeight: 400, color: "#2d2d2d", lineHeight: "24px", fontFamily: "Raleway, sans-serif", textAlign: "right", maxWidth: "565px" }}
-              >
-                We&apos;d love to hear from you! Whether you have questions about a tour, want to
-                discuss partnership opportunities, or simply need more details about your next
-                adventure, our team is here to help. Fill out the form below with your details and
-                message, and we&apos;ll get back to you as soon as possible.
-              </p>
+                <img
+                  src="https://picsum.photos/seed/contact-ghana/439/568"
+                  alt="Ghana street scene"
+                  className="w-full h-full object-cover"
+                />
+              </div>
             </div>
-            <ContactForm onSubmit={handleFormSubmit} />
+
+            {/* Right form — Figma: 576px wide */}
+            <div className="flex flex-col gap-[16px]" style={{ width: "576px" }}>
+              <ContactForm onSubmit={handleFormSubmit} />
+            </div>
           </div>
         </div>
       </section>
 
       {/* ── 4. FAQ ──────────────────────────────────────────────────────────── */}
-      <section className="w-full py-[60px]">
-        {/* Header row — label LEFT, title+body RIGHT */}
-        <div className="px-4 md:px-[80px] flex items-start justify-between mb-[40px]">
-          <SectionLabel text="FAQs" />
-          <div className="flex flex-col items-end gap-[8px] max-w-[597px]">
-            <h2
-              style={{ fontSize: "25px", fontWeight: 700, color: "#2d2d2d", lineHeight: "34px", fontFamily: "Raleway, sans-serif", textAlign: "right" }}
-            >
-              Need Help? We&apos;ve Got Answers
-            </h2>
-            <p
-              style={{ fontSize: "16px", fontWeight: 400, color: "#2d2d2d", lineHeight: "24px", fontFamily: "Raleway, sans-serif", textAlign: "right", maxWidth: "565px" }}
-            >
-              Planning a trip comes with questions — and we&apos;re here to help. Find quick
-              answers about booking, payments, safety, and more so you can plan your Ghana
-              adventure with confidence.
-            </p>
+      {/* Figma: bg #f2eaf9, h 1167px, content at left 156px, top 80px */}
+      <section className="w-full bg-[#f2eaf9] overflow-hidden">
+        {/* Section header row — px-[156px] */}
+        <div className="px-[156px] pt-[80px]">
+          <div className="flex items-start justify-between">
+            <SectionLabel text="FAQs" />
+            <div className="flex flex-col items-end gap-[16px]" style={{ width: "677px" }}>
+              <div style={{ height: "37px", width: "597px", display: "flex", alignItems: "center", justifyContent: "flex-end", paddingLeft: "10px", paddingTop: "10px", paddingBottom: "10px" }}>
+                <h2
+                  style={{ fontSize: "25px", fontWeight: 700, color: "#2d2d2d", lineHeight: "34px", fontFamily: "Raleway, sans-serif", textAlign: "right", width: "581px" }}
+                >
+                  Need Help? We&apos;ve Got Answers
+                </h2>
+              </div>
+              <div style={{ paddingLeft: "10px", paddingRight: "1px", paddingTop: "10px", paddingBottom: "10px", display: "flex", justifyContent: "flex-end" }}>
+                <p
+                  style={{ fontSize: "16px", fontWeight: 400, color: "#2d2d2d", lineHeight: "24px", fontFamily: "Raleway, sans-serif", textAlign: "right", width: "565px" }}
+                >
+                  Planning a trip comes with questions — and we&apos;re here to help. Find quick
+                  answers about booking, payments, safety, and more so you can plan your Ghana
+                  adventure with confidence.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Tab bar */}
-        <div className="border-t border-b border-[#f2eaf9] h-[80px] flex items-center justify-between px-[20px] mb-[40px] overflow-x-auto gap-[16px]">
-          <div className="flex gap-[16px] items-center shrink-0">
+        {/* Tab bar — full width, h-[80px], border top+bottom 0.5px #f2eaf9 baked into shadow/border */}
+        {/* Figma: border top 0.5px solid #f2eaf9, border bottom 0.5px solid #f2eaf9, inner px left 20px */}
+        <div
+          className="w-full mt-[40px]"
+          style={{
+            height: "80px",
+            borderTop: "0.5px solid #d6beeb",
+            borderBottom: "0.5px solid #d6beeb",
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
+          <div
+            className="flex items-center gap-[16px]"
+            style={{ paddingLeft: "20px", paddingRight: "20px" }}
+          >
             {FAQ_TABS.map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
                 className={classNames(
-                  "flex items-center justify-center px-[10px] py-[10px] rounded-[20px] transition-all duration-300 ease-in shrink-0",
+                  "flex items-center justify-center rounded-[20px] transition-all duration-300 ease-in shrink-0",
                   "shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)]",
-                  activeTab === tab ? "bg-[#622399]" : "border border-[#b9b9b9]"
+                  activeTab === tab ? "bg-[#622399]" : "border border-[#b9b9b9] bg-transparent"
                 )}
                 style={{
+                  padding: "10px",
                   fontSize: "13px",
                   fontWeight: activeTab === tab ? 600 : 500,
                   color: activeTab === tab ? "#fefefe" : "#949494",
@@ -308,23 +374,37 @@ const ContactPage = React.forwardRef(({ className, ...props }, ref) => {
               </button>
             ))}
           </div>
+        </div>
 
-          {/* Search — input + purple circular button */}
-          <div className="flex items-center border border-[#c6c6c6] rounded-[40px] h-[48px] shrink-0 overflow-hidden"
-            style={{ width: 379 }}
+        {/* Search row — Figma: search box 379×48px, right side, with purple circular button */}
+        <div className="px-[156px] mt-[24px] flex justify-end">
+          <div
+            className="flex items-center overflow-hidden"
+            style={{
+              width: "379px",
+              height: "48px",
+              border: "1px solid #c6c6c6",
+              borderRadius: "40px",
+            }}
           >
             <input
               type="text"
               value={faqSearch}
               onChange={(e) => setFaqSearch(e.target.value)}
               placeholder="Search for Blogs/Articles"
-              className="flex-1 outline-none bg-transparent px-[20px] min-w-0"
-              style={{ fontSize: "13px", fontWeight: 500, color: "#bebebe", fontFamily: "Raleway, sans-serif" }}
+              className="flex-1 outline-none bg-transparent min-w-0"
+              style={{
+                fontSize: "13px",
+                fontWeight: 500,
+                color: "#2d2d2d",
+                fontFamily: "Raleway, sans-serif",
+                paddingLeft: "20px",
+              }}
             />
-            {/* Purple circular search button */}
             <button
               type="button"
-              className="shrink-0 w-[37px] h-[37px] rounded-full bg-[#7b2cbf] flex items-center justify-center mr-[5px]"
+              className="shrink-0 flex items-center justify-center rounded-full bg-[#7b2cbf] mr-[5px]"
+              style={{ width: "37px", height: "37px" }}
               aria-label="Search"
             >
               <SearchBtnIcon />
@@ -332,58 +412,120 @@ const ContactPage = React.forwardRef(({ className, ...props }, ref) => {
           </div>
         </div>
 
-        {/* FAQ items — 10 items, 2 columns */}
-        <div className="px-4 md:px-[80px]">
+        {/* FAQ grid — Figma: left 158px, top 375px from section, 2 cols gap 21px, items gap 19px */}
+        <div className="px-[156px] mt-[32px] pb-[80px]">
           <FAQAccordion items={visibleFaqs} columns={2} />
         </div>
       </section>
 
       {/* ── 5. MAP ──────────────────────────────────────────────────────────── */}
-      <section className="w-full py-[40px] px-4 md:px-[80px]">
-        <MapEmbed
-          height={521}
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15883.0!2d-0.2137!3d5.6537!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xfdf9062e4ffc9e83%3A0x9e3c31c7d9d4c6e4!2sKwabenya%2C%20Accra%2C%20Ghana!5e0!3m2!1sen!2sgh!4v1700000000000"
-          address="Kwabenya, Accra, Ghana"
-          openMapsUrl="https://maps.google.com/?q=Kwabenya,Accra,Ghana"
-        />
+      {/* Figma: bg #fefefe, h 604px, map 1416×521px centered, py ~41px */}
+      <section className="w-full bg-[#fefefe]" style={{ height: "604px", display: "flex", alignItems: "center" }}>
+        <div className="px-[156px] w-full">
+          <MapEmbed
+            height={521}
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15883.0!2d-0.2137!3d5.6537!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xfdf9062e4ffc9e83%3A0x9e3c31c7d9d4c6e4!2sKwabenya%2C%20Accra%2C%20Ghana!5e0!3m2!1sen!2sgh!4v1700000000000"
+            address="Kwabenya, Accra, Ghana"
+            openMapsUrl="https://maps.google.com/?q=Kwabenya,Accra,Ghana"
+          />
+        </div>
       </section>
 
       {/* ── 6. CTA — "Promoting Ghana, Inspiring the World" ─────────────────── */}
-      <section className="relative w-full bg-[#2b0f43] overflow-hidden">
-        <div className="max-w-[1728px] mx-auto min-h-[500px] lg:min-h-[400px] flex flex-col lg:flex-row items-center gap-[60px] px-4 md:px-[80px] py-[60px]">
-          {/* Left — image */}
-          <div
-            className="shrink-0 rounded-[20px] overflow-hidden"
-            style={{ width: 500, height: 340 }}
+      {/* Figma: bg #2b0f43, h 732px, shadow 0px 4px 4px rgba(0,0,0,0.25) */}
+      <section
+        className="relative w-full overflow-hidden bg-[#2b0f43]"
+        style={{ height: "732px", boxShadow: "0px 4px 4px 0px rgba(0,0,0,0.25)" }}
+      >
+        {/* Left image — Figma: left 156px, vertically centered, 711×559px, border-radius 40px */}
+        <div
+          className="absolute"
+          style={{
+            left: "156px",
+            top: "50%",
+            transform: "translateY(-50%)",
+            width: "711px",
+            height: "559px",
+            borderRadius: "40px",
+            overflow: "hidden",
+            boxShadow: "0px 4px 20px 0px rgba(0,0,0,0.05)",
+          }}
+        >
+          <img
+            src="https://picsum.photos/seed/ghana-promote/711/559"
+            alt="Promoting Ghana"
+            className="w-full h-full object-cover"
+          />
+        </div>
+
+        {/* Right text block — Figma: left 987px, vertically centered, width 581px */}
+        <div
+          className="absolute flex flex-col items-end gap-[16px]"
+          style={{
+            left: "987px",
+            top: "50%",
+            transform: "translateY(-50%)",
+            width: "581px",
+          }}
+        >
+          {/* Title — 56px Bold white right-aligned */}
+          <h2
+            style={{
+              fontSize: "56px",
+              fontWeight: 700,
+              color: "#fefefe",
+              lineHeight: "66px",
+              fontFamily: "Raleway, sans-serif",
+              textAlign: "right",
+              width: "592px",
+            }}
           >
-            <img
-              src="https://picsum.photos/seed/ghana-safari/500/340"
-              alt="Promoting Ghana"
-              className="w-full h-full object-cover"
-            />
-          </div>
-          {/* Right — text */}
-          <div className="flex flex-col items-end gap-[24px] flex-1">
-            <h2
-              style={{ fontSize: "40px", fontWeight: 700, color: "#fefefe", lineHeight: "52px", fontFamily: "Raleway, sans-serif", textAlign: "right" }}
+            Promoting Ghana,<br />Inspiring the World
+          </h2>
+
+          {/* Body + button — gap 24px */}
+          <div className="flex flex-col items-end gap-[24px]">
+            <div style={{ paddingLeft: "10px", paddingRight: "1px", paddingTop: "10px", paddingBottom: "10px" }}>
+              <p
+                style={{
+                  fontSize: "16px",
+                  fontWeight: 400,
+                  color: "#fefefe",
+                  lineHeight: "24px",
+                  fontFamily: "Raleway, sans-serif",
+                  textAlign: "right",
+                  width: "483px",
+                }}
+              >
+                We showcase the best of Ghana — its culture, people, and untold stories. From hidden
+                gems to iconic landmarks, we inspire travelers to explore and celebrate the beauty
+                that defines our nation.
+              </p>
+            </div>
+
+            {/* Button — Figma: bg #fefefe, border 1px solid #7b2cbf, h 64px, w 169px, r 40px, text #2b0f43 */}
+            <button
+              className="flex items-center justify-center gap-[16px] transition-all duration-300 ease-in"
+              style={{
+                background: "#fefefe",
+                border: "1px solid #7b2cbf",
+                height: "64px",
+                width: "169px",
+                borderRadius: "40px",
+                boxShadow: "0px 4px 4px 0px rgba(0,0,0,0.05)",
+                padding: "10px",
+                fontSize: "16px",
+                fontWeight: 600,
+                color: "#2b0f43",
+                fontFamily: "Raleway, sans-serif",
+                lineHeight: "22px",
+                cursor: "pointer",
+              }}
             >
-              Promoting Ghana,<br />Inspiring the World
-            </h2>
-            <p
-              style={{ fontSize: "16px", fontWeight: 400, color: "#fefefe", lineHeight: "24px", fontFamily: "Raleway, sans-serif", textAlign: "right", maxWidth: "483px" }}
-            >
-              we showcase the best of Ghana — its culture, people, and untold stories. From hidden
-              gems to iconic landmarks, we inspire travelers to explore and celebrate the beauty
-              that defines our nation.
-            </p>
-            <Button variant="white" size="medium" shape="pill" className="w-[169px] h-[64px]">
               Partner With Us
-            </Button>
+            </button>
           </div>
         </div>
-        {/* Decorative purple glow blobs */}
-        <div className="absolute top-[-60px] right-[-60px] w-[200px] h-[200px] rounded-full bg-[#7b2cbf] opacity-20 blur-[60px]" />
-        <div className="absolute bottom-[-40px] left-[200px] w-[160px] h-[160px] rounded-full bg-[#5c218f] opacity-20 blur-[40px]" />
       </section>
 
       {/* ── TOAST OVERLAY ───────────────────────────────────────────────────── */}
