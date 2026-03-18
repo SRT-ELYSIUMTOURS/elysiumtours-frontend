@@ -53,18 +53,53 @@ const SortTrigger = React.forwardRef(({
 SortTrigger.displayName = "SortTrigger";
 
 // ── Sort dropdown panel ───────────────────────────────────────────────────────
+// Figma 1914:39150 — white bg, border #e9eaeb, rounded-[20px], px-[18px] py-[20px]
+// "None selected" label (14px medium #bebebe) + thin #d6beeb divider
+// Options: Raleway SemiBold 16px #2d2d2d, h-[42px] w-[238px] px-[12px] py-[10px]
+// Active: bg #7b2cbf rounded-[8px], white text, tick icon on left
 const SORT_OPTIONS = [
-  { value: "recent", label: "Most Recent" },
-  { value: "popular", label: "Most Popular" },
-  { value: "price-asc", label: "Price: Low to High" },
-  { value: "price-desc", label: "Price: High to Low" },
+  { value: "recommended", label: "Recommended" },
+  { value: "nearest", label: "Nearest First" },
+  { value: "rated", label: "Highest Rated" },
+  { value: "newest", label: "Newest" },
 ];
+
+const TickIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="shrink-0">
+    <path d="M4 10.5L8 14.5L16 6.5" stroke="#fefefe" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
 
 const SortDropdownPanel = ({ options, value, onSelect, onClose }) => (
   <div
-    className="absolute top-full left-0 mt-1 z-50 flex flex-col rounded-[20px] border border-solid overflow-hidden"
-    style={{ minWidth: "160px", backgroundColor: "#ffffff", borderColor: "#b9b9b9" }}
+    className="absolute top-full left-0 mt-[6px] z-50 flex flex-col rounded-[20px] border border-solid"
+    style={{
+      backgroundColor: "#ffffff",
+      borderColor: "#e9eaeb",
+      padding: "20px 18px",
+      gap: "13px",
+      boxShadow: "0px 4px 20px 0px rgba(0,0,0,0.10)",
+      width: "274px",
+    }}
   >
+    {/* "None selected" label + separator */}
+    <div className="flex flex-col" style={{ gap: "3px" }}>
+      <div className="px-[12px] py-[4px]">
+        <span style={{
+          fontFamily: "Raleway, sans-serif",
+          fontWeight: 500,
+          fontSize: "14px",
+          lineHeight: "22px",
+          color: "#bebebe",
+          whiteSpace: "nowrap",
+        }}>
+          None selected
+        </span>
+      </div>
+      <div className="w-full h-[2px] rounded-[20px]" style={{ backgroundColor: "#d6beeb", opacity: 0.18 }} />
+    </div>
+
+    {/* Options */}
     {options.map((opt) => {
       const isSelected = value === opt.value;
       return (
@@ -72,18 +107,21 @@ const SortDropdownPanel = ({ options, value, onSelect, onClose }) => (
           key={opt.value}
           type="button"
           onClick={() => { onSelect(opt.value); onClose(); }}
-          className="flex items-center px-[10px] py-[6px] transition-all duration-200 border border-solid mx-[2px] my-[1px] rounded-[6px]"
+          className="flex items-center gap-[8px] transition-all duration-200 rounded-[8px]"
           style={{
-            backgroundColor: isSelected ? "#ebdff5" : "transparent",
-            borderColor: isSelected ? "#7b2cbf" : "#d6beeb",
+            height: "42px",
+            width: "238px",
+            padding: "10px 12px",
+            backgroundColor: isSelected ? "#7b2cbf" : "transparent",
           }}
         >
+          {isSelected && <TickIcon />}
           <span style={{
             fontFamily: "Raleway, sans-serif",
-            fontWeight: isSelected ? 600 : 500,
-            fontSize: "13px",
-            lineHeight: "18px",
-            color: isSelected ? "#5c218f" : "#565656",
+            fontWeight: 600,
+            fontSize: "16px",
+            lineHeight: "22px",
+            color: isSelected ? "#fefefe" : "#2d2d2d",
             whiteSpace: "nowrap",
           }}>
             {opt.label}
@@ -302,7 +340,7 @@ const TYPE_OPTIONS = [
 // Row: SORT trigger | divider | PRICE trigger | divider | DURATION pills | divider | TYPE pills
 // Right: "48 results" text
 const TourFilterBar = React.forwardRef(({ resultsCount = 48, className, ...props }, ref) => {
-  const [sortValue, setSortValue] = useState("recent");
+  const [sortValue, setSortValue] = useState(null);
   const [duration, setDuration] = useState("all-day");
   const [type, setType] = useState("all");
   const [openPanel, setOpenPanel] = useState(null); // "sort" | "price" | null
@@ -320,7 +358,7 @@ const TourFilterBar = React.forwardRef(({ resultsCount = 48, className, ...props
 
   const togglePanel = (name) => setOpenPanel(prev => prev === name ? null : name);
 
-  const sortLabel = SORT_OPTIONS.find(o => o.value === sortValue)?.label || "Non-Selected";
+  const sortLabel = SORT_OPTIONS.find(o => o.value === sortValue)?.label || "Sort";
 
   return (
     <div
