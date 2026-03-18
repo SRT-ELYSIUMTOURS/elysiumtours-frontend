@@ -64,30 +64,87 @@ const WhyChooseSection = React.forwardRef(({ className, ...props }, ref) => {
         </div>
       </div>
 
-      {/* Part 2: Article preview — Frame 12, h=709 */}
+      {/* Part 2: Article preview — Frame 12 / Figma 1914:39485 */}
+      {/* Left: skewed image card 757×487; Right: light purple card 463×306 */}
       <div className="px-[156px] pb-[80px]">
-        <div className="flex items-start gap-0 w-full h-[487px]">
-          {/* Left: large image 757×487 */}
-          <div className="relative w-[757px] h-[487px] shrink-0 rounded-2xl overflow-hidden">
-            <img
-              src="https://picsum.photos/seed/why-article-img/757/487"
-              alt="Jollof Rice article"
-              className="w-full h-full object-cover"
-            />
+        <div className="flex items-center w-full h-[487px]">
+
+          {/* Left: skewed image — skew-x-[5.41deg], rounded-[20px], purple + dark overlay */}
+          <div className="flex items-center justify-center shrink-0" style={{ width: "757px", height: "487px" }}>
+            <div style={{ transform: "skewX(5.41deg)" }}>
+              <div
+                className="relative rounded-[20px] overflow-hidden"
+                style={{
+                  width: "711px",
+                  height: "456px",
+                  boxShadow: "0px 4px 20px 0px rgba(0,0,0,0.05)",
+                }}
+              >
+                {/* Purple base */}
+                <div className="absolute inset-0 rounded-[20px] bg-[#7b2cbf]" />
+                {/* Image */}
+                <img
+                  src="https://picsum.photos/seed/why-article-img/711/456"
+                  alt="Jollof Rice article"
+                  className="absolute inset-0 w-full h-full object-cover rounded-[20px]"
+                />
+                {/* Dark overlay */}
+                <div className="absolute inset-0 rounded-[20px]" style={{ backgroundColor: "rgba(0,0,0,0.4)" }} />
+              </div>
+            </div>
           </div>
 
-          {/* Right: article card — x=757 inside the group, w=463, h=306, padded top ~90 */}
-          <div className="flex flex-col justify-center gap-[10px] pl-[82px] pt-[94px] w-[463px] h-full">
-            <span className="font-raleway font-normal text-[13px] leading-[18px] text-primary-dark-darker">
+          {/* Right: article card — bg #f2eaf9, w-463, h-306, rounded-[10px], shadow, p-10, gap-10, centered */}
+          <div
+            className="flex flex-col items-center justify-center gap-[10px] rounded-[10px] shrink-0"
+            style={{
+              width: "463px",
+              height: "306px",
+              backgroundColor: "#f2eaf9",
+              padding: "10px",
+              boxShadow: "0px 4px 20px 0px rgba(0,0,0,0.05)",
+            }}
+          >
+            <p
+              className="text-center"
+              style={{
+                fontFamily: "Raleway, sans-serif",
+                fontWeight: 700,
+                fontSize: "13px",
+                lineHeight: "18px",
+                color: "#5c218f",
+                width: "298px",
+              }}
+            >
               Writer: Davida Dzato
-            </span>
-            <h3 className="font-raleway font-bold text-[20px] leading-[28px] text-tertiary-normal-default">
+            </p>
+            <p
+              style={{
+                fontFamily: "Raleway, sans-serif",
+                fontWeight: 700,
+                fontSize: "20px",
+                lineHeight: "28px",
+                color: "#2d2d2d",
+                whiteSpace: "nowrap",
+              }}
+            >
               Jollof Rice, Explained
-            </h3>
-            <p className="font-raleway font-normal text-[16px] leading-[24px] text-primary-dark-darker">
+            </p>
+            <p
+              className="text-center"
+              style={{
+                fontFamily: "Raleway, sans-serif",
+                fontWeight: 500,
+                fontSize: "16px",
+                lineHeight: "26px",
+                color: "#2d2d2d",
+                width: "298px",
+              }}
+            >
               Six unique dishes, six African countries to explore.
             </p>
           </div>
+
         </div>
       </div>
     </section>
