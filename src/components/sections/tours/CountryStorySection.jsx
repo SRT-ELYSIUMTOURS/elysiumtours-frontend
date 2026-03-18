@@ -21,6 +21,14 @@ const COUNTRY_STORIES = {
     image: "https://picsum.photos/seed/ghana-story/711/559",
     bodyText: "Ghana is more than a destination — it's an experience that stays with you long after you return home. The country's layered history, vibrant culture, and extraordinary landscapes create a journey unlike any other. Our tours are crafted to immerse you in the authentic Ghana — from the rolling hills of the Volta Region to the historic coastal towns of the Central Region.",
   },
+  nigeria: {
+    title: "A Nation of Stories, Strength & Soul",
+    subtitle: "Nigeria captivates every visitor. From the ancient walls of Kano to the festival energy of Lagos, the country's pulse is unlike anywhere else.",
+    imageCaption: "Olumo Rock, Abeokuta",
+    imagePerson: "Emeka Okafor, Cultural Guide",
+    image: "https://picsum.photos/seed/nigeria-story/711/559",
+    bodyText: "Nigeria is a land of extraordinary contrasts and remarkable depth. Home to over 250 ethnic groups, the country's cultural tapestry is woven with centuries of tradition, art, music, and resilience. Our tours guide you through the bustling markets of Lagos, the historic palaces of Benin, the serene landscapes of Cross River, and the spiritual heartlands of Osun-Osogbo — each journey revealing a new facet of this incredible nation.",
+  },
   default: {
     title: "A Destination That Stays With You",
     subtitle: "Every destination tells a story. Let us take you on a journey through landscapes, culture and history.",

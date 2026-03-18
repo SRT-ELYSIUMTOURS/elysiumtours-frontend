@@ -20,48 +20,98 @@ const MapPinIcon = () => (
   </svg>
 );
 
-const GUIDES = [
-  {
-    id: 1,
-    name: "Kwame Asante",
-    location: "Accra, Ghana",
-    languages: "Twi | English | Ga",
-    rating: 4.9,
-    reviews: 124,
-    image: "https://picsum.photos/seed/guide-1/280/280",
-    speciality: "Heritage & Culture",
-  },
-  {
-    id: 2,
-    name: "Akosua Mensah",
-    location: "Cape Coast, Ghana",
-    languages: "Fante | English",
-    rating: 4.8,
-    reviews: 98,
-    image: "https://picsum.photos/seed/guide-2/280/280",
-    speciality: "Coastal Tours",
-  },
-  {
-    id: 3,
-    name: "Kofi Boateng",
-    location: "Kumasi, Ghana",
-    languages: "Twi | English | French",
-    rating: 4.9,
-    reviews: 156,
-    image: "https://picsum.photos/seed/guide-3/280/280",
-    speciality: "Cultural Immersion",
-  },
-  {
-    id: 4,
-    name: "Ama Osei",
-    location: "Volta Region, Ghana",
-    languages: "Ewe | English",
-    rating: 4.7,
-    reviews: 87,
-    image: "https://picsum.photos/seed/guide-4/280/280",
-    speciality: "Nature & Adventure",
-  },
-];
+const GUIDES_BY_COUNTRY = {
+  ghana: [
+    {
+      id: 1,
+      name: "Kwame Asante",
+      location: "Accra, Ghana",
+      languages: "Twi | English | Ga",
+      rating: 4.9,
+      reviews: 124,
+      image: "https://picsum.photos/seed/guide-1/280/280",
+      speciality: "Heritage & Culture",
+    },
+    {
+      id: 2,
+      name: "Akosua Mensah",
+      location: "Cape Coast, Ghana",
+      languages: "Fante | English",
+      rating: 4.8,
+      reviews: 98,
+      image: "https://picsum.photos/seed/guide-2/280/280",
+      speciality: "Coastal Tours",
+    },
+    {
+      id: 3,
+      name: "Kofi Boateng",
+      location: "Kumasi, Ghana",
+      languages: "Twi | English | French",
+      rating: 4.9,
+      reviews: 156,
+      image: "https://picsum.photos/seed/guide-3/280/280",
+      speciality: "Cultural Immersion",
+    },
+    {
+      id: 4,
+      name: "Ama Osei",
+      location: "Volta Region, Ghana",
+      languages: "Ewe | English",
+      rating: 4.7,
+      reviews: 87,
+      image: "https://picsum.photos/seed/guide-4/280/280",
+      speciality: "Nature & Adventure",
+    },
+  ],
+  nigeria: [
+    {
+      id: 1,
+      name: "Emeka Okafor",
+      location: "Lagos, Nigeria",
+      languages: "Yoruba | English | Igbo",
+      rating: 4.9,
+      reviews: 142,
+      image: "https://picsum.photos/seed/ng-guide-1/280/280",
+      speciality: "Urban & Cultural Tours",
+    },
+    {
+      id: 2,
+      name: "Fatima Bello",
+      location: "Kano, Nigeria",
+      languages: "Hausa | English | Fulani",
+      rating: 4.8,
+      reviews: 109,
+      image: "https://picsum.photos/seed/ng-guide-2/280/280",
+      speciality: "Northern Heritage",
+    },
+    {
+      id: 3,
+      name: "Chidi Eze",
+      location: "Enugu, Nigeria",
+      languages: "Igbo | English",
+      rating: 4.9,
+      reviews: 167,
+      image: "https://picsum.photos/seed/ng-guide-3/280/280",
+      speciality: "Cultural Immersion",
+    },
+    {
+      id: 4,
+      name: "Amina Yakubu",
+      location: "Abuja, Nigeria",
+      languages: "Hausa | English | French",
+      rating: 4.7,
+      reviews: 93,
+      image: "https://picsum.photos/seed/ng-guide-4/280/280",
+      speciality: "Nature & Wildlife",
+    },
+  ],
+};
+
+// Fallback to ghana guides if country not found
+const getGuides = (country) => {
+  const key = country?.toLowerCase();
+  return GUIDES_BY_COUNTRY[key] || GUIDES_BY_COUNTRY.ghana;
+};
 
 const GuideCard = ({ guide }) => (
   <div className="flex flex-col gap-[16px] bg-secondary-dark-active rounded-[20px] overflow-hidden p-[20px] w-[331px]">
@@ -115,6 +165,7 @@ const GuideCard = ({ guide }) => (
 );
 
 const LocalGuidesSection = React.forwardRef(({ country = "Ghana", className, ...props }, ref) => {
+  const guides = getGuides(country);
   return (
     <section
       ref={ref}
@@ -151,7 +202,7 @@ const LocalGuidesSection = React.forwardRef(({ country = "Ghana", className, ...
 
         {/* Guide cards — 4-col layout */}
         <div className="flex items-start gap-[8px]">
-          {GUIDES.map((guide) => (
+          {guides.map((guide) => (
             <GuideCard key={guide.id} guide={guide} />
           ))}
         </div>

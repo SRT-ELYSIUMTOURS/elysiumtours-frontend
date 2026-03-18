@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { classNames } from "../../utils/classNames";
 import StarRating from "../ui/StarRating";
 
@@ -171,14 +172,26 @@ const PopularTourCard = React.forwardRef(
       maxGroupSize = 12,
       pickupIncluded = false,
       tags,
+      country,
+      tourSlug,
       ...props
     },
     ref
   ) => {
+    const navigate = useNavigate();
+
+    const handleClick = (e) => {
+      if (onClick) {
+        onClick(e);
+      } else if (country && tourSlug) {
+        navigate(`/tours/${country}/${tourSlug}`);
+      }
+    };
+
     return (
       <div
         ref={ref}
-        onClick={onClick}
+        onClick={handleClick}
         className={classNames(
           "relative flex flex-col  rounded-[var(--radius-sm)]",
           "bg-transparent transition-all duration-300 ease-in",
