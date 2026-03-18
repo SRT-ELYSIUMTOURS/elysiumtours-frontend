@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { classNames } from "../../../utils/classNames";
 import BlogSearchInput from "../../ui/BlogSearchInput";
 
 const CATEGORIES = [
   { value: "all", label: "All" },
-  { value: "travel-guides", label: "Travel Guides& Tips" },
+  { value: "travel-guides", label: "Travel Guides & Tips" },
   { value: "destination-highlights", label: "Destination Highlights" },
   { value: "local-guides", label: "Behind the scene" },
   { value: "travel-stories", label: "Travel Stories" },
@@ -14,19 +14,18 @@ const CATEGORIES = [
 ];
 
 const BlogCategoryFilter = React.forwardRef(({
-  activeCategory = "all",
-  onCategoryChange,
   onSearch,
   className = "",
   ...props
 }, ref) => {
   const navigate = useNavigate();
-  const [selected, setSelected] = useState(activeCategory);
+  const { category } = useParams();
   const [searchValue, setSearchValue] = useState("");
 
+  // Derive active tab from current URL param; default to "all" on /blog
+  const selected = category ?? "all";
+
   const handleSelect = (value) => {
-    setSelected(value);
-    onCategoryChange?.(value);
     if (value === "all") {
       navigate("/blog");
     } else {
@@ -38,7 +37,7 @@ const BlogCategoryFilter = React.forwardRef(({
     <div
       ref={ref}
       className={classNames(
-        "w-full bg-primary-light-default",
+        "w-full bg-primary-light-default py-10",
         className
       )}
       {...props}

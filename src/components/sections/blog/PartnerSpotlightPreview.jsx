@@ -36,6 +36,8 @@ const PartnerSpotlightPreview = React.forwardRef(({ className, ...props }, ref) 
               key={partner.id}
               image={partner.image}
               category={partner.category}
+              className="h-[400px] md:h-[500px] w-full lg:h-[656px]"
+
             />
           ))}
         </div>

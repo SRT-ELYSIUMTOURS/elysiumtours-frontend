@@ -219,7 +219,7 @@ const Navbar = () => {
 
   return (
     <nav ref={navRef} role="navigation" aria-label="Main navigation"
-      className="w-full bg-primary-light-default shadow-sm sticky top-0 z-40"
+      className="w-full bg-primary-light-default shadow-sm sticky top-0 z-50"
       style={{ height: "112px" }}>
 
       {/* Inner container — max-w-[1728px], mirrors Frame 4 layout */}
@@ -237,9 +237,8 @@ const Navbar = () => {
           <div className="flex items-center" style={{ gap: "32px" }}>
 
             {/* Home */}
-            <Link to="/">
-              <NavLink label="Home" isActive={location.pathname === "/"} hasDropdown={false} isOpen={false}
-                onClick={() => setOpenDropdown(null)} />
+            <Link to="/" onClick={() => setOpenDropdown(null)}>
+              <NavLink label="Home" isActive={location.pathname === "/"} hasDropdown={false} isOpen={false} />
             </Link>
 
             {/* Tour */}
@@ -265,15 +264,13 @@ const Navbar = () => {
             </div>
 
             {/* Gallery */}
-            <Link to="/gallery">
-              <NavLink label="Gallery" isActive={isActivePath("/gallery")} hasDropdown={false} isOpen={false}
-                onClick={() => setOpenDropdown(null)} />
+            <Link to="/gallery" onClick={() => setOpenDropdown(null)}>
+              <NavLink label="Gallery" isActive={isActivePath("/gallery")} hasDropdown={false} isOpen={false} />
             </Link>
 
             {/* Blogs */}
-            <Link to="/blog">
-              <NavLink label="Blogs" isActive={isActivePath("/blog")} hasDropdown={false} isOpen={false}
-                onClick={() => setOpenDropdown(null)} />
+            <Link to="/blog" onClick={() => setOpenDropdown(null)}>
+              <NavLink label="Blogs" isActive={isActivePath("/blog")} hasDropdown={false} isOpen={false} />
             </Link>
           </div>
 

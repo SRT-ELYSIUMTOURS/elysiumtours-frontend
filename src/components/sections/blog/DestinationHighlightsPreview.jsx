@@ -24,7 +24,7 @@ const DestinationHighlightsPreview = React.forwardRef(({ className, ...props }, 
         />
 
         {/* 5-col grid: 1 large left + 2 cols of 2 stacked + 2 cols of 2 stacked */}
-        <div className="mt-[80px] flex gap-[15px]">
+        <div className="mt-[80px] items-center flex gap-[15px]">
           {/* Large left card */}
           <BlogContentCard
             title="Cape Coast Heritage"
