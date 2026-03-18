@@ -21,14 +21,14 @@ const LocalGuidesPreview = React.forwardRef(({ className, ...props }, ref) => {
         />
 
         {/* 3-column masonry grid with varying heights */}
-        <div className="mt-[80px] flex gap-[15px]">
+        <div className="mt-[80px] flex gap-[22px]">
           {/* Column 1 */}
-          <div className="flex flex-col gap-[15px]">
+          <div className="flex flex-col gap-[48px]">
             <BlogContentCard
               title="Guide Kofi's Accra"
               category="City Guide"
               image="https://picsum.photos/seed/lg1/457/419"
-              className="!w-[457px] !h-[419px]"
+              className="!w-[457px] !h-[418px]"
             />
             <BlogContentCard
               title="Walking the Gold Coast"
@@ -38,33 +38,33 @@ const LocalGuidesPreview = React.forwardRef(({ className, ...props }, ref) => {
             />
           </div>
           {/* Column 2 */}
-          <div className="flex flex-col gap-[15px]">
-            <BlogContentCard
-              title="A Day with Ama"
-              category="Local Life"
-              image="https://picsum.photos/seed/lg2/457/337"
-              className="!w-[457px] !h-[337px]"
-            />
+          <div className="flex flex-col gap-[48px]">
             <BlogContentCard
               title="Forest Treks"
               category="Adventure"
               image="https://picsum.photos/seed/lg5/457/814"
               className="!w-[457px] !h-[814px]"
             />
+            <BlogContentCard
+              title="A Day with Ama"
+              category="Local Life"
+              image="https://picsum.photos/seed/lg2/457/337"
+              className="!w-[457px] !h-[338px]"
+            />
           </div>
           {/* Column 3 */}
-          <div className="flex flex-col gap-[15px]">
-            <BlogContentCard
-              title="Market Stories"
-              category="Culture"
-              image="https://picsum.photos/seed/lg3/457/734"
-              className="!w-[457px] !h-[734px]"
-            />
+          <div className="flex flex-col gap-[48px]">
             <BlogContentCard
               title="Festival Season"
               category="Events"
               image="https://picsum.photos/seed/lg6/457/433"
-              className="!w-[457px] !h-[433px]"
+              className="!w-[457px] !h-[338px]"
+            />
+            <BlogContentCard
+              title="Market Stories"
+              category="Culture"
+              image="https://picsum.photos/seed/lg3/457/734"
+              className="!w-[457px] !h-[814px]"
             />
           </div>
         </div>

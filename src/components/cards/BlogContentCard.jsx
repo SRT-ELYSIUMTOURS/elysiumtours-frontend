@@ -63,9 +63,9 @@ const BlogContentCard = React.forwardRef(({
       <div className="absolute inset-0 bg-black/50 transition-all duration-300 ease-in group-hover:bg-black/40" />
 
       {/* Content — bottom of card */}
-      <div className="absolute bottom-0 left-0 right-0 p-6 flex flex-col gap-[8px]">
+      <div className="absolute bottom-0 left-0 right-0 px-7.5 py-[36.5px] flex flex-col gap-[8px]">
         {/* Category eyebrow */}
-        {category && (
+        {/* {category && (
           <span style={{
             fontSize: "13px",
             fontWeight: 700,
@@ -75,7 +75,7 @@ const BlogContentCard = React.forwardRef(({
           }}>
             {category}
           </span>
-        )}
+        )} */}
 
         {/* Title — [25px/700] #fefefe */}
         {title && (
@@ -91,7 +91,7 @@ const BlogContentCard = React.forwardRef(({
         )}
 
         {/* White underline — from Figma Line 3 stroke:#ffffff */}
-        <div className="w-full h-[1px] bg-white opacity-60" />
+        {/* <div className="w-full h-[1px] bg-white opacity-60" /> */}
 
         {/* Sub-label — [16px/400] #f7f7f7 e.g. "28 Pictures" */}
         {subLabel && (

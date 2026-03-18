@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { classNames } from "../../utils/classNames";
 import BlogHero from "../../components/sections/blog/BlogHero";
 import BlogBreadcrumbBar from "../../components/sections/blog/BlogBreadcrumbBar";
+import BlogCategoryFilter from "../../components/sections/blog/BlogCategoryFilter";
 import BlogSectionHeader from "../../components/sections/blog/BlogSectionHeader";
 import BlogPaginationBar from "../../components/sections/blog/BlogPaginationBar";
 import BlogCtaSection from "../../components/sections/blog/BlogCtaSection";
@@ -242,14 +243,15 @@ const BlogCategoryPage = React.forwardRef(({ className, ...props }, ref) => {
     return (
       <main ref={ref} className={classNames("font-raleway", className)} {...props}>
         <BlogBreadcrumbBar
-          items={[
-            { label: "Home", href: "/" },
-            { label: "Blog", href: "/blog" },
-            { label: "Not Found" },
-          ]}
+        items={[
+        { label: "Home", href: "/" },
+        { label: "Blog", href: "/blog" },
+        { label: "Not Found" },
+        ]}
         />
         <BlogHero />
-        <div className="flex items-center justify-center py-[120px]">
+        <BlogCategoryFilter />
+      <div className="flex items-center justify-center py-[120px]">
           <p className="font-raleway font-medium text-[20px] text-primary-dark-darker">
             Category not found
           </p>
@@ -271,6 +273,7 @@ const BlogCategoryPage = React.forwardRef(({ className, ...props }, ref) => {
         ]}
       />
       <BlogHero />
+      <BlogCategoryFilter />
 
       {/* Main content section */}
       <section className={classNames("w-full py-[80px]", config.bg)}>
