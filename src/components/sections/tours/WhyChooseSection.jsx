@@ -54,12 +54,28 @@ const WhyChooseSection = React.forwardRef(({ className, ...props }, ref) => {
           </div>
         </div>
 
-        {/* Large image area — Frame 47, w=1419, h=554 */}
-        <div className="w-full h-[554px] rounded-2xl overflow-hidden">
+        {/* Large image area — Frame 47, w=1419, h=554 — with grain noise overlay */}
+        {/* Figma 1914:39409: noise image h=172.44%, top=-24.49% layered over photo */}
+        <div className="relative w-full h-[554px] rounded-[20px] overflow-hidden shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)]">
           <img
             src="https://picsum.photos/seed/why-choose-collage/1419/554"
             alt="Why choose Elysium Tours"
             className="w-full h-full object-cover"
+          />
+          {/* Grain / monotone noise overlay */}
+          <div
+            className="absolute pointer-events-none"
+            style={{
+              left: 0,
+              width: "100%",
+              height: "172.44%",
+              top: "-24.49%",
+              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+              backgroundRepeat: "repeat",
+              backgroundSize: "300px 300px",
+              opacity: 0.12,
+              mixBlendMode: "overlay",
+            }}
           />
         </div>
       </div>
