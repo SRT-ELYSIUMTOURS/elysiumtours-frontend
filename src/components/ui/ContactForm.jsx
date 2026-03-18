@@ -57,8 +57,12 @@ const ContactForm = React.forwardRef(({
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit?.(form);
-    setSubmitted(true);
+    if (onSubmit) {
+      onSubmit(form);
+      setForm({ firstName: "", lastName: "", email: "", phoneCode: "GH +233", phone: "", subject: "", message: "" });
+    } else {
+      setSubmitted(true);
+    }
   };
 
   if (submitted) {
