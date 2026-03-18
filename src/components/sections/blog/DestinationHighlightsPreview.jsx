@@ -1,9 +1,11 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { classNames } from "../../../utils/classNames";
 import BlogSectionHeader from "./BlogSectionHeader";
 import BlogContentCard from "../../cards/BlogContentCard";
 
 const DestinationHighlightsPreview = React.forwardRef(({ className, ...props }, ref) => {
+  const navigate = useNavigate();
   return (
     <section
       ref={ref}
@@ -18,6 +20,7 @@ const DestinationHighlightsPreview = React.forwardRef(({ className, ...props }, 
           label="DESTINATION HIGHLIGHT"
           title="Unforgettable Places, Endless Discoveries"
           description="From Ghana's golden coasts to Togo's vibrant markets and Benin's historic landmarks, discover the destinations that define the spirit of West Africa. Each highlight invites you to explore cities, cultures, adventures, and beauty like never before."
+          onButtonClick={() => navigate("/blog/destination-highlights")}
         />
 
         {/* 5-col grid: 1 large left + 2 cols of 2 stacked + 2 cols of 2 stacked */}

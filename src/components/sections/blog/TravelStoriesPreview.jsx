@@ -1,9 +1,11 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { classNames } from "../../../utils/classNames";
 import BlogSectionHeader from "./BlogSectionHeader";
 import BlogContentCard from "../../cards/BlogContentCard";
 
 const TravelStoriesPreview = React.forwardRef(({ className, ...props }, ref) => {
+  const navigate = useNavigate();
   return (
     <section
       ref={ref}
@@ -18,6 +20,7 @@ const TravelStoriesPreview = React.forwardRef(({ className, ...props }, ref) => 
           label="DISPORA TRAVEL STORIES"
           title="BidsPora Travel Stories: Real Journeys, Real People"
           description="Step into the world of Dispora travelers as they share their unforgettable adventures across West Africa. From cultural discoveries to spontaneous road trips, these stories capture the heart and spirit of exploration — inspiring you to create your own."
+          onButtonClick={() => navigate("/blog/travel-stories")}
         />
 
         {/* 3-column equal grid */}

@@ -1,9 +1,11 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { classNames } from "../../../utils/classNames";
 import BlogSectionHeader from "./BlogSectionHeader";
 import BlogContentCard from "../../cards/BlogContentCard";
 
 const LocalGuidesPreview = React.forwardRef(({ className, ...props }, ref) => {
+  const navigate = useNavigate();
   return (
     <section
       ref={ref}
@@ -18,6 +20,7 @@ const LocalGuidesPreview = React.forwardRef(({ className, ...props }, ref) => {
           label="BEHIND THE SCENCES WITH GUIDES"
           title="Inside the World of Our Local Guides"
           description="Our guides are more than travel experts — they're storytellers, explorers, and cultural ambassadors. Step behind the scenes to discover how their passion for Ghana transforms every journey into a story, a celebration."
+          onButtonClick={() => navigate("/blog/local-guides")}
         />
 
         {/* 3-column masonry grid with varying heights */}

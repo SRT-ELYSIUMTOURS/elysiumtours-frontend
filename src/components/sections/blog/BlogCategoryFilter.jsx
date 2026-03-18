@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { classNames } from "../../../utils/classNames";
 import BlogSearchInput from "../../ui/BlogSearchInput";
 
@@ -19,12 +20,18 @@ const BlogCategoryFilter = React.forwardRef(({
   className = "",
   ...props
 }, ref) => {
+  const navigate = useNavigate();
   const [selected, setSelected] = useState(activeCategory);
   const [searchValue, setSearchValue] = useState("");
 
   const handleSelect = (value) => {
     setSelected(value);
     onCategoryChange?.(value);
+    if (value === "all") {
+      navigate("/blog");
+    } else {
+      navigate(`/blog/${value}`);
+    }
   };
 
   return (

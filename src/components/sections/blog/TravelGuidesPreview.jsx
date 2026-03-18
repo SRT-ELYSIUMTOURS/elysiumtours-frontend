@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { classNames } from "../../../utils/classNames";
 import BlogSectionHeader from "./BlogSectionHeader";
 import BlogContentCard from "../../cards/BlogContentCard";
@@ -10,6 +11,7 @@ const PLACEHOLDER_CARDS = [
 ];
 
 const TravelGuidesPreview = React.forwardRef(({ className, ...props }, ref) => {
+  const navigate = useNavigate();
   return (
     <section
       ref={ref}
@@ -24,6 +26,7 @@ const TravelGuidesPreview = React.forwardRef(({ className, ...props }, ref) => {
           label="TRAVEL GUIDE & TIPS"
           title="Travel Guides & Tips for Every Explorer"
           description="Discover expert advice, destination guides, and local insights to help you plan your next West African adventure. From cultural etiquette to must-see attractions, our guides make every journey smoother, richer, and more meaningful."
+          onButtonClick={() => navigate("/blog/travel-guides")}
         />
 
         {/* 2-column masonry grid — Figma layout */}
