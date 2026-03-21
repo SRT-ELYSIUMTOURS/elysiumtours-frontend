@@ -12,6 +12,8 @@ import ContactPage from "./pages/tourist/ContactPage";
 import TourPartnersPage from "./pages/tourist/TourPartnersPage";
 import TourPartnerCategoryPage from "./pages/tourist/TourPartnerCategoryPage";
 import TourPartnerListingPage from "./pages/tourist/TourPartnerListingPage";
+import GalleryPage from "./pages/tourist/GalleryPage";
+import GalleryCategoryPage from "./pages/tourist/GalleryCategoryPage";
 
 function App() {
   return (
@@ -29,6 +31,8 @@ function App() {
           <Route path="/tour-partners" element={<TourPartnersPage />} />
           <Route path="/tour-partners/:category" element={<TourPartnerCategoryPage />} />
           <Route path="/tour-partners/:category/all" element={<TourPartnerListingPage />} />
+          <Route path="/gallery" element={<GalleryPage />} />
+          <Route path="/gallery/:category/all" element={<GalleryCategoryPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
