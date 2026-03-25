@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "mcp__Figma__get_design_context"
+      "mcp__Figma__get_design_context",
+      "mcp__Figma__get_screenshot"
     ]
   }
 }

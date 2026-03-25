@@ -107,66 +107,6 @@ const WhyChooseSection = React.forwardRef(({ className, ...props }, ref) => {
         />
       </div>
 
-      {/* ── ARTICLE PREVIEW (Figma 1914:39485) ──────────────────────────────── */}
-      {/* Left: skewed image card 757×487; Right: light purple card 463×306
-          This sub-section has not yet been mapped against Figma in this task. */}
-      <div className="mt-[80px]">
-        <div className="flex items-center w-full h-[487px]">
-
-          {/* Left: skewed image card */}
-          <div className="flex items-center justify-center shrink-0" style={{ width: "757px", height: "487px" }}>
-            <div style={{ transform: "skewX(5.41deg)" }}>
-              <div
-                className="relative rounded-[20px] overflow-hidden"
-                style={{
-                  width: "711px",
-                  height: "456px",
-                  boxShadow: "0px 4px 20px 0px rgba(0,0,0,0.05)",
-                }}
-              >
-                <div className="absolute inset-0 rounded-[20px] bg-[#7b2cbf]" />
-                <img
-                  src="https://picsum.photos/seed/why-article-img/711/456"
-                  alt="Jollof Rice article"
-                  className="absolute inset-0 w-full h-full object-cover rounded-[20px]"
-                />
-                <div className="absolute inset-0 rounded-[20px]" style={{ backgroundColor: "rgba(0,0,0,0.4)" }} />
-              </div>
-            </div>
-          </div>
-
-          {/* Right: article text card */}
-          <div
-            className="flex flex-col items-center justify-center gap-[10px] rounded-[10px] shrink-0"
-            style={{
-              width: "463px",
-              height: "306px",
-              backgroundColor: "#f2eaf9",
-              padding: "10px",
-              boxShadow: "0px 4px 20px 0px rgba(0,0,0,0.05)",
-            }}
-          >
-            <p
-              className="text-center"
-              style={{ fontFamily: "Raleway, sans-serif", fontWeight: 700, fontSize: "13px", lineHeight: "18px", color: "#5c218f", width: "298px" }}
-            >
-              Writer: Davida Dzato
-            </p>
-            <p
-              style={{ fontFamily: "Raleway, sans-serif", fontWeight: 700, fontSize: "20px", lineHeight: "28px", color: "#2d2d2d", whiteSpace: "nowrap" }}
-            >
-              Jollof Rice, Explained
-            </p>
-            <p
-              className="text-center"
-              style={{ fontFamily: "Raleway, sans-serif", fontWeight: 500, fontSize: "16px", lineHeight: "26px", color: "#2d2d2d", width: "298px" }}
-            >
-              Six unique dishes, six African countries to explore.
-            </p>
-          </div>
-
-        </div>
-      </div>
     </section>
   );
 });

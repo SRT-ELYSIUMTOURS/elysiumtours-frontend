@@ -1,64 +1,98 @@
 import React from "react";
 import { classNames } from "../../../utils/classNames";
-import Button from "../../ui/button";
 
+// ── Figma asset imports ───────────────────────────────────────────────────────
+import blogCtaBg from "../../../assets/ElysiumAssets/blog-cta-bg.png";
+// Single SVG containing the full concentric dot-ring decoration (486×437, fill="#D6BEEB")
+import blogCtaDeco from "../../../assets/ElysiumAssets/blog-cta-deco.svg";
+
+// ── BlogCtaSection ────────────────────────────────────────────────────────────
+// Figma: "Frame 103" node 1914-37707 — appears on HomePage
+//
+// Layout:
+//   section  bg-[#f2eaf9] overflow-hidden py-[41px]
+//     └─ decorative dot rings at top-right and bottom-left (partially clipped)
+//     └─ main card  mx-[156px] h-[578px] bg-[#f7f7f7] rounded-[20px]
+//          ├─ left: skewed photo  w-[757px] h-[487px]  skew-x-[5.41deg]
+//          └─ right: text card   w-[463px] h-[306px]  bg-[#f2eaf9] rounded-[10px]
 const BlogCtaSection = React.forwardRef(({ className, ...props }, ref) => {
   return (
     <section
       ref={ref}
-      className={classNames("bg-[#F2EAF9] py-16 md:py-20", className)}
+      className={classNames(
+        "relative overflow-hidden bg-[#f2eaf9] py-[41px]",
+        className
+      )}
       {...props}
     >
-      <div className=" bg-primary-light-default mx-auto mx-6 md:mx-[30px] rounded-[20px] py-8 lg:px-[99px] lg:mx-[164px]">
-        <div className="flex flex-col md:flex-row items-center gap-8 lg:gap-16">
-          {/* Overlapping circular images */}
-          <div className="relative w-[200px] h-[200px] md:w-[247px] md:h-[198px] shrink-0">
-            <div className="absolute z-10 left-0 top-[20px]  w-[145px] h-[157px]  rounded-[20px] -rotate-[21deg] overflow-hidden shadow-[--shadow-card]">
-              <img
-                src="./src/assets/homeAssets/Image-6.webp"
-                alt="Ghana coast"
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute w-full h-full inset-0  bg-black/40"/>
+      {/* ── Decorative corner rings ─────────────────────────────────────────── */}
+      {/* Top-right: Figma node 1914-37709 — top-[-137px] right-[-223px] */}
+      <img
+        src={blogCtaDeco}
+        aria-hidden="true"
+        className="absolute pointer-events-none"
+        style={{ top: -137, right: -223, width: 486, height: 437 }}
+        alt=""
+      />
+      {/* Bottom-left: Figma node 1914-37745 — bottom-[-86px] left-[-26px] */}
+      <img
+        src={blogCtaDeco}
+        aria-hidden="true"
+        className="absolute pointer-events-none"
+        style={{ bottom: -86, left: -26, width: 486, height: 437 }}
+        alt=""
+      />
+
+      {/* ── Main card ──────────────────────────────────────────────────────── */}
+      {/* Figma: left-[156px] w-[1416px] h-[578px] bg-[#f7f7f7] rounded-[20px]
+                shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)] overflow-clip */}
+      <div className="mx-[156px] h-[578px] bg-[#f7f7f7] rounded-[20px] overflow-clip shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)] relative">
+
+        {/* Inner flex row — Figma: absolute left-[33px] top-[50%] -translate-y-1/2 flex items-center */}
+        <div className="absolute left-[33px] top-1/2 -translate-y-1/2 flex items-center">
+
+          {/* ── Left: skewed photo ──────────────────────────────────────────── */}
+          {/* Container: Figma w-[757px] h-[487px] flex items-center justify-center */}
+          <div className="w-[757px] h-[487px] flex items-center justify-center shrink-0">
+            {/* Parallelogram skew — Figma skew-x-[5.41deg] */}
+            <div className="skew-x-[5.41deg] flex-none">
+              {/* Photo card: Figma w-[710.845px] h-[455.676px] rounded-[20px] shadow */}
+              <div
+                className="relative rounded-[20px] shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)]"
+                style={{ width: "710.845px", height: "455.676px" }}
+              >
+                {/* Purple fallback bg */}
+                <div className="absolute inset-0 bg-[#7b2cbf] rounded-[20px]" />
+                {/* Photo — rounded applied directly since parent has no overflow-hidden
+                    (overflow-hidden + skew-x would clip in unexpected ways) */}
+                <img
+                  src={blogCtaBg}
+                  alt="Kakum canopy walkway, Ghana"
+                  className="absolute max-w-none object-cover rounded-[20px] size-full"
+                />
+                {/* Dark overlay */}
+                <div className="absolute inset-0 bg-[rgba(0,0,0,0.4)] rounded-[20px]" />
+              </div>
             </div>
-            <div className="absolute left-[56px] top-[20px]   w-[145px] h-[157px]  rounded-[20px] -rotate-[21deg] overflow-hidden shadow-[--shadow-card] bg-[#F2EAF9]" />
           </div>
 
-          {/* Text content */}
-          <div className="flex flex-col gap-[11.5px] flex-1">
-            <h2 className="font-raleway font-bold text-[22px] leading-[30px] lg:text-High-md-bold lg:leading-[34px] text-tertiary-normal-default">
-              Discovering Ghana&apos;s Coastal Charm
-            </h2>
-            <p className="font-raleway mb-1 font-medium text-[14px] leading-[22px] lg:text-md-regular lg:leading-[22px] text-tertiary-normal-default max-w-[913px]">
-              From the historic shores of Cape Coast to the laid-back beaches of
-              Busua, Ghana&apos;s coastline is a blend of beauty, history, and
-              adventure. Join us as we explore hidden seaside gems, local
-              seafood spots, and the cultural rhythms that make the coast truly
-              unforgettable.
+          {/* ── Right: text card ────────────────────────────────────────────── */}
+          {/* Figma: w-[463px] h-[306px] bg-[#f2eaf9] rounded-[10px]
+                    shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)]
+                    flex flex-col gap-[10px] items-center justify-center p-[10px] */}
+          <div className="w-[463px] h-[306px] bg-[#f2eaf9] rounded-[10px] shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)] flex flex-col gap-[10px] items-center justify-center p-[10px] shrink-0">
+            {/* Writer — Raleway Bold 13px/18px #5c218f text-center w-[298px] */}
+            <p className="font-raleway font-bold text-[13px] leading-[18px] text-[#5c218f] text-center w-[298px] shrink-0">
+              Writer: Davida Dzato
             </p>
-            <div>
-              <Button
-                endIcon={
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="14"
-                    height="14"
-                    viewBox="0 0 14 14"
-                    fill="none"
-                  >
-                    <path
-                      d="M2.33325 6.25016C1.91904 6.25016 1.58325 6.58595 1.58325 7.00016C1.58325 7.41438 1.91904 7.75016 2.33325 7.75016L2.33325 7.00016L2.33325 6.25016ZM11.6666 7.75016C12.0808 7.75016 12.4166 7.41438 12.4166 7.00016C12.4166 6.58595 12.0808 6.25016 11.6666 6.25016V7.00016V7.75016ZM9.86121 3.55081C9.56701 3.25922 9.09214 3.26134 8.80056 3.55554C8.50898 3.84973 8.5111 4.3246 8.80529 4.61619L9.33325 4.0835L9.86121 3.55081ZM10.3617 5.10276L9.83369 5.63545V5.63545L10.3617 5.10276ZM10.3617 8.89757L10.8896 9.43026V9.43026L10.3617 8.89757ZM8.80529 9.38414C8.5111 9.67572 8.50898 10.1506 8.80056 10.4448C9.09214 10.739 9.56701 10.7411 9.86121 10.4495L9.33325 9.91683L8.80529 9.38414ZM11.655 6.81738L12.399 6.72256L12.399 6.72256L11.655 6.81738ZM11.655 7.18294L12.399 7.27777V7.27777L11.655 7.18294ZM2.33325 7.00016L2.33325 7.75016L11.6666 7.75016V7.00016V6.25016L2.33325 6.25016L2.33325 7.00016ZM9.33325 4.0835L8.80529 4.61619L9.83369 5.63545L10.3617 5.10276L10.8896 4.57007L9.86121 3.55081L9.33325 4.0835ZM10.3617 8.89757L9.83369 8.36488L8.80529 9.38414L9.33325 9.91683L9.86121 10.4495L10.8896 9.43026L10.3617 8.89757ZM10.3617 5.10276L9.83369 5.63545C10.2563 6.05429 10.5274 6.3246 10.7074 6.54875C10.8779 6.76107 10.9041 6.85805 10.911 6.91221L11.655 6.81738L12.399 6.72256C12.3427 6.28136 12.1323 5.92745 11.877 5.6095C11.6311 5.30339 11.2871 4.96407 10.8896 4.57007L10.3617 5.10276ZM10.3617 8.89757L10.8896 9.43026C11.2871 9.03625 11.6311 8.69693 11.877 8.39082C12.1323 8.07288 12.3427 7.71897 12.399 7.27777L11.655 7.18294L10.911 7.08811C10.9041 7.14228 10.8779 7.23926 10.7074 7.45158C10.5274 7.67572 10.2563 7.94604 9.83369 8.36488L10.3617 8.89757ZM11.655 6.81738L10.911 6.91221C10.9184 6.97062 10.9184 7.02971 10.911 7.08811L11.655 7.18294L12.399 7.27777C12.4225 7.09344 12.4225 6.90689 12.399 6.72256L11.655 6.81738Z"
-                      fill="#7B2CBF"
-                    />
-                  </svg>
-                }
-                variant="secondaryOutline"
-                size="medium"
-                shape="pill"
-              >
-                Read More
-              </Button>
-            </div>
+            {/* Title — Raleway Bold 20px/28px #2d2d2d */}
+            <p className="font-raleway font-bold text-[20px] leading-[28px] text-[#2d2d2d] whitespace-nowrap shrink-0">
+              Jollof Rice, Explained
+            </p>
+            {/* Description — Raleway Medium 16px/26px #2d2d2d text-center w-[298px] */}
+            <p className="font-raleway font-medium text-[16px] leading-[26px] text-[#2d2d2d] text-center w-[298px] shrink-0">
+              Six unique dishes, six African countries to explore.
+            </p>
           </div>
         </div>
       </div>
@@ -67,5 +101,4 @@ const BlogCtaSection = React.forwardRef(({ className, ...props }, ref) => {
 });
 
 BlogCtaSection.displayName = "BlogCtaSection";
-
 export default BlogCtaSection;
