@@ -1,6 +1,22 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { classNames } from "../../../utils/classNames";
-import Button from "../../ui/button";
+
+// ── Slide dot assets — Figma node 1903:25270 ─────────────────────────────────
+// Active   (44:191): fill #D6BEEB, stroke #F7F7F7  (SVG fallback via <img>)
+// Inactive (44:189): stroke #EBDFF5, no fill
+import slideDotActive   from "../../../assets/ElysiumAssets/slide-dot-active.svg";
+import slideDotInactive from "../../../assets/ElysiumAssets/slide-dot-inactive.svg";
+
+// ── Figma overlay (node I1903:25269;44:203) ───────────────────────────────────
+// Layer 1: flat linear rgba(0,0,0,0.3) across entire slide
+// Layer 2: purple radial gradient, center ~40% 64% (689.5, 461.5 in 1728×717),
+//          ellipse radii 28.5% / 165% from matrix decomposition
+const OVERLAY_STYLE = {
+  background: [
+    "linear-gradient(90deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.3) 100%)",
+    "radial-gradient(ellipse 28.5% 165% at 40% 64%, rgba(132,44,207,0.4) 45.67%, rgba(104,35,164,0.555) 61.78%, rgba(77,26,120,0.71) 77.88%, rgba(43,15,67,0.8) 100%)",
+  ].join(", "),
+};
 
 const SLIDES = [
   { id: 1, image: "https://picsum.photos/seed/tour-hero-1/1728/717", alt: "Ghana landscape" },
@@ -14,13 +30,32 @@ const UP_NEXT = {
   image: "https://picsum.photos/seed/tour-upnext/337/178",
 };
 
-// Figma: 1914:37491 — Frame 6, h-717, full-width hero carousel
-// Title: "Unforgettable Journeys Across Ghana and West Africa" [56px/700] centered w-957
-// Subtitle in Frame 8 (w-867) [16px/500]
-// Up Next card: 337×178px, right-[156px] bottom-[51px]
-// Dots: bottom-[32px] center
+// Figma: 1903:25269 — 1728×717 hero carousel
+// Title:    Raleway Bold 56px/66px #fefefe, max-w-[957px] centered
+// Subtitle: Raleway Medium 16px/26px #fefefe, w-[867px] centered
+// Dots:     top:679px in 717px frame → bottom:22px, gap:12px
+// Up Next:  337×178px, right-[156px] bottom-[51px]
 const TourHero = React.forwardRef(({ className, ...props }, ref) => {
   const [current, setCurrent] = useState(0);
+  const intervalRef = useRef(null);
+
+  const startAutoPlay = () => {
+    clearInterval(intervalRef.current);
+    intervalRef.current = setInterval(() => {
+      setCurrent((prev) => (prev + 1) % SLIDES.length);
+    }, 5000);
+  };
+
+  useEffect(() => {
+    startAutoPlay();
+    return () => clearInterval(intervalRef.current);
+  }, []);
+
+  const goTo = (index) => {
+    clearInterval(intervalRef.current);
+    setCurrent(index);
+    startAutoPlay();
+  };
 
   return (
     <section
@@ -38,25 +73,49 @@ const TourHero = React.forwardRef(({ className, ...props }, ref) => {
           )}
         >
           <img src={slide.image} alt={slide.alt} className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-black/60 z-[15]" />
+          {/* Figma overlay: rgba(0,0,0,0.3) linear + purple radial gradient */}
+          <div className="absolute inset-0 z-[15]" style={OVERLAY_STYLE} />
         </div>
       ))}
 
       {/* Centered content */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center gap-xl z-30">
-        <div className="flex flex-col items-center gap-md">
-          <h1 className="font-raleway font-bold text-[56px] leading-[66px] text-primary-light-default text-center w-[957px]">
+      <div className="absolute inset-0 flex flex-col items-center justify-center gap-[32px] z-30">
+        <div className="flex flex-col items-center gap-[16px]">
+          {/* Title — Raleway Bold 56px/66px #fefefe (node 1903:25276) */}
+          <h1
+            className="text-center"
+            style={{
+              fontFamily: "Raleway, sans-serif",
+              fontSize:   "56px",
+              fontWeight: 700,
+              lineHeight: "66px",
+              color:      "#fefefe",
+              width:      "957px",
+            }}
+          >
             Unforgettable Journeys Across Ghana and West Africa
           </h1>
-          <div className="w-[867px]">
-            <p className="font-raleway font-medium text-[16px] leading-[26px] text-primary-light-default text-center px-[8.5px]">
+
+          {/* Subtitle — Raleway Medium 16px/26px #fefefe (node 1903:25278) */}
+          <div style={{ width: "867px" }}>
+            <p
+              className="text-center"
+              style={{
+                fontFamily: "Raleway, sans-serif",
+                fontSize:   "16px",
+                fontWeight: 500,
+                lineHeight: "26px",
+                color:      "#fefefe",
+                padding:    "0 8.5px",
+              }}
+            >
               Discover the beauty, culture, and adventure of Ghana and West Africa. From historic landmarks to serene beaches and vibrant local life, every Elysium Tour is designed to give you authentic experiences and lasting memories.
             </p>
           </div>
         </div>
       </div>
 
-      {/* "Up Next" floating card */}
+      {/* "Up Next" floating card — 337×178px, right-[156px] bottom-[51px] */}
       <div
         className="absolute right-[156px] bottom-[51px] w-[337px] h-[178px] rounded-[2px] overflow-hidden z-30"
         style={{ boxShadow: "4px 4px 4px 0px rgba(255,255,255,0.05)" }}
@@ -65,12 +124,18 @@ const TourHero = React.forwardRef(({ className, ...props }, ref) => {
         <div className="absolute inset-0 bg-black/40 rounded-[2px]" />
         <div className="absolute inset-0 pointer-events-none rounded-[inherit]" style={{ boxShadow: "inset 0px 4px 20px 0px rgba(0,0,0,0.25)" }} />
         <div className="absolute top-[11px] left-[11px]">
-          <span className="font-raleway font-bold text-[13px] leading-[18px] text-primary-light-default">Up Next</span>
+          <span style={{ fontFamily: "Raleway, sans-serif", fontSize: "13px", fontWeight: 700, lineHeight: "18px", color: "#fefefe" }}>
+            Up Next
+          </span>
         </div>
         <div className="absolute bottom-[12px] left-[11px] right-[11px] flex items-end justify-between gap-[30px]">
-          <div className="flex flex-col gap-[10px] w-[250px] text-primary-light-default">
-            <span className="font-raleway font-bold text-[13px] leading-[18px] underline decoration-[12%]">{UP_NEXT.category}</span>
-            <span className="font-raleway font-semibold text-[16px] leading-[22px]">{UP_NEXT.title}</span>
+          <div className="flex flex-col gap-[10px] w-[250px]" style={{ color: "#fefefe" }}>
+            <span style={{ fontFamily: "Raleway, sans-serif", fontSize: "13px", fontWeight: 700, lineHeight: "18px", textDecoration: "underline", textDecorationThickness: "12%" }}>
+              {UP_NEXT.category}
+            </span>
+            <span style={{ fontFamily: "Raleway, sans-serif", fontSize: "16px", fontWeight: 600, lineHeight: "22px" }}>
+              {UP_NEXT.title}
+            </span>
           </div>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="shrink-0">
             <path d="M9 6L15 12L9 18" stroke="#fefefe" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -78,21 +143,26 @@ const TourHero = React.forwardRef(({ className, ...props }, ref) => {
         </div>
       </div>
 
-      {/* Carousel dots */}
-      <div className="absolute bottom-[32px] left-1/2 -translate-x-1/2 flex items-center gap-[12px] z-40">
+      {/* Dot navigation — top:679px in 717px frame → bottom:22px (node 1903:25270), gap:12px */}
+      <div
+        className="absolute left-1/2 -translate-x-1/2 flex items-center gap-[12px] z-40"
+        style={{ bottom: "22px" }}
+      >
         {SLIDES.map((_, i) => (
           <button
             key={i}
             type="button"
-            onClick={() => setCurrent(i)}
-            className={classNames(
-              "w-4 h-4 rounded-full border border-solid transition-all duration-300 ease-in",
-              i === current
-                ? "bg-secondary-normal-default border-secondary-normal-default"
-                : "bg-transparent border-primary-dark-default hover:border-secondary-normal-hover"
-            )}
+            onClick={() => goTo(i)}
+            className="shrink-0 transition-opacity duration-300 ease-in"
             aria-label={i === current ? "Current slide" : `Go to slide ${i + 1}`}
-          />
+          >
+            <img
+              src={i === current ? slideDotActive : slideDotInactive}
+              alt=""
+              width={16}
+              height={16}
+            />
+          </button>
         ))}
       </div>
     </section>

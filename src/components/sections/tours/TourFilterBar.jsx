@@ -1,42 +1,31 @@
 import React, { useState, useRef, useEffect } from "react";
 import { classNames } from "../../../utils/classNames";
 
-// ── Chevron Down icon ──────────────────────────────────────────────────────────
+// ── Figma SVG assets ──────────────────────────────────────────────────────────
+import charmTick    from "../../../assets/ElysiumAssets/charm-tick.svg";
+import closeCircle  from "../../../assets/ElysiumAssets/close-circle.svg";
+
+// ── Chevron Down icon — Figma "Hicon / Linear / Down 2" ──────────────────────
 const ChevronDown = ({ stroke = "#949494" }) => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
     <path d="M7 10l5 4 5-4" stroke={stroke} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
-// ── Close Circle icon ──────────────────────────────────────────────────────────
-const CloseCircle = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-    <circle cx="12" cy="12" r="10" stroke="#949494" strokeWidth="1.5" />
-    <path d="M9 9l6 6M15 9l-6 6" stroke="#949494" strokeWidth="1.5" strokeLinecap="round" />
-  </svg>
-);
-
-// ── Tick icon for active sort option ──────────────────────────────────────────
-const TickIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="shrink-0">
-    <path d="M4 10.5L8 14.5L16 6.5" stroke="#fefefe" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-
 // ── Sort / Price trigger pill ──────────────────────────────────────────────────
-// Figma 1914:37517 — border #949494, rounded-[20px], shadow, p-[10px], gap-[8px]
-// Text: Raleway SemiBold 13px #949494
-const SortTrigger = React.forwardRef(({ label, isOpen, onClick, className = "", ...props }, ref) => (
+// Figma 1914:37476 — border #949494, rounded-[20px], shadow, p-[10px], gap-[8px]
+// Text: Raleway SemiBold 13px/18lh #949494
+const SortTrigger = React.forwardRef(({ label, isOpen, onClick, style = {}, ...props }, ref) => (
   <button
     ref={ref}
     type="button"
     onClick={onClick}
     className={classNames(
       "flex items-center gap-[8px] p-[10px] rounded-[20px] border border-solid transition-all duration-200",
-      "shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)]",
-      isOpen ? "border-[#d6beeb]" : "border-[#949494]",
-      className
+      "shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)] w-full",
+      isOpen ? "border-[#d6beeb]" : "border-[#949494]"
     )}
+    style={style}
     {...props}
   >
     <span style={{
@@ -46,6 +35,7 @@ const SortTrigger = React.forwardRef(({ label, isOpen, onClick, className = "", 
       lineHeight: "18px",
       color: "#949494",
       whiteSpace: "nowrap",
+      flex: 1,
     }}>
       {label}
     </span>
@@ -54,16 +44,16 @@ const SortTrigger = React.forwardRef(({ label, isOpen, onClick, className = "", 
 ));
 SortTrigger.displayName = "SortTrigger";
 
-// ── Sort dropdown panel ────────────────────────────────────────────────────────
-// Figma 1914:39150 — white bg, border #e9eaeb, rounded-[20px], px-[18px] py-[20px]
-// "None selected" label (14px medium #bebebe) + thin #d6beeb divider
-// Options: Raleway SemiBold 16px #2d2d2d, h-[42px] w-[238px] px-[12px] py-[10px]
-// Active: bg #7b2cbf rounded-[8px], white text, tick icon
+// ── Sort dropdown panel — Figma 1914:39150 ────────────────────────────────────
+// White bg, border #e9eaeb, rounded-[20px], px-[18px] py-[20px], gap-[13px]
+// Shadow: 0px 0px 4px 0px rgba(255,56,60,0.2) (Figma "error" effect)
+// Options: Raleway SemiBold 16px/22lh #2d2d2d, h-[42px] w-[238px] px-[12px] py-[10px]
+// Active: bg #7b2cbf rounded-[8px], gap-[8px], charm-tick.svg + #fefefe text
 const SORT_OPTIONS = [
-  { value: "recommended", label: "Recommended" },
-  { value: "nearest", label: "Nearest First" },
-  { value: "rated", label: "Highest Rated" },
-  { value: "newest", label: "Newest" },
+  { value: "recommended", label: "Recommended"  },
+  { value: "nearest",     label: "Nearest First" },
+  { value: "rated",       label: "Highest Rated" },
+  { value: "newest",      label: "Newest"        },
 ];
 
 const SortDropdownPanel = ({ options, value, onSelect, onClose }) => (
@@ -74,11 +64,11 @@ const SortDropdownPanel = ({ options, value, onSelect, onClose }) => (
       borderColor: "#e9eaeb",
       padding: "20px 18px",
       gap: "13px",
-      boxShadow: "0px 4px 20px 0px rgba(0,0,0,0.10)",
+      boxShadow: "0px 0px 4px 0px rgba(255,56,60,0.2)",
       width: "274px",
     }}
   >
-    {/* "None selected" + separator */}
+    {/* "None selected" + divider */}
     <div className="flex flex-col" style={{ gap: "3px" }}>
       <div className="px-[12px] py-[4px]">
         <span style={{
@@ -92,6 +82,7 @@ const SortDropdownPanel = ({ options, value, onSelect, onClose }) => (
           None selected
         </span>
       </div>
+      {/* Figma node 1914:39157 — bg #d6beeb, h-[2px], opacity 18% */}
       <div className="w-full h-[2px] rounded-[20px]" style={{ backgroundColor: "#d6beeb", opacity: 0.18 }} />
     </div>
 
@@ -103,15 +94,19 @@ const SortDropdownPanel = ({ options, value, onSelect, onClose }) => (
           key={opt.value}
           type="button"
           onClick={() => { onSelect(opt.value); onClose(); }}
-          className="flex items-center gap-[8px] transition-all duration-200 rounded-[8px]"
+          className="flex items-center transition-all duration-200 rounded-[8px]"
           style={{
             height: "42px",
             width: "238px",
             padding: "10px 12px",
+            gap: isSelected ? "8px" : undefined,
             backgroundColor: isSelected ? "#7b2cbf" : "transparent",
           }}
         >
-          {isSelected && <TickIcon />}
+          {/* charm:tick SVG asset (node 1914:39150) */}
+          {isSelected && (
+            <img src={charmTick} alt="" width={20} height={20} className="shrink-0" />
+          )}
           <span style={{
             fontFamily: "Raleway, sans-serif",
             fontWeight: 600,
@@ -128,22 +123,36 @@ const SortDropdownPanel = ({ options, value, onSelect, onClose }) => (
   </div>
 );
 
-// ── Price Range Panel ──────────────────────────────────────────────────────────
-// Figma 1914:40862 — white bg, border #e9eaeb, rounded-[20px]
+// ── Price Range Panel — Figma 1914:40862 ─────────────────────────────────────
+// White bg, border #e9eaeb, rounded-[20px], pt-[24px] pb-[42px] px-[40px], gap-[29px]
 // Shadow: 0px 1px 2px rgba(0,0,0,0.3), 0px 1px 3px 1px rgba(0,0,0,0.15)
-// Padding: pt-[24px] pb-[42px] px-[40px], gap-[29px] between sections
-// Close X: top-right, no inline header row
-// Title: "Price Range" SemiBold 20px #565656
-// Value: "Gh.{min}.00" SemiBold 16px #565656 at top-left of slider
-// Clear: underline text only, Bold 16px #2d2d2d, no border
-// Save Input: bg #7b2cbf, rounded-[40px], h-56px w-169px, SemiBold 16px #fefefe
-const PriceRangePanel = ({ onClose }) => {
-  const [minVal, setMinVal] = useState(0);
-  const [maxVal, setMaxVal] = useState(2000);
+// Content width: 770px (panel 850px − 2×40px padding)
+// Close: Figma close-circle.svg, top-right of 770px row
+// Title: "Price Range" Raleway SemiBold 20px/28px #565656
+// Value: "Gh.X.00" Raleway SemiBold 16px/22px #565656 (shows min value)
+// Slider track: bg #e9eaeb, filled #7b2cbf, h-[7px], handles: #d6beeb fill + #7b2cbf border
+// Button row: w-[768px], Clear (Raleway Bold 16px #2d2d2d underline), Save Input (bg #7b2cbf)
+const PriceRangePanel = ({ onClose, minVal, maxVal, setMinVal, setMaxVal, onSave, onClear }) => {
   const MAX = 5000;
+  const trackRef = useRef(null);
+  // Which input is on top — swapped dynamically based on cursor proximity to each handle
+  const [topThumb, setTopThumb] = useState("max");
 
   const minPct = (minVal / MAX) * 100;
   const maxPct = (maxVal / MAX) * 100;
+
+  // On every mousemove over the track area, put the closest handle's input on top
+  // so clicks/drags always target the nearest handle, not just the one with fixed z-index
+  const handleTrackMouseMove = (e) => {
+    if (!trackRef.current) return;
+    const rect = trackRef.current.getBoundingClientRect();
+    const pct  = (e.clientX - rect.left) / rect.width;
+    const val  = pct * MAX;
+    setTopThumb(Math.abs(val - minVal) <= Math.abs(val - maxVal) ? "min" : "max");
+  };
+
+  const minZIndex = topThumb === "min" ? 5 : 3;
+  const maxZIndex = topThumb === "max" ? 5 : 3;
 
   return (
     <div
@@ -160,16 +169,16 @@ const PriceRangePanel = ({ onClose }) => {
     >
       {/* Top section */}
       <div className="flex flex-col" style={{ gap: "16px" }}>
-        {/* Close button — top right */}
-        <div className="flex justify-end w-full">
-          <button type="button" onClick={onClose} className="cursor-pointer">
-            <CloseCircle />
+
+        {/* Close button — right-aligned within 770px content row */}
+        <div className="flex justify-end" style={{ width: "770px" }}>
+          <button type="button" onClick={onClose} className="cursor-pointer shrink-0">
+            <img src={closeCircle} alt="Close" width={24} height={24} />
           </button>
         </div>
 
-        {/* Title + slider area */}
+        {/* Title + slider */}
         <div className="flex flex-col" style={{ gap: "16px" }}>
-          {/* Title */}
           <span style={{
             fontFamily: "Raleway, sans-serif",
             fontWeight: 600,
@@ -180,9 +189,9 @@ const PriceRangePanel = ({ onClose }) => {
             Price Range
           </span>
 
-          {/* Value label + slider */}
-          <div className="relative" style={{ width: "770px" }}>
-            {/* Min value label */}
+          {/* Slider area — 770px wide */}
+          <div style={{ width: "770px" }}>
+            {/* Value label — shows full range so dragging either handle gives feedback */}
             <span style={{
               fontFamily: "Raleway, sans-serif",
               fontWeight: 600,
@@ -190,76 +199,94 @@ const PriceRangePanel = ({ onClose }) => {
               lineHeight: "22px",
               color: "#565656",
               display: "block",
-              marginBottom: "8px",
+              marginBottom: "12px",
             }}>
-              Gh.{minVal.toLocaleString()}.00
+              Gh.{minVal.toLocaleString()}.00 – Gh.{maxVal.toLocaleString()}.00
             </span>
 
-            {/* Slider track */}
-            <div className="relative h-[7px] rounded-full w-full" style={{ backgroundColor: "#e9eaeb" }}>
-              {/* Filled range */}
+            {/* Track container — onMouseMove swaps z-index so nearest handle is always on top */}
+            <div ref={trackRef} className="relative" style={{ height: "28px" }} onMouseMove={handleTrackMouseMove}>
+              {/* Gray background track */}
               <div
-                className="absolute h-[7px] rounded-full"
-                style={{ left: `${minPct}%`, width: `${maxPct - minPct}%`, backgroundColor: "#7b2cbf" }}
+                className="absolute rounded-full pointer-events-none"
+                style={{
+                  top: "50%", transform: "translateY(-50%)",
+                  left: 0, right: 0, height: "7px",
+                  backgroundColor: "#e9eaeb",
+                }}
+              />
+              {/* Purple filled range */}
+              <div
+                className="absolute rounded-full pointer-events-none"
+                style={{
+                  top: "50%", transform: "translateY(-50%)",
+                  left: `${minPct}%`,
+                  width: `${maxPct - minPct}%`,
+                  height: "7px",
+                  backgroundColor: "#7b2cbf",
+                }}
+              />
+
+              {/* Min range input — transparent, full width, interactive */}
+              <input
+                type="range"
+                min={0}
+                max={MAX}
+                value={minVal}
+                onChange={(e) => setMinVal(Math.min(Number(e.target.value), maxVal - 100))}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                style={{ zIndex: minZIndex }}
+              />
+              {/* Max range input — transparent, full width, interactive */}
+              <input
+                type="range"
+                min={0}
+                max={MAX}
+                value={maxVal}
+                onChange={(e) => setMaxVal(Math.max(Number(e.target.value), minVal + 100))}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                style={{ zIndex: maxZIndex }}
+              />
+
+              {/* Min visual handle — #d6beeb fill + #7b2cbf border (Figma) */}
+              <div
+                className="absolute rounded-full pointer-events-none"
+                style={{
+                  top: "50%",
+                  left: `${minPct}%`,
+                  transform: "translate(-50%, -50%)",
+                  width: "20px",
+                  height: "20px",
+                  backgroundColor: "#d6beeb",
+                  border: "2px solid #7b2cbf",
+                  boxShadow: "0px 2px 6px rgba(0,0,0,0.15)",
+                }}
+              />
+              {/* Max visual handle */}
+              <div
+                className="absolute rounded-full pointer-events-none"
+                style={{
+                  top: "50%",
+                  left: `${maxPct}%`,
+                  transform: "translate(-50%, -50%)",
+                  width: "20px",
+                  height: "20px",
+                  backgroundColor: "#d6beeb",
+                  border: "2px solid #7b2cbf",
+                  boxShadow: "0px 2px 6px rgba(0,0,0,0.15)",
+                }}
               />
             </div>
-
-            {/* Min range input (invisible, interactive) */}
-            <input
-              type="range"
-              min={0}
-              max={MAX}
-              value={minVal}
-              onChange={(e) => setMinVal(Math.min(Number(e.target.value), maxVal - 100))}
-              className="absolute w-full opacity-0 cursor-pointer"
-              style={{ bottom: 0, height: "28px", pointerEvents: "auto" }}
-            />
-            {/* Max range input (invisible, interactive) */}
-            <input
-              type="range"
-              min={0}
-              max={MAX}
-              value={maxVal}
-              onChange={(e) => setMaxVal(Math.max(Number(e.target.value), minVal + 100))}
-              className="absolute w-full opacity-0 cursor-pointer"
-              style={{ bottom: 0, height: "28px", pointerEvents: "auto" }}
-            />
-
-            {/* Min handle */}
-            <div
-              className="absolute -translate-x-1/2 rounded-full bg-white cursor-pointer"
-              style={{
-                left: `${minPct}%`,
-                bottom: "-10px",
-                width: "27px",
-                height: "27px",
-                border: "2px solid #7b2cbf",
-                boxShadow: "0px 2px 6px rgba(0,0,0,0.15)",
-              }}
-            />
-            {/* Max handle */}
-            <div
-              className="absolute -translate-x-1/2 rounded-full bg-white cursor-pointer"
-              style={{
-                left: `${maxPct}%`,
-                bottom: "-10px",
-                width: "27px",
-                height: "27px",
-                border: "2px solid #7b2cbf",
-                boxShadow: "0px 2px 6px rgba(0,0,0,0.15)",
-              }}
-            />
           </div>
         </div>
       </div>
 
-      {/* Button row */}
-      <div className="flex items-center justify-between" style={{ width: "770px" }}>
-        {/* Clear — underlined text, no border */}
+      {/* Button row — Figma w-[768px] */}
+      <div className="flex items-center justify-between" style={{ width: "768px" }}>
+        {/* Clear — Raleway Bold 16px #2d2d2d, underline, no border */}
         <button
           type="button"
-          onClick={onClose}
-          className="flex items-center justify-center transition-all duration-200"
+          onClick={() => { setMinVal(0); setMaxVal(2000); onClear(); }}
           style={{
             width: "74px",
             height: "56px",
@@ -274,14 +301,16 @@ const PriceRangePanel = ({ onClose }) => {
             boxShadow: "0px 4px 4px 0px rgba(0,0,0,0.05)",
             borderRadius: "40px",
             padding: "10px",
+            cursor: "pointer",
           }}
         >
           Clear
         </button>
-        {/* Save Input */}
+
+        {/* Save Input — bg #7b2cbf, rounded-[40px], Raleway SemiBold 16px #fefefe */}
         <button
           type="button"
-          onClick={onClose}
+          onClick={() => { onSave(minVal, maxVal); onClose(); }}
           className="flex items-center justify-center rounded-[40px] transition-all duration-200 hover:opacity-90"
           style={{
             width: "169px",
@@ -303,8 +332,9 @@ const PriceRangePanel = ({ onClose }) => {
 };
 
 // ── Filter pill (DURATION / TYPE) ──────────────────────────────────────────────
-// Active:   bg #622399, no border, SemiBold 13px #fefefe, lineHeight 18px
-// Inactive: border #b9b9b9, Medium 13px #949494, lineHeight 22px
+// Figma 1914:36966 / 1914:37063
+// Inactive: border #b9b9b9, Raleway Medium 13px/22lh #949494, rounded-[20px], px-[20px] py-[10px]
+// Active:   bg #622399, no border, Raleway SemiBold 13px/18lh #fefefe
 const FilterPill = ({ children, isActive, onSelect, value }) => (
   <button
     type="button"
@@ -330,8 +360,7 @@ const FilterPill = ({ children, isActive, onSelect, value }) => (
   </button>
 );
 
-// ── Section label ──────────────────────────────────────────────────────────────
-// Figma: Raleway Bold 13px #2b0f43, p-[10px]
+// ── Section label — Figma: Raleway Bold 13px/18lh #2b0f43, p-[10px] ──────────
 const FilterLabel = ({ children }) => (
   <div className="flex items-center justify-center p-[10px] shrink-0">
     <span style={{
@@ -347,35 +376,36 @@ const FilterLabel = ({ children }) => (
   </div>
 );
 
-// ── Divider ────────────────────────────────────────────────────────────────────
-// Figma: w=2, h=42, bg #d6beeb, rounded-[10px]
+// ── Divider — Figma 1914:37475 — bg #d6beeb, rounded-[10px], 2×42px ──────────
 const FilterDivider = () => (
   <div className="w-[2px] h-[42px] bg-[#d6beeb] rounded-[10px] shrink-0" />
 );
 
-// ── Options ────────────────────────────────────────────────────────────────────
+// ── Options — labels match Figma exactly ──────────────────────────────────────
 const DURATION_OPTIONS = [
-  { value: "all-day", label: "All Day" },
+  { value: "all-day",   label: "All Day"   },
   { value: "day-tours", label: "Day Tours" },
-  { value: "multi-day", label: "Muti-Day" },
+  { value: "multi-day", label: "Muti-Day"  },
 ];
 
 const TYPE_OPTIONS = [
-  { value: "all", label: "All" },
-  { value: "leisure", label: "Leisure" },
+  { value: "all",      label: "All"      },
+  { value: "leisure",  label: "Lesiure"  },
   { value: "business", label: "Business" },
-  { value: "bleisure", label: "Ekolure" },
+  { value: "ekolure",  label: "Ekolure"  },
 ];
 
 // ── TourFilterBar ──────────────────────────────────────────────────────────────
-// Figma 1914:37511 — h=147px container, border-t border-b #f2eaf9 (0.5px), bg white
-// Inner content: h=80px, vertically centered at y=40
-// Row: SORT | divider | PRICE | divider | DURATION pills | divider | TYPE pills | "N results"
+// h=147px, borderTop/Bottom 0.5px #f2eaf9, bg white, px-[156px]
 const TourFilterBar = React.forwardRef(({ resultsCount = 48, className, ...props }, ref) => {
-  const [sortValue, setSortValue] = useState(null);
-  const [duration, setDuration] = useState("all-day");
-  const [type, setType] = useState("all");
-  const [openPanel, setOpenPanel] = useState(null); // "sort" | "price" | null
+  const [sortValue, setSortValue]   = useState(null);
+  const [duration, setDuration]     = useState("all-day");
+  const [type, setType]             = useState("all");
+  const [openPanel, setOpenPanel]   = useState(null); // "sort" | "price" | null
+  // Price range — state lives here so the trigger label can reflect the saved values
+  const [priceMin, setPriceMin]     = useState(0);
+  const [priceMax, setPriceMax]     = useState(2000);
+  const [savedPrice, setSavedPrice] = useState(null); // { min, max } once saved
 
   const barRef = useRef(null);
 
@@ -388,8 +418,10 @@ const TourFilterBar = React.forwardRef(({ resultsCount = 48, className, ...props
   }, []);
 
   const togglePanel = (name) => setOpenPanel(prev => prev === name ? null : name);
-
-  const sortLabel = SORT_OPTIONS.find(o => o.value === sortValue)?.label || "Non-Selected";
+  const sortLabel  = SORT_OPTIONS.find(o => o.value === sortValue)?.label ?? "Non-Selected";
+  const priceLabel = savedPrice
+    ? `Gh.${savedPrice.min.toLocaleString()} – Gh.${savedPrice.max.toLocaleString()}`
+    : "Select Price";
 
   return (
     <div
@@ -402,19 +434,17 @@ const TourFilterBar = React.forwardRef(({ resultsCount = 48, className, ...props
       }}
       {...props}
     >
-      {/* Inner row — h=80, centered vertically */}
       <div className="h-full flex items-center px-[156px]">
         <div ref={barRef} className="flex items-center gap-[12px] flex-1">
 
-          {/* SORT */}
+          {/* SORT — Figma 1914:37476 */}
           <div className="flex items-center gap-[12px] shrink-0">
             <FilterLabel>SORT</FilterLabel>
-            <div className="relative">
+            <div className="relative" style={{ minWidth: "134px", height: "44px" }}>
               <SortTrigger
                 label={sortLabel}
                 isOpen={openPanel === "sort"}
                 onClick={() => togglePanel("sort")}
-                style={{ minWidth: "139px" }}
               />
               {openPanel === "sort" && (
                 <SortDropdownPanel
@@ -429,61 +459,54 @@ const TourFilterBar = React.forwardRef(({ resultsCount = 48, className, ...props
 
           <FilterDivider />
 
-          {/* PRICE */}
+          {/* PRICE — Figma 1914:37455 */}
           <div className="flex items-center gap-[12px] shrink-0">
             <FilterLabel>PRICE</FilterLabel>
-            <div className="relative">
+            <div className="relative" style={{ minWidth: "126px", height: "44px" }}>
               <SortTrigger
-                label="Select Price"
+                label={priceLabel}
                 isOpen={openPanel === "price"}
                 onClick={() => togglePanel("price")}
-                style={{ minWidth: "126px" }}
               />
               {openPanel === "price" && (
-                <PriceRangePanel onClose={() => setOpenPanel(null)} />
+                <PriceRangePanel
+                  minVal={priceMin}
+                  maxVal={priceMax}
+                  setMinVal={setPriceMin}
+                  setMaxVal={setPriceMax}
+                  onSave={(min, max) => setSavedPrice({ min, max })}
+                  onClear={() => setSavedPrice(null)}
+                  onClose={() => setOpenPanel(null)}
+                />
               )}
             </div>
           </div>
 
           <FilterDivider />
 
-          {/* DURATION */}
+          {/* DURATION — Figma 1914:36966 */}
           <div className="flex items-center gap-[12px] shrink-0">
             <FilterLabel>DURATION</FilterLabel>
-            <div className="flex items-center gap-[8px]">
-              {DURATION_OPTIONS.map((opt) => (
-                <FilterPill
-                  key={opt.value}
-                  value={opt.value}
-                  isActive={duration === opt.value}
-                  onSelect={setDuration}
-                >
-                  {opt.label}
-                </FilterPill>
-              ))}
-            </div>
+            {DURATION_OPTIONS.map((opt) => (
+              <FilterPill key={opt.value} value={opt.value} isActive={duration === opt.value} onSelect={setDuration}>
+                {opt.label}
+              </FilterPill>
+            ))}
           </div>
 
           <FilterDivider />
 
-          {/* TYPE */}
+          {/* TYPE — Figma 1914:37063 */}
           <div className="flex items-center gap-[12px] shrink-0">
             <FilterLabel>TYPE</FilterLabel>
-            <div className="flex items-center gap-[8px]">
-              {TYPE_OPTIONS.map((opt) => (
-                <FilterPill
-                  key={opt.value}
-                  value={opt.value}
-                  isActive={type === opt.value}
-                  onSelect={setType}
-                >
-                  {opt.label}
-                </FilterPill>
-              ))}
-            </div>
+            {TYPE_OPTIONS.map((opt) => (
+              <FilterPill key={opt.value} value={opt.value} isActive={type === opt.value} onSelect={setType}>
+                {opt.label}
+              </FilterPill>
+            ))}
           </div>
 
-          {/* Results count — right-aligned */}
+          {/* Results count */}
           <div className="ml-auto shrink-0 flex items-center justify-center p-[10px]">
             <span style={{
               fontFamily: "Raleway, sans-serif",
