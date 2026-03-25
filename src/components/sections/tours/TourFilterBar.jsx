@@ -418,7 +418,7 @@ const TourFilterBar = React.forwardRef(({ resultsCount = 48, className, ...props
   }, []);
 
   const togglePanel = (name) => setOpenPanel(prev => prev === name ? null : name);
-  const sortLabel  = SORT_OPTIONS.find(o => o.value === sortValue)?.label ?? "Non-Selected";
+  const sortLabel  = SORT_OPTIONS.find(o => o.value === sortValue)?.label ?? "None-Selected";
   const priceLabel = savedPrice
     ? `Gh.${savedPrice.min.toLocaleString()} – Gh.${savedPrice.max.toLocaleString()}`
     : "Select Price";
