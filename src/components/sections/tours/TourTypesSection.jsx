@@ -1,84 +1,127 @@
 import React from "react";
 import { classNames } from "../../../utils/classNames";
 import PartnerHighlightCard from "../../cards/PartnerHighlightCard";
-import Button from "../../ui/button";
 
-// Figma: 1914:37642 — Frame 8, h=1058
-// Header: "TYPES OF TOURS" left / "Tours: Designed for Every Traveller" right + desc
-// 3 PartnerHighlightCards (451×656px) at x=156, y=322, gap 32px
+// Downloaded from Figma asset server
+import sectionLine    from "../../../assets/ElysiumAssets/section-line.svg";
+import leisureBg      from "../../../assets/ElysiumAssets/leisure-tours-bg.png";
+import businessBg     from "../../../assets/ElysiumAssets/business-tours-bg.png";
+import ekolureBg      from "../../../assets/ElysiumAssets/ekolure-tours-bg.png";
+
+// Figma node 1903-25379 — TourTypesSection
+// Section bg: #f2eaf9 (Violet-Secondary 30%/Light)
+// Header: pt-[80px] px-[156px] — flex justify-between items-start
+// Cards row: flex gap-[32px] — starts at Figma y=322 → margin-top 96px from header bottom
+//   (322px - 80px top - 146px header height = 96px gap)
+
+// Per Figma, each card has different overlay opacity and subtitle colour:
 const TOUR_TYPES = [
   {
     id: 1,
     label: "Leisure Tours",
-    image: "https://picsum.photos/seed/tourtype-leisure/451/656",
+    subtitle: "24 experience available",
+    subtitleColor: "#dedede",           // Figma: I1903:25391;98:234 — #dedede
+    overlayColor: "rgba(0,0,0,0.7)",   // Figma: bg-[rgba(0,0,0,0.7)]
+    image: leisureBg,
   },
   {
     id: 2,
     label: "Business Tours",
-    image: "https://picsum.photos/seed/tourtype-business/451/656",
+    subtitle: "24 curated programmes",
+    subtitleColor: "#f7f7f7",           // Figma: I1903:25392;98:234 — #f7f7f7
+    overlayColor: "rgba(0,0,0,0.7)",   // Figma: bg-[rgba(0,0,0,0.7)]
+    image: businessBg,
   },
   {
     id: 3,
-    label: "Bleisure Tours",
-    image: "https://picsum.photos/seed/tourtype-bleisure/451/656",
+    label: "Ekolure Tours",
+    subtitle: "12 eco & cultural immersion",
+    subtitleColor: "#fefefe",           // Figma: I1903:25393;98:234 — #fefefe (inherited)
+    overlayColor: "rgba(0,0,0,0.5)",   // Figma: bg-[rgba(0,0,0,0.5)] — lighter than other two
+    image: ekolureBg,
   },
 ];
-
-const ArrowIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-    <path d="M2.33325 6.25C1.91904 6.25 1.58325 6.58579 1.58325 7C1.58325 7.41421 1.91904 7.75 2.33325 7.75V7V6.25ZM11.6666 7.75C12.0808 7.75 12.4166 7.41421 12.4166 7C12.4166 6.58579 12.0808 6.25 11.6666 6.25V7V7.75ZM9.86121 3.55068C9.56701 3.2591 9.09214 3.26122 8.80056 3.55542C8.50898 3.84961 8.5111 4.32448 8.80529 4.61606L9.33325 4.08337L9.86121 3.55068ZM2.33325 7.75H11.6666V7V6.25H2.33325V7V7.75ZM8.80529 4.61606L9.83369 5.63533L10.8896 4.56995L9.86121 3.55068L8.80529 4.61606ZM9.83369 8.36475L8.80529 9.38402L9.86121 10.4494L10.8896 9.43014L9.83369 8.36475ZM9.83369 5.63533C10.2563 6.05416 10.5274 6.32448 10.7074 6.54863C10.8779 6.76094 10.9041 6.85793 10.911 6.91209L11.655 6.81726L12.399 6.72243C12.3427 6.28124 12.1323 5.92733 11.877 5.60938C11.6311 5.30327 11.2871 4.96395 10.8896 4.56995L9.83369 5.63533ZM10.911 7.08799C10.9041 7.14215 10.8779 7.23914 10.7074 7.45145C10.5274 7.6756 10.2563 7.94592 9.83369 8.36475L10.8896 9.43014C11.2871 9.03613 11.6311 8.69681 11.877 8.3907C12.1323 8.07275 12.3427 7.71885 12.399 7.27765L10.911 7.08799ZM10.911 6.91209C10.9184 6.9705 10.9184 7.02958 10.911 7.08799L12.399 7.27765C12.4225 7.09331 12.4225 6.90677 12.399 6.72243L10.911 6.91209Z" fill="#7B2CBF"/>
-  </svg>
-);
 
 const TourTypesSection = React.forwardRef(({ className, ...props }, ref) => {
   return (
     <section
       ref={ref}
-      className={classNames("w-full bg-secondary-light-default py-[80px]", className)}
+      // Figma background: #f2eaf9 (Violet-Secondary 30%/Light)
+      className={classNames("w-full bg-[#f2eaf9] pt-[80px] pb-[80px]", className)}
       {...props}
     >
       <div className="px-[156px]">
-        {/* Section header */}
-        <div className="flex items-start justify-between w-full mb-[176px]">
-          {/* Left — line + label */}
+
+        {/* ── Section header ──────────────────────────────────────────────── */}
+        {/* Figma: flex justify-between items-start, full width (1416px inner) */}
+        {/* mb-[96px]: gap between header bottom (80+146=226px) and cards top (322px) */}
+        <div className="flex items-start justify-between w-full mb-[96px]">
+
+          {/* Left — horizontal line SVG + "TYPES OF TOURS" label */}
+          {/* Figma node 1903-25381: flex gap-[8px] items-center */}
           <div className="flex items-center gap-[8px] shrink-0">
-            <div className="w-[46px] h-[1px] bg-secondary-dark-darker" />
-            <span className="font-raleway font-bold text-[13px] leading-[18px] text-secondary-dark-darker whitespace-nowrap tracking-[0.05em] uppercase">
-              Types of Tours
+            {/* Figma: w-[46px] h-0 with SVG stretching to fill — renders as thin horizontal line */}
+            {/* SVG has width/height="100%" so intrinsic size is undefined — set explicit px dims */}
+            <img
+              src={sectionLine}
+              alt=""
+              aria-hidden="true"
+              style={{ width: "46px", height: "2px", display: "block" }}
+            />
+            {/* Figma: Raleway Bold 13px/18px #2b0f43, p-[10px] wrapper */}
+            <span className="font-raleway font-bold text-[13px] leading-[18px] text-[#2b0f43] whitespace-nowrap p-[10px]">
+              TYPES OF TOURS
             </span>
           </div>
 
-          {/* Right — title + desc + button, w=597 */}
-          <div className="flex flex-col gap-md items-end w-[597px]">
-            <h2 className="font-raleway font-bold text-[25px] leading-[34px] text-tertiary-normal-default text-right">
-              Tours: Designed for Every Traveller
-            </h2>
-            <p className="font-raleway font-normal text-[16px] leading-[24px] text-tertiary-normal-default text-right w-[565px]">
-              Elysium Tours offers experiences tailored to every journey. Whether you're unwinding with our Leisure Tours, handling official travel through our Business Tours, or blending both worlds with our Bleisure Tours, we ensure comfort, authenticity, and unforgettable moments every step of the way.
-            </p>
-            <Button
-              variant="secondaryOutline"
-              shape="pill"
-              size="small"
-              className="h-[32px] gap-[9px] rounded-xl border-[0.8px]"
-              endIcon={<ArrowIcon />}
-            >
-              Explore More
-            </Button>
+          {/* Right — title + description, w-[597px], items-end */}
+          {/* Figma node 1903-25385: flex-col gap-[16px] items-end w-[597px] */}
+          <div className="flex flex-col gap-[16px] items-end w-[597px]">
+
+            {/* Title row — h-[37px], Raleway Bold 25px/34px #2d2d2d, text-right */}
+            {/* Figma node 1903-25386: h-[37px] pl-[10px] py-[10px] flex items-center justify-end */}
+            <div className="flex items-center justify-end h-[37px] w-full pl-[10px] py-[10px]">
+              <h2 className="font-raleway font-bold text-[25px] leading-[34px] text-[#2d2d2d] text-right whitespace-nowrap">
+                Tours: Designed for Every Traveller
+              </h2>
+            </div>
+
+            {/* Description — h-[93px], Raleway Regular 16px/24px #2d2d2d, w-[565px], text-right */}
+            {/* Figma node 1903-25388: h-[93px] pl-[10px] pr-px py-[10px] flex items-center justify-end */}
+            <div className="flex items-center justify-end h-[93px] w-full pl-[10px] pr-px py-[10px]">
+              <p className="font-raleway font-normal text-[16px] leading-[24px] text-[#2d2d2d] text-right w-[565px]">
+                Elysium Tours offers experiences tailored to every journey. Whether
+                you&apos;re unwinding with our Leisure Tours, handling official travel
+                through our Business Tours, or blending both worlds with our Bleisure
+                Tours, we ensure comfort, authenticity, and unforgettable moments every
+                step of the way.
+              </p>
+            </div>
+
+            {/* NOTE: No "Explore More" button — not present in Figma node 1903-25379 */}
           </div>
         </div>
 
-        {/* 3 PartnerHighlightCards — 451×656, gap 32px */}
-        <div className="flex items-start gap-[32px]">
+        {/* ── Cards row ───────────────────────────────────────────────────── */}
+        {/* Figma node 1903-25390: flex gap-[32px] items-center */}
+        {/* Cards: 451×656px, rounded-[40px], shadow, overflow-clip */}
+        <div className="flex items-center gap-[32px]">
           {TOUR_TYPES.map((t) => (
             <PartnerHighlightCard
               key={t.id}
               image={t.image}
               category={t.label}
-              className="!w-[451px] !h-[656px]"
+              subtitle={t.subtitle}
+              subtitleColor={t.subtitleColor}
+              overlayColor={t.overlayColor}
+              // Figma: label text at left-[23px] top-[595px] inside 656px card
+              // = 61px from card bottom. Two-line text (28px + 26px) fits within clip bounds.
+              labelClassName="absolute left-[23px] top-[595px]"
+              className="w-[451px] h-[656px] shrink-0"
             />
           ))}
         </div>
+
       </div>
     </section>
   );

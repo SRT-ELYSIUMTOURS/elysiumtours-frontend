@@ -3,6 +3,19 @@ import { Link, useLocation } from "react-router-dom";
 import { classNames } from "../../utils/classNames";
 import Button from "../ui/button";
 
+// ── Figma icon assets (node 1073:10307) — downloaded from Figma MCP ──────────
+import iconBackpack    from "../../assets/ElysiumAssets/menu-icons/backpack.svg";
+import iconHome2       from "../../assets/ElysiumAssets/menu-icons/home2.svg";
+import iconCar         from "../../assets/ElysiumAssets/menu-icons/car.svg";
+import iconMentoring   from "../../assets/ElysiumAssets/menu-icons/mentoring.svg";
+import iconServingFood from "../../assets/ElysiumAssets/menu-icons/serving-food.svg";
+import iconAlbum       from "../../assets/ElysiumAssets/menu-icons/album.svg";
+import iconMoneyJar    from "../../assets/ElysiumAssets/menu-icons/money-jar.svg";
+
+// ── Right-panel card assets (node 1073:10379–10381) ──────────────────────────
+import menuCardBg    from "../../assets/ElysiumAssets/menu-card-bg.png";
+import menuCardPhoto from "../../assets/ElysiumAssets/menu-card-photo.png";
+
 // ── Logo SVG — matches Figma cursive Elysium script ──────────────────────────
 const ElysiumLogo = () => (
   <img src="./src/assets/ElysiumAssets/Logo.png" width={80} height={80} alt="" />
@@ -20,53 +33,19 @@ const ChevronUp = ({ stroke = "#622399" }) => (
   </svg>
 );
 
-// ── Partner category icons (matching Figma vector paths) ─────────────────────
-const IconTourSites = ({ color = "#7b2cbf" }) => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M9 22V12h6v10" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-const IconAccommodation = ({ color = "#7b2cbf" }) => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    <rect x="9" y="12" width="6" height="5" rx="1" stroke={color} strokeWidth="1.5"/>
-  </svg>
-);
-const IconTransportation = ({ color = "#7b2cbf" }) => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-    <rect x="2" y="8" width="20" height="10" rx="2" stroke={color} strokeWidth="1.5"/>
-    <path d="M6 18v2M18 18v2" stroke={color} strokeWidth="1.5" strokeLinecap="round"/>
-    <path d="M2 12h20" stroke={color} strokeWidth="1.5"/>
-    <circle cx="7" cy="18" r="1.5" fill={color}/>
-    <circle cx="17" cy="18" r="1.5" fill={color}/>
-    <path d="M6 8V6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2" stroke={color} strokeWidth="1.5"/>
-  </svg>
-);
-const IconTourGuides = ({ color = "#7b2cbf" }) => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-    <circle cx="12" cy="7" r="4" stroke={color} strokeWidth="1.5"/>
-    <path d="M4 21v-1a8 8 0 0 1 16 0v1" stroke={color} strokeWidth="1.5" strokeLinecap="round"/>
-    <path d="M15 11l2 2-2 2" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-const IconDining = ({ color = "#7b2cbf" }) => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-    <path d="M3 2v7c0 2.21 1.79 4 4 4s4-1.79 4-4V2" stroke={color} strokeWidth="1.5" strokeLinecap="round"/>
-    <path d="M7 2v20M21 2v20M17 2c0 0 4 3 4 9s-4 9-4 9" stroke={color} strokeWidth="1.5" strokeLinecap="round"/>
-  </svg>
-);
-const IconPhotography = ({ color = "#7b2cbf" }) => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    <circle cx="12" cy="13" r="4" stroke={color} strokeWidth="1.5"/>
-  </svg>
-);
-const IconInsurance = ({ color = "#7b2cbf" }) => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M9 12l2 2 4-4" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
+// ── MenuIcon ──────────────────────────────────────────────────────────────────
+// SVG assets use `var(--stroke-0, #7B2CBF)` — the CSS variable falls back to
+// the correct purple when rendered as <img> (external context, no CSS cascade).
+// Active state: filter brightness(0) invert(1) converts any colour to white.
+const MenuIcon = ({ src, isActive }) => (
+  <img
+    src={src}
+    alt=""
+    width={24}
+    height={24}
+    className="shrink-0"
+    style={isActive ? { filter: "brightness(0) invert(1)" } : {}}
+  />
 );
 
 // ── Nav item data ─────────────────────────────────────────────────────────────
@@ -78,14 +57,51 @@ const TOUR_ITEMS = [
   { label: "Heritage",   desc: "Explore Ghana's rich history and heritage sites.", href: "/tours?type=heritage"    },
 ];
 
+// ── Tour Partners dropdown items — Figma node 1073:10307 ─────────────────────
+// icon: downloaded SVG asset path (rendered via CSS mask for full colour control)
 const TOUR_PARTNER_ITEMS = [
-  { label: "Tour Sites & Events",       desc: "Discover iconic landmarks, guided tours, and vibrant local events.",                   href: "/tour-partners/sites-events",  Icon: IconTourSites      },
-  { label: "Accommodation",             desc: "Find comfortable and trusted places to stay, offered by our verified partners.",        href: "/tour-partners/accommodation", Icon: IconAccommodation  },
-  { label: "Transportation",            desc: "Discover iconic landmarks, guided tours, and vibrant local experiences.",               href: "/tour-partners/transportation", Icon: IconTransportation },
-  { label: "Tour Guides",               desc: "Explore with knowledgeable local guides who bring destinations to life.",               href: "/tour-partners/guides",        Icon: IconTourGuides     },
-  { label: "Restaurants & Dining",      desc: "Savour local cuisine at our trusted partner restaurants across Ghana.",                 href: "/tour-partners/dining",        Icon: IconDining         },
-  { label: "Photo & Videographers",     desc: "Capture your memories with our professional photography partners.",                    href: "/tour-partners/photography",   Icon: IconPhotography    },
-  { label: "Insurance & Other Services",desc: "Travel with confidence with our trusted insurance and service partners.",               href: "/tour-partners/insurance",     Icon: IconInsurance      },
+  {
+    label: "Tour Sites & Events",
+    desc:  "Discover iconic landmarks, guided tours, and vibrant local events.",
+    href:  "/tour-partners/sites-events",
+    icon:  iconBackpack,
+  },
+  {
+    label: "Accommodation",
+    desc:  "Find comfortable and trusted places to stay, offered by our verified partners.",
+    href:  "/tour-partners/accommodation",
+    icon:  iconHome2,
+  },
+  {
+    label: "Transportation",
+    desc:  "Discover iconic landmarks, guided tours, and vibrant local events offered.",
+    href:  "/tour-partners/transportation",
+    icon:  iconCar,
+  },
+  {
+    label: "Tour Guides",
+    desc:  "Explore with knowledgeable local guides who bring destinations to life through stories, history, and firsthand experience.",
+    href:  "/tour-partners/guides",
+    icon:  iconMentoring,
+  },
+  {
+    label: "Resturants & Dinning",
+    desc:  "Get up and running on new features and techniques.",
+    href:  "/tour-partners/dining",
+    icon:  iconServingFood,
+  },
+  {
+    label: "Photo & Videographers",
+    desc:  "Get up and running on new features and techniques.",
+    href:  "/tour-partners/photography",
+    icon:  iconAlbum,
+  },
+  {
+    label: "Insurance & Other Services",
+    desc:  "Get up and running on new features and techniques.",
+    href:  "/tour-partners/insurance",
+    icon:  iconMoneyJar,
+  },
 ];
 
 // ── NavLink ───────────────────────────────────────────────────────────────────
@@ -146,32 +162,62 @@ const TourDropdown = ({ items, currentPath, onClose }) => (
 );
 
 // ── Tour Partners dropdown ────────────────────────────────────────────────────
-// From Figma: 748×782, fill:#ffffff stroke:#e9eaeb r:12
-// Left col: menu items with icons (HORIZONTAL gap:16, r:8)
-// Right col: fill:#fafafa paddingLeft:20 — featured card
+// Figma node 1073:10307 — scaled down from 748px to fit viewport height.
+// Proportions and token colours preserved; sizes reduced uniformly.
 const TourPartnersDropdown = ({ items, currentPath, onClose }) => (
-  <div className="absolute top-full left-0 mt-2 z-50 rounded-[12px] border border-[#e9eaeb] shadow-lg flex overflow-hidden"
-    style={{ width: "680px", backgroundColor: "#ffffff" }}>
-
-    {/* Left column — menu items with icons */}
-    <div className="flex-1 p-2 flex flex-col gap-[2px]">
-      {items.map(({ label, desc, href, Icon }) => {
-        const isItemActive = currentPath === href;
+  <div
+    className="absolute top-full left-0 mt-2 z-50 flex overflow-hidden rounded-[12px] border border-[#e9eaeb]"
+    style={{
+      width: "620px",
+      backgroundColor: "#ffffff",
+      boxShadow: "0px 12px 16px -4px rgba(10,13,18,0.08), 0px 4px 6px -2px rgba(10,13,18,0.03)",
+    }}
+  >
+    {/* ── LEFT column ── */}
+    <div className="flex-1 flex flex-col gap-[4px] px-[14px] py-[14px] overflow-hidden">
+      {items.map(({ label, desc, href, icon }) => {
+        const isItemActive = currentPath === href || currentPath.startsWith(href);
         return (
-          <Link key={href} to={href} onClick={onClose}
+          <Link
+            key={href}
+            to={href}
+            onClick={onClose}
             className={classNames(
-              "flex items-start gap-[16px] px-4 py-3 rounded-[8px] transition-all duration-300 ease-in",
-              isItemActive ? "bg-secondary-normal-default" : "hover:bg-secondary-light-default"
-            )}>
-            {/* Icon — 24×24, stroke:#7b2cbf (or white when active) */}
-            <div className="shrink-0 mt-0.5">
-              <Icon color={isItemActive ? "#ffffff" : "#7b2cbf"} />
-            </div>
-            <div className="flex flex-col gap-[4px]">
-              <span style={{ fontSize: "16px", fontWeight: 600, color: isItemActive ? "#eaeaea" : "#2d2d2d", lineHeight: "24px" }}>
+              "flex items-start gap-[12px] p-[8px] rounded-[8px] transition-all duration-300 ease-in",
+              isItemActive ? "bg-[#7b2cbf]" : "hover:bg-secondary-light-default"
+            )}
+          >
+            {/* Icon — 20×20 (reduced from 24), purple inactive / white active */}
+            <img
+              src={icon}
+              alt=""
+              width={20}
+              height={20}
+              className="shrink-0 mt-[2px]"
+              style={isItemActive ? { filter: "brightness(0) invert(1)" } : {}}
+            />
+
+            <div className="flex flex-col gap-[2px] flex-1 min-w-0">
+              <span
+                style={{
+                  fontFamily: "Inter, sans-serif",
+                  fontSize:   "14px",
+                  fontWeight: 600,
+                  lineHeight: "20px",
+                  color:      isItemActive ? "#eaeaea" : "#2d2d2d",
+                }}
+              >
                 {label}
               </span>
-              <span style={{ fontSize: "13px", fontWeight: 400, color: isItemActive ? "#f7f7f7" : "#6f6f6f", lineHeight: "18px" }}>
+              <span
+                style={{
+                  fontFamily: "Raleway, sans-serif",
+                  fontSize:   "12px",
+                  fontWeight: isItemActive ? 500 : 400,
+                  lineHeight: "18px",
+                  color:      isItemActive ? "#f7f7f7" : "#6f6f6f",
+                }}
+              >
                 {desc}
               </span>
             </div>
@@ -180,16 +226,44 @@ const TourPartnersDropdown = ({ items, currentPath, onClose }) => (
       })}
     </div>
 
-    {/* Right column — featured card, fill:#fafafa paddingLeft:20 from Figma */}
-    <div className="shrink-0 flex flex-col gap-4 p-5" style={{ width: "220px", backgroundColor: "#fafafa" }}>
-      <div className="w-full rounded-[10px] overflow-hidden" style={{ height: "150px", backgroundColor: "#f4ebff" }}>
-        <img src="https://picsum.photos/seed/partner-card/220/150" alt="Featured" className="w-full h-full object-cover" />
-      </div>
-      <div className="flex flex-col gap-[4px]">
-        <p style={{ fontSize: "16px", fontWeight: 600, color: "#181d27" }}>Explore Our Partners</p>
-        <p style={{ fontSize: "13px", fontWeight: 400, color: "#535862" }}>
-          Trusted local partners for every part of your journey.
-        </p>
+    {/* ── RIGHT column — featured photo card ── */}
+    <div
+      className="shrink-0 flex flex-col items-start justify-center overflow-hidden self-stretch"
+      style={{
+        width:           "220px",
+        backgroundColor: "#f7f7f7",
+        paddingLeft:     "16px",
+        paddingRight:    "16px",
+        paddingTop:      "16px",
+        paddingBottom:   "16px",
+      }}
+    >
+      {/* Card: bg texture + purple overlay + main photo */}
+      <div
+        className="relative w-full overflow-hidden"
+        style={{ borderRadius: "16px", padding: "8px" }}
+      >
+        <img
+          alt=""
+          src={menuCardBg}
+          className="absolute inset-0 w-full h-full object-cover rounded-[16px]"
+          style={{ opacity: 0.5 }}
+        />
+        <div
+          className="absolute inset-0 rounded-[16px]"
+          style={{ backgroundColor: "rgba(123,44,191,0.5)" }}
+        />
+        {/* Reduced from 278px → 160px */}
+        <div
+          className="relative w-full overflow-hidden"
+          style={{ height: "160px", borderRadius: "8px" }}
+        >
+          <img
+            src={menuCardPhoto}
+            alt="Explore Ghana"
+            className="w-full h-full object-cover"
+          />
+        </div>
       </div>
     </div>
   </div>
