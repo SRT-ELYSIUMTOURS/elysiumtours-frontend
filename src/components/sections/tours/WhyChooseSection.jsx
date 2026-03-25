@@ -92,7 +92,7 @@ const WhyChooseSection = React.forwardRef(({ className, ...props }, ref) => {
             }
             shape="pill"
             size="small"
-            className="h-[32px] gap-[9px] rounded-[40px] border-[0.8px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.05)] px-[10px]"
+            className="h-[32px]  rounded-[40px] border-[0.8px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.05)] px-[10px]"
           >
             Explore More
           </Button>
