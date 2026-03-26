@@ -7,6 +7,7 @@ import TourTypesSection from "../../components/sections/tours/TourTypesSection";
 import TourFeaturedSection from "../../components/sections/tours/TourFeaturedSection";
 import WhyChooseSection from "../../components/sections/tours/WhyChooseSection";
 import BlogCtaSection from "../../components/sections/blog/BlogCtaSection";
+import CtaSection from "../../components/sections/tours/CtaSection";
 
 // Figma: 1914:37486 — Tours landing page
 // Stack: Breadcrumb → Hero → FilterBar → TourByCountries → TourTypes → FeaturedTours → WhyChoose → CTA
@@ -26,6 +27,7 @@ const TourPage = () => {
       <TourFeaturedSection />
       <WhyChooseSection />
       <BlogCtaSection />
+      <CtaSection />
     </main>
   );
 };
