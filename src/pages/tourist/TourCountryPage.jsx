@@ -2,8 +2,9 @@ import React from "react";
 import { useParams } from "react-router-dom";
 import BlogBreadcrumbBar from "../../components/sections/blog/BlogBreadcrumbBar";
 import TourCountryHero from "../../components/sections/tours/TourCountryHero";
-import TourFilterBar from "../../components/sections/tours/TourFilterBar";
+import TourCountryFilterBar from "../../components/sections/tours/TourCountryFilterBar";
 import SignatureExperiencesSection from "../../components/sections/tours/SignatureExperiencesSection";
+import AllToursSection from "../../components/sections/tours/AllToursSection";
 import LocalGuidesSection from "../../components/sections/tours/LocalGuidesSection";
 import CountryStorySection from "../../components/sections/tours/CountryStorySection";
 import BlogCtaSection from "../../components/sections/blog/BlogCtaSection";
@@ -26,8 +27,9 @@ const TourCountryPage = () => {
         ]}
       />
       <TourCountryHero country={country} />
-      <TourFilterBar />
+      <TourCountryFilterBar country={country} />
       <SignatureExperiencesSection country={displayName} />
+      <AllToursSection country={displayName} />
       <LocalGuidesSection country={displayName} />
       <CountryStorySection country={country} />
       <BlogCtaSection />
