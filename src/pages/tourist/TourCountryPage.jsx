@@ -6,6 +6,7 @@ import TourCountryFilterBar from "../../components/sections/tours/TourCountryFil
 import SignatureExperiencesSection from "../../components/sections/tours/SignatureExperiencesSection";
 import AllToursSection from "../../components/sections/tours/AllToursSection";
 import LocalGuidesSection from "../../components/sections/tours/LocalGuidesSection";
+import WhyCountrySection from "../../components/sections/tours/WhyCountrySection";
 import CountryStorySection from "../../components/sections/tours/CountryStorySection";
 import BlogCtaSection from "../../components/sections/blog/BlogCtaSection";
 
@@ -31,6 +32,7 @@ const TourCountryPage = () => {
       <SignatureExperiencesSection country={displayName} />
       <AllToursSection country={displayName} />
       <LocalGuidesSection country={displayName} />
+      <WhyCountrySection country={country} />
       <CountryStorySection country={country} />
       <BlogCtaSection />
     </main>
