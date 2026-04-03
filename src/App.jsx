@@ -1,7 +1,9 @@
-import React from "react";
+import React, { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "./App.css";
 import TouristLayout from "./layout/touristLayout.jsx";
+
+const AdminApp = lazy(() => import("./admin/AdminApp"));
 import HomePage from "./pages/tourist/HomePage";
 import BlogPage from "./pages/tourist/BlogPage";
 import BlogCategoryPage from "./pages/tourist/BlogCategoryPage";
@@ -20,6 +22,14 @@ function App() {
     <BrowserRouter>
       <div id="toast-root" />
       <Routes>
+        <Route
+          path="/admin/*"
+          element={
+            <Suspense fallback={<div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>Loading admin...</div>}>
+              <AdminApp />
+            </Suspense>
+          }
+        />
         <Route element={<TouristLayout />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/blog" element={<BlogPage />} />
