@@ -240,59 +240,7 @@ const GeneralTab = () => {
 
 // --------------- Tab 2: Email Templates ---------------
 const TemplatesTab = () => {
-  const notify = useNotify();
-  const dataProvider = useDataProvider();
-  const [editingTemplate, setEditingTemplate] = useState(null);
-  const [editForm, setEditForm] = useState({ subject: "", body: "" });
-  const [editSaving, setEditSaving] = useState(false);
-  const {
-    data: templates,
-    total,
-    isLoading,
-    error,
-    refetch,
-  } = useGetList("templates", {
-    pagination: { page: 1, perPage: 50 },
-    sort: { field: "name", order: "ASC" },
-  });
-
-  // When editingTemplate changes, populate form
-  useEffect(() => {
-    if (editingTemplate) {
-      setEditForm({ subject: editingTemplate.subject || "", body: editingTemplate.body || "" });
-    }
-  }, [editingTemplate]);
-
-  const handleSaveTemplate = async () => {
-    if (!editingTemplate) return;
-    setEditSaving(true);
-    try {
-      console.debug("[Settings] Saving template:", editingTemplate.id, editForm);
-      await dataProvider.update("templates", {
-        id: editingTemplate.id,
-        data: { name: editingTemplate.name, subject: editForm.subject, body: editForm.body },
-        previousData: editingTemplate,
-      });
-      notify("Template updated", { type: "success" });
-      setEditingTemplate(null);
-      refetch();
-    } catch (err) {
-      console.error("[Settings] Save template error:", err);
-      notify(err.message || "Failed to save", { type: "error" });
-    } finally {
-      setEditSaving(false);
-    }
-  };
-
-  const channelColors = {
-    email: "primary",
-    sms: "secondary",
-    whatsapp: "success",
-    in_app: "info",
-  };
-
   return (
-    <>
     <Card>
       <CardContent>
         <Typography variant="h6" gutterBottom>
@@ -300,114 +248,23 @@ const TemplatesTab = () => {
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
           Manage notification templates used across all channels.
-          {total != null && ` (${total} templates)`}
+          Use the dedicated Email Templates page for full CRUD editing.
         </Typography>
-
-        {isLoading ? (
-          <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-            <CircularProgress />
-          </Box>
-        ) : error ? (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            Failed to load templates: {error.message || "Unknown error"}
-          </Alert>
-        ) : !templates || templates.length === 0 ? (
-          <Typography color="text.secondary">No templates found.</Typography>
-        ) : (
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell>Name</TableCell>
-                <TableCell>Subject</TableCell>
-                <TableCell>Channel</TableCell>
-                <TableCell>Active</TableCell>
-                <TableCell align="right">Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {templates.map((tpl) => (
-                <TableRow key={tpl.id} hover>
-                  <TableCell sx={{ fontWeight: 600 }}>
-                    {tpl.name || tpl.slug || "--"}
-                  </TableCell>
-                  <TableCell>{tpl.subject || "--"}</TableCell>
-                  <TableCell>
-                    <Chip
-                      label={tpl.channel || "email"}
-                      size="small"
-                      color={channelColors[tpl.channel] || "default"}
-                      variant="outlined"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Chip
-                      label={tpl.isActive !== false ? "Active" : "Inactive"}
-                      size="small"
-                      color={tpl.isActive !== false ? "success" : "default"}
-                    />
-                  </TableCell>
-                  <TableCell align="right">
-                    <Button
-                      size="small"
-                      variant="outlined"
-                      onClick={() => {
-                        console.debug("[Settings] Edit template:", { id: tpl.id, name: tpl.name, subject: tpl.subject, channel: tpl.channel, body: tpl.body?.substring(0, 100) });
-                        setEditingTemplate(tpl);
-                      }}
-                    >
-                      Edit
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        )}
+        <Button
+          variant="contained"
+          onClick={() => { window.location.href = "/admin/templates"; }}
+        >
+          Manage Email Templates
+        </Button>
+        <Button
+          variant="outlined"
+          sx={{ ml: 1 }}
+          onClick={() => { window.location.href = "/admin/contract-templates"; }}
+        >
+          Manage Contract Templates
+        </Button>
       </CardContent>
     </Card>
-
-    {/* Inline Edit Dialog */}
-    {editingTemplate && (
-      <Card sx={{ mt: 2 }}>
-        <CardContent>
-          <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
-            Editing: {editingTemplate.name}
-          </Typography>
-          <Stack spacing={2}>
-            <TextField
-              label="Subject"
-              value={editForm.subject}
-              onChange={(e) => setEditForm((f) => ({ ...f, subject: e.target.value }))}
-              fullWidth
-            />
-            <TextField
-              label="Body"
-              value={editForm.body}
-              onChange={(e) => setEditForm((f) => ({ ...f, body: e.target.value }))}
-              multiline
-              rows={8}
-              fullWidth
-            />
-            <Stack direction="row" spacing={1}>
-              <Button
-                variant="contained"
-                onClick={handleSaveTemplate}
-                disabled={editSaving}
-              >
-                {editSaving ? "Saving..." : "Save Template"}
-              </Button>
-              <Button
-                variant="outlined"
-                onClick={() => setEditingTemplate(null)}
-              >
-                Cancel
-              </Button>
-            </Stack>
-          </Stack>
-        </CardContent>
-      </Card>
-    )}
-    </>
   );
 };
 

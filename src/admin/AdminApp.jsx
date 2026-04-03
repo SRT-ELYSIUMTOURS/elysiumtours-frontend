@@ -36,6 +36,8 @@ import { OrganizationList, OrganizationShow, OrganizationCreate, OrganizationEdi
 import { ContractTemplateList, ContractTemplateCreate, ContractTemplateEdit } from "./resources/contracts";
 import { ReviewList, ReviewShow } from "./resources/reviews";
 import { GalleryList, GalleryCreate, GalleryEdit } from "./resources/gallery";
+import { TemplateList, TemplateCreate, TemplateEdit } from "./resources/templates";
+import EmailIcon from "@mui/icons-material/Email";
 
 // Custom pages
 import PricingDeskList from "./pages/pricingDesk/PricingDeskList";
@@ -119,6 +121,7 @@ const AdminApp = () => (
 
     {/* Administration */}
     <Resource name="contract-templates" list={ContractTemplateList} create={ContractTemplateCreate} edit={ContractTemplateEdit} icon={DescriptionIcon} recordRepresentation="name" />
+    <Resource name="templates" list={TemplateList} create={TemplateCreate} edit={TemplateEdit} icon={EmailIcon} recordRepresentation="name" />
     <Resource name="reviews" list={ReviewList} show={ReviewShow} icon={StarIcon} recordRepresentation="title" />
     <Resource name="gallery" list={GalleryList} create={GalleryCreate} edit={GalleryEdit} icon={PhotoLibraryIcon} recordRepresentation="title" />
 

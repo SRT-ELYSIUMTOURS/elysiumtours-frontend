@@ -76,6 +76,7 @@ const AdminMenu = () => {
           <SectionLabel label="Administration" />
           <Menu.Item to="/admin/settings" primaryText="Settings" leftIcon={<SettingsIcon />} />
           <Menu.Item to="/admin/communications" primaryText="Notifications" leftIcon={<NotificationsIcon />} />
+          <Menu.ResourceItem name="templates" primaryText="Email Templates" />
           <Menu.ResourceItem name="contract-templates" primaryText="Contract Templates" />
           <Menu.ResourceItem name="reviews" primaryText="Reviews" />
           <Menu.ResourceItem name="gallery" primaryText="Gallery" />
