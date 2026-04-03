@@ -40,6 +40,7 @@ const ImageUploadField = ({ source, label = "Image", multiple = false }) => {
     }
 
     const data = await res.json();
+    console.debug("[ImageUpload] uploaded:", data.url);
     return data.url;
   };
 
@@ -110,6 +111,7 @@ const ImageUploadField = ({ source, label = "Image", multiple = false }) => {
                 src={currentValue}
                 alt={label}
                 style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 8 }}
+                onError={(e) => { e.target.style.display = "none"; console.warn("[ImageUpload] Failed to load:", currentValue); }}
               />
               <IconButton
                 size="small"

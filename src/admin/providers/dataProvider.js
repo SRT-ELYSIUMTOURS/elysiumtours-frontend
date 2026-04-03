@@ -96,7 +96,7 @@ const dataProvider = {
     const data = await handleResponse(response);
 
     // Handle inconsistent response shapes from different backend services
-    const records = data.rows || data.bookings || data.results || data.organizations || data.data || (Array.isArray(data) ? data : []);
+    const records = data.rows || data.bookings || data.payments || data.results || data.organizations || data.queue || data.data || (Array.isArray(data) ? data : []);
 
     return {
       data: records.map(transformRecord),
@@ -118,11 +118,16 @@ const dataProvider = {
     console.debug(`[dataProvider] getMany ${resource}:`, params.ids);
     const records = await Promise.all(
       params.ids.map(async (id) => {
-        const url = `${getResourceUrl(resource)}/${id}`;
-        const response = await fetch(url, { headers: getHeaders() });
-        const data = await handleResponse(response);
-        const record = unwrapRecord(data);
-        return transformRecord(record);
+        try {
+          const url = `${getResourceUrl(resource)}/${id}`;
+          const response = await fetch(url, { headers: getHeaders() });
+          const data = await handleResponse(response);
+          const record = unwrapRecord(data);
+          return transformRecord(record);
+        } catch (err) {
+          console.warn(`[dataProvider] getMany ${resource}/${id} failed:`, err.message);
+          return { id }; // Return stub record so react-admin doesn't crash
+        }
       })
     );
     return { data: records };
@@ -145,7 +150,7 @@ const dataProvider = {
     const response = await fetch(url, { headers: getHeaders(), signal: params.signal });
     const data = await handleResponse(response);
 
-    const records = data.rows || data.bookings || data.results || data.organizations || data.data || (Array.isArray(data) ? data : []);
+    const records = data.rows || data.bookings || data.payments || data.results || data.organizations || data.queue || data.data || (Array.isArray(data) ? data : []);
     return {
       data: records.map(transformRecord),
       total: data.total || records.length,
