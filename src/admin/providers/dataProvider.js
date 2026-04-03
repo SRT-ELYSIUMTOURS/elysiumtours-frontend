@@ -30,6 +30,7 @@ const resourceMap = {
   interests: "/interests",
   guides: "/guides",
   reviews: "/reviews",
+  gallery: "/gallery",
   notifications: "/notifications",
   organizations: "/platform/organizations",
 };
@@ -60,21 +61,43 @@ const transformRecord = (record) => {
 // Unwrap nested response — only if top-level has no _id (i.e., it's a wrapper object)
 // If the response already has _id, it IS the record (e.g., tour with populated destination)
 const unwrapRecord = (data) => {
+  console.debug("[dataProvider] unwrapRecord input keys:", Object.keys(data));
   if (data._id || data.id) return data;
-  return data.booking || data.package || data.data || data.template || data.contract || data;
+  const unwrapped =
+    data.booking ||
+    data.package ||
+    data.user ||
+    data.destination ||
+    data.hotel ||
+    data.attraction ||
+    data.provider ||
+    data.guide ||
+    data.review ||
+    data.interest ||
+    data.notification ||
+    data.organization ||
+    data.data ||
+    data.template ||
+    data.contract ||
+    data.gallery ||
+    data;
+  console.debug("[dataProvider] unwrapRecord resolved to:", unwrapped?._id || unwrapped?.id || "(no id)");
+  return unwrapped;
 };
 
-const handleResponse = async (response) => {
+const handleResponse = async (response, context = "") => {
   if (!response.ok) {
     const error = await response.json().catch(() => ({ message: response.statusText }));
-    console.error(`[dataProvider] API ${response.status}:`, error);
+    console.error(`[dataProvider] ${response.status} ${response.url}:`, error);
+    console.error(`[dataProvider] Context: ${context}`);
     const err = new Error(error.message || `API error: ${response.status}`);
     err.status = response.status;
     err.body = error;
     throw err;
   }
   const data = await response.json();
-  console.debug(`[dataProvider] Response:`, data);
+  const summary = Array.isArray(data) ? `[Array(${data.length})]` : Object.keys(data).join(", ");
+  console.debug(`[dataProvider] ${response.status} ${response.url} => keys: ${summary}`);
   return data;
 };
 
@@ -91,12 +114,14 @@ const dataProvider = {
     };
 
     const url = `${getResourceUrl(resource)}?${buildQuery(query)}`;
-    console.debug(`[dataProvider] getList ${resource}:`, url);
+    console.debug(`[dataProvider] GET getList ${resource}: ${url}`);
+    console.debug(`[dataProvider] getList query params:`, query);
     const response = await fetch(url, { headers: getHeaders(), signal: params.signal });
-    const data = await handleResponse(response);
+    const data = await handleResponse(response, `getList(${resource})`);
 
     // Handle inconsistent response shapes from different backend services
     const records = data.rows || data.bookings || data.payments || data.results || data.organizations || data.queue || data.data || (Array.isArray(data) ? data : []);
+    console.debug(`[dataProvider] getList ${resource}: ${records.length} records, total=${data.total || data.totalCount || records.length}`);
 
     return {
       data: records.map(transformRecord),
@@ -106,26 +131,27 @@ const dataProvider = {
 
   getOne: async (resource, params) => {
     const url = `${getResourceUrl(resource)}/${params.id}`;
-    console.debug(`[dataProvider] getOne ${resource}/${params.id}:`, url);
+    console.debug(`[dataProvider] GET getOne ${resource}/${params.id}: ${url}`);
     const response = await fetch(url, { headers: getHeaders(), signal: params.signal });
-    const data = await handleResponse(response);
+    const data = await handleResponse(response, `getOne(${resource}, ${params.id})`);
 
     const record = unwrapRecord(data);
     return { data: transformRecord(record) };
   },
 
   getMany: async (resource, params) => {
-    console.debug(`[dataProvider] getMany ${resource}:`, params.ids);
+    console.debug(`[dataProvider] GET getMany ${resource}: ids=[${params.ids.join(", ")}]`);
     const records = await Promise.all(
       params.ids.map(async (id) => {
         try {
           const url = `${getResourceUrl(resource)}/${id}`;
+          console.debug(`[dataProvider] GET getMany ${resource}/${id}: ${url}`);
           const response = await fetch(url, { headers: getHeaders() });
-          const data = await handleResponse(response);
+          const data = await handleResponse(response, `getMany(${resource}, ${id})`);
           const record = unwrapRecord(data);
           return transformRecord(record);
         } catch (err) {
-          console.warn(`[dataProvider] getMany ${resource}/${id} failed:`, err.message);
+          console.warn(`[dataProvider] getMany ${resource}/${id} failed:`, err.message, err.status, err.body);
           return { id }; // Return stub record so react-admin doesn't crash
         }
       })
@@ -146,9 +172,10 @@ const dataProvider = {
     };
 
     const url = `${getResourceUrl(resource)}?${buildQuery(query)}`;
-    console.debug(`[dataProvider] getManyReference ${resource}:`, url);
+    console.debug(`[dataProvider] GET getManyReference ${resource}: ${url}`);
+    console.debug(`[dataProvider] getManyReference query params:`, query);
     const response = await fetch(url, { headers: getHeaders(), signal: params.signal });
-    const data = await handleResponse(response);
+    const data = await handleResponse(response, `getManyReference(${resource}, ${params.target}=${params.id})`);
 
     const records = data.rows || data.bookings || data.payments || data.results || data.organizations || data.queue || data.data || (Array.isArray(data) ? data : []);
     return {
@@ -158,42 +185,45 @@ const dataProvider = {
   },
 
   create: async (resource, params) => {
+    // Staff/user creation uses POST /users → user.createStaffUser (admin endpoint)
     const url = getResourceUrl(resource);
-    console.debug(`[dataProvider] create ${resource}:`, params.data);
+    const body = params.data;
+    console.debug(`[dataProvider] POST create ${resource}: ${url}`, body);
     const response = await fetch(url, {
       method: "POST",
       headers: getHeaders(),
-      body: JSON.stringify(params.data),
+      body: JSON.stringify(body),
     });
-    const data = await handleResponse(response);
+    const data = await handleResponse(response, `create(${resource})`);
     const record = unwrapRecord(data);
     return { data: transformRecord(record) };
   },
 
   update: async (resource, params) => {
     const url = `${getResourceUrl(resource)}/${params.id}`;
-    console.debug(`[dataProvider] update ${resource}/${params.id}:`, params.data);
+    console.debug(`[dataProvider] PUT update ${resource}/${params.id}: ${url}`, params.data);
     const response = await fetch(url, {
       method: "PUT",
       headers: getHeaders(),
       body: JSON.stringify(params.data),
     });
-    const data = await handleResponse(response);
+    const data = await handleResponse(response, `update(${resource}, ${params.id})`);
     const record = unwrapRecord(data);
     return { data: transformRecord(record) };
   },
 
   updateMany: async (resource, params) => {
-    console.debug(`[dataProvider] updateMany ${resource}:`, params.ids);
+    console.debug(`[dataProvider] PUT updateMany ${resource}: ids=[${params.ids.join(", ")}]`, params.data);
     const results = await Promise.all(
       params.ids.map(async (id) => {
         const url = `${getResourceUrl(resource)}/${id}`;
+        console.debug(`[dataProvider] PUT updateMany ${resource}/${id}: ${url}`);
         const response = await fetch(url, {
           method: "PUT",
           headers: getHeaders(),
           body: JSON.stringify(params.data),
         });
-        await handleResponse(response);
+        await handleResponse(response, `updateMany(${resource}, ${id})`);
         return id;
       })
     );
@@ -202,25 +232,26 @@ const dataProvider = {
 
   delete: async (resource, params) => {
     const url = `${getResourceUrl(resource)}/${params.id}`;
-    console.debug(`[dataProvider] delete ${resource}/${params.id}`);
+    console.debug(`[dataProvider] DELETE delete ${resource}/${params.id}: ${url}`);
     const response = await fetch(url, {
       method: "DELETE",
       headers: getHeaders(),
     });
-    await handleResponse(response);
+    await handleResponse(response, `delete(${resource}, ${params.id})`);
     return { data: { id: params.id } };
   },
 
   deleteMany: async (resource, params) => {
-    console.debug(`[dataProvider] deleteMany ${resource}:`, params.ids);
+    console.debug(`[dataProvider] DELETE deleteMany ${resource}: ids=[${params.ids.join(", ")}]`);
     await Promise.all(
       params.ids.map(async (id) => {
         const url = `${getResourceUrl(resource)}/${id}`;
+        console.debug(`[dataProvider] DELETE deleteMany ${resource}/${id}: ${url}`);
         const response = await fetch(url, {
           method: "DELETE",
           headers: getHeaders(),
         });
-        await handleResponse(response);
+        await handleResponse(response, `deleteMany(${resource}, ${id})`);
       })
     );
     return { data: params.ids };

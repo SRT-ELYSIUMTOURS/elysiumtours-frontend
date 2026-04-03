@@ -27,6 +27,8 @@ const ImageUploadField = ({ source, label = "Image", multiple = false }) => {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("folder", "elysium-tours");
+    formData.append("mimetype", file.type || "image/jpeg");
+    formData.append("filename", file.name || "upload.jpg");
 
     const res = await fetch(`${API_URL}/media/upload`, {
       method: "POST",
