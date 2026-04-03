@@ -6,6 +6,7 @@ import SpeedIcon from "@mui/icons-material/Speed";
 import SettingsIcon from "@mui/icons-material/Settings";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import BusinessIcon from "@mui/icons-material/Business";
+import MonitorHeartIcon from "@mui/icons-material/MonitorHeart";
 import { Typography, Divider, Box } from "@mui/material";
 
 const SectionLabel = ({ label }) => (
@@ -77,6 +78,9 @@ const AdminMenu = () => {
           <Menu.Item to="/admin/communications" primaryText="Notifications" leftIcon={<NotificationsIcon />} />
           {isSuperAdmin && (
             <Menu.ResourceItem name="organizations" primaryText="Organizations" />
+          )}
+          {isSuperAdmin && (
+            <Menu.Item to="/admin/platform-health" primaryText="Platform Health" leftIcon={<MonitorHeartIcon />} />
           )}
         </Box>
       )}

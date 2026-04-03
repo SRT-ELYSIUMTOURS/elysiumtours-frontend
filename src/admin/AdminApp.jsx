@@ -29,7 +29,7 @@ import { DiningList, DiningCreate, DiningEdit } from "./resources/partners/dinin
 import { TransportList, TransportCreate, TransportEdit } from "./resources/partners/transport";
 import { StaffList, StaffCreate, StaffEdit } from "./resources/staff";
 import { PaymentList, PaymentShow } from "./resources/payments";
-import { OrganizationList, OrganizationShow, OrganizationCreate } from "./resources/organizations";
+import { OrganizationList, OrganizationShow, OrganizationCreate, OrganizationEdit } from "./resources/organizations";
 
 // Custom pages
 import PricingDeskList from "./pages/pricingDesk/PricingDeskList";
@@ -38,6 +38,7 @@ import AnalyticsDashboard from "./pages/analytics/AnalyticsDashboard";
 import SlaDashboard from "./pages/sla/SlaDashboard";
 import PlatformSettings from "./pages/settings/PlatformSettings";
 import NotificationLog from "./pages/communications/NotificationLog";
+import PlatformHealth from "./pages/platformHealth/PlatformHealth";
 
 /**
  * AdminApp — All Resources are always registered.
@@ -108,7 +109,7 @@ const AdminApp = () => (
     <Resource name="staff" list={StaffList} create={StaffCreate} edit={StaffEdit} icon={BadgeIcon} recordRepresentation={(r) => `${r.firstName} ${r.lastName}`} />
 
     {/* Platform — super_admin only (authProvider.canAccess controls visibility) */}
-    <Resource name="organizations" list={OrganizationList} show={OrganizationShow} create={OrganizationCreate} icon={BusinessIcon} recordRepresentation="name" />
+    <Resource name="organizations" list={OrganizationList} show={OrganizationShow} create={OrganizationCreate} edit={OrganizationEdit} icon={BusinessIcon} recordRepresentation="name" />
 
     {/* Custom Pages */}
     <CustomRoutes>
@@ -118,6 +119,7 @@ const AdminApp = () => (
       <Route path="/sla-dashboard" element={<SlaDashboard />} />
       <Route path="/settings" element={<PlatformSettings />} />
       <Route path="/communications" element={<NotificationLog />} />
+      <Route path="/platform-health" element={<PlatformHealth />} />
     </CustomRoutes>
   </Admin>
 );
