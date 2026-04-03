@@ -6,6 +6,7 @@ import {
   BooleanInput,
   required,
 } from "react-admin";
+import ImageUploadField from "../../../components/ImageUploadField";
 
 const arrayToLines = (v) => (Array.isArray(v) ? v.join("\n") : v || "");
 const linesToArray = (v) =>
@@ -35,7 +36,7 @@ const TransportEdit = () => (
         parse={linesToArray}
         fullWidth
       />
-      <TextInput source="coverImage" label="Cover Image URL" fullWidth />
+      <ImageUploadField source="coverImage" label="Cover Image" />
       <BooleanInput source="isActive" label="Active" fullWidth />
     </SimpleForm>
   </Edit>

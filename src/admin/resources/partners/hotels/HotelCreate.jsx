@@ -9,6 +9,7 @@ import {
   SimpleFormIterator,
   required,
 } from "react-admin";
+import ImageUploadField from "../../../components/ImageUploadField";
 
 const arrayToLines = (v) => (Array.isArray(v) ? v.join("\n") : v || "");
 const linesToArray = (v) =>
@@ -36,7 +37,7 @@ const HotelCreate = () => (
         <TextInput source="contactInfo.phone" label="Phone" fullWidth />
         <TextInput source="contactInfo.email" label="Email" fullWidth />
         <TextInput source="contactInfo.website" label="Website" fullWidth />
-        <TextInput source="coverImage" label="Cover Image URL" fullWidth />
+        <ImageUploadField source="coverImage" label="Cover Image" />
         <TextInput source="shortDescription" label="Short Description" fullWidth />
         <SelectInput source="priceRange" label="Price Range" choices={[
           { id: "budget", name: "Budget" },

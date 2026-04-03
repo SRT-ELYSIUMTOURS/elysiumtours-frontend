@@ -7,6 +7,7 @@ import {
   SelectInput,
   required,
 } from "react-admin";
+import ImageUploadField from "../../../components/ImageUploadField";
 
 const AttractionCreate = () => (
   <Create>
@@ -41,7 +42,7 @@ const AttractionCreate = () => (
       />
       <TextInput source="operatingHours.open" label="Opening Time" fullWidth />
       <TextInput source="operatingHours.close" label="Closing Time" fullWidth />
-      <TextInput source="coverImage" label="Cover Image URL" fullWidth />
+      <ImageUploadField source="coverImage" label="Cover Image" />
       <TextInput source="duration" label="Duration (e.g., 2-3 hours)" fullWidth />
       <TextInput source="suitableFor" label="Suitable For (one per line)" multiline rows={2}
         format={(v) => (Array.isArray(v) ? v.join("\n") : v || "")}

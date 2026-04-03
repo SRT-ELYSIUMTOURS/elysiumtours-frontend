@@ -9,6 +9,7 @@ import {
   SimpleFormIterator,
   required,
 } from "react-admin";
+import ImageUploadField from "../../../components/ImageUploadField";
 
 const DiningCreate = () => (
   <Create>
@@ -34,7 +35,7 @@ const DiningCreate = () => (
         />
         <TextInput source="contactInfo.phone" label="Phone" fullWidth />
         <TextInput source="contactInfo.email" label="Email" fullWidth />
-        <TextInput source="coverImage" label="Cover Image URL" fullWidth />
+        <ImageUploadField source="coverImage" label="Cover Image" />
       </TabbedForm.Tab>
 
       <TabbedForm.Tab label="Menu">

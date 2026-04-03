@@ -12,6 +12,7 @@ import {
   SimpleFormIterator,
   required,
 } from "react-admin";
+import ImageUploadField from "../../components/ImageUploadField";
 
 const arrayToLines = (v) => (Array.isArray(v) ? v.join("\n") : v || "");
 const linesToArray = (v) =>
@@ -84,12 +85,8 @@ const TourPackageEdit = () => (
 
       {/* Media Tab */}
       <TabbedForm.Tab label="Media">
-        <TextInput source="coverImage" label="Cover Image URL" fullWidth />
-        <TextInput source="heroImages" label="Hero Images (one URL per line)" multiline rows={3}
-          format={(v) => (Array.isArray(v) ? v.join("\n") : v || "")}
-          parse={(v) => (v ? v.split("\n").map((s) => s.trim()).filter(Boolean) : [])}
-          fullWidth
-        />
+        <ImageUploadField source="coverImage" label="Cover Image" />
+        <ImageUploadField source="heroImages" label="Hero Images" multiple />
       </TabbedForm.Tab>
 
       {/* Group & Pricing Tab */}
