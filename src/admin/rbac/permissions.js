@@ -43,12 +43,31 @@ const RESOURCE_TO_BACKEND = {
   templates: "admin",
 };
 
+// Some frontend resources map to non-standard backend permission names
+const SPECIAL_PERMISSION_MAP = {
+  "staff.list": "admin.staffManagement",
+  "staff.create": "admin.staffManagement",
+  "staff.edit": "admin.staffManagement",
+  "customers.list": "user.listUsers",
+  "customers.show": "user.listUsers",
+  "templates.list": "admin.settings",
+  "templates.create": "admin.settings",
+  "templates.edit": "admin.settings",
+};
+
 export const canAccess = (resource, action) => {
   const perms = getStoredPermissions();
   if (!perms) return false;
 
   // super_admin always has access
   if (perms.role === "super_admin") return true;
+
+  // Check special mappings first
+  const specialKey = `${resource}.${action}`;
+  if (SPECIAL_PERMISSION_MAP[specialKey]) {
+    const [res, act] = SPECIAL_PERMISSION_MAP[specialKey].split(".");
+    return perms.resourceAccess?.[res]?.[act] === true;
+  }
 
   const backendResource = RESOURCE_TO_BACKEND[resource] || resource;
   return perms.resourceAccess?.[backendResource]?.[action] === true;
