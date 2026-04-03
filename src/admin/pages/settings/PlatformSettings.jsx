@@ -241,15 +241,48 @@ const GeneralTab = () => {
 // --------------- Tab 2: Email Templates ---------------
 const TemplatesTab = () => {
   const notify = useNotify();
+  const dataProvider = useDataProvider();
+  const [editingTemplate, setEditingTemplate] = useState(null);
+  const [editForm, setEditForm] = useState({ subject: "", body: "" });
+  const [editSaving, setEditSaving] = useState(false);
   const {
     data: templates,
     total,
     isLoading,
     error,
+    refetch,
   } = useGetList("templates", {
     pagination: { page: 1, perPage: 50 },
     sort: { field: "name", order: "ASC" },
   });
+
+  // When editingTemplate changes, populate form
+  useEffect(() => {
+    if (editingTemplate) {
+      setEditForm({ subject: editingTemplate.subject || "", body: editingTemplate.body || "" });
+    }
+  }, [editingTemplate]);
+
+  const handleSaveTemplate = async () => {
+    if (!editingTemplate) return;
+    setEditSaving(true);
+    try {
+      console.debug("[Settings] Saving template:", editingTemplate.id, editForm);
+      await dataProvider.update("templates", {
+        id: editingTemplate.id,
+        data: { name: editingTemplate.name, subject: editForm.subject, body: editForm.body },
+        previousData: editingTemplate,
+      });
+      notify("Template updated", { type: "success" });
+      setEditingTemplate(null);
+      refetch();
+    } catch (err) {
+      console.error("[Settings] Save template error:", err);
+      notify(err.message || "Failed to save", { type: "error" });
+    } finally {
+      setEditSaving(false);
+    }
+  };
 
   const channelColors = {
     email: "primary",
@@ -259,6 +292,7 @@ const TemplatesTab = () => {
   };
 
   return (
+    <>
     <Card>
       <CardContent>
         <Typography variant="h6" gutterBottom>
@@ -315,7 +349,11 @@ const TemplatesTab = () => {
                   <TableCell align="right">
                     <Button
                       size="small"
-                      href={`#/templates/${tpl.id}`}
+                      variant="outlined"
+                      onClick={() => {
+                        console.debug("[Settings] Edit template:", { id: tpl.id, name: tpl.name, subject: tpl.subject, channel: tpl.channel, body: tpl.body?.substring(0, 100) });
+                        setEditingTemplate(tpl);
+                      }}
                     >
                       Edit
                     </Button>
@@ -327,6 +365,49 @@ const TemplatesTab = () => {
         )}
       </CardContent>
     </Card>
+
+    {/* Inline Edit Dialog */}
+    {editingTemplate && (
+      <Card sx={{ mt: 2 }}>
+        <CardContent>
+          <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
+            Editing: {editingTemplate.name}
+          </Typography>
+          <Stack spacing={2}>
+            <TextField
+              label="Subject"
+              value={editForm.subject}
+              onChange={(e) => setEditForm((f) => ({ ...f, subject: e.target.value }))}
+              fullWidth
+            />
+            <TextField
+              label="Body"
+              value={editForm.body}
+              onChange={(e) => setEditForm((f) => ({ ...f, body: e.target.value }))}
+              multiline
+              rows={8}
+              fullWidth
+            />
+            <Stack direction="row" spacing={1}>
+              <Button
+                variant="contained"
+                onClick={handleSaveTemplate}
+                disabled={editSaving}
+              >
+                {editSaving ? "Saving..." : "Save Template"}
+              </Button>
+              <Button
+                variant="outlined"
+                onClick={() => setEditingTemplate(null)}
+              >
+                Cancel
+              </Button>
+            </Stack>
+          </Stack>
+        </CardContent>
+      </Card>
+    )}
+    </>
   );
 };
 
