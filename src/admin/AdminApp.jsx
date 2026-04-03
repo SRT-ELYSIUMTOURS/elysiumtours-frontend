@@ -11,6 +11,9 @@ import DirectionsBusIcon from "@mui/icons-material/DirectionsBus";
 import PeopleIcon from "@mui/icons-material/People";
 import BadgeIcon from "@mui/icons-material/Badge";
 import BusinessIcon from "@mui/icons-material/Business";
+import DescriptionIcon from "@mui/icons-material/Description";
+import StarIcon from "@mui/icons-material/Star";
+import PhotoLibraryIcon from "@mui/icons-material/PhotoLibrary";
 
 import dataProvider from "./providers/dataProvider";
 import authProvider from "./providers/authProvider";
@@ -30,6 +33,9 @@ import { TransportList, TransportCreate, TransportEdit } from "./resources/partn
 import { StaffList, StaffCreate, StaffEdit } from "./resources/staff";
 import { PaymentList, PaymentShow } from "./resources/payments";
 import { OrganizationList, OrganizationShow, OrganizationCreate, OrganizationEdit } from "./resources/organizations";
+import { ContractTemplateList, ContractTemplateCreate, ContractTemplateEdit } from "./resources/contracts";
+import { ReviewList, ReviewShow } from "./resources/reviews";
+import { GalleryList, GalleryCreate, GalleryEdit } from "./resources/gallery";
 
 // Custom pages
 import PricingDeskList from "./pages/pricingDesk/PricingDeskList";
@@ -110,6 +116,11 @@ const AdminApp = () => (
 
     {/* Platform — super_admin only (authProvider.canAccess controls visibility) */}
     <Resource name="organizations" list={OrganizationList} show={OrganizationShow} create={OrganizationCreate} edit={OrganizationEdit} icon={BusinessIcon} recordRepresentation="name" />
+
+    {/* Administration */}
+    <Resource name="contract-templates" list={ContractTemplateList} create={ContractTemplateCreate} edit={ContractTemplateEdit} icon={DescriptionIcon} recordRepresentation="name" />
+    <Resource name="reviews" list={ReviewList} show={ReviewShow} icon={StarIcon} recordRepresentation="title" />
+    <Resource name="gallery" list={GalleryList} create={GalleryCreate} edit={GalleryEdit} icon={PhotoLibraryIcon} recordRepresentation="title" />
 
     {/* Custom Pages */}
     <CustomRoutes>
