@@ -35,6 +35,7 @@ const DiningEdit = () => (
         />
         <TextInput source="contactInfo.phone" label="Phone" fullWidth />
         <TextInput source="contactInfo.email" label="Email" fullWidth />
+        <TextInput source="coverImage" label="Cover Image URL" fullWidth />
         <BooleanInput source="isActive" label="Active" fullWidth />
       </TabbedForm.Tab>
 

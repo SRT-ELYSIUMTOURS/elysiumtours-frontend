@@ -37,6 +37,14 @@ const HotelEdit = () => (
         <TextInput source="contactInfo.phone" label="Phone" fullWidth />
         <TextInput source="contactInfo.email" label="Email" fullWidth />
         <TextInput source="contactInfo.website" label="Website" fullWidth />
+        <TextInput source="coverImage" label="Cover Image URL" fullWidth />
+        <TextInput source="shortDescription" label="Short Description" fullWidth />
+        <SelectInput source="priceRange" label="Price Range" choices={[
+          { id: "budget", name: "Budget" },
+          { id: "moderate", name: "Moderate" },
+          { id: "premium", name: "Premium" },
+          { id: "luxury", name: "Luxury" },
+        ]} />
         <BooleanInput source="isActive" label="Active" fullWidth />
       </TabbedForm.Tab>
 

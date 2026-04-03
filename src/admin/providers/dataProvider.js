@@ -28,6 +28,7 @@ const resourceMap = {
   "contract-templates": "/admin/contract-templates",
   "pricing-desk": "/pricing-desk/queue",
   interests: "/interests",
+  guides: "/guides",
   reviews: "/reviews",
   notifications: "/notifications",
   organizations: "/platform/organizations",

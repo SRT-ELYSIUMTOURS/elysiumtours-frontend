@@ -34,6 +34,7 @@ const DiningCreate = () => (
         />
         <TextInput source="contactInfo.phone" label="Phone" fullWidth />
         <TextInput source="contactInfo.email" label="Email" fullWidth />
+        <TextInput source="coverImage" label="Cover Image URL" fullWidth />
       </TabbedForm.Tab>
 
       <TabbedForm.Tab label="Menu">

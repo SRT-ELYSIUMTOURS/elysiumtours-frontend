@@ -4,6 +4,7 @@ import {
   TextInput,
   NumberInput,
   SelectInput,
+  BooleanInput,
   ReferenceInput,
   ReferenceArrayInput,
   AutocompleteArrayInput,
@@ -44,6 +45,50 @@ const TourPackageCreate = () => (
             { id: "archived", name: "Archived" },
           ]}
           defaultValue="draft"
+        />
+        <SelectInput source="tourType" label="Tour Type" choices={[
+          { id: "day_tour", name: "Day Tour" },
+          { id: "multi_day", name: "Multi-Day" },
+          { id: "express", name: "Express" },
+        ]} defaultValue="multi_day" />
+        <TextInput source="country" label="Country" defaultValue="Ghana" fullWidth />
+        <TextInput source="tags" label="Tags (one per line)" multiline rows={3}
+          format={(v) => (Array.isArray(v) ? v.join("\n") : v || "")}
+          parse={(v) => (v ? v.split("\n").map((s) => s.trim()).filter(Boolean) : [])}
+          fullWidth
+        />
+        <TextInput source="languages" label="Languages (one per line)" multiline rows={2}
+          format={(v) => (Array.isArray(v) ? v.join("\n") : v || "")}
+          parse={(v) => (v ? v.split("\n").map((s) => s.trim()).filter(Boolean) : [])}
+          fullWidth
+          defaultValue="English"
+        />
+        <TextInput source="cancellationPolicy" label="Cancellation Policy" fullWidth />
+        <TextInput source="availabilitySchedule" label="Availability (e.g., Opened Daily)" fullWidth />
+        <BooleanInput source="pickupIncluded" label="Pickup Included" />
+        <TextInput source="pickupLocation" label="Pickup Location" fullWidth />
+        <SelectInput source="difficulty" label="Difficulty" choices={[
+          { id: "easy", name: "Easy" },
+          { id: "moderate", name: "Moderate" },
+          { id: "challenging", name: "Challenging" },
+        ]} defaultValue="easy" />
+        <TextInput source="bestFor" label="Best For (one per line)" multiline rows={2}
+          format={(v) => (Array.isArray(v) ? v.join("\n") : v || "")}
+          parse={(v) => (v ? v.split("\n").map((s) => s.trim()).filter(Boolean) : [])}
+          fullWidth
+        />
+        <ReferenceInput source="guideId" reference="guides" allowEmpty>
+          <SelectInput optionText="name" />
+        </ReferenceInput>
+      </TabbedForm.Tab>
+
+      {/* Media Tab */}
+      <TabbedForm.Tab label="Media">
+        <TextInput source="coverImage" label="Cover Image URL" fullWidth />
+        <TextInput source="heroImages" label="Hero Images (one URL per line)" multiline rows={3}
+          format={(v) => (Array.isArray(v) ? v.join("\n") : v || "")}
+          parse={(v) => (v ? v.split("\n").map((s) => s.trim()).filter(Boolean) : [])}
+          fullWidth
         />
       </TabbedForm.Tab>
 

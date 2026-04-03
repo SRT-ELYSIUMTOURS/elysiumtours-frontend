@@ -34,6 +34,7 @@ const TransportCreate = () => (
         parse={linesToArray}
         fullWidth
       />
+      <TextInput source="coverImage" label="Cover Image URL" fullWidth />
     </SimpleForm>
   </Create>
 );

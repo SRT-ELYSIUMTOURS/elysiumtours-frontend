@@ -35,6 +35,7 @@ const TransportEdit = () => (
         parse={linesToArray}
         fullWidth
       />
+      <TextInput source="coverImage" label="Cover Image URL" fullWidth />
       <BooleanInput source="isActive" label="Active" fullWidth />
     </SimpleForm>
   </Edit>

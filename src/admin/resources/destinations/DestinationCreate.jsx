@@ -35,6 +35,16 @@ const DestinationCreate = () => (
       <TextInput source="description" multiline rows={4} fullWidth />
       <NumberInput source="gpsCoords.lat" label="Latitude" />
       <NumberInput source="gpsCoords.lng" label="Longitude" />
+      <TextInput source="country" label="Country" defaultValue="Ghana" fullWidth />
+      <TextInput source="subtitle" label="Subtitle / Tagline" fullWidth />
+      <TextInput source="coverImage" label="Cover Image URL" fullWidth />
+      <TextInput source="bestTimeToVisit" label="Best Time to Visit" fullWidth />
+      <TextInput source="aboutText" label="About (detailed)" multiline rows={4} fullWidth />
+      <TextInput source="travelTips" label="Travel Tips (one per line)" multiline rows={3}
+        format={(v) => (Array.isArray(v) ? v.join("\n") : v || "")}
+        parse={(v) => (v ? v.split("\n").map((s) => s.trim()).filter(Boolean) : [])}
+        fullWidth
+      />
     </SimpleForm>
   </Create>
 );
