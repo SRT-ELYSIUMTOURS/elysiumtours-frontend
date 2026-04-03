@@ -25,10 +25,12 @@ const ImageUploadField = ({ source, label = "Image", multiple = false }) => {
   const uploadFile = async (file) => {
     const token = localStorage.getItem("token");
     const formData = new FormData();
-    formData.append("file", file);
+    // Text fields MUST come before the file — busboy processes in order
+    // and Moleculer's stream: prefix pipes the first file as ctx.params
     formData.append("folder", "elysium-tours");
     formData.append("mimetype", file.type || "image/jpeg");
     formData.append("filename", file.name || "upload.jpg");
+    formData.append("file", file, file.name || "upload.jpg");
 
     const res = await fetch(`${API_URL}/media/upload`, {
       method: "POST",
