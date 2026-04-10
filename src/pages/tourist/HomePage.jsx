@@ -17,7 +17,7 @@ const HomePage = React.forwardRef(({ className, ...props }, ref) => {
       className={classNames("font-raleway", className)}
       {...props}
     >
-      <HeroSection />
+      <HeroSection/>
       <DiscoverSection />
       <FeaturedToursSection />
       <FeaturedDestinationsSection />

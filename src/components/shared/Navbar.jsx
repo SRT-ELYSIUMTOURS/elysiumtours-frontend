@@ -4,32 +4,61 @@ import { classNames } from "../../utils/classNames";
 import Button from "../ui/button";
 
 // ── Figma icon assets (node 1073:10307) — downloaded from Figma MCP ──────────
-import iconBackpack    from "../../assets/ElysiumAssets/menu-icons/backpack.svg";
-import iconHome2       from "../../assets/ElysiumAssets/menu-icons/home2.svg";
-import iconCar         from "../../assets/ElysiumAssets/menu-icons/car.svg";
-import iconMentoring   from "../../assets/ElysiumAssets/menu-icons/mentoring.svg";
+import iconBackpack from "../../assets/ElysiumAssets/menu-icons/backpack.svg";
+import iconHome2 from "../../assets/ElysiumAssets/menu-icons/home2.svg";
+import iconCar from "../../assets/ElysiumAssets/menu-icons/car.svg";
+import iconMentoring from "../../assets/ElysiumAssets/menu-icons/mentoring.svg";
 import iconServingFood from "../../assets/ElysiumAssets/menu-icons/serving-food.svg";
-import iconAlbum       from "../../assets/ElysiumAssets/menu-icons/album.svg";
-import iconMoneyJar    from "../../assets/ElysiumAssets/menu-icons/money-jar.svg";
+import iconAlbum from "../../assets/ElysiumAssets/menu-icons/album.svg";
+import iconMoneyJar from "../../assets/ElysiumAssets/menu-icons/money-jar.svg";
 
 // ── Right-panel card assets (node 1073:10379–10381) ──────────────────────────
-import menuCardBg    from "../../assets/ElysiumAssets/menu-card-bg.png";
+import menuCardBg from "../../assets/ElysiumAssets/menu-card-bg.png";
 import menuCardPhoto from "../../assets/ElysiumAssets/menu-card-photo.png";
 
 // ── Logo SVG — matches Figma cursive Elysium script ──────────────────────────
 const ElysiumLogo = () => (
-  <img src="./src/assets/ElysiumAssets/Logo.png" width={80} height={80} alt="" />
+  <img
+    src="./src/assets/ElysiumAssets/Logo.png"
+    width={80}
+    height={80}
+    alt=""
+  />
 );
 
 // ── Chevrons ──────────────────────────────────────────────────────────────────
 const ChevronDown = ({ stroke = "#565656" }) => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-    <path d="M7 10l5 4 5-4" stroke={stroke} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+  >
+    <path
+      d="M17 10L15.2527 11.763C13.8592 13.1689 13.1625 13.8719 12.3133 13.9801C12.1053 14.0066 11.8947 14.0066 11.6867 13.9801C10.8375 13.8719 10.1408 13.1689 8.74731 11.763L7 10"
+      stroke={stroke}
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
   </svg>
 );
 const ChevronUp = ({ stroke = "#622399" }) => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-    <path d="M7 14l5-4 5 4" stroke={stroke} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+  >
+    <path
+      d="M7 14L8.74731 12.237C10.1408 10.8311 10.8375 10.1281 11.6867 10.0199C11.8947 9.99337 12.1053 9.99337 12.3133 10.0199C13.1625 10.1281 13.8592 10.8311 15.2527 12.237L17 14"
+      stroke={stroke}
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
   </svg>
 );
 
@@ -50,11 +79,31 @@ const MenuIcon = ({ src, isActive }) => (
 
 // ── Nav item data ─────────────────────────────────────────────────────────────
 const TOUR_ITEMS = [
-  { label: "All Tours",  desc: "Browse our full collection of Ghana tours.",       href: "/tours"                  },
-  { label: "Day Tours",  desc: "Perfect single-day experiences across Ghana.",     href: "/tours?type=day"         },
-  { label: "Multi-Day",  desc: "Immersive multi-day adventures and packages.",     href: "/tours?type=multi-day"   },
-  { label: "Festivals",  desc: "Experience Ghana's vibrant cultural festivals.",   href: "/tours?type=festivals"   },
-  { label: "Heritage",   desc: "Explore Ghana's rich history and heritage sites.", href: "/tours?type=heritage"    },
+  {
+    label: "All Tours",
+    desc: "Browse our full collection of Ghana tours.",
+    href: "/tours",
+  },
+  {
+    label: "Day Tours",
+    desc: "Perfect single-day experiences across Ghana.",
+    href: "/tours?type=day",
+  },
+  {
+    label: "Multi-Day",
+    desc: "Immersive multi-day adventures and packages.",
+    href: "/tours?type=multi-day",
+  },
+  {
+    label: "Festivals",
+    desc: "Experience Ghana's vibrant cultural festivals.",
+    href: "/tours?type=festivals",
+  },
+  {
+    label: "Heritage",
+    desc: "Explore Ghana's rich history and heritage sites.",
+    href: "/tours?type=heritage",
+  },
 ];
 
 // ── Tour Partners dropdown items — Figma node 1073:10307 ─────────────────────
@@ -62,45 +111,45 @@ const TOUR_ITEMS = [
 const TOUR_PARTNER_ITEMS = [
   {
     label: "Tour Sites & Events",
-    desc:  "Discover iconic landmarks, guided tours, and vibrant local events.",
-    href:  "/tour-partners/sites-events",
-    icon:  iconBackpack,
+    desc: "Discover iconic landmarks, guided tours, and vibrant local events.",
+    href: "/tour-partners/sites-events",
+    icon: iconBackpack,
   },
   {
     label: "Accommodation",
-    desc:  "Find comfortable and trusted places to stay, offered by our verified partners.",
-    href:  "/tour-partners/accommodation",
-    icon:  iconHome2,
+    desc: "Find comfortable and trusted places to stay, offered by our verified partners.",
+    href: "/tour-partners/accommodation",
+    icon: iconHome2,
   },
   {
     label: "Transportation",
-    desc:  "Discover iconic landmarks, guided tours, and vibrant local events offered.",
-    href:  "/tour-partners/transportation",
-    icon:  iconCar,
+    desc: "Discover iconic landmarks, guided tours, and vibrant local events offered.",
+    href: "/tour-partners/transportation",
+    icon: iconCar,
   },
   {
     label: "Tour Guides",
-    desc:  "Explore with knowledgeable local guides who bring destinations to life through stories, history, and firsthand experience.",
-    href:  "/tour-partners/guides",
-    icon:  iconMentoring,
+    desc: "Explore with knowledgeable local guides who bring destinations to life through stories, history, and firsthand experience.",
+    href: "/tour-partners/guides",
+    icon: iconMentoring,
   },
   {
     label: "Resturants & Dinning",
-    desc:  "Get up and running on new features and techniques.",
-    href:  "/tour-partners/dining",
-    icon:  iconServingFood,
+    desc: "Get up and running on new features and techniques.",
+    href: "/tour-partners/dining",
+    icon: iconServingFood,
   },
   {
     label: "Photo & Videographers",
-    desc:  "Get up and running on new features and techniques.",
-    href:  "/tour-partners/photography",
-    icon:  iconAlbum,
+    desc: "Get up and running on new features and techniques.",
+    href: "/tour-partners/photography",
+    icon: iconAlbum,
   },
   {
     label: "Insurance & Other Services",
-    desc:  "Get up and running on new features and techniques.",
-    href:  "/tour-partners/insurance",
-    icon:  iconMoneyJar,
+    desc: "Get up and running on new features and techniques.",
+    href: "/tour-partners/insurance",
+    icon: iconMoneyJar,
   },
 ];
 
@@ -110,9 +159,9 @@ const TOUR_PARTNER_ITEMS = [
 //   Inactive: text [16px/500] #565656 + ChevronDown
 //   Open:     text [16px/600] #622399 + ChevronUp + underline fill:#622399
 const NavLink = ({ label, isActive, hasDropdown, isOpen, onClick }) => {
-  const textColor  = isOpen ? "#622399" : isActive ? "#7b2cbf" : "#565656";
-  const lineColor  = isOpen ? "#622399" : "#7b2cbf";
-  const fontWeight = (isActive || isOpen) ? 600 : 500;
+  const textColor = isOpen ? "#622399" : isActive ? "#7b2cbf" : "#565656";
+  const lineColor = isOpen ? "#622399" : "#7b2cbf";
+  const fontWeight = isActive || isOpen ? 600 : 500;
 
   return (
     <button
@@ -121,18 +170,31 @@ const NavLink = ({ label, isActive, hasDropdown, isOpen, onClick }) => {
       className="relative flex flex-col items-start px-[10px] py-[10px] transition-all duration-300 ease-in"
     >
       <div className="flex items-center gap-0">
-        <span style={{ fontSize: "16px", fontWeight, color: textColor, fontFamily: "Raleway, sans-serif", lineHeight: "22px", whiteSpace: "nowrap" }}>
+        <span
+          style={{
+            fontWeight,
+            color: textColor,
+            whiteSpace: "nowrap",
+          }}
+          className={classNames(
+            `${!isActive ? `text-md-Medium` : `text-md-semibold`}`
+          )}
+        >
           {label}
         </span>
-        {hasDropdown && (isOpen
-          ? <ChevronUp stroke={textColor} />
-          : <ChevronDown stroke={textColor} />
-        )}
+        {hasDropdown &&
+          (isOpen ? (
+            <ChevronUp stroke={textColor} />
+          ) : (
+            <ChevronDown stroke={textColor} />
+          ))}
       </div>
       {/* Underline — Rectangle r:10, only on active or open */}
       {(isActive || isOpen) && (
-        <div className="w-full h-[3px] rounded-[10px] mt-[2px] transition-all duration-300 ease-in"
-          style={{ backgroundColor: lineColor }} />
+        <div
+          className="w-full max-w-[59px] mx-auto h-[3px] rounded-[10px] mt-[8px] transition-all duration-300 ease-in"
+          style={{ backgroundColor: lineColor }}
+        />
       )}
     </button>
   );
@@ -144,15 +206,35 @@ const TourDropdown = ({ items, currentPath, onClose }) => (
     {items.map((item) => {
       const isItemActive = currentPath === item.href;
       return (
-        <Link key={item.href} to={item.href} onClick={onClose}
+        <Link
+          key={item.href}
+          to={item.href}
+          onClick={onClose}
           className={classNames(
             "flex flex-col gap-[4px] px-4 py-3 rounded-[8px] transition-all duration-300 ease-in",
-            isItemActive ? "bg-secondary-normal-default" : "hover:bg-secondary-light-default"
-          )}>
-          <span style={{ fontSize: "16px", fontWeight: 600, color: isItemActive ? "#eaeaea" : "#2d2d2d", lineHeight: "24px" }}>
+            isItemActive
+              ? "bg-secondary-normal-default"
+              : "hover:bg-secondary-light-default"
+          )}
+        >
+          <span
+            style={{
+              fontSize: "16px",
+              fontWeight: 600,
+              color: isItemActive ? "#eaeaea" : "#2d2d2d",
+              lineHeight: "24px",
+            }}
+          >
             {item.label}
           </span>
-          <span style={{ fontSize: "13px", fontWeight: 400, color: isItemActive ? "#f7f7f7" : "#6f6f6f", lineHeight: "18px" }}>
+          <span
+            style={{
+              fontSize: "13px",
+              fontWeight: 400,
+              color: isItemActive ? "#f7f7f7" : "#6f6f6f",
+              lineHeight: "18px",
+            }}
+          >
             {item.desc}
           </span>
         </Link>
@@ -170,13 +252,15 @@ const TourPartnersDropdown = ({ items, currentPath, onClose }) => (
     style={{
       width: "620px",
       backgroundColor: "#ffffff",
-      boxShadow: "0px 12px 16px -4px rgba(10,13,18,0.08), 0px 4px 6px -2px rgba(10,13,18,0.03)",
+      boxShadow:
+        "0px 12px 16px -4px rgba(10,13,18,0.08), 0px 4px 6px -2px rgba(10,13,18,0.03)",
     }}
   >
     {/* ── LEFT column ── */}
     <div className="flex-1 flex flex-col gap-[4px] px-[14px] py-[14px] overflow-hidden">
       {items.map(({ label, desc, href, icon }) => {
-        const isItemActive = currentPath === href || currentPath.startsWith(href);
+        const isItemActive =
+          currentPath === href || currentPath.startsWith(href);
         return (
           <Link
             key={href}
@@ -201,10 +285,10 @@ const TourPartnersDropdown = ({ items, currentPath, onClose }) => (
               <span
                 style={{
                   fontFamily: "Inter, sans-serif",
-                  fontSize:   "14px",
+                  fontSize: "14px",
                   fontWeight: 600,
                   lineHeight: "20px",
-                  color:      isItemActive ? "#eaeaea" : "#2d2d2d",
+                  color: isItemActive ? "#eaeaea" : "#2d2d2d",
                 }}
               >
                 {label}
@@ -212,10 +296,10 @@ const TourPartnersDropdown = ({ items, currentPath, onClose }) => (
               <span
                 style={{
                   fontFamily: "Raleway, sans-serif",
-                  fontSize:   "12px",
+                  fontSize: "12px",
                   fontWeight: isItemActive ? 500 : 400,
                   lineHeight: "18px",
-                  color:      isItemActive ? "#f7f7f7" : "#6f6f6f",
+                  color: isItemActive ? "#f7f7f7" : "#6f6f6f",
                 }}
               >
                 {desc}
@@ -230,12 +314,12 @@ const TourPartnersDropdown = ({ items, currentPath, onClose }) => (
     <div
       className="shrink-0 flex flex-col items-start justify-center overflow-hidden self-stretch"
       style={{
-        width:           "220px",
+        width: "220px",
         backgroundColor: "#f7f7f7",
-        paddingLeft:     "16px",
-        paddingRight:    "16px",
-        paddingTop:      "16px",
-        paddingBottom:   "16px",
+        paddingLeft: "16px",
+        paddingRight: "16px",
+        paddingTop: "16px",
+        paddingBottom: "16px",
       }}
     >
       {/* Card: bg texture + purple overlay + main photo */}
@@ -282,81 +366,209 @@ const Navbar = () => {
 
   useEffect(() => {
     const handler = (e) => {
-      if (navRef.current && !navRef.current.contains(e.target)) setOpenDropdown(null);
+      if (navRef.current && !navRef.current.contains(e.target))
+        setOpenDropdown(null);
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const toggle = (name) => setOpenDropdown(prev => prev === name ? null : name);
-  const isActivePath = (path) => location.pathname === path || (path !== "/" && location.pathname.startsWith(path));
+  const toggle = (name) =>
+    setOpenDropdown((prev) => (prev === name ? null : name));
+  const isActivePath = (path) =>
+    location.pathname === path ||
+    (path !== "/" && location.pathname.startsWith(path));
 
   return (
-    <nav ref={navRef} role="navigation" aria-label="Main navigation"
+    <nav
+      ref={navRef}
+      role="navigation"
+      aria-label="Main navigation"
       className="w-full bg-primary-light-default shadow-sm sticky top-0 z-50"
-      style={{ height: "112px" }}>
-
+      style={{ height: "112px" }}
+    >
       {/* Inner container — max-w-[1728px], mirrors Frame 4 layout */}
-      <div className="h-full mx-auto flex items-center justify-between px-[164px]">
-
+      <div className="h-full mx-auto flex items-center justify-between px-[145px]">
         {/* Logo — 115×76 IMAGE (Figma: Elysium cursive script) */}
-        <Link to="/" onClick={() => setOpenDropdown(null)} className="shrink-0 flex items-center" style={{ height: "76px" }}>
+        <Link
+          to="/"
+          onClick={() => setOpenDropdown(null)}
+          className="shrink-0 
+          
+          
+          flex items-center"
+        >
           <ElysiumLogo />
         </Link>
 
         {/* Nav links + CTA — right side with gap:284 from logo */}
-        <div className="flex items-center" style={{ gap: "284px", marginLeft: "0" }}>
-
+        <div
+          className="flex items-center 
+          
+          
+          "
+          style={{ marginLeft: "0" }}
+        >
           {/* Links — HORIZONTAL gap:32 */}
-          <div className="flex items-center" style={{ gap: "32px" }}>
-
+          <div className="flex " style={{ gap: "20px" }}>
             {/* Home */}
             <Link to="/" onClick={() => setOpenDropdown(null)}>
-              <NavLink label="Home" isActive={location.pathname === "/"} hasDropdown={false} isOpen={false} />
+              <NavLink
+                label="Home"
+                isActive={location.pathname === "/"}
+                hasDropdown={false}
+                isOpen={false}
+              />
             </Link>
 
             {/* Tour */}
             <div className="relative">
-              <NavLink label="Tour" isActive={isActivePath("/tours") && openDropdown !== "tour"}
-                hasDropdown isOpen={openDropdown === "tour"}
-                onClick={() => toggle("tour")} />
+              <NavLink
+                label="Tour"
+                isActive={isActivePath("/tours") && openDropdown !== "tour"}
+                hasDropdown
+                isOpen={openDropdown === "tour"}
+                onClick={() => toggle("tour")}
+              />
               {openDropdown === "tour" && (
-                <TourDropdown items={TOUR_ITEMS} currentPath={location.pathname}
-                  onClose={() => setOpenDropdown(null)} />
+                <TourDropdown
+                  items={TOUR_ITEMS}
+                  currentPath={location.pathname}
+                  onClose={() => setOpenDropdown(null)}
+                />
               )}
             </div>
 
             {/* Tour Partners */}
             <div className="relative">
-              <NavLink label="Tour Partners" isActive={isActivePath("/tour-partners") && openDropdown !== "tour-partners"}
-                hasDropdown isOpen={openDropdown === "tour-partners"}
-                onClick={() => toggle("tour-partners")} />
+              <NavLink
+                label="Tour Partners"
+                isActive={
+                  isActivePath("/tour-partners") &&
+                  openDropdown !== "tour-partners"
+                }
+                hasDropdown
+                isOpen={openDropdown === "tour-partners"}
+                onClick={() => toggle("tour-partners")}
+              />
               {openDropdown === "tour-partners" && (
-                <TourPartnersDropdown items={TOUR_PARTNER_ITEMS} currentPath={location.pathname}
-                  onClose={() => setOpenDropdown(null)} />
+                <TourPartnersDropdown
+                  items={TOUR_PARTNER_ITEMS}
+                  currentPath={location.pathname}
+                  onClose={() => setOpenDropdown(null)}
+                />
               )}
             </div>
 
             {/* Gallery */}
             <Link to="/gallery" onClick={() => setOpenDropdown(null)}>
-              <NavLink label="Gallery" isActive={isActivePath("/gallery")} hasDropdown={false} isOpen={false} />
+              <NavLink
+                label="Gallery"
+                isActive={isActivePath("/gallery")}
+                hasDropdown={false}
+                isOpen={false}
+              />
             </Link>
 
             {/* Blogs */}
             <Link to="/blog" onClick={() => setOpenDropdown(null)}>
-              <NavLink label="Blogs" isActive={isActivePath("/blog")} hasDropdown={false} isOpen={false} />
+              <NavLink
+                label="Blogs"
+                isActive={isActivePath("/blog")}
+                hasDropdown={false}
+                isOpen={false}
+              />
+            </Link>
+            {/* Contact Us */}
+            <Link to="/contact" onClick={() => setOpenDropdown(null)}>
+              <NavLink
+                label="Contact Us"
+                isActive={isActivePath("/contact")}
+                hasDropdown={false}
+                isOpen={false}
+              />
             </Link>
           </div>
-
-          {/* Contact Us — 169×56, fill:#7b2cbf, r:40, [16px/600] #fefefe */}
-          <Link to="/contact" onClick={() => setOpenDropdown(null)}>
-            <button
-              type="button"
-              className="bg-secondary-normal-default hover:bg-secondary-normal-hover active:bg-secondary-normal-active text-primary-light-default transition-all duration-300 ease-in"
-              style={{ width: "169px", height: "56px", borderRadius: "40px", fontSize: "16px", fontWeight: 600, fontFamily: "Raleway, sans-serif" }}>
-              Contact Us
-            </button>
-          </Link>
+        </div>
+        <div
+          className="flex items-center gap-4"
+        >
+          {/* Language */}
+          <Button
+            className=" bg-transparent! px-0! shadow-none!"
+            startIcon={
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="22"
+                height="26"
+                viewBox="0 0 22 26"
+                fill="none"
+              >
+                <path
+                  d="M11 22.75C12.0834 22.75 13.1562 22.4978 14.1571 22.0078C15.1581 21.5178 16.0675 20.7997 16.8336 19.8943C17.5997 18.9889 18.2074 17.9141 18.622 16.7312C19.0366 15.5482 19.25 14.2804 19.25 13C19.25 11.7196 19.0366 10.4518 18.622 9.26884C18.2074 8.08591 17.5997 7.01108 16.8336 6.10571C16.0675 5.20034 15.1581 4.48216 14.1571 3.99217C13.1562 3.50219 12.0834 3.25 11 3.25M11 22.75C9.91659 22.75 8.8438 22.4978 7.84286 22.0078C6.84193 21.5178 5.93245 20.7997 5.16637 19.8943C4.40029 18.9889 3.7926 17.9141 3.37799 16.7312C2.96339 15.5482 2.75 14.2804 2.75 13C2.75 11.7196 2.96339 10.4518 3.37799 9.26884C3.7926 8.08591 4.40029 7.01108 5.16637 6.10571C5.93245 5.20034 6.84193 4.48216 7.84286 3.99217C8.8438 3.50219 9.91659 3.25 11 3.25M11 22.75C13.5309 22.75 14.6126 17.1568 14.6126 13C14.6126 8.84325 13.5309 3.25 11 3.25M11 22.75C8.46908 22.75 7.38742 17.1568 7.38742 13C7.38742 8.84325 8.46908 3.25 11 3.25M3.20833 9.75H18.7917M3.20833 16.25H18.7917"
+                  stroke="#565656"
+                  stroke-width="1.2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            }
+            endIcon={
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                viewBox="0 0 18 18"
+                fill="none"
+              >
+                <path d="M5.25 7.5L9 11.25L12.75 7.5H5.25Z" fill="#565656" />
+              </svg>
+            }
+            variant="outline"
+            size="md"
+          >
+            <span className="text-md-Medium text-primary-dark-darker">
+              English
+            </span>
+          </Button>
+          {/* Login */}
+          <Button
+            className="shadow-none! px-0!"
+            startIcon={
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
+                fill="none"
+              >
+                <path
+                  d="M14.1667 7.61627H5.83333C4.68274 7.61627 3.75 8.54901 3.75 9.69961V15.9496C3.75 17.1002 4.68274 18.0329 5.83333 18.0329H14.1667C15.3173 18.0329 16.25 17.1002 16.25 15.9496V9.69961C16.25 8.54901 15.3173 7.61627 14.1667 7.61627Z"
+                  stroke="#565656"
+                  stroke-width="1.66667"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M10 1.36627C8.89497 1.36627 7.83516 1.80526 7.05376 2.58666C6.27236 3.36806 5.83337 4.42787 5.83337 5.53294V7.61627H14.1667V5.53294C14.1667 4.42787 13.7277 3.36806 12.9463 2.58666C12.1649 1.80526 11.1051 1.36627 10 1.36627V1.36627Z"
+                  stroke="#565656"
+                  stroke-width="1.66667"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            }
+            variant="outline"
+            size="md"
+          >
+            <span className="text-md-semibold text-primary-dark-darker">
+              Login
+            </span>
+          </Button>
+          {/* Sign Up */}
+          <Button className="px-10 py-4" variant="secondary" size="md" shape="pill">
+            <span className="text-nowrap">Sign Up</span>
+          </Button>
         </div>
       </div>
     </nav>
