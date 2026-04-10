@@ -25,7 +25,6 @@ const HomePage = React.forwardRef(({ className, ...props }, ref) => {
       <PartnerHighlightsSection />
       <GallerySection />
       <BlogFeatureSection />
-      <BlogCtaSection />
       <TestimonialsSection />
       <CtaSection />
     </main>
