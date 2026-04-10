@@ -32,7 +32,7 @@ const BlogHero = React.forwardRef(({ className, ...props }, ref) => {
   return (
     <section
       ref={ref}
-      className={classNames("relative w-full h-[711px] overflow-hidden", className)}
+      className={classNames("relative  w-full h-[711px] overflow-hidden", className)}
       {...props}
     >
       {/* Slide images */}

@@ -13,7 +13,7 @@ import { classNames } from "../../utils/classNames";
 const StatItem = ({ value, label }) => (
   <div className="flex items-center gap-[40px]">
     {/* Value + label — VERTICAL gap:8 */}
-    <div className="flex flex-col gap-[8px] w-[182px]">
+    <div className="flex flex-col gap-[18px] w-[182px]">
       {/* Value — [56px/600] #7b2cbf */}
       <span className="text-Display-xl-semibold text-secondary-normal-default leading-none">
         {value}
@@ -45,7 +45,7 @@ const StatCounter = React.forwardRef(({
       ref={ref}
       className={classNames(
         // Frame 26: HORIZONTAL gap:170
-        "flex items-center gap-[170px]",
+        "flex items-center justify-between",
         className
       )}
       {...props}

@@ -50,9 +50,9 @@ const SearchBar = React.forwardRef(({
       {...props}
     >
       {/* LEFT — Frame 10: "Where to?" — stroke:#d6beeb on right side only */}
-      <div className="flex-1 flex flex-col justify-center px-6 py-4 border-r border-secondary-light-active">
+      <div className="flex-1 flex flex-col gap-2 justify-center px-10 py-4 border-r border-secondary-light-active">
         {/* Label — [16px/600] #2d2d2d */}
-        <span className="text-md-semibold text-tertiary-normal-default leading-none mb-1">
+        <span className="text-md-semibold text-tertiary-normal-default leading-none ">
           Where to?
         </span>
         {/* Input — [13px/500] #949494 */}
@@ -66,10 +66,10 @@ const SearchBar = React.forwardRef(({
       </div>
 
       {/* RIGHT — Frame 11: "When?" */}
-      <div className="flex-1 flex items-center justify-between px-6 py-4">
-        <div className="flex flex-col justify-center">
+      <div className="flex-1 flex items-center justify-between pl-10 pr-5.5 py-4">
+        <div className="flex flex-col  gap-2 justify-center">
           {/* Label — [16px/600] #2d2d2d */}
-          <span className="text-md-semibold text-tertiary-normal-default leading-none mb-1">
+          <span className="text-md-semibold text-tertiary-normal-default leading-none ">
             When?
           </span>
           {/* Input — [13px/500] #949494 */}
