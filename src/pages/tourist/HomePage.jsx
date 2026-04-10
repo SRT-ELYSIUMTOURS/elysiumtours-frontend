@@ -7,6 +7,7 @@ import FeaturedDestinationsSection from "../../components/sections/home/Featured
 import PartnerHighlightsSection from "../../components/sections/home/PartnerHighlightsSection";
 import GallerySection from "../../components/sections/home/GallerySection";
 import BlogCtaSection from "../../components/sections/home/BlogCtaSection";
+import BlogFeatureSection from "../../components/sections/home/BlogFeatureSection";
 import TestimonialsSection from "../../components/sections/home/TestimonialsSection";
 import CtaSection from "../../components/sections/home/CtaSection";
 
@@ -23,6 +24,7 @@ const HomePage = React.forwardRef(({ className, ...props }, ref) => {
       <FeaturedDestinationsSection />
       <PartnerHighlightsSection />
       <GallerySection />
+      <BlogFeatureSection />
       <BlogCtaSection />
       <TestimonialsSection />
       <CtaSection />
