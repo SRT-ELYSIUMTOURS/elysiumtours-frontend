@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import { classNames } from "../../utils/classNames";
 import BlogBreadcrumbBar from "../../components/sections/blog/BlogBreadcrumbBar";
@@ -25,8 +25,9 @@ const TOUR_DATA = {
     description: "Embark on a transformative journey through Ghana's Central Region, where history meets the sea. Visit the iconic Elmina Castle and Cape Coast Castle — UNESCO World Heritage Sites that tell the story of the transatlantic slave trade with sobering depth. Walk through the Door of No Return, stand in the dungeons, and feel the weight of history. Beyond the castles, explore vibrant local fishing villages, sample fresh seafood at the harbour, and discover the natural wonder of Kakum National Park's canopy walkway suspended 30 metres above the forest floor.",
     images: Array.from({ length: 24 }, (_, i) => `https://picsum.photos/seed/tour-detail-${i + 1}/856/717`),
     heroMainImage: "https://picsum.photos/seed/tour-hero-main/856/717",
-    heroTopRight: "https://picsum.photos/seed/tour-hero-top/856/366",
-    heroBottomRight: "https://picsum.photos/seed/tour-hero-bottom/856/347",
+    heroTopRight: "https://picsum.photos/seed/tour-hero-top/867/366",
+    heroBottomLeft: "https://picsum.photos/seed/tour-hero-bl/430/347",
+    heroBottomRight: "https://picsum.photos/seed/tour-hero-bottom/432/347",
     bestFor: ["Cultural Enthusiasts", "Diaspora Travelers", "International Tourists", "Couples"],
     included: [
       { type: "check", text: "All inter-continental travels" },
@@ -59,11 +60,26 @@ const TOUR_DATA = {
       },
     ],
     guide: {
-      name: "Kwame Asante",
+      name: "Ailsa Mensah-Asante",
       rating: 4.9,
       reviews: 124,
       speciality: "Heritage Guide",
-      image: "https://picsum.photos/seed/guide-kwame/80/80",
+      yearsExp: 8,
+      languages: ["🇬🇧 English", "🇫🇷 French", "🇬🇭 Twi"],
+      certifications: ["UNESCO Certified", "History MA"],
+      image: "https://picsum.photos/seed/guide-ailsa/296/393",
+      testimonials: [
+        {
+          quote: "Ailsa's depth of knowledge brought the castle history to life in a way no textbook ever could. A truly transformative experience.",
+          reviewer: "Estella Sackey",
+          date: "2 weeks ago",
+        },
+        {
+          quote: "Her passion for Ghana's heritage is infectious. Every stop felt personal and deeply meaningful — I'll never forget it.",
+          reviewer: "James O.",
+          date: "1 month ago",
+        },
+      ],
     },
     reviews: [
       {
@@ -92,6 +108,19 @@ const TOUR_DATA = {
       },
     ],
     ratingBreakdown: { 5: 85, 4: 10, 3: 3, 2: 1, 1: 1 },
+    totalReviews: 3249,
+    categoryRatings: [
+      { label: "Guide Quality",      score: 4.9 },
+      { label: "Value for Money",    score: 4.8 },
+      { label: "Logistical Quality", score: 4.9 },
+      { label: "Transport",          score: 4.5 },
+    ],
+    addOns: [
+      { name: "Professional Photo Package",   desc: "High-resolution photos & edited highlights reel",    price: "GH₵ 850" },
+      { name: "Private Vehicle Upgrade",       desc: "Exclusive private transfer throughout the tour",      price: "GH₵ 850" },
+      { name: "Elmwood International Flights", desc: "Return flights from your home country",               price: "GH₵ 850" },
+      { name: "Souvenir Bundle",               desc: "Curated Ghanaian artisan souvenirs and gifts",         price: "GH₵ 850" },
+    ],
   },
 };
 
@@ -234,6 +263,230 @@ const GreenCheckIcon = () => (
   </svg>
 );
 
+// ─── Tour Hero Section — Figma 3075:39137 ─────────────────────────────────────
+// Full-width section: title+meta header (pl-156px) + 4-photo image grid (h-717px)
+// Must sit OUTSIDE the padded content container so images reach edge-to-edge.
+//
+// Image grid layout (all absolute-positioned within the 1728×717 frame):
+//   Left carousel:   left-0       w-856px  h-717px (gap of 8px to right column)
+//   Right column:    left-864px   w-864px  h-717px   flex-col gap-4px
+//     ↳ Top image:   w-full       h-366px
+//     ↳ Bottom row:  w-full       h-347px  flex gap-4px
+//         Bottom-L:  w-430px      h-347px
+//         Bottom-R:  flex-1       h-347px  + "Show all photos" button
+//
+// "Show all photos" button — Figma 3071:39004:
+//   backdrop-blur(7.45px) bg rgba(123,44,191,0.5) border-[#f2eaf9] rounded-[10px]
+//   left-248px top-294px  w-160px h-38px  within the 432×347 bottom-right image
+const TourHeroSection = React.forwardRef(({ tourData, onOpenGallery }, ref) => {
+  const [slideIndex, setSlideIndex] = useState(0);
+
+  return (
+    <div ref={ref} className="w-full flex flex-col bg-secondary-light-hover" style={{ gap: "16px" }}>
+
+      {/* ── Title + meta row — Figma 3075:39109 ──────────────────────────── */}
+      {/* pl-156px matches the standard page left gutter; pt-32px from gap to tab nav */}
+      <div className="flex flex-col pl-[156px]" style={{ gap: "8px", paddingTop: "32px" }}>
+
+        {/* h1 — Raleway SemiBold 39px/50lh #7b2cbf — Figma 3075:39111 */}
+        <h1 style={{
+          fontFamily: "Raleway, sans-serif",
+          fontWeight: 600,
+          fontSize: "39px",
+          lineHeight: "50px",
+          color: "#7b2cbf",
+          whiteSpace: "nowrap",
+        }}>
+          {tourData.title}
+        </h1>
+
+        {/* Meta row — Figma 3075:39112 — h-20px flex gap-8px */}
+        <div className="flex items-center" style={{ gap: "8px", height: "20px" }}>
+
+          {/* Star + rating + review count */}
+          <div className="flex items-center" style={{ gap: "4px" }}>
+            {/* star SVG 18×19px — Figma 3075:39115 */}
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+              <path d="M8.523 1.164c.292-.842 1.662-.842 1.954 0l1.12 3.232a1.04 1.04 0 0 0 .987.716h3.4c.893 0 1.264 1.145.542 1.67l-2.75 2.002a1.04 1.04 0 0 0-.378 1.163l1.052 3.042c.29.84-.69 1.54-1.408 1.017l-2.752-2.003a1.04 1.04 0 0 0-1.224 0L6.358 14.006c-.718.523-1.698-.176-1.408-1.017l1.052-3.042a1.04 1.04 0 0 0-.378-1.163L2.874 6.782c-.722-.525-.351-1.67.542-1.67h3.4a1.04 1.04 0 0 0 .987-.716L8.923 1.164Z" fill="#7b2cbf" />
+            </svg>
+            {/* rating value — Raleway SemiBold 13px #0a0a0a */}
+            <span style={{ fontFamily: "Raleway, sans-serif", fontWeight: 600, fontSize: "13px", lineHeight: "18px", color: "#0a0a0a" }}>
+              {tourData.rating}
+            </span>
+            {/* review count — Raleway SemiBold 13px #4a5565 */}
+            <span style={{ fontFamily: "Raleway, sans-serif", fontWeight: 600, fontSize: "13px", lineHeight: "18px", color: "#4a5565" }}>
+              ({tourData.reviewCount} reviews)
+            </span>
+          </div>
+
+          {/* Dot separator — Inter Regular 14px #99a1af tracking-[-0.15px] */}
+          <span aria-hidden="true" style={{ fontFamily: "Inter, sans-serif", fontWeight: 400, fontSize: "14px", lineHeight: "20px", color: "#99a1af", letterSpacing: "-0.1504px" }}>
+            ·
+          </span>
+
+          {/* Location — Raleway SemiBold 13px #2d2d2d underline — Figma 3075:39124 */}
+          <span style={{ fontFamily: "Raleway, sans-serif", fontWeight: 600, fontSize: "13px", lineHeight: "18px", color: "#2d2d2d", textDecoration: "underline", textDecorationStyle: "solid", whiteSpace: "nowrap" }}>
+            {tourData.location}
+          </span>
+        </div>
+      </div>
+
+      {/* ── 4-photo image grid — Figma 3047:42325 ────────────────────────── */}
+      {/* Full width, h-717px, border-r #d6beeb, overflow-hidden */}
+      <div className="relative w-full overflow-hidden" style={{ height: "717px", borderRight: "1px solid #d6beeb" }}>
+
+        {/* LEFT: carousel — absolute, left-0, w-856px */}
+        <div
+          className="absolute left-0 top-0 overflow-hidden cursor-pointer"
+          style={{ width: "856px", height: "717px" }}
+          onClick={() => onOpenGallery(slideIndex)}
+        >
+          <img
+            src={tourData.heroMainImage}
+            alt={tourData.title}
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+
+          
+        </div>
+
+        {/* RIGHT: 3-image column — absolute, left-864px (8px gap), w-864px */}
+        <div
+          className="absolute top-0 flex flex-col"
+          style={{ left: "864px", width: "864px", height: "717px", gap: "4px" }}
+        >
+          {/* Top image — h-366px, full right width */}
+          <div
+            className="overflow-hidden flex-shrink-0 cursor-pointer"
+            style={{ width: "100%", height: "366px" }}
+            onClick={() => onOpenGallery(1)}
+          >
+            <img src={tourData.heroTopRight} alt="Tour view 2" className="w-full h-full object-cover" />
+          </div>
+
+          {/* Bottom row — h-347px, two images side by side gap-4px */}
+          <div className="flex" style={{ gap: "4px", height: "347px" }}>
+
+            {/* Bottom-left — w-430px */}
+            <div
+              className="overflow-hidden flex-shrink-0 cursor-pointer"
+              style={{ width: "430px", height: "347px" }}
+              onClick={() => onOpenGallery(2)}
+            >
+              <img src={tourData.heroBottomLeft} alt="Tour view 3" className="w-full h-full object-cover" />
+            </div>
+
+            {/* Bottom-right — flex-1 (~432px), has "Show all photos" button */}
+            <div
+              className="relative overflow-hidden cursor-pointer"
+              style={{ flex: "1 0 0", height: "347px" }}
+              onClick={() => onOpenGallery(3)}
+            >
+              <img src={tourData.heroBottomRight} alt="Tour view 4" className="w-full h-full object-cover" />
+
+              {/* "Show all photos" button — Figma 3071:39004
+                  Frosted glass: backdrop-blur(7.45px) rgba(123,44,191,0.5) border-[#f2eaf9]
+                  Position within image: left-248px top-294px
+                  Interaction: opens image gallery carousel (pop-up) */}
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); onOpenGallery(0); }}
+                className="absolute flex items-center"
+                style={{
+                  left: "248px",
+                  top: "294px",
+                  width: "160px",
+                  height: "38px",
+                  borderRadius: "10px",
+                  backdropFilter: "blur(7.45px)",
+                  WebkitBackdropFilter: "blur(7.45px)",
+                  backgroundColor: "rgba(123, 44, 191, 0.5)",
+                  border: "1px solid #f2eaf9",
+                  paddingLeft: "12px",
+                  gap: "8px",
+                }}
+              >
+                {/* Grid icon — Figma uses ⋮⋮ (two vertical ellipsis chars); rendered as SVG 4-square grid for crisp rendering */}
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true" style={{ flexShrink: 0 }}>
+                  <rect x="0" y="0" width="5" height="5" rx="1" fill="#ebdff5" />
+                  <rect x="7" y="0" width="5" height="5" rx="1" fill="#ebdff5" />
+                  <rect x="0" y="7" width="5" height="5" rx="1" fill="#ebdff5" />
+                  <rect x="7" y="7" width="5" height="5" rx="1" fill="#ebdff5" />
+                </svg>
+                <span style={{
+                  fontFamily: "Raleway, sans-serif",
+                  fontWeight: 600,
+                  fontSize: "13px",
+                  lineHeight: "18px",
+                  color: "#f2eaf9",
+                  whiteSpace: "nowrap",
+                }}>
+                  Show all photos
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+});
+TourHeroSection.displayName = "TourHeroSection";
+
+// ─── Sticky section nav bar — Figma 3045:42287 ────────────────────────────────
+// 1728×64px, bg #fefefe, borderBottom 2px solid #d6beeb, sticky below main nav
+// Tabs: flex row gap-8px, left-aligned inside px-156px container
+// Active:   SemiBold 13px/18lh #7b2cbf + 2px bottom border #7b2cbf
+// Inactive: Medium   13px/22lh #565656 + transparent border
+const DETAIL_TABS = [
+  { key: "overview",   label: "Overview"   },
+  { key: "itinerary",  label: "Itinerary"  },
+  { key: "inclusions", label: "Inclusions" },
+  { key: "tour-guide", label: "Tour Guide" },
+  { key: "reviews",    label: "Reviews"    },
+  { key: "location",   label: "Location"   },
+];
+
+const TourDetailNavBar = ({ activeSection, onTabClick }) => (
+  <div
+    className="w-full bg-[#fefefe] sticky z-40"
+    style={{ top: "112px", height: "64px", borderBottom: "2px solid #d6beeb" }}
+  >
+    <div className="h-full flex items-center px-[156px]">
+      <div className="flex items-center gap-[8px]">
+        {DETAIL_TABS.map((tab) => {
+          const isActive = activeSection === tab.key;
+          return (
+            <button
+              key={tab.key}
+              type="button"
+              onClick={() => onTabClick(tab.key)}
+              className="h-[63px] relative flex items-center justify-center px-[10px] flex-shrink-0 transition-colors"
+              style={{
+                borderBottom: isActive ? "2px solid #7b2cbf" : "2px solid transparent",
+                marginBottom: "-2px", // align bottom border with bar's bottom border
+              }}
+            >
+              <span
+                style={{
+                  fontFamily: "Raleway, sans-serif",
+                  fontSize: "13px",
+                  fontWeight: isActive ? 600 : 500,
+                  lineHeight: isActive ? "18px" : "22px",
+                  color: isActive ? "#7b2cbf" : "#565656",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {tab.label}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  </div>
+);
+
 // ─── Itinerary accordion item ──────────────────────────────────────────────────
 const ItineraryDay = ({ day }) => {
   const [open, setOpen] = useState(day.day === 1);
@@ -276,15 +529,489 @@ const ReviewStars = ({ rating, size = 14 }) => (
   </div>
 );
 
+// ─── ItineraryStep ────────────────────────────────────────────────────────────
+// Figma 3111:40578 — step circle (48px) + vertical connector line + accordion
+// Active circle: bg-#7b2cbf border-2 white, text white   Inactive: bg-#ebdff5 border-#d6beeb, text #7b2cbf
+const ItineraryStep = ({ day, isFirst }) => {
+  const [open, setOpen] = useState(isFirst);
+  return (
+    <div className="flex" style={{ gap: "24px", paddingBottom: open ? "32px" : "28px" }}>
+      {/* Circle */}
+      <div className="flex-shrink-0" style={{ paddingTop: "2px" }}>
+        <div
+          style={{
+            width: "48px",
+            height: "48px",
+            borderRadius: "50%",
+            backgroundColor: open ? "#7b2cbf" : "#ebdff5",
+            border: open ? "2px solid #ffffff" : "1.5px solid #d6beeb",
+            boxShadow: open ? "0 0 0 2px #7b2cbf" : "none",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+            transition: "all 0.2s",
+          }}
+        >
+          <span style={{ fontFamily: "Raleway, sans-serif", fontWeight: 600, fontSize: "20px", lineHeight: 1, color: open ? "#ffffff" : "#7b2cbf" }}>
+            {day.day}
+          </span>
+        </div>
+      </div>
+      {/* Content */}
+      <div className="flex-1" style={{ paddingTop: "8px" }}>
+        <button
+          type="button"
+          onClick={() => setOpen(!open)}
+          className="w-full text-left flex items-start justify-between"
+          style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
+        >
+          <div style={{ flex: 1, paddingRight: "12px" }}>
+            <h3 style={{ fontFamily: "Raleway, sans-serif", fontWeight: 600, fontSize: "16px", lineHeight: "28px", color: "#4a1a73", marginBottom: "2px" }}>
+              Day {day.day}: {day.title}
+            </h3>
+            <p style={{ fontFamily: "Raleway, sans-serif", fontWeight: 400, fontSize: "13px", lineHeight: "20px", color: "#6a7282" }}>
+              {day.activities.join(" • ")}
+            </p>
+          </div>
+          <ChevronDownIcon open={open} />
+        </button>
+        {open && (
+          <div style={{ marginTop: "16px", paddingTop: "16px", borderTop: "1px solid #ebdff5" }}>
+            <div className="flex flex-col" style={{ gap: "6px" }}>
+              {day.activities.map((act, i) => (
+                <div key={i} className="flex items-start" style={{ gap: "10px" }}>
+                  <div style={{ width: "6px", height: "6px", borderRadius: "50%", backgroundColor: "#7b2cbf", flexShrink: 0, marginTop: "9px" }} />
+                  <span style={{ fontFamily: "Raleway, sans-serif", fontWeight: 400, fontSize: "15px", lineHeight: "24px", color: "#364153" }}>
+                    {act}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// ─── AddOnRow ─────────────────────────────────────────────────────────────────
+// Figma 3112:40669 — icon + name + desc on left; price + checkbox on right
+const AddOnRow = ({ addon }) => {
+  const [selected, setSelected] = useState(false);
+  return (
+    <div className="flex items-center justify-between" style={{ paddingTop: "16px", paddingBottom: "16px", borderBottom: "1px solid #ebdff5" }}>
+      <div className="flex items-center" style={{ gap: "14px" }}>
+        {/* Icon chip */}
+        <div style={{ width: "40px", height: "40px", borderRadius: "10px", backgroundColor: "#f2eaf9", border: "1px solid #ebdff5", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <circle cx="10" cy="10" r="7.5" stroke="#7b2cbf" strokeWidth="1.5"/>
+            <path d="M7 10.5L9 12.5L13.5 8" stroke="#7b2cbf" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </div>
+        <div>
+          <p style={{ fontFamily: "Raleway, sans-serif", fontWeight: 600, fontSize: "15px", lineHeight: "22px", color: "#2d2d2d" }}>
+            {addon.name}
+          </p>
+          <p style={{ fontFamily: "Raleway, sans-serif", fontWeight: 400, fontSize: "13px", lineHeight: "20px", color: "#6a7282", marginTop: "2px" }}>
+            {addon.desc}
+          </p>
+        </div>
+      </div>
+      <div className="flex items-center" style={{ gap: "14px", flexShrink: 0 }}>
+        <span style={{ fontFamily: "Raleway, sans-serif", fontWeight: 600, fontSize: "14px", color: "#7b2cbf", whiteSpace: "nowrap" }}>
+          + {addon.price}
+        </span>
+        <button
+          type="button"
+          onClick={() => setSelected(!selected)}
+          style={{ width: "24px", height: "24px", flexShrink: 0, background: "none", border: "none", padding: 0, cursor: "pointer" }}
+        >
+          {selected ? (
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <rect x="2" y="2" width="20" height="20" rx="4" fill="#7b2cbf"/>
+              <path d="M7 12L10 15L17 8" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          ) : (
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <rect x="2" y="2" width="20" height="20" rx="4" stroke="#d1d5dc" strokeWidth="1.5"/>
+            </svg>
+          )}
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// ─── GuideCard ────────────────────────────────────────────────────────────────
+// Figma 3112:40961 — rounded-30px card; left photo panel (gradient #2b0f43→#6c26a9)
+// Right content: name / subtitle / language+cert badges / 2 testimonial quotes / link
+const GuideCard = ({ guide }) => (
+  <div
+    className="relative overflow-hidden flex"
+    style={{ borderRadius: "30px", border: "1.5px solid #d6beeb", minHeight: "393px" }}
+  >
+    {/* Left: photo panel */}
+    <div className="relative flex-shrink-0" style={{ width: "296px" }}>
+      {/* Gradient overlay */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background: "linear-gradient(180deg, #2b0f43 0%, #6c26a9 100%)",
+          opacity: 0.82,
+          borderRadius: "28px 0 0 28px",
+          zIndex: 1,
+        }}
+      />
+      {/* Glow ellipse */}
+      <div
+        className="absolute pointer-events-none"
+        style={{
+          width: "455px",
+          height: "366px",
+          left: "-63px",
+          bottom: "-80px",
+          borderRadius: "50%",
+          background: "rgba(123,44,191,0.45)",
+          filter: "blur(64px)",
+          zIndex: 2,
+        }}
+      />
+      <img
+        src={guide.image}
+        alt={guide.name}
+        className="absolute inset-0 w-full h-full object-cover"
+        style={{ borderRadius: "28px 0 0 28px" }}
+      />
+    </div>
+
+    {/* Right: content */}
+    <div className="flex-1 flex flex-col justify-center" style={{ padding: "32px 32px 32px 36px" }}>
+      {/* Name */}
+      <h3 style={{ fontFamily: "Raleway, sans-serif", fontWeight: 600, fontSize: "20px", lineHeight: "28px", color: "#4a1a73", marginBottom: "4px" }}>
+        {guide.name}
+      </h3>
+      {/* Subtitle */}
+      <p style={{ fontFamily: "Raleway, sans-serif", fontWeight: 400, fontSize: "14px", lineHeight: "22px", color: "#6a7282", marginBottom: "16px" }}>
+        {guide.speciality} · {guide.yearsExp} yrs · {guide.rating} ★ ({guide.reviews} reviews)
+      </p>
+      {/* Language + certification badges */}
+      <div className="flex flex-wrap" style={{ gap: "8px", marginBottom: "24px" }}>
+        {(guide.languages || []).map((lang) => (
+          <span key={lang} style={{ fontFamily: "Raleway, sans-serif", fontSize: "13px", fontWeight: 500, color: "#364153", backgroundColor: "#fafafa", border: "1px solid #d6beeb", borderRadius: "100px", padding: "4px 12px" }}>
+            {lang}
+          </span>
+        ))}
+        {(guide.certifications || []).map((cert) => (
+          <span key={cert} style={{ fontFamily: "Raleway, sans-serif", fontSize: "13px", fontWeight: 600, color: "#4a1a73", backgroundColor: "#f2eaf9", border: "1px solid #d6beeb", borderRadius: "100px", padding: "4px 12px" }}>
+            {cert}
+          </span>
+        ))}
+      </div>
+      {/* Testimonial quotes — border-l-2 #7b2cbf */}
+      <div className="flex flex-col" style={{ gap: "16px", marginBottom: "24px" }}>
+        {(guide.testimonials || []).map((t, i) => (
+          <div key={i} style={{ borderLeft: "2px solid #7b2cbf", paddingLeft: "14px" }}>
+            <p style={{ fontFamily: "Raleway, sans-serif", fontWeight: 500, fontSize: "14px", lineHeight: "22px", color: "#364153", fontStyle: "italic" }}>
+              "{t.quote}"
+            </p>
+            <p style={{ fontFamily: "Raleway, sans-serif", fontWeight: 600, fontSize: "12px", color: "#6a7282", marginTop: "4px" }}>
+              — {t.reviewer}, {t.date}
+            </p>
+          </div>
+        ))}
+      </div>
+      {/* View Full Details link */}
+      <button
+        type="button"
+        style={{ alignSelf: "flex-end", fontFamily: "Raleway, sans-serif", fontWeight: 600, fontSize: "14px", color: "#7b2cbf", background: "none", border: "none", cursor: "pointer", padding: 0 }}
+      >
+        View Full Details →
+      </button>
+    </div>
+  </div>
+);
+
+// ─── ReviewsSection ───────────────────────────────────────────────────────────
+// Figma 3123:42908 — 4.9 score + category bars + filter tabs + 4 review cards
+const REVIEW_FILTER_TABS = ["All", "Cultural Interests", "Cleanness", "International", "Business", "Groups"];
+
+const ReviewsSection = ({ tourData }) => {
+  const [activeFilter, setActiveFilter] = useState("All");
+  return (
+    <div>
+      {/* Rating overview */}
+      <div className="flex items-start" style={{ gap: "48px", marginBottom: "28px" }}>
+        {/* Big number + stars */}
+        <div className="flex flex-col items-center flex-shrink-0" style={{ gap: "8px", width: "127px" }}>
+          <span style={{ fontFamily: "Raleway, sans-serif", fontWeight: 700, fontSize: "56px", lineHeight: "56px", color: "#0a0a0a" }}>
+            {tourData.rating}
+          </span>
+          <ReviewStars rating={tourData.rating} size={18} />
+          <span style={{ fontFamily: "Raleway, sans-serif", fontWeight: 400, fontSize: "13px", color: "#6a7282", marginTop: "2px" }}>
+            {(tourData.totalReviews || 3249).toLocaleString()} reviews
+          </span>
+        </div>
+        {/* Category rating bars */}
+        <div className="flex-1 flex flex-col" style={{ gap: "18px", paddingTop: "8px" }}>
+          {(tourData.categoryRatings || []).map(({ label, score }) => (
+            <div key={label} className="flex items-center" style={{ gap: "12px" }}>
+              <span style={{ fontFamily: "Raleway, sans-serif", fontWeight: 500, fontSize: "13px", lineHeight: "20px", color: "#364153", width: "140px", flexShrink: 0 }}>
+                {label}
+              </span>
+              <div
+                className="flex-1 overflow-hidden"
+                style={{ height: "8px", borderRadius: "100px", backgroundColor: "#e9eaeb" }}
+              >
+                <div style={{ width: `${(score / 5) * 100}%`, height: "100%", backgroundColor: "#7b2cbf", borderRadius: "100px" }} />
+              </div>
+              <span style={{ fontFamily: "Raleway, sans-serif", fontWeight: 600, fontSize: "13px", color: "#364153", width: "32px", textAlign: "right", flexShrink: 0 }}>
+                {score}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Filter tabs */}
+      <div className="flex items-center flex-wrap" style={{ gap: "8px", marginBottom: "28px" }}>
+        {REVIEW_FILTER_TABS.map((tab) => {
+          const isActive = activeFilter === tab;
+          return (
+            <button
+              key={tab}
+              type="button"
+              onClick={() => setActiveFilter(tab)}
+              style={{
+                fontFamily: "Raleway, sans-serif",
+                fontWeight: isActive ? 600 : 500,
+                fontSize: "13px",
+                lineHeight: "22px",
+                color: isActive ? "#7b2cbf" : "#364153",
+                backgroundColor: isActive ? "#f2eaf9" : "#fafafa",
+                border: `1.5px solid ${isActive ? "#d6beeb" : "#e9eaeb"}`,
+                borderRadius: "100px",
+                padding: "6px 16px",
+                cursor: "pointer",
+                transition: "all 0.2s",
+              }}
+            >
+              {tab}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Review cards */}
+      <div className="flex flex-col">
+        {tourData.reviews.map((review) => (
+          <div key={review.id} style={{ padding: "28px 10px", borderBottom: "1px solid #ebdff5" }}>
+            <div className="flex items-start" style={{ gap: "16px" }}>
+              <div style={{ width: "60px", height: "60px", borderRadius: "50%", overflow: "hidden", flexShrink: 0 }}>
+                <img src={review.avatar} alt={review.name} className="w-full h-full object-cover" />
+              </div>
+              <div className="flex-1">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p style={{ fontFamily: "Raleway, sans-serif", fontWeight: 600, fontSize: "15px", lineHeight: "22px", color: "#2d2d2d" }}>{review.name}</p>
+                    <p style={{ fontFamily: "Raleway, sans-serif", fontWeight: 400, fontSize: "12px", color: "#6a7282", marginTop: "2px" }}>{review.date}</p>
+                  </div>
+                  <ReviewStars rating={review.rating} size={14} />
+                </div>
+                <p style={{ fontFamily: "Raleway, sans-serif", fontWeight: 400, fontSize: "15px", lineHeight: "24px", color: "#364153", marginTop: "12px" }}>
+                  {review.text}
+                </p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Load More — centered, w=215px h=56px — Figma 3126:43291 */}
+      <div className="flex justify-center" style={{ marginTop: "32px" }}>
+        <button
+          type="button"
+          style={{ width: "215px", height: "56px", borderRadius: "40px", border: "1.5px solid #7b2cbf", color: "#7b2cbf", fontFamily: "Raleway, sans-serif", fontWeight: 600, fontSize: "15px", backgroundColor: "transparent", cursor: "pointer" }}
+        >
+          Load More Reviews
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// ─── BookingWidget ────────────────────────────────────────────────────────────
+// Figma 3156:45940 — 457×755px card; gradient header + 3-step stepper + date inputs
+// + traveler counters + Check Availability CTA + free cancellation notice
+const BookingWidget = ({ tourData, adults, setAdults, children, setChildren, departureDate, setDepartureDate, returnDate, setReturnDate, bookmarked, setBookmarked }) => (
+  <div
+    style={{
+      width: "457px",
+      borderRadius: "24px",
+      border: "1px solid #d6beeb",
+      overflow: "hidden",
+      boxShadow: "0px 20px 25px -5px rgba(0,0,0,0.1)",
+      backgroundColor: "white",
+    }}
+  >
+    {/* ── Gradient header — bg from-#7b2cbf to-#391559, h-140px ─────── */}
+    <div style={{ height: "140px", background: "linear-gradient(180deg, #7b2cbf 0%, #391559 100%)", padding: "24px 24px 0 18px", display: "flex", flexDirection: "column", gap: "8px" }}>
+      <p style={{ fontFamily: "Raleway, sans-serif", fontWeight: 500, fontSize: "10px", lineHeight: "18px", color: "#d6beeb", letterSpacing: "0.08em" }}>FROM</p>
+      <p style={{ fontFamily: "Raleway, sans-serif", fontWeight: 700, fontSize: "39px", lineHeight: "50px", color: "white", margin: 0 }}>GH₵ 4,590</p>
+      <p style={{ fontFamily: "Raleway, sans-serif", fontWeight: 500, fontSize: "13px", lineHeight: "22px", color: "#ebdff5", margin: 0 }}>per person · USD ~$290 equivalent</p>
+    </div>
+
+    {/* ── 3-step stepper — h-105px border-b #f2eaf9 ─────────────────── */}
+    <div style={{ height: "105px", borderBottom: "1px solid #f2eaf9", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div className="flex items-center" style={{ gap: "12px" }}>
+        {/* Step 1 — active */}
+        <div className="flex flex-col items-center" style={{ gap: "8px", width: "91px" }}>
+          <div style={{ width: "40px", height: "40px", borderRadius: "100px", backgroundColor: "#7b2cbf", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <span style={{ fontFamily: "Raleway, sans-serif", fontWeight: 600, fontSize: "13px", color: "white" }}>1</span>
+          </div>
+          <span style={{ fontFamily: "Raleway, sans-serif", fontWeight: 700, fontSize: "13px", lineHeight: "18px", color: "#7b2cbf" }}>Dates</span>
+        </div>
+        {/* Connector line */}
+        <div style={{ width: "47px", height: "2px", borderRadius: "10px", backgroundColor: "#ebdff5" }} />
+        {/* Step 2 — inactive */}
+        <div className="flex flex-col items-center" style={{ gap: "8px", width: "91px" }}>
+          <div style={{ width: "40px", height: "40px", borderRadius: "100px", backgroundColor: "#f2eaf9", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <span style={{ fontFamily: "Raleway, sans-serif", fontWeight: 600, fontSize: "13px", color: "#d6beeb" }}>2</span>
+          </div>
+          <span style={{ fontFamily: "Raleway, sans-serif", fontWeight: 600, fontSize: "13px", lineHeight: "18px", color: "#d6beeb" }}>Review</span>
+        </div>
+        {/* Connector line */}
+        <div style={{ width: "47px", height: "2px", borderRadius: "10px", backgroundColor: "#ebdff5" }} />
+        {/* Step 3 — inactive */}
+        <div className="flex flex-col items-center" style={{ gap: "8px", width: "91px" }}>
+          <div style={{ width: "40px", height: "40px", borderRadius: "100px", backgroundColor: "#f2eaf9", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <span style={{ fontFamily: "Raleway, sans-serif", fontWeight: 600, fontSize: "13px", color: "#d6beeb" }}>3</span>
+          </div>
+          <span style={{ fontFamily: "Raleway, sans-serif", fontWeight: 600, fontSize: "13px", lineHeight: "18px", color: "#d6beeb" }}>Payment</span>
+        </div>
+      </div>
+    </div>
+
+    {/* ── Content area ─────────────────────────────────────────────────── */}
+    <div style={{ padding: "24px 28px 0", display: "flex", flexDirection: "column", gap: "16px" }}>
+
+      {/* CHOOSE YOUR DATE */}
+      <div>
+        <p style={{ fontFamily: "Raleway, sans-serif", fontWeight: 700, fontSize: "13px", lineHeight: "18px", color: "#4a1a73", marginBottom: "16px" }}>CHOOSE YOUR DATE</p>
+        <div className="grid grid-cols-2" style={{ gap: "16px" }}>
+          <div>
+            <p style={{ fontFamily: "Inter, sans-serif", fontWeight: 500, fontSize: "12px", color: "#6a7282", textTransform: "uppercase", marginBottom: "8px", letterSpacing: "0.04em" }}>DEPARTURE</p>
+            <input
+              type="date"
+              value={departureDate}
+              onChange={(e) => setDepartureDate(e.target.value)}
+              style={{ width: "100%", height: "42px", borderRadius: "10px", border: "1px solid #d1d5dc", padding: "0 12px", fontFamily: "Inter, sans-serif", fontSize: "14px", color: "#0a0a0a", outline: "none", boxSizing: "border-box" }}
+            />
+          </div>
+          <div>
+            <p style={{ fontFamily: "Inter, sans-serif", fontWeight: 500, fontSize: "12px", color: "#6a7282", textTransform: "uppercase", marginBottom: "8px", letterSpacing: "0.04em" }}>RETURN</p>
+            <input
+              type="date"
+              value={returnDate}
+              onChange={(e) => setReturnDate(e.target.value)}
+              style={{ width: "100%", height: "42px", borderRadius: "10px", border: "1px solid #d1d5dc", padding: "0 12px", fontFamily: "Inter, sans-serif", fontSize: "14px", color: "#0a0a0a", outline: "none", boxSizing: "border-box" }}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* TRAVELERS */}
+      <div>
+        <p style={{ fontFamily: "Raleway, sans-serif", fontWeight: 700, fontSize: "13px", lineHeight: "18px", color: "#4a1a73", marginBottom: "12px" }}>Travelers</p>
+        <div className="flex flex-col" style={{ gap: "0" }}>
+          {/* Adults */}
+          <div className="flex items-center justify-between" style={{ padding: "10px 0" }}>
+            <div>
+              <p style={{ fontFamily: "Raleway, sans-serif", fontWeight: 600, fontSize: "13px", lineHeight: "20px", color: "#2d2d2d" }}>Adults</p>
+              <p style={{ fontFamily: "Raleway, sans-serif", fontWeight: 500, fontSize: "10px", color: "#7b2cbf" }}>Age 13+</p>
+            </div>
+            <div className="flex items-center" style={{ gap: "12px" }}>
+              <button
+                type="button"
+                onClick={() => setAdults(Math.max(1, adults - 1))}
+                style={{ width: "32px", height: "32px", borderRadius: "50%", border: "2px solid #d6beeb", display: "flex", alignItems: "center", justifyContent: "center", color: "#7b2cbf", fontSize: "18px", fontWeight: "bold", cursor: "pointer", backgroundColor: "transparent", lineHeight: 1 }}
+              >−</button>
+              <span style={{ fontFamily: "Raleway, sans-serif", fontWeight: 600, fontSize: "20px", color: "#4a1a73", width: "32px", textAlign: "center" }}>{adults}</span>
+              <button
+                type="button"
+                onClick={() => setAdults(adults + 1)}
+                style={{ width: "32px", height: "32px", borderRadius: "50%", border: "2px solid #d6beeb", display: "flex", alignItems: "center", justifyContent: "center", color: "#7b2cbf", fontSize: "18px", fontWeight: "bold", cursor: "pointer", backgroundColor: "transparent", lineHeight: 1 }}
+              >+</button>
+            </div>
+          </div>
+          {/* Children */}
+          <div className="flex items-center justify-between" style={{ padding: "10px 0" }}>
+            <div>
+              <p style={{ fontFamily: "Raleway, sans-serif", fontWeight: 600, fontSize: "13px", lineHeight: "20px", color: "#2d2d2d" }}>Children</p>
+              <p style={{ fontFamily: "Raleway, sans-serif", fontWeight: 500, fontSize: "10px", color: "#7b2cbf" }}>Age 4–12</p>
+            </div>
+            <div className="flex items-center" style={{ gap: "12px" }}>
+              <button
+                type="button"
+                onClick={() => setChildren(Math.max(0, children - 1))}
+                style={{ width: "32px", height: "32px", borderRadius: "50%", border: "2px solid #d6beeb", display: "flex", alignItems: "center", justifyContent: "center", color: "#7b2cbf", fontSize: "18px", fontWeight: "bold", cursor: "pointer", backgroundColor: "transparent", lineHeight: 1 }}
+              >−</button>
+              <span style={{ fontFamily: "Raleway, sans-serif", fontWeight: 600, fontSize: "20px", color: "#4a1a73", width: "32px", textAlign: "center" }}>{children}</span>
+              <button
+                type="button"
+                onClick={() => setChildren(children + 1)}
+                style={{ width: "32px", height: "32px", borderRadius: "50%", border: "2px solid #d6beeb", display: "flex", alignItems: "center", justifyContent: "center", color: "#7b2cbf", fontSize: "18px", fontWeight: "bold", cursor: "pointer", backgroundColor: "transparent", lineHeight: 1 }}
+              >+</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* CTA ACTIONS */}
+      <div className="flex flex-col" style={{ gap: "12px" }}>
+        {/* Check Availability — h-52px rounded-40px bg-#7b2cbf */}
+        <button
+          type="button"
+          style={{ width: "100%", height: "52px", borderRadius: "40px", backgroundColor: "#7b2cbf", border: "1px solid #7b2cbf", color: "#f2eaf9", fontFamily: "Raleway, sans-serif", fontWeight: 600, fontSize: "16px", lineHeight: "22px", cursor: "pointer", boxShadow: "0px 4px 4px rgba(0,0,0,0.05)" }}
+        >
+          Check Availability
+        </button>
+        {/* Save to Wishlist — send/arrow icon + text */}
+        <button
+          type="button"
+          onClick={() => setBookmarked(!bookmarked)}
+          style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: "4px", padding: "8px 0", background: "none", border: "none", cursor: "pointer" }}
+        >
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" style={{ transform: "scaleY(-1)" }}>
+            <path d="M1.5 1.5L16.5 9L1.5 16.5V11.25L11.5 9L1.5 6.75V1.5Z" stroke={bookmarked ? "#7b2cbf" : "#2d2d2d"} fill={bookmarked ? "#7b2cbf" : "none"} strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          <span style={{ fontFamily: "Raleway, sans-serif", fontWeight: 500, fontSize: "13px", color: "#2d2d2d" }}>Save to Wishlist</span>
+        </button>
+      </div>
+    </div>
+
+    {/* Free cancellation notice — absolute-like, pinned at bottom of widget */}
+    <div style={{ margin: "0 28px 28px", display: "flex", alignItems: "center", gap: "10px", padding: "0 11px", backgroundColor: "rgba(235,223,245,0.5)", border: "1px solid #d6beeb", borderRadius: "10px", height: "40px" }}>
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0 }}>
+        <circle cx="8" cy="8" r="7" fill="#22c55e"/>
+        <path d="M4.5 8L6.5 10L11.5 5.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+      <span style={{ fontFamily: "Raleway, sans-serif", fontWeight: 500, fontSize: "13px", lineHeight: "22px", color: "#7b2cbf", whiteSpace: "nowrap" }}>
+        Free cancellation up to 48 hours before departure
+      </span>
+    </div>
+  </div>
+);
+
 // ─── TourDetailPage ────────────────────────────────────────────────────────────
 const TourDetailPage = () => {
   const { country, tour } = useParams();
-  const [activeTab, setActiveTab] = useState("description");
+  // activeSection drives the sticky nav bar tabs
+  const [activeSection, setActiveSection] = useState("overview");
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [galleryIndex, setGalleryIndex] = useState(0);
   const [shareOpen, setShareOpen] = useState(false);
   const [bookmarked, setBookmarked] = useState(false);
-  const [descExpanded, setDescExpanded] = useState(false);
   const [adults, setAdults] = useState(2);
   const [children, setChildren] = useState(2);
   const [departureDate, setDepartureDate] = useState("");
@@ -300,10 +1027,39 @@ const TourDetailPage = () => {
     setGalleryOpen(true);
   };
 
-  const tabs = ["Description", "Guide", "Reviews"];
+  // Scroll to section when nav tab is clicked (offset = navbar 112px + detail nav 64px + 8px buffer)
+  const scrollToSection = useCallback((key) => {
+    setActiveSection(key);
+    const el = document.getElementById(`section-${key}`);
+    if (!el) return;
+    const offset = 112 + 64 + 8;
+    const top = el.getBoundingClientRect().top + window.scrollY - offset;
+    window.scrollTo({ top, behavior: "smooth" });
+  }, []);
+
+  // Update active section as user scrolls (highlight whichever section is in the middle of the viewport)
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const key = entry.target.id.replace("section-", "");
+            setActiveSection(key);
+          }
+        });
+      },
+      // Trigger when section crosses the midpoint of the viewport
+      { rootMargin: "-40% 0px -55% 0px", threshold: 0 }
+    );
+    DETAIL_TABS.forEach(({ key }) => {
+      const el = document.getElementById(`section-${key}`);
+      if (el) observer.observe(el);
+    });
+    return () => observer.disconnect();
+  }, []);
 
   return (
-    <main className="w-full bg-white min-h-screen" style={{ fontFamily: "Raleway, sans-serif" }}>
+    <main className="w-full bg-secondary-light-hover min-h-screen" style={{ fontFamily: "Raleway, sans-serif" }}>
       {/* Breadcrumb */}
       <BlogBreadcrumbBar
         items={[
@@ -314,209 +1070,82 @@ const TourDetailPage = () => {
         ]}
       />
 
-      {/* Main content area */}
-      <div className="px-[80px] pt-[40px] pb-[80px]">
-        {/* Title + meta header */}
-        <div className="mb-[24px]">
-          <div className="flex items-start justify-between mb-[12px]">
-            <h1 className="font-raleway font-bold text-[48px] leading-[58px] text-[#2d2d2d] max-w-[800px]">
-              {tourData.title}
-            </h1>
-            <div className="flex items-center gap-[12px] mt-[8px]">
-              <button
-                onClick={() => setBookmarked(!bookmarked)}
-                className="w-[44px] h-[44px] flex items-center justify-center rounded-full border border-[#e9eaeb] hover:border-[#7b2cbf] transition-colors"
-                aria-label="Bookmark"
-              >
-                <BookmarkIcon active={bookmarked} />
-              </button>
-              <button
-                onClick={() => setShareOpen(true)}
-                className="w-[44px] h-[44px] flex items-center justify-center rounded-full border border-[#e9eaeb] hover:border-[#7b2cbf] transition-colors"
-                aria-label="Share"
-              >
-                <ShareIcon />
-              </button>
-            </div>
-          </div>
+      {/* Sticky section nav — Figma 3045:42287 */}
+      <TourDetailNavBar activeSection={activeSection} onTabClick={scrollToSection} />
 
-          {/* Rating row */}
-          <div className="flex items-center gap-[12px] mb-[12px]">
-            <ReviewStars rating={tourData.rating} />
-            <span className="font-raleway font-semibold text-[14px] text-[#7b2cbf]">{tourData.rating}</span>
-            <span className="font-raleway font-normal text-[14px] text-[#6f6f6f]">({tourData.reviewCount} reviews)</span>
-            <div className="w-[4px] h-[4px] rounded-full bg-[#d0d0d0]" />
-            <div className="flex items-center gap-[6px]">
-              <MapPinIcon />
-              <span className="font-raleway font-medium text-[14px] text-[#6f6f6f]">{tourData.location}</span>
-            </div>
-          </div>
+      {/* Full-width tour hero — Figma 3075:39137
+          Title + meta (pl-156px) + 4-photo image grid (h-717px)
+          Must be OUTSIDE the padded content div so images reach both edges */}
+      <TourHeroSection tourData={tourData} onOpenGallery={openGallery} />
 
-          {/* Tour meta row */}
-          <div className="flex items-center gap-[20px]">
-            <div className="flex items-center gap-[6px]">
-              <UsersIcon />
-              <span className="font-raleway font-medium text-[14px] text-[#6f6f6f]">Max {tourData.maxGuests} guests</span>
-            </div>
-            <div className="w-[1px] h-[14px] bg-[#d0d0d0]" />
-            <div className="flex items-center gap-[6px]">
-              <ClockIcon />
-              <span className="font-raleway font-medium text-[14px] text-[#6f6f6f]">{tourData.duration}</span>
-            </div>
-            <div className="w-[1px] h-[14px] bg-[#d0d0d0]" />
-            <div className="flex items-center gap-[6px]">
-              <GlobeIcon />
-              <span className="font-raleway font-medium text-[14px] text-[#6f6f6f]">{tourData.languages}</span>
-            </div>
-            <div className="w-[1px] h-[14px] bg-[#d0d0d0]" />
-            <div className="flex items-center gap-[6px]">
-              <CancelIcon />
-              <span className="font-raleway font-medium text-[14px] text-[#6f6f6f]">{tourData.cancellation}</span>
-            </div>
-          </div>
-        </div>
+      {/* ── Main content — Figma Frame 1000006773 ────────────────────────────────
+           px-156px matches page gutter (same as hero title / sticky nav)
+           Left col max-w-928px + gap + right widget 457px sticky              */}
+      <div className="px-[156px] pt-[56px] pb-[80px]">
+        <div className="flex gap-[32px] items-start">
 
-        {/* Hero image grid */}
-        <div className="flex gap-[8px] mb-[32px]" style={{ height: "717px" }}>
-          {/* Left: main image slider (half width) */}
-          <div
-            className="relative overflow-hidden rounded-[12px] cursor-pointer flex-1"
-            onClick={() => openGallery(0)}
-          >
-            <img
-              src={tourData.heroMainImage}
-              alt={tourData.title}
-              className="w-full h-full object-cover"
-            />
-            {/* Dot nav */}
-            <div className="absolute bottom-[20px] left-1/2 -translate-x-1/2 flex items-center gap-[8px] z-10">
-              {[0, 1, 2].map((i) => (
-                <button
-                  key={i}
-                  className={classNames(
-                    "w-[10px] h-[10px] rounded-full border border-solid transition-all",
-                    i === 0 ? "bg-white border-white" : "bg-transparent border-white/60"
-                  )}
-                  aria-label={`Slide ${i + 1}`}
-                />
-              ))}
-            </div>
-          </div>
+          {/* ── LEFT CONTENT — w=928px ─────────────────────────────────── */}
+          <div className="flex-1 max-w-[928px] min-w-0 flex flex-col">
 
-          {/* Right: 2 stacked images */}
-          <div className="flex flex-col gap-[8px] flex-1 relative">
-            <div
-              className="overflow-hidden rounded-[12px] cursor-pointer"
-              style={{ height: "366px" }}
-              onClick={() => openGallery(1)}
-            >
-              <img src={tourData.heroTopRight} alt="Tour view 2" className="w-full h-full object-cover"/>
-            </div>
-            <div
-              className="overflow-hidden rounded-[12px] cursor-pointer relative"
-              style={{ height: "347px" }}
-              onClick={() => openGallery(2)}
-            >
-              <img src={tourData.heroBottomRight} alt="Tour view 3" className="w-full h-full object-cover"/>
-              {/* Image count badge */}
-              <div
-                className="absolute bottom-[16px] right-[16px] flex items-center gap-[6px] px-[14px] py-[8px] rounded-[40px] bg-black/60 cursor-pointer hover:bg-black/75 transition-colors"
-                onClick={(e) => { e.stopPropagation(); openGallery(0); }}
-              >
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <rect x="2" y="3" width="10" height="8" rx="1.5" stroke="white" strokeWidth="1.2"/>
-                  <path d="M5 11V13H14V5H12" stroke="white" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-                <span className="font-raleway font-semibold text-[13px] text-white">3 of {tourData.images.length} images</span>
+            {/* ① OVERVIEW: Tour Meta Bar + About The Tour ─ id=section-overview */}
+            <div id="section-overview" style={{ paddingBottom: "32px", borderBottom: "1.5px solid #ebdff5" }}>
+
+              {/* Meta subtitle — "3-day tour hosted by Heritage Guides" */}
+              <p style={{ fontFamily: "Raleway, sans-serif", fontWeight: 500, fontSize: "16px", lineHeight: "24px", color: "#364153", marginBottom: "12px" }}>
+                3-day tour hosted by Heritage Guides
+              </p>
+              {/* Info bar: Users · Duration · Languages · Cancellation */}
+              <div className="flex items-center flex-wrap" style={{ gap: "8px" }}>
+                <span className="flex items-center" style={{ gap: "6px", fontFamily: "Raleway, sans-serif", fontWeight: 500, fontSize: "14px", color: "#6a7282" }}>
+                  <UsersIcon /> Max {tourData.maxGuests} guests
+                </span>
+                <span style={{ color: "#99a1af" }}>·</span>
+                <span className="flex items-center" style={{ gap: "6px", fontFamily: "Raleway, sans-serif", fontWeight: 500, fontSize: "14px", color: "#6a7282" }}>
+                  <ClockIcon /> {tourData.duration}
+                </span>
+                <span style={{ color: "#99a1af" }}>·</span>
+                <span className="flex items-center" style={{ gap: "6px", fontFamily: "Raleway, sans-serif", fontWeight: 500, fontSize: "14px", color: "#6a7282" }}>
+                  <GlobeIcon /> {tourData.languages}
+                </span>
+                <span style={{ color: "#99a1af" }}>·</span>
+                <span className="flex items-center" style={{ gap: "6px", fontFamily: "Raleway, sans-serif", fontWeight: 500, fontSize: "14px", color: "#6a7282" }}>
+                  <CancelIcon /> {tourData.cancellation}
+                </span>
               </div>
-            </div>
-          </div>
-        </div>
 
-        {/* Tabs + action icons row */}
-        <div className="flex items-center justify-between border-b border-[#e9eaeb] mb-[40px]">
-          <div className="flex items-center">
-            {tabs.map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab.toLowerCase())}
-                className={classNames(
-                  "px-[24px] py-[14px] font-raleway font-semibold text-[15px] transition-colors border-b-2",
-                  activeTab === tab.toLowerCase()
-                    ? "text-[#7b2cbf] border-[#7b2cbf]"
-                    : "text-[#6f6f6f] border-transparent hover:text-[#2d2d2d]"
-                )}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
-          <div className="flex items-center gap-[8px] pb-[2px]">
-            <button
-              onClick={() => setBookmarked(!bookmarked)}
-              className="w-[40px] h-[40px] flex items-center justify-center rounded-full border border-[#e9eaeb] hover:border-[#7b2cbf] transition-colors"
-              aria-label="Bookmark"
-            >
-              <BookmarkIcon active={bookmarked} />
-            </button>
-            <button
-              onClick={() => setShareOpen(true)}
-              className="w-[40px] h-[40px] flex items-center justify-center rounded-full border border-[#e9eaeb] hover:border-[#7b2cbf] transition-colors"
-              aria-label="Share"
-            >
-              <ShareIcon />
-            </button>
-          </div>
-        </div>
+              {/* Divider */}
+              <div style={{ height: "1.5px", backgroundColor: "#ebdff5", margin: "24px 0" }} />
 
-        {/* Two-column layout */}
-        <div className="flex gap-[40px] items-start">
-          {/* LEFT CONTENT */}
-          <div className="flex-1 flex flex-col gap-[48px]">
-
-            {/* Description */}
-            <div>
-              <p className={classNames(
-                "font-raleway font-normal text-[16px] leading-[28px] text-[#4a4a4a]",
-                !descExpanded ? "line-clamp-4" : ""
-              )}>
+              {/* About The Tour heading */}
+              <h2 style={{ fontFamily: "Raleway, sans-serif", fontWeight: 600, fontSize: "20px", lineHeight: "28px", color: "#4a1a73", marginBottom: "16px" }}>
+                About The Tour
+              </h2>
+              {/* Description */}
+              <p style={{ fontFamily: "Raleway, sans-serif", fontWeight: 400, fontSize: "16px", lineHeight: "24px", color: "#364153" }}>
                 {tourData.description}
               </p>
-              {!descExpanded && (
-                <button
-                  onClick={() => setDescExpanded(true)}
-                  className="mt-[8px] font-raleway font-semibold text-[14px] text-[#7b2cbf] hover:underline"
-                >
-                  Read More
-                </button>
-              )}
 
-              {/* Best for tags */}
-              <div className="mt-[20px]">
-                <span className="font-raleway font-semibold text-[14px] text-[#2d2d2d] mr-[12px]">Best for:</span>
-                <div className="inline-flex flex-wrap gap-[8px] mt-[8px]">
-                  {tourData.bestFor.map((tag) => (
-                    <span
-                      key={tag}
-                      className="px-[14px] py-[6px] rounded-[20px] font-raleway font-medium text-[13px] text-[#4a4a4a] border border-[#d0d0d0] bg-[#fafafa]"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
+              {/* Best For tags */}
+              <div className="flex flex-wrap items-center" style={{ gap: "8px", marginTop: "20px" }}>
+                <span style={{ fontFamily: "Raleway, sans-serif", fontWeight: 600, fontSize: "14px", color: "#364153", flexShrink: 0 }}>Best For:</span>
+                {tourData.bestFor.map((tag) => (
+                  <span key={tag} style={{ fontFamily: "Raleway, sans-serif", fontWeight: 500, fontSize: "13px", color: "#4a1a73", backgroundColor: "#f2eaf9", border: "1px solid #d6beeb", borderRadius: "100px", padding: "5px 14px" }}>
+                    {tag}
+                  </span>
+                ))}
               </div>
             </div>
 
-            {/* What's included */}
-            <div>
-              <h2 className="font-raleway font-bold text-[20px] leading-[28px] text-[#2d2d2d] mb-[20px]">
+            {/* ② WHAT'S INCLUDED ─ id=section-inclusions */}
+            <div id="section-inclusions" style={{ padding: "32px 0", borderBottom: "1.5px solid #ebdff5" }}>
+              <h2 style={{ fontFamily: "Raleway, sans-serif", fontWeight: 600, fontSize: "20px", lineHeight: "28px", color: "#4a1a73", marginBottom: "20px" }}>
                 What's included
               </h2>
-              <div className="grid grid-cols-2 gap-x-[32px] gap-y-[12px]">
+              <div className="grid grid-cols-2" style={{ gap: "16px 40px" }}>
                 {tourData.included.map((item, i) => (
-                  <div key={i} className="flex items-start gap-[10px]">
+                  <div key={i} className="flex items-start" style={{ gap: "12px" }}>
                     {item.type === "check" ? <CheckIcon /> : <CrossIcon />}
-                    <span className="font-raleway font-medium text-[14px] leading-[22px] text-[#4a4a4a]">
+                    <span style={{ fontFamily: "Raleway, sans-serif", fontWeight: 500, fontSize: "15px", lineHeight: "24px", color: "#364153" }}>
                       {item.text}
                     </span>
                   </div>
@@ -524,138 +1153,113 @@ const TourDetailPage = () => {
               </div>
             </div>
 
-            {/* What you'll do — Itinerary */}
-            <div>
-              <h2 className="font-raleway font-bold text-[20px] leading-[28px] text-[#2d2d2d] mb-[20px]">
+            {/* ③ ITINERARY ─ id=section-itinerary */}
+            {/* Step circles (48px) + vertical connector line + expandable days */}
+            <div id="section-itinerary" style={{ padding: "32px 0", borderBottom: "1.5px solid #ebdff5" }}>
+              <h2 style={{ fontFamily: "Raleway, sans-serif", fontWeight: 600, fontSize: "20px", lineHeight: "28px", color: "#4a1a73", marginBottom: "28px" }}>
                 What you'll do
               </h2>
-              <div className="flex flex-col gap-[12px]">
-                {tourData.itinerary.map((day) => (
-                  <ItineraryDay key={day.day} day={day} />
+              <div className="relative" style={{ paddingLeft: "72px" }}>
+                {/* Vertical connector line linking all circles */}
+                <div
+                  className="absolute"
+                  style={{ left: "23px", top: "26px", width: "1.5px", bottom: "26px", backgroundColor: "#d6beeb" }}
+                />
+                <div className="flex flex-col">
+                  {tourData.itinerary.map((day, idx) => (
+                    <ItineraryStep key={day.day} day={day} isFirst={idx === 0} />
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* ④ OPTIONAL ADD-ONS */}
+            <div style={{ padding: "32px 0", borderBottom: "1.5px solid #ebdff5" }}>
+              <h2 style={{ fontFamily: "Raleway, sans-serif", fontWeight: 600, fontSize: "20px", lineHeight: "28px", color: "#4a1a73", marginBottom: "8px" }}>
+                + Optional Add-ons
+              </h2>
+              <div className="flex flex-col">
+                {tourData.addOns.map((addon, i) => (
+                  <AddOnRow key={i} addon={addon} />
                 ))}
               </div>
             </div>
 
-            {/* Tour Guide preview */}
-            <div className="p-[24px] rounded-[16px] border border-[#e9eaeb] bg-[#fafafa] flex items-center gap-[20px]">
-              <div className="w-[72px] h-[72px] rounded-full overflow-hidden flex-shrink-0">
-                <img src={tourData.guide.image} alt={tourData.guide.name} className="w-full h-full object-cover"/>
-              </div>
-              <div className="flex-1">
-                <h3 className="font-raleway font-bold text-[18px] text-[#2d2d2d] mb-[4px]">{tourData.guide.name}</h3>
-                <div className="flex items-center gap-[8px] mb-[6px]">
-                  <ReviewStars rating={tourData.guide.rating} size={13} />
-                  <span className="font-raleway font-medium text-[13px] text-[#6f6f6f]">{tourData.guide.rating} · {tourData.guide.reviews} reviews</span>
-                </div>
-                <span className="inline-flex px-[10px] py-[4px] rounded-[20px] bg-[#f3e8ff] text-[#7b2cbf] font-raleway font-semibold text-[12px]">
-                  {tourData.guide.speciality}
-                </span>
-              </div>
-              <button className="px-[20px] py-[10px] rounded-[40px] border border-[#7b2cbf] text-[#7b2cbf] font-raleway font-semibold text-[14px] hover:bg-[#f9f5ff] transition-colors">
-                View Profile
-              </button>
+            {/* ⑤ MEET YOUR TOUR GUIDE ─ id=section-tour-guide */}
+            <div id="section-tour-guide" style={{ padding: "32px 0", borderBottom: "1.5px solid #ebdff5" }}>
+              <h2 style={{ fontFamily: "Raleway, sans-serif", fontWeight: 600, fontSize: "20px", lineHeight: "28px", color: "#4a1a73", marginBottom: "24px" }}>
+                Meet Your Tour Guide
+              </h2>
+              <GuideCard guide={tourData.guide} />
             </div>
 
-            {/* Reviews section */}
-            <div>
-              <h2 className="font-raleway font-bold text-[20px] leading-[28px] text-[#2d2d2d] mb-[24px]">
-                What People Say
+            {/* ⑥ WHAT OUR TRAVELERS SAY ─ id=section-reviews */}
+            <div id="section-reviews" style={{ padding: "32px 0", borderBottom: "1.5px solid #ebdff5" }}>
+              <h2 style={{ fontFamily: "Raleway, sans-serif", fontWeight: 600, fontSize: "20px", lineHeight: "28px", color: "#4a1a73", marginBottom: "24px" }}>
+                What Our Travelers Say
               </h2>
+              <ReviewsSection tourData={tourData} />
+            </div>
 
-              {/* Overall rating */}
-              <div className="flex items-start gap-[40px] p-[24px] rounded-[16px] border border-[#e9eaeb] bg-[#fafafa] mb-[24px]">
-                <div className="flex flex-col items-center gap-[4px]">
-                  <span className="font-raleway font-bold text-[56px] leading-[64px] text-[#2d2d2d]">{tourData.rating}</span>
-                  <ReviewStars rating={tourData.rating} size={16} />
-                  <span className="font-raleway font-medium text-[13px] text-[#6f6f6f]">out of 5</span>
-                </div>
-                <div className="flex-1 flex flex-col gap-[8px]">
-                  {[5, 4, 3, 2, 1].map((star) => {
-                    const pct = tourData.ratingBreakdown[star] || 0;
-                    return (
-                      <div key={star} className="flex items-center gap-[10px]">
-                        <span className="font-raleway font-medium text-[13px] text-[#6f6f6f] w-[12px]">{star}</span>
-                        <StarIcon size={12} filled />
-                        <div className="flex-1 h-[6px] rounded-full bg-[#e9eaeb] overflow-hidden">
-                          <div className="h-full rounded-full bg-[#7b2cbf] transition-all duration-500" style={{ width: `${pct}%` }} />
-                        </div>
-                        <span className="font-raleway font-medium text-[12px] text-[#6f6f6f] w-[32px] text-right">{pct}%</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Review cards */}
-              <div className="flex flex-col gap-[20px] mb-[24px]">
-                {tourData.reviews.map((review) => (
-                  <div key={review.id} className="p-[20px] rounded-[16px] border border-[#e9eaeb]">
-                    <div className="flex items-center gap-[12px] mb-[12px]">
-                      <div className="w-[40px] h-[40px] rounded-full overflow-hidden flex-shrink-0">
-                        <img src={review.avatar} alt={review.name} className="w-full h-full object-cover"/>
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-raleway font-bold text-[15px] text-[#2d2d2d]">{review.name}</p>
-                        <p className="font-raleway font-normal text-[12px] text-[#6f6f6f]">{review.date}</p>
-                      </div>
-                      <ReviewStars rating={review.rating} size={13} />
-                    </div>
-                    <p className="font-raleway font-normal text-[14px] leading-[22px] text-[#4a4a4a]">
-                      {review.text}
-                    </p>
+            {/* ⑦ MEETING POINT & LOCATION ─ id=section-location */}
+            <div id="section-location" style={{ padding: "32px 0", borderBottom: "1.5px solid #ebdff5" }}>
+              <h2 style={{ fontFamily: "Raleway, sans-serif", fontWeight: 600, fontSize: "20px", lineHeight: "28px", color: "#4a1a73", marginBottom: "20px" }}>
+                Meeting Point & Location
+              </h2>
+              {/* Map placeholder — 928×393px */}
+              <div className="relative w-full overflow-hidden" style={{ height: "393px", borderRadius: "16px", backgroundColor: "#e9eaeb" }}>
+                {/* Grid overlay */}
+                <div className="absolute inset-0 opacity-20" style={{ backgroundImage: "repeating-linear-gradient(0deg,#9ca3af 0,#9ca3af 1px,transparent 1px,transparent 40px),repeating-linear-gradient(90deg,#9ca3af 0,#9ca3af 1px,transparent 1px,transparent 40px)" }} />
+                {/* Map pin + label */}
+                <div className="absolute" style={{ left: "50%", top: "50%", transform: "translate(-50%,-60%)", display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
+                  <svg width="38" height="47" viewBox="0 0 38 47" fill="none">
+                    <path d="M19 0C8.51 0 0 8.51 0 19C0 33.25 19 47 19 47C19 47 38 33.25 38 19C38 8.51 29.49 0 19 0Z" fill="#7b2cbf"/>
+                    <circle cx="19" cy="19" r="8" fill="white"/>
+                  </svg>
+                  <div style={{ backgroundColor: "white", padding: "8px 16px", borderRadius: "8px", boxShadow: "0 2px 8px rgba(0,0,0,0.12)", fontFamily: "Raleway, sans-serif", fontSize: "12px", fontWeight: 500, color: "#2d2d2d", whiteSpace: "nowrap" }}>
+                    Accra, Greater Accra Region
                   </div>
-                ))}
-              </div>
-
-              {/* Load more */}
-              <button className="w-full h-[48px] rounded-[40px] border border-[#7b2cbf] text-[#7b2cbf] font-raleway font-semibold text-[15px] hover:bg-[#f9f5ff] transition-colors">
-                Load More Reviews
-              </button>
-            </div>
-
-            {/* Map section */}
-            <div>
-              <h2 className="font-raleway font-bold text-[20px] leading-[28px] text-[#2d2d2d] mb-[20px]">
-                Booking Point on a Map
-              </h2>
-              <div className="w-full h-[320px] rounded-[16px] bg-[#e9eaeb] relative overflow-hidden flex items-center justify-center">
-                <div className="flex flex-col items-center gap-[12px]">
-                  <div className="w-[48px] h-[48px] rounded-full bg-[#7b2cbf] flex items-center justify-center">
-                    <MapPinIcon />
-                  </div>
-                  <p className="font-raleway font-medium text-[14px] text-[#6f6f6f]">{tourData.location}</p>
-                  <button className="px-[20px] py-[8px] rounded-[40px] bg-white border border-[#e9eaeb] text-[#2d2d2d] font-raleway font-semibold text-[13px] hover:border-[#7b2cbf] transition-colors shadow-sm">
-                    Get Directions
-                  </button>
                 </div>
-                {/* Map grid lines for placeholder */}
-                <div className="absolute inset-0 opacity-20" style={{
-                  backgroundImage: "repeating-linear-gradient(0deg, #9ca3af 0, #9ca3af 1px, transparent 1px, transparent 40px), repeating-linear-gradient(90deg, #9ca3af 0, #9ca3af 1px, transparent 1px, transparent 40px)"
-                }} />
+                {/* Get Directions button */}
+                <button
+                  type="button"
+                  style={{ position: "absolute", right: "16px", bottom: "16px", fontFamily: "Raleway, sans-serif", fontWeight: 600, fontSize: "14px", color: "#2d2d2d", backgroundColor: "white", border: "1px solid #e9eaeb", borderRadius: "8px", padding: "10px 18px", boxShadow: "0 1px 4px rgba(0,0,0,0.08)", cursor: "pointer" }}
+                >
+                  Get Directions →
+                </button>
+              </div>
+              {/* Pickup note */}
+              <p style={{ marginTop: "16px", fontFamily: "Raleway, sans-serif", fontWeight: 400, fontSize: "14px", lineHeight: "22px", color: "#6a7282" }}>
+                Hotel pickup available from Greater Accra and Cape Coast downtown. We will contact you the day before to confirm your exact pickup time.
+              </p>
+            </div>
+
+            {/* ⑧ TRAVELLING WITH 6 OR MORE? ─ group CTA */}
+            <div style={{ padding: "32px 0", borderBottom: "1.5px solid #ebdff5" }}>
+              <div style={{ borderRadius: "16px", border: "1.5px solid #ebdff5", padding: "32px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "24px" }}>
+                <div>
+                  <h4 style={{ fontFamily: "Raleway, sans-serif", fontWeight: 600, fontSize: "20px", lineHeight: "28px", color: "#4a1a73", marginBottom: "12px" }}>
+                    Travelling with 6 or more?
+                  </h4>
+                  <p style={{ fontFamily: "Raleway, sans-serif", fontWeight: 400, fontSize: "15px", lineHeight: "24px", color: "#364153", maxWidth: "509px" }}>
+                    Get bespoke itineraries tailored around your group — greater value, shared memories, and seamless logistics designed just for you.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  style={{ flexShrink: 0, fontFamily: "Raleway, sans-serif", fontWeight: 600, fontSize: "15px", lineHeight: "22px", color: "#4a1a73", border: "1.5px solid #4a1a73", borderRadius: "40px", padding: "14px 24px", whiteSpace: "nowrap", cursor: "pointer", backgroundColor: "transparent" }}
+                >
+                  Get a Group Quote →
+                </button>
               </div>
             </div>
 
-            {/* Travelling with a group CTA */}
-            <div className="p-[32px] rounded-[20px] bg-gradient-to-r from-[#2b0f43] to-[#4a1470] flex items-center justify-between">
-              <div>
-                <h3 className="font-raleway font-bold text-[22px] leading-[30px] text-white mb-[8px]">
-                  Travelling with a group?
-                </h3>
-                <p className="font-raleway font-normal text-[15px] leading-[22px] text-white/70 max-w-[400px]">
-                  Get exclusive group rates and customised itineraries for parties of 6 or more. We'll make your group adventure unforgettable.
-                </p>
-              </div>
-              <button className="flex-shrink-0 px-[24px] py-[12px] rounded-[40px] bg-[#7b2cbf] text-white font-raleway font-semibold text-[15px] hover:bg-[#6b22af] transition-colors">
-                Enquire Now
-              </button>
-            </div>
-
-            {/* You might also like */}
-            <div>
-              <h2 className="font-raleway font-bold text-[20px] leading-[28px] text-[#2d2d2d] mb-[24px]">
-                You might also like
+            {/* ⑨ YOU MIGHT ALSO LOVE */}
+            <div style={{ paddingTop: "40px" }}>
+              <h2 style={{ fontFamily: "Raleway, sans-serif", fontWeight: 600, fontSize: "20px", lineHeight: "28px", color: "#4a1a73", marginBottom: "24px" }}>
+                You Might Also Love
               </h2>
-              <div className="grid grid-cols-3 gap-[16px]">
+              <div className="grid grid-cols-3" style={{ gap: "24px" }}>
                 {RELATED_TOURS.map((t) => (
                   <PopularTourCard
                     key={t.id}
@@ -677,143 +1281,22 @@ const TourDetailPage = () => {
             </div>
           </div>
 
-          {/* RIGHT: Sticky Booking Widget */}
-          <div className="w-[400px] flex-shrink-0 sticky top-[100px]">
-            <div className="rounded-[20px] border border-[#e9eaeb] bg-white shadow-lg overflow-hidden">
-              <div className="p-[24px]">
-                {/* Price */}
-                <div className="flex items-baseline gap-[6px] mb-[20px]">
-                  <span className="font-raleway font-bold text-[32px] leading-[40px] text-[#7b2cbf]">
-                    {tourData.price}
-                  </span>
-                  <span className="font-raleway font-normal text-[16px] text-[#6f6f6f]">/Person</span>
-                </div>
-
-                {/* Mini tabs */}
-                <div className="flex items-center border border-[#e9eaeb] rounded-[10px] overflow-hidden mb-[20px]">
-                  {tabs.map((tab) => (
-                    <button
-                      key={tab}
-                      onClick={() => setActiveTab(tab.toLowerCase())}
-                      className={classNames(
-                        "flex-1 py-[8px] font-raleway font-semibold text-[13px] transition-colors",
-                        activeTab === tab.toLowerCase()
-                          ? "bg-[#7b2cbf] text-white"
-                          : "bg-white text-[#6f6f6f] hover:bg-[#fafafa]"
-                      )}
-                    >
-                      {tab}
-                    </button>
-                  ))}
-                </div>
-
-                <div className="border-t border-[#e9eaeb] mb-[20px]" />
-
-                {/* Choose your date */}
-                <p className="font-raleway font-bold text-[12px] uppercase tracking-[0.08em] text-[#2d2d2d] mb-[12px]">
-                  Choose Your Date
-                </p>
-
-                {/* Date inputs */}
-                <div className="grid grid-cols-2 gap-[10px] mb-[20px]">
-                  <div>
-                    <label className="block font-raleway font-semibold text-[11px] uppercase tracking-[0.06em] text-[#6f6f6f] mb-[6px]">
-                      Departure
-                    </label>
-                    <input
-                      type="date"
-                      value={departureDate}
-                      onChange={(e) => setDepartureDate(e.target.value)}
-                      className="w-full h-[42px] px-[12px] rounded-[10px] border border-[#e9eaeb] font-raleway font-medium text-[13px] text-[#2d2d2d] focus:outline-none focus:border-[#7b2cbf] transition-colors"
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-raleway font-semibold text-[11px] uppercase tracking-[0.06em] text-[#6f6f6f] mb-[6px]">
-                      Return
-                    </label>
-                    <input
-                      type="date"
-                      value={returnDate}
-                      onChange={(e) => setReturnDate(e.target.value)}
-                      className="w-full h-[42px] px-[12px] rounded-[10px] border border-[#e9eaeb] font-raleway font-medium text-[13px] text-[#2d2d2d] focus:outline-none focus:border-[#7b2cbf] transition-colors"
-                    />
-                  </div>
-                </div>
-
-                {/* Travelers */}
-                <div className="flex flex-col gap-[12px] mb-[24px]">
-                  {/* Adults */}
-                  <div className="flex items-center justify-between p-[12px] rounded-[10px] border border-[#e9eaeb]">
-                    <div>
-                      <p className="font-raleway font-semibold text-[14px] text-[#2d2d2d]">Adults</p>
-                      <p className="font-raleway font-normal text-[12px] text-[#6f6f6f]">Age 13+</p>
-                    </div>
-                    <div className="flex items-center gap-[12px]">
-                      <button
-                        onClick={() => setAdults(Math.max(1, adults - 1))}
-                        className="w-[32px] h-[32px] rounded-full border border-[#e9eaeb] flex items-center justify-center hover:border-[#7b2cbf] hover:text-[#7b2cbf] transition-colors text-[18px] font-light"
-                      >
-                        −
-                      </button>
-                      <span className="font-raleway font-bold text-[16px] text-[#2d2d2d] w-[20px] text-center">{adults}</span>
-                      <button
-                        onClick={() => setAdults(adults + 1)}
-                        className="w-[32px] h-[32px] rounded-full border border-[#e9eaeb] flex items-center justify-center hover:border-[#7b2cbf] hover:text-[#7b2cbf] transition-colors text-[18px] font-light"
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Children */}
-                  <div className="flex items-center justify-between p-[12px] rounded-[10px] border border-[#e9eaeb]">
-                    <div>
-                      <p className="font-raleway font-semibold text-[14px] text-[#2d2d2d]">Children</p>
-                      <p className="font-raleway font-normal text-[12px] text-[#6f6f6f]">Age 0-12</p>
-                    </div>
-                    <div className="flex items-center gap-[12px]">
-                      <button
-                        onClick={() => setChildren(Math.max(0, children - 1))}
-                        className="w-[32px] h-[32px] rounded-full border border-[#e9eaeb] flex items-center justify-center hover:border-[#7b2cbf] hover:text-[#7b2cbf] transition-colors text-[18px] font-light"
-                      >
-                        −
-                      </button>
-                      <span className="font-raleway font-bold text-[16px] text-[#2d2d2d] w-[20px] text-center">{children}</span>
-                      <button
-                        onClick={() => setChildren(children + 1)}
-                        className="w-[32px] h-[32px] rounded-full border border-[#e9eaeb] flex items-center justify-center hover:border-[#7b2cbf] hover:text-[#7b2cbf] transition-colors text-[18px] font-light"
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Check Availability button */}
-                <button className="w-full h-[56px] rounded-[40px] bg-[#7b2cbf] text-white font-raleway font-bold text-[16px] hover:bg-[#6b22af] transition-colors mb-[12px]">
-                  Check Availability
-                </button>
-
-                {/* Save to Wishlist */}
-                <button
-                  onClick={() => setBookmarked(!bookmarked)}
-                  className="w-full flex items-center justify-center gap-[8px] py-[10px] font-raleway font-semibold text-[14px] text-[#6f6f6f] hover:text-[#7b2cbf] transition-colors mb-[16px]"
-                >
-                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                    <path d="M6 3C4.07 3 2.5 4.57 2.5 6.5C2.5 10 9 15 9 15C9 15 15.5 10 15.5 6.5C15.5 4.57 13.93 3 12 3C10.87 3 9.86 3.55 9.28 4.4C8.7 3.55 7.69 3 6 3Z" stroke={bookmarked ? "#7b2cbf" : "#6f6f6f"} fill={bookmarked ? "#7b2cbf" : "none"} strokeWidth="1.3"/>
-                  </svg>
-                  Save to Wishlist
-                </button>
-
-                {/* Cancellation notice */}
-                <div className="flex items-start gap-[8px] p-[12px] rounded-[10px] bg-[#f0fdf4]">
-                  <GreenCheckIcon />
-                  <p className="font-raleway font-normal text-[13px] leading-[20px] text-[#4a4a4a]">
-                    Free cancellation up to 48 hours before departure
-                  </p>
-                </div>
-              </div>
-            </div>
+          {/* ── RIGHT: Booking Widget — Figma 3156:45940 ─────────────────── */}
+          {/* sticky top = 112px navbar + 64px detail nav + 12px buffer = 188px */}
+          <div className="flex-shrink-0 sticky" style={{ width: "457px", top: "188px" }}>
+            <BookingWidget
+              tourData={tourData}
+              adults={adults}
+              setAdults={setAdults}
+              children={children}
+              setChildren={setChildren}
+              departureDate={departureDate}
+              setDepartureDate={setDepartureDate}
+              returnDate={returnDate}
+              setReturnDate={setReturnDate}
+              bookmarked={bookmarked}
+              setBookmarked={setBookmarked}
+            />
           </div>
         </div>
       </div>
