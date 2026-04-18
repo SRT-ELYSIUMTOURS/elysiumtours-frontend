@@ -250,8 +250,7 @@ const AllToursSection = React.forwardRef(({ country = "Ghana", tourCount = 10, c
   return (
     <section
       ref={ref}
-      className={classNames("w-full py-[80px]", className)}
-      style={{ backgroundColor: "#fefefe" }}
+      className={classNames("w-full py-[80px] bg-secondary-light-default", className)}
       {...props}
     >
       <div className="px-[148px]">
