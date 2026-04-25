@@ -250,15 +250,15 @@ const AllToursSection = React.forwardRef(({ country = "Ghana", tourCount = 10, c
   return (
     <section
       ref={ref}
-      className={classNames("w-full py-[80px]", className)}
+      className={classNames("w-full py-[48px] md:py-[60px] lg:py-[80px]", className)}
       style={{ backgroundColor: "#fefefe" }}
       {...props}
     >
-      <div className="px-[148px]">
+      <div className="px-6 md:px-[30px] lg:px-[148px]">
 
         {/* ── Header row — Figma 1914:41068 ────────────────────────────────── */}
         {/* Left: 46px line + "{N} tours in {country}" | Right: SORT label + dropdown */}
-        <div className="flex items-center justify-between w-full mb-[24px]">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between w-full mb-[24px] gap-4">
 
           {/* Left: section label — same pattern as SignatureExperiencesSection */}
           <div className="flex items-center gap-[8px] shrink-0">
@@ -359,7 +359,7 @@ const AllToursSection = React.forwardRef(({ country = "Ghana", tourCount = 10, c
 
         {/* ── Tour grid — 3 rows × 4 cols, gap-x-[8px] gap-y-[20px] ──────── */}
         {/* Figma 1942:31179: cards 351×615, rows at y=0/635/1270, col spacing=359 */}
-        <div className="grid grid-cols-4 gap-x-[8px] gap-y-[20px]">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-x-[8px] gap-y-[20px]">
           {GHANA_TOURS.map((tour) => (
             <PopularTourCard
               key={tour.id}

@@ -47,20 +47,19 @@ const BlogCtaSection = React.forwardRef(({ className, ...props }, ref) => {
       {/* ── Main card ──────────────────────────────────────────────────────── */}
       {/* Figma: left-[156px] w-[1416px] h-[578px] bg-[#f7f7f7] rounded-[20px]
                 shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)] overflow-clip */}
-      <div className="mx-[156px] h-[578px] bg-[#f7f7f7] rounded-[20px] overflow-clip shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)] relative">
+      <div className="mx-6 md:mx-[30px] lg:mx-[156px] h-auto lg:h-[578px] bg-[#f7f7f7] rounded-[20px] overflow-clip shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)] relative">
 
         {/* Inner flex row — Figma: absolute left-[33px] top-[50%] -translate-y-1/2 flex items-center */}
-        <div className="absolute left-[33px] top-1/2 -translate-y-1/2 flex items-center">
+        <div className="relative lg:absolute left-0 lg:left-[33px] top-0 lg:top-1/2 lg:-translate-y-1/2 flex flex-col lg:flex-row items-center">
 
           {/* ── Left: skewed photo ──────────────────────────────────────────── */}
           {/* Container: Figma w-[757px] h-[487px] flex items-center justify-center */}
-          <div className="w-[757px] h-[487px] flex items-center justify-center shrink-0">
+          <div className="w-full lg:w-[757px] h-[280px] md:h-[380px] lg:h-[487px] flex items-center justify-center shrink-0">
             {/* Parallelogram skew — Figma skew-x-[5.41deg] */}
-            <div className="skew-x-[5.41deg] flex-none">
+            <div className="lg:skew-x-[5.41deg] flex-none w-full lg:w-auto">
               {/* Photo card: Figma w-[710.845px] h-[455.676px] rounded-[20px] shadow */}
               <div
-                className="relative rounded-[20px] shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)]"
-                style={{ width: "710.845px", height: "455.676px" }}
+                className="relative rounded-[20px] shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)] w-full h-[250px] md:h-[350px] lg:w-[710.845px] lg:h-[455.676px]"
               >
                 {/* Purple fallback bg */}
                 <div className="absolute inset-0 bg-[#7b2cbf] rounded-[20px]" />
@@ -81,7 +80,7 @@ const BlogCtaSection = React.forwardRef(({ className, ...props }, ref) => {
           {/* Figma: w-[463px] h-[306px] bg-[#f2eaf9] rounded-[10px]
                     shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)]
                     flex flex-col gap-[10px] items-center justify-center p-[10px] */}
-          <div className="w-[463px] h-[306px] bg-[#f2eaf9] rounded-[10px] shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)] flex flex-col gap-[10px] items-center justify-center p-[10px] shrink-0">
+          <div className="w-full lg:w-[463px] h-auto py-8 lg:h-[306px] bg-[#f2eaf9] rounded-[10px] shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)] flex flex-col gap-[10px] items-center justify-center p-[10px] shrink-0">
             {/* Writer — Raleway Bold 13px/18px #5c218f text-center w-[298px] */}
             <p className="font-raleway font-bold text-[13px] leading-[18px] text-[#5c218f] text-center w-[298px] shrink-0">
               Writer: Davida Dzato

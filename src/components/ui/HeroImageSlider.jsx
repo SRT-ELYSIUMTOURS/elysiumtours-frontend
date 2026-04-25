@@ -53,10 +53,10 @@ const HeroImageSlider = ({
   return (
     <div
       className={classNames(
-        "relative w-full  overflow-hidden bg-gray-800", // fallback bg
+        "relative w-full overflow-hidden bg-gray-800 h-[500px] md:h-[var(--hero-height)]", // fallback bg, responsive height
         className
       )}
-      style={{ height }}
+      style={{ "--hero-height": `${height}px` }}
       role="region"
       aria-roledescription="carousel"
     >

@@ -39,7 +39,7 @@ const TestimonialCard = React.forwardRef(({
       onClick={onClick}
       className={classNames(
         // 456×225 — no border, no shadow, white bg, vertical gap-[10px]
-        "flex flex-col gap-[10px] w-[456px]",
+        "flex flex-col gap-[10px] w-full max-w-[456px] min-w-0 overflow-hidden",
         className
       )}
       {...props}
@@ -53,11 +53,11 @@ const TestimonialCard = React.forwardRef(({
         {/* Text block — VERTICAL gap:8 */}
         <div className="flex flex-col gap-[8px]">
           {/* Quote headline — [13px/700] #2d2d2d */}
-          <p className="text-med-small-bold text-tertiary-normal-default">
+          <p className="text-med-small-bold text-tertiary-normal-default break-words">
             {quote}
           </p>
           {/* Body — [13px/400] #2d2d2d */}
-          <p className="text-med-small-regular text-tertiary-normal-default leading-[18px]">
+          <p className="text-med-small-regular text-tertiary-normal-default leading-[18px] break-words">
             {body}
           </p>
           {/* Attribution — [10px/700] #2d2d2d */}

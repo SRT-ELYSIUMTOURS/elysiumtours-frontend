@@ -84,14 +84,14 @@ const SignatureExperiencesSection = React.forwardRef(({ country = "Ghana", class
   return (
     <section
       ref={ref}
-      className={classNames("w-full py-[80px]", className)}
+      className={classNames("w-full py-[48px] md:py-[60px] lg:py-[80px]", className)}
       style={{ backgroundColor: "#ffffff" }}
       {...props}
     >
-      <div className="px-[148px]">
+      <div className="px-6 md:px-[30px] lg:px-[148px]">
 
         {/* ── Section header — Figma 1914:40955 (left) + 1914:40959 (right) ── */}
-        <div className="flex items-start justify-between w-full mb-[60px]">
+        <div className="flex flex-col lg:flex-row items-center lg:items-start justify-between w-full mb-[32px] lg:mb-[60px] gap-4">
 
           {/* Left: 46px decorative line + "ONLY IN {COUNTRY}" label */}
           <div className="flex items-center gap-[8px] shrink-0">
@@ -111,16 +111,15 @@ const SignatureExperiencesSection = React.forwardRef(({ country = "Ghana", class
           </div>
 
           {/* Right: "Signature Experiences" title + "See All Tours" button */}
-          <div className="flex flex-col items-end gap-[12px]" style={{ width: "800px" }}>
+          <div className="flex flex-col items-center lg:items-end gap-[12px] w-full lg:max-w-[800px]">
             <h2
-              className="text-right"
+              className="text-center lg:text-right"
               style={{
                 fontFamily: "Raleway, sans-serif",
                 fontSize:   "25px",
                 fontWeight: 700,
                 lineHeight: "34px",
                 color:      "#2d2d2d",
-                width:      "800px",
               }}
             >
               Signature Experiences
@@ -144,7 +143,7 @@ const SignatureExperiencesSection = React.forwardRef(({ country = "Ghana", class
         </div>
 
         {/* ── 4-card grid — Figma 1914:40952 body ────────────────────────── */}
-        <div className="grid grid-cols-4 gap-x-[8px]">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-x-[8px] gap-y-[16px]">
           {TOURS.map((tour) => (
             <PopularTourCard
               key={tour.id}

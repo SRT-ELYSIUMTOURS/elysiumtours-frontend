@@ -46,66 +46,56 @@ const TourTypesSection = React.forwardRef(({ className, ...props }, ref) => {
   return (
     <section
       ref={ref}
-      // Figma background: #f2eaf9 (Violet-Secondary 30%/Light)
-      className={classNames("w-full bg-[#f2eaf9] pt-[80px] pb-[80px]", className)}
+      className={classNames(
+        "w-full bg-[#f2eaf9] py-10 md:py-16 lg:py-20",
+        className
+      )}
       {...props}
     >
-      <div className="px-[156px]">
+      <div className="px-4 md:px-10 lg:px-[156px]">
 
-        {/* ── Section header ──────────────────────────────────────────────── */}
-        {/* Figma: flex justify-between items-start, full width (1416px inner) */}
-        {/* mb-[96px]: gap between header bottom (80+146=226px) and cards top (322px) */}
-        <div className="flex items-start justify-between w-full mb-[96px]">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-6 mb-10 md:mb-20">
 
-          {/* Left — horizontal line SVG + "TYPES OF TOURS" label */}
-          {/* Figma node 1903-25381: flex gap-[8px] items-center */}
-          <div className="flex items-center gap-[8px] shrink-0">
-            {/* Figma: w-[46px] h-0 with SVG stretching to fill — renders as thin horizontal line */}
-            {/* SVG has width/height="100%" so intrinsic size is undefined — set explicit px dims */}
+          {/* Left */}
+          <div className="flex items-center gap-2 shrink-0">
             <img
               src={sectionLine}
               alt=""
-              aria-hidden="true"
-              style={{ width: "46px", height: "2px", display: "block" }}
+              className="w-[46px] h-[2px]"
             />
-            {/* Figma: Raleway Bold 13px/18px #2b0f43, p-[10px] wrapper */}
-            <span className="font-raleway font-bold text-[13px] leading-[18px] text-[#2b0f43] whitespace-nowrap p-[10px]">
+            <span className="font-raleway font-bold text-sm text-[#2b0f43] whitespace-nowrap">
               TYPES OF TOURS
             </span>
           </div>
 
-          {/* Right — title + description, w-[597px], items-end */}
-          {/* Figma node 1903-25385: flex-col gap-[16px] items-end w-[597px] */}
-          <div className="flex flex-col gap-[16px] items-end w-[597px]">
+          {/* Right */}
+          <div className="flex flex-col gap-4 md:items-end w-full md:max-w-[600px]">
 
-            {/* Title row — h-[37px], Raleway Bold 25px/34px #2d2d2d, text-right */}
-            {/* Figma node 1903-25386: h-[37px] pl-[10px] py-[10px] flex items-center justify-end */}
-            <div className="flex items-center justify-end h-[37px] w-full pl-[10px] py-[10px]">
-              <h2 className="font-raleway font-bold text-[25px] leading-[34px] text-[#2d2d2d] text-right whitespace-nowrap">
-                Tours: Designed for Every Traveller
-              </h2>
-            </div>
+            <h2 className="font-raleway font-bold 
+              text-lg md:text-xl lg:text-2xl 
+              text-[#2d2d2d] text-left md:text-right">
+              Tours: Designed for Every Traveller
+            </h2>
 
-            {/* Description — h-[93px], Raleway Regular 16px/24px #2d2d2d, w-[565px], text-right */}
-            {/* Figma node 1903-25388: h-[93px] pl-[10px] pr-px py-[10px] flex items-center justify-end */}
-            <div className="flex items-center justify-end h-[93px] w-full pl-[10px] pr-px py-[10px]">
-              <p className="font-raleway font-normal text-[16px] leading-[24px] text-[#2d2d2d] text-right w-[565px]">
-                Elysium Tours offers experiences tailored to every journey. Whether
-                you&apos;re unwinding with our Leisure Tours, handling official travel
-                through our Business Tours, or blending both worlds with our Bleisure
-                Tours, we ensure comfort, authenticity, and unforgettable moments every
-                step of the way.
-              </p>
-            </div>
-
-            {/* NOTE: No "Explore More" button — not present in Figma node 1903-25379 */}
+            <p className="font-raleway 
+              text-sm md:text-base 
+              text-[#2d2d2d] 
+              text-left md:text-right">
+              Elysium Tours offers experiences tailored to every journey.
+              Whether you're unwinding with our Leisure Tours, handling
+              official travel through our Business Tours, or blending both
+              worlds with our Bleisure Tours.
+            </p>
           </div>
         </div>
 
-        {/* ── Cards row ───────────────────────────────────────────────────── */}
-        {/* Figma node 1903-25390: flex gap-[32px] items-center */}
-        {/* Cards: 451×656px, rounded-[40px], shadow, overflow-clip */}
-        <div className="flex items-center gap-[32px]">
+        {/* Cards */}
+        <div className="
+          flex flex-col md:flex-row 
+          gap-6 md:gap-8 
+          overflow-x-auto md:overflow-visible
+        ">
           {TOUR_TYPES.map((t) => (
             <PartnerHighlightCard
               key={t.id}
@@ -114,10 +104,13 @@ const TourTypesSection = React.forwardRef(({ className, ...props }, ref) => {
               subtitle={t.subtitle}
               subtitleColor={t.subtitleColor}
               overlayColor={t.overlayColor}
-              // Figma: label text at left-[23px] top-[595px] inside 656px card
-              // = 61px from card bottom. Two-line text (28px + 26px) fits within clip bounds.
-              labelClassName="absolute left-[23px] top-[595px]"
-              className="w-[451px] h-[656px] shrink-0"
+              labelClassName="absolute left-4 bottom-4"
+              className="
+                w-full 
+                md:w-[300px] lg:w-[451px] 
+                h-[400px] md:h-[500px] lg:h-[656px] 
+                shrink-0
+              "
             />
           ))}
         </div>
@@ -126,6 +119,5 @@ const TourTypesSection = React.forwardRef(({ className, ...props }, ref) => {
     </section>
   );
 });
-
 TourTypesSection.displayName = "TourTypesSection";
 export default TourTypesSection;

@@ -29,50 +29,65 @@ const TourPartnerListingPage = () => {
   const isGuide = category === "guides";
 
   return (
-    <main>
-      <BlogBreadcrumbBar
-        items={[
-          { label: "Home", href: "/" },
-          { label: "Tour Partners", href: "/tour-partners" },
-          { label: categoryLabel, href: `/tour-partners/${category}` },
-          { label: "All" },
-        ]}
-      />
+    <main className="w-full">
 
-      {/* Category filter bar at top — switching categories navigates */}
-      <PartnerCategoryFilterBar
-        activeCategory={category}
-        onCategoryChange={(cat) => {
-          if (cat === "all") navigate("/tour-partners");
-          else navigate(`/tour-partners/${cat}/all`);
-        }}
-      />
+      {/* Breadcrumb */}
+      <div className="px-4 md:px-8 lg:px-16">
+        <BlogBreadcrumbBar
+          items={[
+            { label: "Home", href: "/" },
+            { label: "Tour Partners", href: "/tour-partners" },
+            { label: categoryLabel, href: `/tour-partners/${category}` },
+            { label: "All" },
+          ]}
+        />
+      </div>
 
-      {/* Sort / Date / Filter controls */}
-      <PartnerListingFilterBar
-        category={category}
-        showLocationFilter={isGuide}
-        onSortChange={setSort}
-        onFiltersApply={setFilters}
-      />
+      {/* Category filter bar */}
+      <div className="px-4 md:px-8 lg:px-16 overflow-x-auto">
+        <PartnerCategoryFilterBar
+          activeCategory={category}
+          onCategoryChange={(cat) => {
+            if (cat === "all") navigate("/tour-partners");
+            else navigate(`/tour-partners/${cat}/all`);
+          }}
+        />
+      </div>
 
-      {/* Page heading */}
-      <div className="px-[80px] pt-[48px] pb-[8px]">
-        <h1 className="font-raleway font-bold text-[31px] leading-[42px] text-tertiary-normal-default">
+      {/* Filters */}
+      <div className="px-4 md:px-8 lg:px-16">
+        <div className="flex flex-col md:flex-row gap-3">
+          <PartnerListingFilterBar
+            category={category}
+            showLocationFilter={isGuide}
+            onSortChange={setSort}
+            onFiltersApply={setFilters}
+          />
+        </div>
+      </div>
+
+      {/* Heading */}
+      <div className="px-4 md:px-8 lg:px-16 pt-6 md:pt-10 pb-2">
+        <h1 className="font-raleway font-bold text-xl md:text-2xl lg:text-3xl text-tertiary-normal-default">
           {categoryLabel}
         </h1>
       </div>
 
-      {/* Partner cards grid */}
-      <PartnerListingGrid
-        category={category}
-        filters={filters}
-        sort={sort}
-      />
+      {/* Grid */}
+      <div className="px-4 md:px-8 lg:px-16">
+        <PartnerListingGrid
+          category={category}
+          filters={filters}
+          sort={sort}
+        />
+      </div>
 
-      <PartnerCtaSection />
+      {/* CTA */}
+      <div className="px-4 md:px-8 lg:px-16 mt-8">
+        <PartnerCtaSection />
+      </div>
+
     </main>
   );
 };
-
 export default TourPartnerListingPage;

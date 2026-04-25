@@ -227,3 +227,12 @@
   background-repeat: repeat;
   background-size: 200px 200px;
 }
+
+/* Hide scrollbar for horizontal scroll sections on mobile */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

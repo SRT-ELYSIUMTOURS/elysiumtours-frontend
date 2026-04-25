@@ -90,100 +90,47 @@ const TourFeaturedSection = React.forwardRef(({ className, ...props }, ref) => {
   return (
     <section
       ref={ref}
-      // Figma: bg-[#f2eaf9] (secondary-light-default), pt-[80px] pb-[80px]
-      className={classNames("w-full bg-[#f2eaf9] pt-[80px] pb-[80px]", className)}
+      className={classNames(
+        "w-full bg-[#f2eaf9] py-10 md:py-16 lg:py-20",
+        className
+      )}
       {...props}
     >
-      {/* ── Section header — px-[156px] ────────────────────────────────────── */}
-      <div className="px-[156px] mb-[60px]">
-        <div className="flex items-start justify-between w-full">
+      {/* Header */}
+      <div className="px-4 md:px-10 lg:px-[156px] mb-10 md:mb-16">
+        <div className="flex flex-col md:flex-row md:justify-between gap-6">
 
-          {/* Left — line SVG + "FEATURED TOURS" label */}
-          <div className="flex items-center gap-[8px] shrink-0">
-            <img
-              src={sectionLine}
-              alt=""
-              aria-hidden="true"
-              style={{ width: "46px", height: "2px", display: "block" }}
-            />
-            <span
-              style={{
-                fontFamily: "Raleway, sans-serif",
-                fontSize: "13px",
-                fontWeight: 700,
-                lineHeight: "18px",
-                color: "#2b0f43",
-                whiteSpace: "nowrap",
-                textTransform: "uppercase",
-                letterSpacing: "0.05em",
-              }}
-            >
+          {/* Left */}
+          <div className="flex items-center gap-2 shrink-0">
+            <img src={sectionLine} alt="" className="w-[46px] h-[2px]" />
+            <span className="font-bold text-sm text-[#2b0f43] uppercase">
               Featured Tours
             </span>
           </div>
 
-          {/* Right — heading + description, w-[677px], items-end */}
-          <div className="flex flex-col gap-[16px] items-end w-[677px]">
+          {/* Right */}
+          <div className="flex flex-col gap-4 w-full md:max-w-[677px] md:items-end">
 
-            {/* Heading — Raleway Bold 25px/34px #2d2d2d, text-right */}
-            <div className="flex items-center justify-end w-full">
-              <h2
-                style={{
-                  fontFamily: "Raleway, sans-serif",
-                  fontSize: "25px",
-                  fontWeight: 700,
-                  lineHeight: "34px",
-                  color: "#2d2d2d",
-                  textAlign: "right",
-                }}
-              >
-                Explore Our Most Popular Tours and Experiences
-              </h2>
-            </div>
+            <h2 className="text-lg md:text-xl lg:text-2xl font-bold text-[#2d2d2d] text-left md:text-right">
+              Explore Our Most Popular Tours and Experiences
+            </h2>
 
-            {/* Description — Raleway Regular 16px/24px #2d2d2d, text-right */}
-            <div className="flex items-center justify-end w-full">
-              <p
-                style={{
-                  fontFamily: "Raleway, sans-serif",
-                  fontSize: "16px",
-                  fontWeight: 400,
-                  lineHeight: "24px",
-                  color: "#2d2d2d",
-                  textAlign: "right",
-                }}
-              >
-                Ghana is buzzing with spots like Kakum National Park, that canopy walkway is a
-                thrill. Cape Coast Castle, super eye-opening on history. Kwame Nkrumah Memorial
-                Park in Accra&apos;s topping lists, with over three hundred thousand visitors last
-                year alone.
-              </p>
-            </div>
+            <p className="text-sm md:text-base text-[#2d2d2d] text-left md:text-right">
+              Ghana is buzzing with spots like Kakum National Park...
+            </p>
+
           </div>
         </div>
       </div>
 
-      {/* ── Cards grid — px-[148px] ─────────────────────────────────────────── */}
-      {/* Figma: grid-cols-4 gap-x-[8px] gap-y-[20px] */}
-      <div className="px-[148px]">
-        <div className="grid grid-cols-4 gap-x-[8px] gap-y-[20px]">
+      {/* Grid */}
+      <div className="px-4 md:px-10 lg:px-[148px]">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           {TOURS.map((tour) => (
             <PopularTourCard
               key={tour.id}
-              image={tour.image}
-              location={tour.location}
-              rating={tour.rating}
-              title={tour.title}
-              availabilityBadge={tour.availabilityBadge}
-              price={tour.price}
-              tags={tour.tags}
-              duration={tour.duration}
-              maxGroupSize={tour.maxGroupSize}
-              featureType={tour.featureType}
-              featureLabel={tour.featureLabel}
-              statusBadge={tour.statusBadge}
-              reviewCount={tour.reviewCount}
-              className="w-[351px]"
+              {...tour}
+              className="w-full"
             />
           ))}
         </div>
@@ -191,6 +138,6 @@ const TourFeaturedSection = React.forwardRef(({ className, ...props }, ref) => {
     </section>
   );
 });
-
 TourFeaturedSection.displayName = "TourFeaturedSection";
+
 export default TourFeaturedSection;

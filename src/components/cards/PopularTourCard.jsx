@@ -139,7 +139,7 @@ const PopularTourCard = React.forwardRef(
         // Figma: w-351 h-615, flex-col gap-12, p-10, items-center justify-center
         className={classNames(
           "relative flex flex-col gap-[12px] items-center justify-center p-[10px]",
-          "w-[351px] h-[615px] shrink-0",
+          "w-full max-w-[351px] min-h-[615px] shrink-0",
           "cursor-pointer hover:-translate-y-1 transition-transform duration-300 ease-in",
           className
         )}
@@ -147,7 +147,7 @@ const PopularTourCard = React.forwardRef(
       >
         {/* ── IMAGE SECTION ───────────────────────────────────────────────── */}
         {/* Figma: h-373 w-331, rounded-[10px], overflow-clip */}
-        <div className="relative h-[373px] w-[331px] shrink-0 rounded-[10px] overflow-clip">
+        <div className="relative h-[373px] w-full max-w-[331px] shrink-0 rounded-[10px] overflow-clip">
           {/* Background image + black overlay */}
           {image ? (
             <img
@@ -230,17 +230,17 @@ const PopularTourCard = React.forwardRef(
 
         {/* ── BODY SECTION ────────────────────────────────────────────────── */}
         {/* Figma: flex-col gap-[4px] h-[210px] py-[8px] w-[330px] */}
-        <div className="flex flex-col gap-[4px] h-[210px] items-start py-[8px] w-[330px]">
+        <div className="flex flex-col gap-[4px] h-[210px] items-start py-[8px] w-full max-w-[330px]">
 
           {/* ── Group 1: Tags + Info row + Divider ── */}
           {/* Figma: flex-col gap-[4px] w-[326px] */}
-          <div className="flex flex-col gap-[4px] items-start w-[326px]">
+          <div className="flex flex-col gap-[4px] items-start w-full max-w-[326px]">
 
             {/* Tag pills
                 Figma: flex gap-[10px] items-center
                        pill: h-[28px] px-[9px] border-[0.5px] border-[#6f6f6f] rounded-[20px]
                        text: Raleway Medium 10px/18px #565656 */}
-            <div className="flex gap-[10px] items-center">
+            <div className="flex gap-[10px] items-center flex-wrap">
               {tags.map((tag, i) => (
                 <div
                   key={i}
@@ -258,7 +258,7 @@ const PopularTourCard = React.forwardRef(
             {/* Info row: duration | group size | feature
                 Figma: flex gap-[12px] items-start w-[303px]
                        each item: icon 16px + Raleway Medium 10px #371456 */}
-            <div className="flex gap-[12px] items-start w-[303px]">
+            <div className="flex gap-[12px] items-start w-full max-w-[303px] flex-wrap">
 
               {/* Duration */}
               <div className="flex h-[33px] items-center shrink-0">
@@ -300,7 +300,7 @@ const PopularTourCard = React.forwardRef(
             {/* Divider line
                 Figma: h-0 w-[327px] relative, absolute inset-[-8.5px_-2.6%]
                        SVG line (780c3c7d...) — visual only, no layout height */}
-            <div className="h-0 w-[327px] relative shrink-0">
+            <div className="h-0 w-full max-w-[327px] relative shrink-0">
               <div className="absolute" style={{ inset: "-8.5px -2.6%" }}>
                 <img
                   src={dividerLine}
@@ -314,12 +314,12 @@ const PopularTourCard = React.forwardRef(
 
           {/* ── Group 2: Title + Availability + Price ── */}
           {/* Figma: flex-col h-[129px] items-start pr-[10px] pt-[10px] w-[330px] */}
-          <div className="flex flex-col h-[129px] items-start pr-[10px] pt-[10px] w-[330px]">
+          <div className="flex flex-col h-[129px] items-start pr-[10px] pt-[10px] w-full max-w-[330px]">
 
             {/* Title + availability sub-group */}
             <div className="flex flex-col gap-[4px] items-start">
               {/* Title row — h-[28px], Raleway SemiBold 20px/28px #2d2d2d */}
-              <div className="flex h-[28px] items-center justify-center w-[330px]">
+              <div className="flex h-[28px] items-center justify-center w-full max-w-[330px]">
                 <h3 className="flex-1 font-raleway font-semibold text-[20px] leading-[28px] text-[#2d2d2d] min-h-px min-w-px">
                   {title}
                 </h3>

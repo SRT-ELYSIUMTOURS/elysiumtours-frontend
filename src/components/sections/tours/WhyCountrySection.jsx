@@ -61,12 +61,12 @@ const WhyCountrySection = React.forwardRef(
         {...props}
       >
         <div
-          className="flex flex-col"
-          style={{ paddingLeft: "156px", paddingRight: "156px", gap: "32px" }}
+          className="flex flex-col px-6 md:px-[30px] lg:px-[156px]"
+          style={{ gap: "32px" }}
         >
           {/* ── Header row ──────────────────────────────────────────────────── */}
           {/* Figma 1942:31920 — justify-between, full width */}
-          <div className="flex items-start justify-between w-full">
+          <div className="flex flex-col lg:flex-row items-center lg:items-start justify-between w-full gap-4">
 
             {/* Left — Figma 1942:31921: 46px line + "WHY GHANA" label */}
             <div className="flex items-center gap-[8px] shrink-0">
@@ -86,17 +86,17 @@ const WhyCountrySection = React.forwardRef(
             </div>
 
             {/* Right — Figma 1942:31925: w=677px, flex-col gap-16px, items-end */}
-            <div className="flex flex-col items-end" style={{ width: "677px", gap: "16px" }}>
+            <div className="flex flex-col items-center lg:items-end w-full lg:max-w-[677px]" style={{ gap: "16px" }}>
 
               {/* Title — Figma 1942:31927: Bold 25px #2d2d2d, text-right */}
               <h2
+                className="text-center lg:text-right"
                 style={{
                   fontFamily: "Raleway, sans-serif",
                   fontWeight: 700,
                   fontSize: "25px",
                   lineHeight: "34px",
                   color: "#2d2d2d",
-                  textAlign: "right",
                   margin: 0,
                 }}
               >
@@ -104,20 +104,20 @@ const WhyCountrySection = React.forwardRef(
               </h2>
 
               {/* Description + stats — Figma 1942:31928: flex-col gap-29px */}
-              <div className="flex flex-col items-end" style={{ gap: "29px", width: "100%" }}>
+              <div className="flex flex-col items-center lg:items-end" style={{ gap: "29px", width: "100%" }}>
 
                 {/* Body text — Figma 1942:31929: Regular 16px #2d2d2d, text-right, w=565px */}
-                <div className="flex flex-col" style={{ width: "565px", gap: "0px" }}>
+                <div className="flex flex-col w-full lg:max-w-[565px]" style={{ gap: "0px" }}>
                   {data.paragraphs.map((p, i) => (
                     <p
                       key={i}
+                      className="text-center lg:text-right"
                       style={{
                         fontFamily: "Raleway, sans-serif",
                         fontWeight: 400,
                         fontSize: "16px",
                         lineHeight: "24px",
                         color: "#2d2d2d",
-                        textAlign: "right",
                         margin: i < data.paragraphs.length - 1 ? "0 0 16px 0" : 0,
                       }}
                     >
@@ -129,7 +129,7 @@ const WhyCountrySection = React.forwardRef(
                 {/* Stat pills — Figma 1942:31998: flex gap-24px */}
                 {/* Each pill: border #f2eaf9, rounded-12px, p-12px */}
                 {/* Label: SemiBold 13px #7b2cbf | Value: Medium 12px #555 */}
-                <div className="flex items-start gap-[24px]">
+                <div className="flex flex-wrap items-start justify-center lg:justify-end gap-[12px] lg:gap-[24px]">
                   {data.stats.map((stat, i) => (
                     <div
                       key={i}
@@ -176,9 +176,8 @@ const WhyCountrySection = React.forwardRef(
           {/* ── Full-width image with caption overlay ───────────────────────── */}
           {/* Figma 3029:36185: h=654px, rounded-20px, overflow-hidden, box-shadow */}
           <div
-            className="relative overflow-hidden rounded-[20px] shrink-0 w-full"
+            className="relative overflow-hidden rounded-[20px] shrink-0 w-full h-[280px] md:h-[450px] lg:h-[654px]"
             style={{
-              height: "654px",
               boxShadow: "0px 4px 20px 0px rgba(0, 0, 0, 0.05)",
             }}
           >
@@ -191,14 +190,7 @@ const WhyCountrySection = React.forwardRef(
             {/* Frosted caption overlay — Figma 3029:36186 */}
             {/* Positioned: left=25px, centered at top=calc(50%+229.5px), h=137px, w=623px */}
             <div
-              className="absolute "
-              style={{
-                left: "25px",
-                top: "calc(50% + 229.5px)",
-                transform: "translateY(-50%)",
-                width: "623px",
-                height: "137px",
-              }}
+              className="absolute left-3 right-3 bottom-3 lg:left-[25px] lg:right-auto lg:bottom-[25px] lg:w-[623px]"
             >
               {/* Backdrop glass panel — Figma 3029:36187 */}
               {/* White-tinted frosted glass: backdrop-blur 50px + rgba(255,255,255,0.72) base */}
@@ -237,24 +229,18 @@ const WhyCountrySection = React.forwardRef(
               </div>
 
               {/* Caption text — Figma 3029:36188 */}
-              {/* left=26px inside overlay, centered vertically, w=535px */}
               <div
-                className="absolute  flex flex-col justify-center"
+                className="relative flex flex-col justify-center p-4 lg:p-[26px] w-full lg:max-w-[535px]"
                 style={{
-                  left: "26px",
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  width: "535px",
                   gap: "8px",
                 }}
               >
                 {/* Caption title — Bold 25px #2d2d2d */}
                 <p
+                  className="text-[18px] leading-[26px] lg:text-[25px] lg:leading-[34px]"
                   style={{
                     fontFamily: "Raleway, sans-serif",
                     fontWeight: 700,
-                    fontSize: "25px",
-                    lineHeight: "34px",
                     color: "#2d2d2d",
                     margin: 0,
                   }}
@@ -263,11 +249,10 @@ const WhyCountrySection = React.forwardRef(
                 </p>
                 {/* Caption subtitle — Regular 16px #2d2d2d */}
                 <p
+                  className="text-[14px] leading-[20px] lg:text-[16px] lg:leading-[24px]"
                   style={{
                     fontFamily: "Raleway, sans-serif",
                     fontWeight: 400,
-                    fontSize: "16px",
-                    lineHeight: "24px",
                     color: "#2d2d2d",
                     margin: 0,
                   }}

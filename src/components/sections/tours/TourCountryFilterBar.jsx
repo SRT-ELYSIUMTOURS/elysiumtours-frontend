@@ -77,7 +77,7 @@ const RegionDropdownPanel = ({
   <div
     className="absolute top-full left-0 mt-[6px] z-50 bg-white rounded-[20px] border border-solid border-[#e9eaeb] flex flex-col overflow-hidden"
     style={{
-      width: "460px",
+      width: "min(460px, calc(100vw - 48px))",
       paddingTop: "22px",
       paddingBottom: "22px",
       gap: "22px",
@@ -130,7 +130,7 @@ const RegionDropdownPanel = ({
           {/* Each item is ~183px wide so 2 × 183 = 366 ≈ 369px total (matches Figma w-[369px]) */}
           <div
             className="flex flex-wrap"
-            style={{ gap: "4px 0", width: "408px" }}
+            style={{ gap: "4px 0", maxWidth: "408px", width: "100%" }}
           >
             {regions.map((region) => {
               const isChecked = selected.includes(region);
@@ -140,7 +140,7 @@ const RegionDropdownPanel = ({
                   type="button"
                   onClick={() => onToggle(region)}
                   className="flex items-center gap-[8px] transition-all duration-150 hover:opacity-80"
-                  style={{ width: "204px", padding: "8px 0" }}
+                  style={{ width: "50%", minWidth: "160px", padding: "8px 0" }}
                 >
                   {isChecked ? <CheckboxChecked /> : <CheckboxUnchecked />}
                   <span
@@ -388,13 +388,13 @@ const TourCountryFilterBar = React.forwardRef(
         ref={ref}
         className={classNames("w-full", className)}
         style={{
-          height: "113px",
+          minHeight: "113px",
           backgroundColor: "#f2eaf9",
         }}
         {...props}
       >
-        <div className="h-full flex items-center px-[156px]">
-          <div ref={barRef} className="flex items-center gap-[12px] flex-1">
+        <div className="h-full flex items-center px-6 md:px-[30px] lg:px-[156px] py-4 lg:py-0">
+          <div ref={barRef} className="flex items-center gap-[12px] flex-1 overflow-x-auto scrollbar-hide">
 
             {/* ── REGION — Figma 1942:34258 ───────────────────────────────── */}
             <div className="flex items-center gap-[12px] shrink-0">

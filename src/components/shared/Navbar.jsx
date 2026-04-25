@@ -63,7 +63,7 @@ const TOUR_PARTNER_ITEMS = [
   {
     label: "Tour Sites & Events",
     desc:  "Discover iconic landmarks, guided tours, and vibrant local events.",
-    href:  "/tour-partners/sites-events",
+    href:  "/tour-partners/tour-sites",
     icon:  iconBackpack,
   },
   {
@@ -85,15 +85,15 @@ const TOUR_PARTNER_ITEMS = [
     icon:  iconMentoring,
   },
   {
-    label: "Resturants & Dinning",
+    label: "Restaurants & Dining",
     desc:  "Get up and running on new features and techniques.",
-    href:  "/tour-partners/dining",
+    href:  "/tour-partners/restaurants",
     icon:  iconServingFood,
   },
   {
-    label: "Photo & Videographers",
+    label: "Photos & Videographers",
     desc:  "Get up and running on new features and techniques.",
-    href:  "/tour-partners/photography",
+    href:  "/tour-partners/photographers",
     icon:  iconAlbum,
   },
   {
