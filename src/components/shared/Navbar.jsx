@@ -19,7 +19,7 @@ import menuCardPhoto from "../../assets/ElysiumAssets/menu-card-photo.png";
 // ── Logo SVG — matches Figma cursive Elysium script ──────────────────────────
 const ElysiumLogo = () => (
   <img
-    src="./src/assets/ElysiumAssets/Logo.png"
+    src="/ElysiumAssets/Logo.png"
     width={80}
     height={80}
     alt=""
