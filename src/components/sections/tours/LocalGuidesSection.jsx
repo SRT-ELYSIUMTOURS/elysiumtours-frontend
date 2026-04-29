@@ -113,7 +113,7 @@ const GuideCard = ({ guide }) => (
     />
     <div className="relative z-0">
       <div
-        className="w-[455px] h-[324px] absolute bg-secondary-light-default rounded-4xl z-0 top-[50%]"
+        className="w-[455px] h-[324px] absolute bg-secondary-light-default rounded-4xl z-0 top-[50%] left-[50%] translate-x-[-50%]"
         style={{
           filter: "blur(50px)",
         }}
