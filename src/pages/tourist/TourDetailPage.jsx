@@ -207,6 +207,15 @@ const MeetingPointMapFrame = ({
   );
 };
 
+/**
+ * Per-tour page content. Optional keys control “extended” detail layout:
+ * - `tourHighlights` — cards under About the Tour (`{ title, description }[]`; legacy plain strings become title-only)
+ * - `businessAmenities` — two-column checklist + optional `corporateBookingBenefits` or legacy `noteHtml`
+ *   (`items` order: **left** column top-to-bottom, then **right** column, so the split matches Figma)
+ * - `importantInformation` — `{ blocks[], footerNote? }` above the map (`block.label` or `block.title` + `body`; optional banner)
+ * - `bookingAddOns` — optional extras in the sidebar (checkboxes + subtotal)
+ * Omit a field or use [] / empty `items` / `blocks` to hide that block.
+ */
 const TOUR_DATA = {
   "elmina-heritage-coastal-journey": {
     title: "Elmina Heritage & Coastal Journey",
@@ -214,6 +223,85 @@ const TOUR_DATA = {
     location: "Cape Coast, Ghana",
     meetingPoint: { lat: 5.6037, lng: -0.187 },
     meetingPointLabel: "Accra, Greater Accra Region",
+    /** Optional: omit or [] to hide “Tour Highlights” on this tour */
+    tourHighlights: [
+      {
+        title: "Elmina Castle & Atlantic heritage",
+        description:
+          "UNESCO World Heritage site with expert guides and space for reflection at the Door of No Return.",
+      },
+      {
+        title: "Cape Coast communities & markets",
+        description:
+          "Coastal fishing villages, open-air markets, and everyday life along Ghana's Central Region shore.",
+      },
+      {
+        title: "Cultural context & local voices",
+        description:
+          "Certified heritage storytelling that connects the past to the living culture around you.",
+      },
+      {
+        title: "Evening ocean & downtime",
+        description:
+          "Paced days with time by the coast—well suited to photography, conversation, and rest.",
+      },
+    ],
+    /** Optional: omit or empty items[] to hide “Business Amenities” */
+    businessAmenities: {
+      items: [
+        "High-Speed WiFi Throughout",
+        "4-Star Hotel (Executive Floor)",
+        "VAT Invoices Provided",
+        "Private Chauffeured Vehicle",
+        "Corporate Group Invoicing",
+        "24/7 Concierge Support",
+        "Airport Transfers (VIP)",
+        "Hotel pickup & drop-off",
+        "Meeting Room Access",
+      ],
+      corporateBookingBenefits: {
+        title: "Corporate Booking Benefits",
+        items: [
+          "Group bookings of 5+ receive 12% corporate discount",
+          "Consolidated invoices available for company expense reporting",
+          "Dedicated corporate account manager assigned for your trip",
+          "Custom itinerary modifications for conference integration",
+        ],
+      },
+    },
+    /** Optional — appears above the map in Location */
+    importantInformation: {
+      blocks: [
+        {
+          title: "Visa:",
+          body: "Most non-Ghanaian visitors need a visa or eligible VOA; check your nationality and apply early. eVisa is available for many countries.",
+        },
+        {
+          title: "Health:",
+          body:
+            "Yellow fever vaccination is required for entry. Malaria prophylaxis is strongly recommended. Confirm plans with your healthcare provider at least 6 weeks before travel.",
+        },
+        {
+          title: "Dress code:",
+          body: "Comfortable walking shoes and modest layers for heritage sites. Smart casual for evenings; bring sun protection and a light rain layer in the rainy season.",
+        },
+        {
+          title: "Power:",
+          body: "Ghana uses Type G outlets (230V). Bring a universal adaptor; a power bank is useful for long days.",
+        },
+        {
+          title: "Connectivity:",
+          body: "Local SIM cards with data are widely available (MTN, Vodafone, AirtelTigo). Your guide can help on arrival if needed.",
+        },
+      ],
+      footerNote:
+        "Free cancellation up to 48 hours before departure. Corporate and group bookings may have dedicated terms—contact your coordinator.",
+    },
+    /** Optional: omit or [] — optional extras + subtotal in the booking sidebar */
+    bookingAddOns: [
+      { id: "airport", label: "Airport pickup / drop-off (Accra)", priceGhc: 250 },
+      { id: "photo", label: "Half-day professional photography", priceGhc: 450 },
+    ],
     rating: 4.9,
     reviewCount: 24,
     maxGuests: 12,
@@ -572,6 +660,27 @@ const RELATED_TOURS = [
     slug: "wli-waterfalls-nature-exploration",
   },
 ];
+
+/** Figma: left column first (5 of 9), right column second — split at ceil(n/2). */
+function splitBusinessAmenityColumns(items) {
+  const mid = Math.ceil(items.length / 2);
+  return [items.slice(0, mid), items.slice(mid)];
+}
+
+/** Tour highlight entry: Figma uses title + body; plain strings are treated as title-only. */
+function normalizeTourHighlight(entry) {
+  if (typeof entry === "string") {
+    return { title: entry, description: "" };
+  }
+  return {
+    title: entry?.title ?? "",
+    description: entry?.description ?? "",
+  };
+}
+
+function importantInformationRowLabel(block) {
+  return block?.label ?? block?.title ?? "";
+}
 
 // ─── Icon components ──────────────────────────────────────────────────────────
 const StarIcon = ({ filled = true, size = 16 }) => (
@@ -1644,6 +1753,21 @@ const BookingWidget = ({
     bookingStepProp !== undefined ? bookingStepProp : bookingStepInternal;
   const setActiveStep = onBookingStepChange ?? setBookingStepInternal;
 
+  const [selectedBookingAddons, setSelectedBookingAddons] = useState({});
+  const bookingAddOns = tourData.bookingAddOns ?? [];
+  const addonsSubtotal = useMemo(
+    () =>
+      bookingAddOns.reduce(
+        (sum, a) => sum + (selectedBookingAddons[a.id] ? a.priceGhc : 0),
+        0
+      ),
+    [bookingAddOns, selectedBookingAddons]
+  );
+
+  const toggleBookingAddon = (id) => {
+    setSelectedBookingAddons((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
   return (
   <div className="max-w-full  overflow-hidden rounded-[24px] border border-secondary-light-active bg-white">
     {/* ── Gradient header — condensed to 110px so widget fits viewport ── */}
@@ -1821,6 +1945,43 @@ const BookingWidget = ({
         </div>
       </div>
 
+      {bookingAddOns.length > 0 && (
+        <div className="mt-3 border-t border-secondary-light-default pt-4">
+          <p className="mb-3 font-raleway text-med-small-bold text-secondary-dark-hover">
+            Optional extras
+          </p>
+          <div className="flex flex-col gap-2">
+            {bookingAddOns.map((a) => (
+              <label
+                key={a.id}
+                className="flex cursor-pointer items-start gap-3 rounded-lg border border-secondary-light-hover bg-secondary-light-default/50 px-3 py-2.5 transition-colors hover:bg-secondary-light-default/80"
+              >
+                <input
+                  type="checkbox"
+                  checked={!!selectedBookingAddons[a.id]}
+                  onChange={() => toggleBookingAddon(a.id)}
+                  className="mt-0.5 size-4 shrink-0 accent-secondary-normal-default"
+                />
+                <span className="flex-1 text-med-small-Medium text-tertiary-normal-default">
+                  {a.label}
+                </span>
+                <span className="text-med-small-semibold text-secondary-normal-default whitespace-nowrap tabular-nums">
+                  GHC {a.priceGhc.toLocaleString()}
+                </span>
+              </label>
+            ))}
+          </div>
+          {addonsSubtotal > 0 && (
+            <div className="mt-3 flex items-center justify-between border-t border-dashed border-secondary-light-active pt-3 text-med-small-semibold text-secondary-dark-hover">
+              <span>Add-ons subtotal</span>
+              <span className="tabular-nums">
+                GHC {addonsSubtotal.toLocaleString()}
+              </span>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* CTA ACTIONS */}
       <div className="flex flex-col gap-2">
         <Button
@@ -1907,6 +2068,11 @@ const TourDetailPage = () => {
 
   const tourData =
     TOUR_DATA[tour] || TOUR_DATA["elmina-heritage-coastal-journey"];
+  const importantInfo = tourData.importantInformation;
+  const importantInfoRows = importantInfo?.blocks ?? [];
+  const importantInfoFooter = importantInfo?.footerNote;
+  const showImportantInformation =
+    importantInfoRows.length > 0 || !!importantInfoFooter;
   const [meetingPin, setMeetingPin] = useState(
     () => tourData.meetingPoint ?? DEFAULT_MEETING_POINT
   );
@@ -2060,6 +2226,126 @@ const TourDetailPage = () => {
                   </div>
                 </div>
               </div>
+
+              {tourData.tourHighlights?.length > 0 && (
+                <div className="relative mt-6 w-full rounded-[20px] border border-solid border-[#e8d9f5] bg-white px-[33px] pb-8 pt-[29px]">
+                  <h2 className="font-raleway text-xl font-bold leading-8 tracking-normal text-secondary-dark-hover">
+                    Tour Highlights
+                  </h2>
+                  <div className="mt-4 grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-x-5 md:gap-y-3">
+                    {tourData.tourHighlights.map((entry, idx) => {
+                      const { title, description } =
+                        normalizeTourHighlight(entry);
+                      return (
+                        <div
+                          key={`${title}-${idx}`}
+                          className="relative min-h-[92px] rounded-[14px] bg-[#f3e8ff]/50 pl-[18px] pr-4 pt-4 pb-4"
+                        >
+                          <div className="flex items-start gap-[5px]">
+                            <div
+                              className="h-[26px] w-6 shrink-0 rounded bg-secondary-light-hover"
+                              aria-hidden
+                            />
+                            <div className="flex min-w-0 flex-1 flex-col gap-1">
+                              <div className="font-raleway text-sm font-bold leading-[20.8px] text-secondary-dark-hover">
+                                {title}
+                              </div>
+                              {description ? (
+                                <p className="font-raleway text-xs font-normal leading-[18px] tracking-normal text-gray-500 whitespace-pre-line">
+                                  {description}
+                                </p>
+                              ) : null}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {tourData.businessAmenities?.items?.length > 0 && (
+                <div className="mt-6 flex w-full max-w-full flex-col items-start gap-4 self-stretch rounded-[20px] border-b-[1.2px] border-solid border-secondary-light-hover bg-white pl-5 pr-5 pt-5 pb-[21px]">
+                  <div className="flex w-full flex-col items-start gap-2">
+                    <div className="flex w-full items-center gap-2.5 px-0 py-1">
+                      <h2 className="text-semi-md-semibold text-secondary-dark-hover">
+                        Business Amenities
+                      </h2>
+                    </div>
+                  </div>
+                  <div className="flex w-full flex-col gap-4 lg:flex-row lg:gap-x-[87px]">
+                    {splitBusinessAmenityColumns(
+                      tourData.businessAmenities.items
+                    ).map((column, colIdx) => (
+                      <div
+                        key={colIdx}
+                        className="flex min-w-0 flex-1 flex-col gap-4"
+                      >
+                        {column.map((line) => (
+                          <div
+                            key={line}
+                            className="flex items-center"
+                            style={{ gap: "12px" }}
+                          >
+                            <span className="flex size-5 shrink-0 items-center justify-center">
+                              <CheckIcon />
+                            </span>
+                            <span className="text-md-Medium text-[#364153]">
+                              {line}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                  {(tourData.businessAmenities.corporateBookingBenefits?.items
+                    ?.length > 0 ||
+                    tourData.businessAmenities.noteHtml) && (
+                    <div className="relative min-h-44 w-full max-w-[877px] rounded-[14px] border-l-[3px] border-solid border-secondary-dark-hover bg-secondary-light-default/50 px-[21px] pb-5 pt-[19px]">
+                      {tourData.businessAmenities.corporateBookingBenefits
+                        ?.items?.length > 0 && (
+                        <>
+                          <p className="font-raleway text-sm font-bold leading-[22.4px] text-secondary-dark-hover">
+                            {tourData.businessAmenities
+                              .corporateBookingBenefits.title ??
+                              "Corporate Booking Benefits"}
+                          </p>
+                          <ul className="mt-3 flex flex-col gap-0">
+                            {tourData.businessAmenities.corporateBookingBenefits.items.map(
+                              (benefit) => (
+                                <li
+                                  key={benefit}
+                                  className="flex min-h-[29px] items-center gap-[5.7px]"
+                                >
+                                  <span
+                                    className="shrink-0 font-sans text-[13px] font-bold leading-[20.8px] text-secondary-normal-default"
+                                    aria-hidden
+                                  >
+                                    →
+                                  </span>
+                                  <p className="font-raleway text-[13px] font-normal leading-[20.8px] text-[#364153]">
+                                    {benefit}
+                                  </p>
+                                </li>
+                              )
+                            )}
+                          </ul>
+                        </>
+                      )}
+                      {(!tourData.businessAmenities.corporateBookingBenefits
+                        ?.items?.length &&
+                        tourData.businessAmenities.noteHtml) && (
+                        <div
+                          className="font-raleway text-[13px] font-normal leading-relaxed text-[#364153]"
+                          dangerouslySetInnerHTML={{
+                            __html: tourData.businessAmenities.noteHtml,
+                          }}
+                        />
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* ② WHAT'S INCLUDED ─ id=section-inclusions */}
@@ -2148,12 +2434,55 @@ const TourDetailPage = () => {
               <ReviewsSection tourData={tourData} />
             </div>
 
-            {/* ⑦ MEETING POINT & LOCATION ─ id=section-location */}
+            {/* ⑦ IMPORTANT INFO + MEETING POINT & LOCATION ─ id=section-location */}
             <div
               id="section-location"
               className="pb-14.5 pt-8 border-b border-secondary-light-hover"
             >
-                                         <h2 className="text-semi-md-semibold text-secondary-dark-hover mb-5.5 ml-5">
+              {showImportantInformation && (
+                <div className="mb-10 w-full rounded-[20px] border border-solid border-[#e8d9f5] bg-white px-[33px] pb-8 pt-[29px]">
+                  <h2 className="font-raleway text-xl font-bold leading-8 tracking-normal text-secondary-dark-hover">
+                    Important Information
+                  </h2>
+                  {importantInfoRows.length > 0 && (
+                    <div className="mt-4 flex w-full min-w-0 flex-col">
+                      {importantInfoRows.map((block, i) => (
+                        <div
+                          key={i}
+                          className="border-b border-solid border-[#e8d9f5] py-3"
+                        >
+                          <p className="font-raleway text-sm font-normal leading-[20.8px]">
+                            <span className="font-bold text-secondary-dark-default">
+                              {importantInformationRowLabel(block)}
+                            </span>
+                            <span className="whitespace-pre-line font-raleway text-[13px] font-normal leading-[20.8px] text-tertiary-normal-default">
+                              {" "}
+                              {block.body}
+                            </span>
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {importantInfoFooter ? (
+                    <div
+                      className={`flex min-h-[70px] w-full items-center gap-[11.7px] rounded-xl bg-secondary-light-hover/50 px-4 py-4 ${importantInfoRows.length > 0 ? "mt-6" : "mt-4"}`}
+                    >
+                      <span
+                        className="ml-1.5 shrink-0 font-sans text-lg font-normal leading-[28.8px] text-[#364153]"
+                        aria-hidden
+                      >
+                        ✓
+                      </span>
+                      <p className="font-raleway text-[13px] font-semibold leading-[20.8px] text-secondary-dark-hover">
+                        {importantInfoFooter}
+                      </p>
+                    </div>
+                  ) : null}
+                </div>
+              )}
+
+              <h2 className="text-semi-md-semibold text-secondary-dark-hover mb-5.5 ml-5">
 
                 Meeting Point & Location
               </h2>
