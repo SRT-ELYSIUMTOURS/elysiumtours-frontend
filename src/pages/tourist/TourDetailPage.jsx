@@ -1,20 +1,219 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, Fragment, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { classNames } from "../../utils/classNames";
+import { formatTimeAgo } from "../../utils/formatTimeAgo";
 import BlogBreadcrumbBar from "../../components/sections/blog/BlogBreadcrumbBar";
 import PopularTourCard from "../../components/cards/PopularTourCard";
 import ImageGalleryModal from "../../components/ui/ImageGalleryModal";
 import ShareModal from "../../components/ui/ShareModal";
 import Button from "../../components/ui/Button";
+import CtaSection from "../../components/sections/tours/CtaSection";
+import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from "react-leaflet";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+
 // Route: /tours/:country/:tour
 // e.g. /tours/ghana/elmina-heritage-coastal-journey
 
 // ─── Static tour data (replace with API call later) ───────────────────────────
+const msAgo = (ms) => new Date(Date.now() - ms).toISOString();
+
+/** Fallback map center if tour has no `meetingPoint` (WGS84). */
+const DEFAULT_MEETING_POINT = { lat: 5.6037, lng: -0.187 };
+
+/** Build a short place label from BigDataCloud reverse-geocode (browser CORS, no key). */
+function formatReverseGeocodeLabel(data) {
+  if (!data || typeof data !== "object") return null;
+  const locality = data.locality;
+  const city = data.city;
+  const region = data.principalSubdivision;
+  if (locality && city && locality !== city) {
+    return `${locality}, ${city}`;
+  }
+  if (locality) return locality;
+  if (city && region) return `${city}, ${region}`;
+  if (city) return city;
+  if (region) return region;
+  return data.countryName || null;
+}
+
+/**
+ * Coordinates → place name for the map pill (replaces raw lat/lng in the UI).
+ * Uses BigDataCloud client reverse-geocode API.
+ */
+async function reverseGeocodeToPlaceName(lat, lng, signal) {
+  const url = new URL(
+    "https://api.bigdatacloud.net/data/reverse-geocode-client"
+  );
+  url.searchParams.set("latitude", String(lat));
+  url.searchParams.set("longitude", String(lng));
+  url.searchParams.set("localityLanguage", "en");
+  const res = await fetch(url.toString(), { signal });
+  if (!res.ok) throw new Error("Reverse geocode failed");
+  const data = await res.json();
+  return formatReverseGeocodeLabel(data);
+}
+
+function truncatePinLabel(text, maxChars = 52) {
+  const t = String(text).trim();
+  if (t.length <= maxChars) return t;
+  return `${t.slice(0, maxChars - 1)}…`;
+}
+
+/** Safe text for DivIcon HTML */
+function escapeHtml(text) {
+  return String(text)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+/** Purple pin + pill label (Leaflet DivIcon — tip of pin at lat/lng) */
+function createMeetingPinIcon(labelText) {
+  const safe = escapeHtml(labelText);
+  return L.divIcon({
+    className: "leaflet-meeting-pin-icon",
+    html: `<div style="display:flex;flex-direction:column;align-items:center;gap:8px;width:max-content;max-width:min(280px,70vw);">
+      <svg width="38" height="47" viewBox="0 0 38 47" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M19 0C8.51 0 0 8.51 0 19C0 33.25 19 47 19 47C19 47 38 33.25 38 19C38 8.51 29.49 0 19 0Z" fill="#7b2cbf"/>
+        <circle cx="19" cy="19" r="8" fill="white"/>
+      </svg>
+      <div style="background:#fff;padding:12px 18px;border-radius:40px;box-shadow:0 2px 8px rgba(0,0,0,0.12);font-family:Raleway,sans-serif;font-size:13px;font-weight:600;color:#7b2cbf;border-bottom:1px solid #7b2cbf;white-space:nowrap;text-align:center;">
+        ${safe}
+      </div>
+    </div>`,
+    iconAnchor: [19, 47],
+    iconSize: [280, 140],
+    popupAnchor: [0, -47],
+  });
+}
+
+/** Tap map to drop pin at that location (pans so the pin stays in view) */
+function MapClickPlacePin({ onPlace }) {
+  const map = useMap();
+  useMapEvents({
+    click(e) {
+      const ll = e.latlng;
+      onPlace({ lat: ll.lat, lng: ll.lng });
+      map.panTo(ll, { animate: true });
+    },
+  });
+  return null;
+}
+
+/**
+ * OSM tiles + draggable pin (same artwork as before). Click map or drag pin to move.
+ */
+const MeetingPointMapFrame = ({
+  position,
+  onPositionChange,
+  locationLabel,
+}) => {
+  const [mapReady, setMapReady] = useState(false);
+  const [hasMovedPin, setHasMovedPin] = useState(false);
+  const [resolvedPlace, setResolvedPlace] = useState(null);
+  const [placeLookup, setPlaceLookup] = useState("idle"); // idle | loading | ok | error
+
+  useEffect(() => {
+    setMapReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hasMovedPin) {
+      setResolvedPlace(null);
+      setPlaceLookup("idle");
+      return;
+    }
+
+    const ac = new AbortController();
+    setPlaceLookup("loading");
+    const timer = setTimeout(async () => {
+      try {
+        const name = await reverseGeocodeToPlaceName(
+          position.lat,
+          position.lng,
+          ac.signal
+        );
+        if (!name) throw new Error("empty");
+        setResolvedPlace(name);
+        setPlaceLookup("ok");
+      } catch {
+        if (!ac.signal.aborted) {
+          setResolvedPlace(null);
+          setPlaceLookup("error");
+        }
+      }
+    }, 400);
+
+    return () => {
+      ac.abort();
+      clearTimeout(timer);
+    };
+  }, [hasMovedPin, position.lat, position.lng]);
+
+  const labelText = useMemo(() => {
+    if (!hasMovedPin) return truncatePinLabel(locationLabel);
+    if (resolvedPlace) return truncatePinLabel(resolvedPlace);
+    if (placeLookup === "error") return truncatePinLabel(locationLabel);
+    return "Finding location…";
+  }, [hasMovedPin, locationLabel, placeLookup, resolvedPlace]);
+
+  const pinIcon = useMemo(
+    () => createMeetingPinIcon(labelText),
+    [labelText]
+  );
+
+  const handleMove = (next) => {
+    onPositionChange(next);
+    setHasMovedPin(true);
+  };
+
+  if (!mapReady) {
+    return (
+      <div
+        className="absolute inset-0 z-0 bg-secondary-light-hover"
+        aria-hidden
+      />
+    );
+  }
+
+  return (
+    <MapContainer
+      center={[position.lat, position.lng]}
+      zoom={14}
+      className="absolute inset-0 z-0 size-full cursor-crosshair outline-none! [&_.leaflet-container]:cursor-crosshair [&_.leaflet-control-zoom]:cursor-pointer [&_.leaflet-marker-draggable]:cursor-grab [&_.leaflet-marker-draggable.leaflet-drag-target]:cursor-grabbing [&_.leaflet-control-zoom]:border-secondary-light-active [&_.leaflet-control-zoom_a]:text-secondary-normal-default"
+      style={{ minHeight: "100%", minWidth: "100%" }}
+      scrollWheelZoom={false}
+      zoomControl
+    >
+      <TileLayer
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      />
+      <MapClickPlacePin onPlace={handleMove} />
+      <Marker
+        position={[position.lat, position.lng]}
+        icon={pinIcon}
+        draggable
+        eventHandlers={{
+          dragend: (e) => {
+            const ll = e.target.getLatLng();
+            handleMove({ lat: ll.lat, lng: ll.lng });
+          },
+        }}
+      />
+    </MapContainer>
+  );
+};
+
 const TOUR_DATA = {
   "elmina-heritage-coastal-journey": {
     title: "Elmina Heritage & Coastal Journey",
     country: "Ghana",
     location: "Cape Coast, Ghana",
+    meetingPoint: { lat: 5.6037, lng: -0.187 },
+    meetingPointLabel: "Accra, Greater Accra Region",
     rating: 4.9,
     reviewCount: 24,
     maxGuests: 12,
@@ -148,7 +347,7 @@ const TOUR_DATA = {
         name: "Sarah M.",
         avatar: "https://picsum.photos/seed/reviewer-1/40/40",
         rating: 5,
-        date: "January 2025",
+        date: msAgo(50 * 1000),
         text: "Absolutely life-changing experience. Kwame's knowledge of the history was profound and deeply moving. The castle visits were emotional but necessary. Highly recommend to every person of African descent.",
       },
       {
@@ -156,7 +355,7 @@ const TOUR_DATA = {
         name: "James O.",
         avatar: "https://picsum.photos/seed/reviewer-2/40/40",
         rating: 5,
-        date: "December 2024",
+        date: msAgo(5 * 60 * 1000),
         text: "A perfect blend of history, culture, and natural beauty. The canopy walk was exhilarating and the coastal views were stunning. Elysium Tours truly exceeded our expectations.",
       },
       {
@@ -164,7 +363,7 @@ const TOUR_DATA = {
         name: "Priya K.",
         avatar: "https://picsum.photos/seed/reviewer-3/40/40",
         rating: 4,
-        date: "November 2024",
+        date: msAgo(14 * 24 * 60 * 60 * 1000),
         text: "Wonderful tour with excellent organisation. The accommodations were comfortable and the meals were delicious. Would love to return for the extended tour next time.",
       },
     ],
@@ -379,8 +578,8 @@ const StarIcon = ({ filled = true, size = 16 }) => (
   <svg width={size} height={size} viewBox="0 0 16 16" fill="none">
     <path
       d="M7.02 1.47C7.35 0.51 8.65 0.51 8.98 1.47L9.97 4.43C10.1 4.83 10.47 5.1 10.88 5.1H13.97C14.97 5.1 15.38 6.38 14.57 6.95L12.08 8.77C11.73 9.02 11.58 9.47 11.71 9.87L12.7 12.83C13.03 13.79 11.93 14.59 11.12 14.02L8.63 12.2C8.25 11.93 7.75 11.93 7.37 12.2L4.88 14.02C4.07 14.59 2.97 13.79 3.3 12.83L4.29 9.87C4.42 9.47 4.27 9.02 3.92 8.77L1.43 6.95C0.62 6.38 1.03 5.1 2.03 5.1H5.12C5.53 5.1 5.9 4.83 6.03 4.43L7.02 1.47Z"
-      fill={filled ? "#7B2CBF" : "none"}
-      stroke={filled ? "none" : "#7B2CBF"}
+      fill={filled ? "#7B2CBF" : "#D6BEEB"}
+      stroke={filled ? "none" : "none"}
       strokeWidth="1.2"
     />
   </svg>
@@ -975,7 +1174,7 @@ const ItineraryDay = ({ day }) => {
 
 // ─── Rating stars row ──────────────────────────────────────────────────────────
 const ReviewStars = ({ rating, size = 14 }) => (
-  <div className="flex items-center gap-[2px]">
+  <div className="flex items-center gap-1">
     {[1, 2, 3, 4, 5].map((s) => (
       <StarIcon key={s} filled={s <= Math.round(rating)} size={size} />
     ))}
@@ -1216,28 +1415,17 @@ const GuideCard = ({ guide }) => (
         {(guide.testimonials || []).map((t, i) => (
           <div
             key={i}
-            style={{ borderLeft: "2px solid #7b2cbf", paddingLeft: "14px" }}
+            
           >
-            <p
-              style={{
-                fontFamily: "Raleway, sans-serif",
-                fontWeight: 500,
-                fontSize: "14px",
-                lineHeight: "22px",
-                color: "#364153",
-                fontStyle: "italic",
-              }}
+            <p className="font-medium flex gap-3 text-[13px] italic leading-[22px] text-primary-dark-darker "
+             
             >
+              <span className="block w-[2px] h-[32px] my-auto  bg-secondary-normal-default "/>
               "{t.quote}"
             </p>
             <p
-              style={{
-                fontFamily: "Raleway, sans-serif",
-                fontWeight: 600,
-                fontSize: "12px",
-                color: "#6a7282",
-                marginTop: "4px",
-              }}
+            className="font-medium text-[10px] leading-[22px] text-secondary-normal-default mt-1"
+              
             >
               — {t.reviewer}, {t.date}
             </p>
@@ -1246,17 +1434,11 @@ const GuideCard = ({ guide }) => (
         {/* View Full Details link */}
         <button
           type="button"
-          style={{
-            alignSelf: "flex-end",
-            fontFamily: "Raleway, sans-serif",
-            fontWeight: 600,
-            fontSize: "14px",
-            color: "#7b2cbf",
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            padding: 0,
-          }}
+          className="font-semibold text-[14px] hover:bg-tertiary-light-hover self-end p-2 rounded-[5px] border-b  text-secondary-normal-default   cursor-pointer"
+        style={
+          {boxShadow: "0 4px 4px 0 rgba(0, 0, 0, 0.05)"}
+
+        }
         >
           View Full Details →
         </button>
@@ -1282,48 +1464,34 @@ const ReviewsSection = ({ tourData }) => {
     <div>
       {/* Rating overview */}
       <div
-        className="flex items-start"
-        style={{ gap: "48px", marginBottom: "28px" }}
+        className="flex gap-12 mb-7 items-start"
       >
         {/* Big number + stars */}
         <div
-          className="flex flex-col items-center flex-shrink-0"
-          style={{ gap: "8px", width: "127px" }}
+          className="flex flex-col gap-2 w-[127px] p-3.5 rounded-[10px] border-2 border-secondary-light-active bg-primary-light-default items-center flex-shrink-0"
         >
           <span
-            style={{
-              fontFamily: "Raleway, sans-serif",
-              fontWeight: 700,
-              fontSize: "56px",
-              lineHeight: "56px",
-              color: "#0a0a0a",
-            }}
+          className="text-Display-md-small-semibold mb-[2.5px] text-secondary-normal-default"
+          
           >
             {tourData.rating}
           </span>
           <ReviewStars rating={tourData.rating} size={18} />
           <span
-            style={{
-              fontFamily: "Raleway, sans-serif",
-              fontWeight: 400,
-              fontSize: "13px",
-              color: "#6a7282",
-              marginTop: "2px",
-            }}
+          className="text-med-small-Medium mt-2.5 text-[#4a5565]"
+            
           >
             {(tourData.totalReviews || 3249).toLocaleString()} reviews
           </span>
         </div>
         {/* Category rating bars */}
         <div
-          className="flex-1 flex flex-col"
-          style={{ gap: "18px", paddingTop: "8px" }}
+          className="flex-1 gap-4.5 pt-2 flex flex-col"
         >
           {(tourData.categoryRatings || []).map(({ label, score }) => (
             <div
               key={label}
-              className="flex items-center"
-              style={{ gap: "12px" }}
+              className="flex items-center gap-3"
             >
               <span
                 style={{
@@ -1335,36 +1503,25 @@ const ReviewsSection = ({ tourData }) => {
                   width: "140px",
                   flexShrink: 0,
                 }}
+                className="text-med-small-Medium text-tertiary-normal-default"
               >
                 {label}
               </span>
               <div
-                className="flex-1 overflow-hidden"
-                style={{
-                  height: "8px",
-                  borderRadius: "100px",
-                  backgroundColor: "#e9eaeb",
-                }}
+                className="flex-1 h-2 rounded-lg bg-secondary-light-hover overflow-hidden"
+                
               >
                 <div
+                className="h-full bg-secondary-normal-default rounded-lg"
                   style={{
                     width: `${(score / 5) * 100}%`,
-                    height: "100%",
-                    backgroundColor: "#7b2cbf",
-                    borderRadius: "100px",
+                  
                   }}
                 />
               </div>
               <span
-                style={{
-                  fontFamily: "Raleway, sans-serif",
-                  fontWeight: 600,
-                  fontSize: "13px",
-                  color: "#364153",
-                  width: "32px",
-                  textAlign: "right",
-                  flexShrink: 0,
-                }}
+              className="text-[14px]  text-tertiary-normal-default  text-right flex-shrink-0"
+              
               >
                 {score}
               </span>
@@ -1375,8 +1532,7 @@ const ReviewsSection = ({ tourData }) => {
 
       {/* Filter tabs */}
       <div
-        className="flex items-center flex-wrap"
-        style={{ gap: "8px", marginBottom: "28px" }}
+        className="flex items-center gap-2 mb-7 flex-wrap"
       >
         {REVIEW_FILTER_TABS.map((tab) => {
           const isActive = activeFilter === tab;
@@ -1385,19 +1541,8 @@ const ReviewsSection = ({ tourData }) => {
               key={tab}
               type="button"
               onClick={() => setActiveFilter(tab)}
-              style={{
-                fontFamily: "Raleway, sans-serif",
-                fontWeight: isActive ? 600 : 500,
-                fontSize: "13px",
-                lineHeight: "22px",
-                color: isActive ? "#7b2cbf" : "#364153",
-                backgroundColor: isActive ? "#f2eaf9" : "#fafafa",
-                border: `1.5px solid ${isActive ? "#d6beeb" : "#e9eaeb"}`,
-                borderRadius: "100px",
-                padding: "6px 16px",
-                cursor: "pointer",
-                transition: "all 0.2s",
-              }}
+              className={`text-med-small-Medium py-[9px] rounded-[40px] px-4 transition-colors cursor-pointer ${isActive? `text-white bg-secondary-normal-default` : `text-primary-dark-darker bg-secondary-light-hover`} `}
+              
             >
               {tab}
             </button>
@@ -1406,21 +1551,16 @@ const ReviewsSection = ({ tourData }) => {
       </div>
 
       {/* Review cards */}
-      <div className="flex flex-col">
+      <div className="flex flex-col gap-4">
         {tourData.reviews.map((review) => (
           <div
             key={review.id}
-            style={{ padding: "28px 10px", borderBottom: "1px solid #ebdff5" }}
+            className="px-5 py-7 rounded-[20px] bg-primary-light-default/60 border border-secondary-light-hover "
           >
-            <div className="flex items-start" style={{ gap: "16px" }}>
+            <div className="flex items-start gap-4" >
               <div
-                style={{
-                  width: "60px",
-                  height: "60px",
-                  borderRadius: "50%",
-                  overflow: "hidden",
-                  flexShrink: 0,
-                }}
+              className="size-[60px] rounded-full overflow-hidden flex-shrink-0"
+               
               >
                 <img
                   src={review.avatar}
@@ -1432,39 +1572,24 @@ const ReviewsSection = ({ tourData }) => {
                 <div className="flex items-start justify-between">
                   <div>
                     <p
-                      style={{
-                        fontFamily: "Raleway, sans-serif",
-                        fontWeight: 600,
-                        fontSize: "15px",
-                        lineHeight: "22px",
-                        color: "#2d2d2d",
-                      }}
+                    className="text-[16px] font-semibold text-tertiary-normal-default "
+                     
                     >
                       {review.name}
                     </p>
                     <p
-                      style={{
-                        fontFamily: "Raleway, sans-serif",
-                        fontWeight: 400,
-                        fontSize: "12px",
-                        color: "#6a7282",
-                        marginTop: "2px",
-                      }}
+                    className="text-[13px] font-medium text-primary-dark-hover mt-1"
+                      
                     >
-                      {review.date}
+                      {formatTimeAgo(review.date)}
                     </p>
                   </div>
                   <ReviewStars rating={review.rating} size={14} />
                 </div>
                 <p
-                  style={{
-                    fontFamily: "Raleway, sans-serif",
-                    fontWeight: 400,
-                    fontSize: "15px",
-                    lineHeight: "24px",
-                    color: "#364153",
-                    marginTop: "12px",
-                  }}
+                                    className="text-med-small-Medium text-[#364153] mt-2"
+
+               
                 >
                   {review.text}
                 </p>
@@ -1474,25 +1599,17 @@ const ReviewsSection = ({ tourData }) => {
         ))}
       </div>
 
-      {/* Load More — centered, w=215px h=56px — Figma 3126:43291 */}
-      <div className="flex justify-center" style={{ marginTop: "32px" }}>
-        <button
+      {/* See all reviews — light lavender fill, purple outline — Figma spacing 24px above */}
+      <div className="flex justify-center mt-6">
+        <Button
           type="button"
-          style={{
-            width: "215px",
-            height: "56px",
-            borderRadius: "40px",
-            border: "1.5px solid #7b2cbf",
-            color: "#7b2cbf",
-            fontFamily: "Raleway, sans-serif",
-            fontWeight: 600,
-            fontSize: "15px",
-            backgroundColor: "transparent",
-            cursor: "pointer",
-          }}
+          variant="secondaryOutline"
+          shape="pill"
+          style={{ fontFamily: "Raleway, sans-serif" }}
+          className="!bg-secondary-light-default hover:!bg-secondary-light-hover active:!bg-secondary-light-active shadow-none min-h-14 h-14 px-8 rounded-full border-[1.5px] border-secondary-normal-default text-secondary-normal-default text-[15px] font-semibold"
         >
-          Load More Reviews
-        </button>
+          {`see All ${(tourData.totalReviews || 3249).toLocaleString()} Reviews →`}
+        </Button>
       </div>
     </div>
   );
@@ -1501,6 +1618,12 @@ const ReviewsSection = ({ tourData }) => {
 // ─── BookingWidget ────────────────────────────────────────────────────────────
 // Figma 3156:45940 — 457×755px card; gradient header + 3-step stepper + date inputs
 // + traveler counters + Check Availability CTA + free cancellation notice
+const BOOKING_STEPS = [
+  { id: 1, label: "Dates" },
+  { id: 2, label: "Review" },
+  { id: 3, label: "Payment" },
+];
+
 const BookingWidget = ({
   tourData,
   adults,
@@ -1513,301 +1636,113 @@ const BookingWidget = ({
   setReturnDate,
   bookmarked,
   setBookmarked,
-}) => (
-  <div
-    style={{
-      width: "457px",
-      borderRadius: "24px",
-      border: "1px solid #d6beeb",
-      overflow: "hidden",
-      boxShadow: "0px 20px 25px -5px rgba(0,0,0,0.1)",
-      backgroundColor: "white",
-    }}
-  >
-    {/* ── Gradient header — bg from-#7b2cbf to-#391559, h-140px ─────── */}
-    <div
-      style={{
-        height: "140px",
-        background: "linear-gradient(180deg, #7b2cbf 0%, #391559 100%)",
-        padding: "24px 24px 0 18px",
-        display: "flex",
-        flexDirection: "column",
-        gap: "8px",
-      }}
-    >
-      <p
-        style={{
-          fontFamily: "Raleway, sans-serif",
-          fontWeight: 500,
-          fontSize: "10px",
-          lineHeight: "18px",
-          color: "#d6beeb",
-          letterSpacing: "0.08em",
-        }}
-      >
+  bookingStep: bookingStepProp,
+  onBookingStepChange,
+}) => {
+  const [bookingStepInternal, setBookingStepInternal] = useState(1);
+  const activeStep =
+    bookingStepProp !== undefined ? bookingStepProp : bookingStepInternal;
+  const setActiveStep = onBookingStepChange ?? setBookingStepInternal;
+
+  return (
+  <div className="max-w-full  overflow-hidden rounded-[24px] border border-secondary-light-active bg-white">
+    {/* ── Gradient header — condensed to 110px so widget fits viewport ── */}
+    <div className="flex  flex-col gap-2 bg-linear-to-b from-secondary-normal-default to-[#391559] pl-[18px] pr-6 py-6">
+      <p className=" text-sm-Medium text-secondary-light-active">
         FROM
       </p>
-      <p
-        style={{
-          fontFamily: "Raleway, sans-serif",
-          fontWeight: 700,
-          fontSize: "39px",
-          lineHeight: "50px",
-          color: "white",
-          margin: 0,
-        }}
-      >
-        GH₵ 4,590
+      <p className=" text-Display-md-small-bold  text-white">
+        {tourData?.price ?? "GH₵ 4,590"}
       </p>
-      <p
-        style={{
-          fontFamily: "Raleway, sans-serif",
-          fontWeight: 500,
-          fontSize: "13px",
-          lineHeight: "22px",
-          color: "#ebdff5",
-          margin: 0,
-        }}
-      >
+      <p className="text-med-small-Medium text-secondary-light-hover">
         per person · USD ~$290 equivalent
       </p>
     </div>
 
-    {/* ── 3-step stepper — h-105px border-b #f2eaf9 ─────────────────── */}
-    <div
-      style={{
-        height: "105px",
-        borderBottom: "1px solid #f2eaf9",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <div className="flex items-center" style={{ gap: "12px" }}>
-        {/* Step 1 — active */}
-        <div
-          className="flex flex-col items-center"
-          style={{ gap: "8px", width: "91px" }}
-        >
-          <div
-            style={{
-              width: "40px",
-              height: "40px",
-              borderRadius: "100px",
-              backgroundColor: "#7b2cbf",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <span
-              style={{
-                fontFamily: "Raleway, sans-serif",
-                fontWeight: 600,
-                fontSize: "13px",
-                color: "white",
-              }}
-            >
-              1
-            </span>
-          </div>
-          <span
-            style={{
-              fontFamily: "Raleway, sans-serif",
-              fontWeight: 700,
-              fontSize: "13px",
-              lineHeight: "18px",
-              color: "#7b2cbf",
-            }}
-          >
-            Dates
-          </span>
-        </div>
-        {/* Connector line */}
-        <div
-          style={{
-            width: "47px",
-            height: "2px",
-            borderRadius: "10px",
-            backgroundColor: "#ebdff5",
-          }}
-        />
-        {/* Step 2 — inactive */}
-        <div
-          className="flex flex-col items-center"
-          style={{ gap: "8px", width: "91px" }}
-        >
-          <div
-            style={{
-              width: "40px",
-              height: "40px",
-              borderRadius: "100px",
-              backgroundColor: "#f2eaf9",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <span
-              style={{
-                fontFamily: "Raleway, sans-serif",
-                fontWeight: 600,
-                fontSize: "13px",
-                color: "#d6beeb",
-              }}
-            >
-              2
-            </span>
-          </div>
-          <span
-            style={{
-              fontFamily: "Raleway, sans-serif",
-              fontWeight: 600,
-              fontSize: "13px",
-              lineHeight: "18px",
-              color: "#d6beeb",
-            }}
-          >
-            Review
-          </span>
-        </div>
-        {/* Connector line */}
-        <div
-          style={{
-            width: "47px",
-            height: "2px",
-            borderRadius: "10px",
-            backgroundColor: "#ebdff5",
-          }}
-        />
-        {/* Step 3 — inactive */}
-        <div
-          className="flex flex-col items-center"
-          style={{ gap: "8px", width: "91px" }}
-        >
-          <div
-            style={{
-              width: "40px",
-              height: "40px",
-              borderRadius: "100px",
-              backgroundColor: "#f2eaf9",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <span
-              style={{
-                fontFamily: "Raleway, sans-serif",
-                fontWeight: 600,
-                fontSize: "13px",
-                color: "#d6beeb",
-              }}
-            >
-              3
-            </span>
-          </div>
-          <span
-            style={{
-              fontFamily: "Raleway, sans-serif",
-              fontWeight: 600,
-              fontSize: "13px",
-              lineHeight: "18px",
-              color: "#d6beeb",
-            }}
-          >
-            Payment
-          </span>
-        </div>
+    {/* ── 3-step stepper — active / completed / upcoming from `activeStep` ── */}
+    <div className="flex py-5 px-11 items-center justify-center border-b border-secondary-light-default">
+      <div className="flex items-center justify-between w-full gap-3">
+        {BOOKING_STEPS.map((step, index) => {
+          const isActive = activeStep === step.id;
+          const isComplete = activeStep > step.id;
+          const isUpcoming = activeStep < step.id;
+
+          const circleClass = classNames(
+            "flex items-center justify-center rounded-full font-raleway text-med-small-semibold  transition-colors",
+            isActive &&
+              "size-[40px] bg-secondary-normal-default text-white",
+            !isActive &&
+              isComplete &&
+              "size-[40px] bg-secondary-normal-default text-white",
+            !isActive &&
+              isUpcoming &&
+              "size-[40px] bg-secondary-light-default text-secondary-light-active"
+          );
+
+          const labelClass = classNames(
+            "font-raleway text-xs leading-4",
+            (isActive || isComplete) &&
+              "font-bold text-secondary-normal-default",
+            isUpcoming && "font-semibold text-secondary-light-active"
+          );
+
+          return (
+            <Fragment key={step.id}>
+              <button
+                type="button"
+                onClick={() => setActiveStep(step.id)}
+                className="flex w-[72px] flex-col items-center gap-1.5 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-secondary-normal-default focus-visible:ring-offset-2"
+                aria-current={isActive ? "step" : undefined}
+                aria-label={`${step.label}, step ${step.id} of ${BOOKING_STEPS.length}`}
+              >
+                <span className={circleClass}>{step.id}</span>
+                <span className={labelClass}>{step.label}</span>
+              </button>
+              {index < BOOKING_STEPS.length - 1 && (
+                <div
+                  role="presentation"
+                  className={classNames(
+                    "h-0.5 w-10 rounded-lg",
+                    activeStep > step.id
+                      ? "bg-secondary-normal-default"
+                      : "bg-secondary-light-hover"
+                  )}
+                />
+              )}
+            </Fragment>
+          );
+        })}
       </div>
     </div>
 
-    {/* ── Content area ─────────────────────────────────────────────────── */}
-    <div
-      style={{
-        padding: "24px 28px 0",
-        display: "flex",
-        flexDirection: "column",
-        gap: "16px",
-      }}
-    >
+    {/* ── Content area — tightened spacing ────────────────────────────── */}
+    <div className="flex flex-col gap-3 px-[30px] pt-6">
       {/* CHOOSE YOUR DATE */}
-      <div>
-        <p
-          style={{
-            fontFamily: "Raleway, sans-serif",
-            fontWeight: 700,
-            fontSize: "13px",
-            lineHeight: "18px",
-            color: "#4a1a73",
-            marginBottom: "16px",
-          }}
-        >
+      <div className="w-full">
+        <p className="mb-3.5 text-med-small-bold text-secondary-dark-hover">
           CHOOSE YOUR DATE
         </p>
-        <div className="grid grid-cols-2" style={{ gap: "16px" }}>
-          <div>
-            <p
-              style={{
-                fontFamily: "Inter, sans-serif",
-                fontWeight: 500,
-                fontSize: "12px",
-                color: "#6a7282",
-                textTransform: "uppercase",
-                marginBottom: "8px",
-                letterSpacing: "0.04em",
-              }}
-            >
+        <div className="flex gap-[70px] justify-between w-full">
+          <div className="flex-1">
+            <p className="mb-2 font-[Inter,sans-serif] text-xs font-medium uppercase tracking-[0.04em] text-[#6a7282]">
               DEPARTURE
             </p>
             <input
               type="date"
               value={departureDate}
               onChange={(e) => setDepartureDate(e.target.value)}
-              style={{
-                width: "100%",
-                height: "42px",
-                borderRadius: "10px",
-                border: "1px solid #d1d5dc",
-                padding: "0 12px",
-                fontFamily: "Inter, sans-serif",
-                fontSize: "14px",
-                color: "#0a0a0a",
-                outline: "none",
-                boxSizing: "border-box",
-              }}
+              className="box-border h-9 w-full rounded-sm border border-[#d1d5dc] px-3 py-2.5 font-[Inter,sans-serif] text-[13px] text-[#0A0A0A80] outline-none"
             />
           </div>
-          <div>
-            <p
-              style={{
-                fontFamily: "Inter, sans-serif",
-                fontWeight: 500,
-                fontSize: "12px",
-                color: "#6a7282",
-                textTransform: "uppercase",
-                marginBottom: "8px",
-                letterSpacing: "0.04em",
-              }}
-            >
+          <div className="flex-1">
+            <p className="mb-2 font-[Inter,sans-serif] text-xs font-medium uppercase tracking-[0.04em] text-[#6a7282]">
               RETURN
             </p>
             <input
               type="date"
               value={returnDate}
               onChange={(e) => setReturnDate(e.target.value)}
-              style={{
-                width: "100%",
-                height: "42px",
-                borderRadius: "10px",
-                border: "1px solid #d1d5dc",
-                padding: "0 12px",
-                fontFamily: "Inter, sans-serif",
-                fontSize: "14px",
-                color: "#0a0a0a",
-                outline: "none",
-                boxSizing: "border-box",
-              }}
+              className="box-border h-9 w-full rounded-sm border border-[#d1d5dc] px-2.5 font-[Inter,sans-serif] text-[13px] text-[#0A0A0A80] outline-none"
             />
           </div>
         </div>
@@ -1815,305 +1750,146 @@ const BookingWidget = ({
 
       {/* TRAVELERS */}
       <div>
-        <p
-          style={{
-            fontFamily: "Raleway, sans-serif",
-            fontWeight: 700,
-            fontSize: "13px",
-            lineHeight: "18px",
-            color: "#4a1a73",
-            marginBottom: "12px",
-          }}
-        >
+        <p className="mb-2 font-raleway text-med-small-bold text-secondary-dark-hover">
           Travelers
         </p>
-        <div className="flex flex-col" style={{ gap: "0" }}>
+        <div className="flex flex-col">
           {/* Adults */}
-          <div
-            className="flex items-center justify-between"
-            style={{ padding: "10px 0" }}
-          >
+          <div className="flex items-center justify-between py-[7px]">
             <div>
-              <p
-                style={{
-                  fontFamily: "Raleway, sans-serif",
-                  fontWeight: 600,
-                  fontSize: "13px",
-                  lineHeight: "20px",
-                  color: "#2d2d2d",
-                }}
-              >
+              <p className="text-med-small-semibold text-tertiary-normal-default">
                 Adults
               </p>
-              <p
-                style={{
-                  fontFamily: "Raleway, sans-serif",
-                  fontWeight: 500,
-                  fontSize: "10px",
-                  color: "#7b2cbf",
-                }}
-              >
+              <p className="text-sm-Medium text-secondary-normal-default">
                 Age 13+
               </p>
             </div>
-            <div className="flex items-center" style={{ gap: "12px" }}>
-              <button
+            <div className="flex items-center gap-3">
+              <Button
                 type="button"
+                variant="secondaryOutline"
                 onClick={() => setAdults(Math.max(1, adults - 1))}
-                style={{
-                  width: "32px",
-                  height: "32px",
-                  borderRadius: "50%",
-                  border: "2px solid #d6beeb",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "#7b2cbf",
-                  fontSize: "18px",
-                  fontWeight: "bold",
-                  cursor: "pointer",
-                  backgroundColor: "transparent",
-                  lineHeight: 1,
-                }}
+                className="size-8! min-h-0! border-2! rounded-full! border-secondary-light-active! bg-transparent! p-0! text-lg! font-bold! leading-none text-secondary-normal-default shadow-none! hover:bg-secondary-light-default/40"
               >
                 −
-              </button>
-              <span
-                style={{
-                  fontFamily: "Raleway, sans-serif",
-                  fontWeight: 600,
-                  fontSize: "20px",
-                  color: "#4a1a73",
-                  width: "32px",
-                  textAlign: "center",
-                }}
-              >
+              </Button>
+              <span className="w-8 text-center text-semi-md-semibold text-secondary-dark-hover">
                 {adults}
               </span>
-              <button
+              <Button
                 type="button"
+                variant="secondaryOutline"
                 onClick={() => setAdults(adults + 1)}
-                style={{
-                  width: "32px",
-                  height: "32px",
-                  borderRadius: "50%",
-                  border: "2px solid #d6beeb",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "#7b2cbf",
-                  fontSize: "18px",
-                  fontWeight: "bold",
-                  cursor: "pointer",
-                  backgroundColor: "transparent",
-                  lineHeight: 1,
-                }}
+                className="size-8! min-h-0!  rounded-full! border-2! border-secondary-light-active! bg-transparent! p-0! text-lg! font-bold! leading-none text-secondary-normal-default shadow-none! hover:bg-secondary-light-default/40"
               >
                 +
-              </button>
+              </Button>
             </div>
           </div>
           {/* Children */}
-          <div
-            className="flex items-center justify-between"
-            style={{ padding: "10px 0" }}
-          >
+          <div className="flex items-center justify-between py-[7px]">
             <div>
-              <p
-                style={{
-                  fontFamily: "Raleway, sans-serif",
-                  fontWeight: 600,
-                  fontSize: "13px",
-                  lineHeight: "20px",
-                  color: "#2d2d2d",
-                }}
-              >
+              <p className="text-med-small-semibold text-tertiary-normal-default">
                 Children
               </p>
-              <p
-                style={{
-                  fontFamily: "Raleway, sans-serif",
-                  fontWeight: 500,
-                  fontSize: "10px",
-                  color: "#7b2cbf",
-                }}
-              >
+              <p className="text-sm-Medium text-secondary-normal-default">
                 Age 4–12
               </p>
             </div>
-            <div className="flex items-center" style={{ gap: "12px" }}>
-              <button
+            <div className="flex items-center gap-3">
+              <Button
                 type="button"
+                variant="secondaryOutline"
                 onClick={() => setChildren(Math.max(0, children - 1))}
-                style={{
-                  width: "32px",
-                  height: "32px",
-                  borderRadius: "50%",
-                  border: "2px solid #d6beeb",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "#7b2cbf",
-                  fontSize: "18px",
-                  fontWeight: "bold",
-                  cursor: "pointer",
-                  backgroundColor: "transparent",
-                  lineHeight: 1,
-                }}
+                className="size-8! min-h-0!  rounded-full! border-2! border-secondary-light-active! bg-transparent! p-0! text-lg! font-bold! leading-none text-secondary-normal-default shadow-none! hover:bg-secondary-light-default/40"
               >
                 −
-              </button>
-              <span
-                style={{
-                  fontFamily: "Raleway, sans-serif",
-                  fontWeight: 600,
-                  fontSize: "20px",
-                  color: "#4a1a73",
-                  width: "32px",
-                  textAlign: "center",
-                }}
-              >
+              </Button>
+              <span className="w-8 text-center  text-semi-md-semibold text-secondary-dark-hover">
                 {children}
               </span>
-              <button
+              <Button
                 type="button"
+                variant="secondaryOutline"
                 onClick={() => setChildren(children + 1)}
-                style={{
-                  width: "32px",
-                  height: "32px",
-                  borderRadius: "50%",
-                  border: "2px solid #d6beeb",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "#7b2cbf",
-                  fontSize: "18px",
-                  fontWeight: "bold",
-                  cursor: "pointer",
-                  backgroundColor: "transparent",
-                  lineHeight: 1,
-                }}
+                className="size-8! min-h-0!  rounded-full! border-2! border-secondary-light-active! bg-transparent! p-0! text-lg! font-bold! leading-none text-secondary-normal-default shadow-none! hover:bg-secondary-light-default/40"
               >
                 +
-              </button>
+              </Button>
             </div>
           </div>
         </div>
       </div>
 
       {/* CTA ACTIONS */}
-      <div className="flex flex-col" style={{ gap: "12px" }}>
-        {/* Check Availability — h-52px rounded-40px bg-#7b2cbf */}
-        <button
+      <div className="flex flex-col gap-2">
+        <Button
           type="button"
-          style={{
-            width: "100%",
-            height: "52px",
-            borderRadius: "40px",
-            backgroundColor: "#7b2cbf",
-            border: "1px solid #7b2cbf",
-            color: "#f2eaf9",
-            fontFamily: "Raleway, sans-serif",
-            fontWeight: 600,
-            fontSize: "16px",
-            lineHeight: "22px",
-            cursor: "pointer",
-            boxShadow: "0px 4px 4px rgba(0,0,0,0.05)",
-          }}
+          variant="secondary"
+          shape="pill"
+          fullWidth
+          className="h-[46px] min-h-0! rounded-full border-0 font-raleway text-[15px] font-semibold leading-[22px] text-secondary-light-default! shadow-[0_4px_4px_rgba(0,0,0,0.05)]"
         >
-          Check Availability
-        </button>
-        {/* Save to Wishlist — send/arrow icon + text */}
-        <button
+          Reserve This Tour
+        </Button>
+        <Button
           type="button"
+          variant="link"
           onClick={() => setBookmarked(!bookmarked)}
-          style={{
-            width: "100%",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "4px",
-            padding: "8px 0",
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-          }}
+          startIcon={
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 18 18"
+              fill="none"
+              aria-hidden
+            >
+              <path
+                d="M6.61573 13.7362C7.75843 15.4212 10.241 15.4213 11.3837 13.7363L15.3052 7.9537C16.0346 6.87805 16.0742 5.47034 15.4143 4.35069C14.0961 2.11423 10.8298 2.14608 9.58663 4.42508C9.33322 4.88962 8.66617 4.88962 8.41277 4.42508C7.16957 2.14608 3.90334 2.11425 2.58514 4.3507C1.92521 5.47034 1.96481 6.87805 2.69426 7.95369L6.61573 13.7362Z"
+                stroke={bookmarked ? "#7b2cbf" : "#2d2d2d"}
+                fill={bookmarked ? "#7b2cbf" : "none"}
+                strokeWidth="1.2"
+              />
+            </svg>
+          }
+          className="w-full justify-center !no-underline  p-0! py-1 font-raleway text-[13px] font-medium text-tertiary-normal-default shadow-none "
         >
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 18 18"
-            fill="none"
-            style={{ transform: "scaleY(-1)" }}
-          >
-            <path
-              d="M1.5 1.5L16.5 9L1.5 16.5V11.25L11.5 9L1.5 6.75V1.5Z"
-              stroke={bookmarked ? "#7b2cbf" : "#2d2d2d"}
-              fill={bookmarked ? "#7b2cbf" : "none"}
-              strokeWidth="1.3"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-          <span
-            style={{
-              fontFamily: "Raleway, sans-serif",
-              fontWeight: 500,
-              fontSize: "13px",
-              color: "#2d2d2d",
-            }}
-          >
-            Save to Wishlist
-          </span>
-        </button>
+          Save to Wishlist
+        </Button>
       </div>
     </div>
 
-    {/* Free cancellation notice — absolute-like, pinned at bottom of widget */}
-    <div
-      style={{
-        margin: "0 28px 28px",
-        display: "flex",
-        alignItems: "center",
-        gap: "10px",
-        padding: "0 11px",
-        backgroundColor: "rgba(235,223,245,0.5)",
-        border: "1px solid #d6beeb",
-        borderRadius: "10px",
-        height: "40px",
-      }}
-    >
+    {/* Free cancellation notice */}
+    <div className="mx-[22px] mb-5 mt-2 flex h-9 items-center gap-2.5 rounded-sm border border-secondary-light-active bg-secondary-light-hover/50 px-[11px]">
       <svg
+        xmlns="http://www.w3.org/2000/svg"
         width="16"
         height="16"
         viewBox="0 0 16 16"
         fill="none"
-        style={{ flexShrink: 0 }}
+        aria-hidden
+        className="shrink-0"
       >
-        <circle cx="8" cy="8" r="7" fill="#22c55e" />
-        <path
-          d="M4.5 8L6.5 10L11.5 5.5"
-          stroke="white"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
+        <g clipPath="url(#clip-booking-widget-free-cancel)">
+          <path
+            d="M8 0C3.58867 0 0 3.58867 0 8C0 12.4113 3.58867 16 8 16C12.4113 16 16 12.4113 16 8H14.2C14.2 11.4187 11.4187 14.2 8 14.2C4.58133 14.2 1.8 11.4187 1.8 8C1.8 4.58133 4.58133 1.8 8 1.8V0ZM12.9333 1.722L7.93 7.96933L5.592 6.05333L4.25733 7.67733L7.418 10.2693C7.52538 10.3579 7.64931 10.4242 7.78258 10.4644C7.91585 10.5046 8.05578 10.5178 8.19422 10.5034C8.33266 10.4889 8.46684 10.447 8.58893 10.3802C8.71102 10.3133 8.81857 10.2228 8.90533 10.114L14.5747 3.036L12.9333 1.722Z"
+            className="fill-secondary-light-active"
+          />
+        </g>
+        <defs>
+          <clipPath id="clip-booking-widget-free-cancel">
+            <rect width="16" height="16" fill="white" />
+          </clipPath>
+        </defs>
       </svg>
-      <span
-        style={{
-          fontFamily: "Raleway, sans-serif",
-          fontWeight: 500,
-          fontSize: "13px",
-          lineHeight: "22px",
-          color: "#7b2cbf",
-          whiteSpace: "nowrap",
-        }}
-      >
+      <span className="whitespace-nowrap text-med-small-Medium text-secondary-normal-default">
         Free cancellation up to 48 hours before departure
       </span>
     </div>
   </div>
-);
+  );
+};
 
 // ─── TourDetailPage ────────────────────────────────────────────────────────────
 const TourDetailPage = () => {
@@ -2131,6 +1907,15 @@ const TourDetailPage = () => {
 
   const tourData =
     TOUR_DATA[tour] || TOUR_DATA["elmina-heritage-coastal-journey"];
+  const [meetingPin, setMeetingPin] = useState(
+    () => tourData.meetingPoint ?? DEFAULT_MEETING_POINT
+  );
+
+  useEffect(() => {
+    const data = TOUR_DATA[tour] || TOUR_DATA["elmina-heritage-coastal-journey"];
+    setMeetingPin(data.meetingPoint ?? DEFAULT_MEETING_POINT);
+  }, [tour]);
+
   const countryDisplay = country
     ? country.charAt(0).toUpperCase() + country.slice(1)
     : "Ghana";
@@ -2203,7 +1988,7 @@ const TourDetailPage = () => {
       <div className="px-[156px] pt-[56px] pb-[80px]">
         <div className="flex gap-[32px] items-start">
           {/* ── LEFT CONTENT — w=928px ─────────────────────────────────── */}
-          <div className="flex-1 max-w-[928px] min-w-0 flex flex-col">
+          <div className="flex-1 lg:min-w-[70%] max-w-[928px] min-w-0 flex flex-col">
             {/* ① OVERVIEW: Tour Meta Bar + About The Tour ─ id=section-overview */}
             <div id="section-overview" className="mb-6">
               {/* Meta subtitle — "3-day tour hosted by Heritage Guides" */}
@@ -2356,16 +2141,8 @@ const TourDetailPage = () => {
               id="section-reviews"
               style={{ padding: "32px 0", borderBottom: "1.5px solid #ebdff5" }}
             >
-              <h2
-                style={{
-                  fontFamily: "Raleway, sans-serif",
-                  fontWeight: 600,
-                  fontSize: "20px",
-                  lineHeight: "28px",
-                  color: "#4a1a73",
-                  marginBottom: "24px",
-                }}
-              >
+                           <h2 className="text-semi-md-semibold text-secondary-dark-hover mb-5.5 ml-5">
+
                 What Our Travelers Say
               </h2>
               <ReviewsSection tourData={tourData} />
@@ -2374,105 +2151,45 @@ const TourDetailPage = () => {
             {/* ⑦ MEETING POINT & LOCATION ─ id=section-location */}
             <div
               id="section-location"
-              style={{ padding: "32px 0", borderBottom: "1.5px solid #ebdff5" }}
+              className="pb-14.5 pt-8 border-b border-secondary-light-hover"
             >
-              <h2
-                style={{
-                  fontFamily: "Raleway, sans-serif",
-                  fontWeight: 600,
-                  fontSize: "20px",
-                  lineHeight: "28px",
-                  color: "#4a1a73",
-                  marginBottom: "20px",
-                }}
-              >
+                                         <h2 className="text-semi-md-semibold text-secondary-dark-hover mb-5.5 ml-5">
+
                 Meeting Point & Location
               </h2>
-              {/* Map placeholder — 928×393px */}
-              <div
-                className="relative w-full overflow-hidden"
-                style={{
-                  height: "393px",
-                  borderRadius: "16px",
-                  backgroundColor: "#e9eaeb",
-                }}
-              >
-                {/* Grid overlay */}
-                <div
-                  className="absolute inset-0 opacity-20"
-                  style={{
-                    backgroundImage:
-                      "repeating-linear-gradient(0deg,#9ca3af 0,#9ca3af 1px,transparent 1px,transparent 40px),repeating-linear-gradient(90deg,#9ca3af 0,#9ca3af 1px,transparent 1px,transparent 40px)",
-                  }}
+              {/* Map — OSM tiles; pin is draggable; tap map to move pin */}
+              <div className="relative h-[393px] w-full overflow-hidden rounded-[16px] bg-secondary-light-hover">
+                <MeetingPointMapFrame
+                  key={tour}
+                  position={meetingPin}
+                  onPositionChange={setMeetingPin}
+                  locationLabel={
+                    tourData.meetingPointLabel ?? "Accra, Greater Accra Region"
+                  }
                 />
-                {/* Map pin + label */}
-                <div
-                  className="absolute"
-                  style={{
-                    left: "50%",
-                    top: "50%",
-                    transform: "translate(-50%,-60%)",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    gap: "8px",
-                  }}
-                >
-                  <svg width="38" height="47" viewBox="0 0 38 47" fill="none">
-                    <path
-                      d="M19 0C8.51 0 0 8.51 0 19C0 33.25 19 47 19 47C19 47 38 33.25 38 19C38 8.51 29.49 0 19 0Z"
-                      fill="#7b2cbf"
-                    />
-                    <circle cx="19" cy="19" r="8" fill="white" />
-                  </svg>
-                  <div
-                    style={{
-                      backgroundColor: "white",
-                      padding: "8px 16px",
-                      borderRadius: "8px",
-                      boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
-                      fontFamily: "Raleway, sans-serif",
-                      fontSize: "12px",
-                      fontWeight: 500,
-                      color: "#2d2d2d",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    Accra, Greater Accra Region
-                  </div>
-                </div>
-                {/* Get Directions button */}
-                <button
+                <Button
                   type="button"
-                  style={{
-                    position: "absolute",
-                    right: "16px",
-                    bottom: "16px",
-                    fontFamily: "Raleway, sans-serif",
-                    fontWeight: 600,
-                    fontSize: "14px",
-                    color: "#2d2d2d",
-                    backgroundColor: "white",
-                    border: "1px solid #e9eaeb",
-                    borderRadius: "8px",
-                    padding: "10px 18px",
-                    boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
-                    cursor: "pointer",
+                  variant="secondary"
+                  size="small"
+                  shape="pill"
+                  endIcon="→"
+                  onClick={() => {
+                    const { lat, lng } = meetingPin;
+                    window.open(
+                      `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`,
+                      "_blank",
+                      "noopener,noreferrer"
+                    );
                   }}
+                  className="absolute right-4 bottom-4 z-[501] min-h-0! rounded-full border-0 shadow-none px-[18px] py-2.5 text-[14px] font-semibold text-primary-light-default"
                 >
-                  Get Directions →
-                </button>
+                  Get Directions
+                </Button>
               </div>
               {/* Pickup note */}
               <p
-                style={{
-                  marginTop: "16px",
-                  fontFamily: "Raleway, sans-serif",
-                  fontWeight: 400,
-                  fontSize: "14px",
-                  lineHeight: "22px",
-                  color: "#6a7282",
-                }}
+              className="mt-4 rounded-[10px] bg-secondary-light-hover border border-secondary-light-active px-5 py-2.5 text-med-small-semibold text-secondary-normal-default"
+               
               >
                 Hotel pickup available from Greater Accra and Cape Coast
                 downtown. We will contact you the day before to confirm your
@@ -2482,84 +2199,46 @@ const TourDetailPage = () => {
 
             {/* ⑧ TRAVELLING WITH 6 OR MORE? ─ group CTA */}
             <div
-              style={{ padding: "32px 0", borderBottom: "1.5px solid #ebdff5" }}
+            className="pt-5 pb-[64px] border-b border-secondary-light-hover "
             >
               <div
-                style={{
-                  borderRadius: "16px",
-                  border: "1.5px solid #ebdff5",
-                  padding: "32px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  gap: "24px",
-                }}
+              className="px-5 py-8 rounded-[30px] bg-secondary-dark-darker border border-secondary-light-hover flex items-center justify-between gap-6"
+               
               >
                 <div>
                   <h4
-                    style={{
-                      fontFamily: "Raleway, sans-serif",
-                      fontWeight: 600,
-                      fontSize: "20px",
-                      lineHeight: "28px",
-                      color: "#4a1a73",
-                      marginBottom: "12px",
-                    }}
+                  className="text-semi-md-semibold text-white mb-2 "
+                   
                   >
                     Travelling with 6 or more?
                   </h4>
                   <p
-                    style={{
-                      fontFamily: "Raleway, sans-serif",
-                      fontWeight: 400,
-                      fontSize: "15px",
-                      lineHeight: "24px",
-                      color: "#364153",
-                      maxWidth: "509px",
-                    }}
+                  className="text-med-small-Medium text-primary-normal-hover max-w-[500px]"
+                    
                   >
-                    Get bespoke itineraries tailored around your group — greater
-                    value, shared memories, and seamless logistics designed just
-                    for you.
+                    Get bespoke itineraries around our group—greater vehicles, separate dining sessions for minors and starting-time seeds at hotels. Corporate retreats and cultural delegations welcome.
                   </p>
                 </div>
-                <button
+                <Button
                   type="button"
-                  style={{
-                    flexShrink: 0,
-                    fontFamily: "Raleway, sans-serif",
-                    fontWeight: 600,
-                    fontSize: "15px",
-                    lineHeight: "22px",
-                    color: "#4a1a73",
-                    border: "1.5px solid #4a1a73",
-                    borderRadius: "40px",
-                    padding: "14px 24px",
-                    whiteSpace: "nowrap",
-                    cursor: "pointer",
-                    backgroundColor: "transparent",
-                  }}
+                  variant="secondaryOutline"
+                  size="medium"
+                  shape="pill"
+                  endIcon="→"
+                  className="shrink-0 whitespace-nowrap rounded-full border-[1.5px] border-secondary-dark-hover bg-secondary-light-default! hover:bg-secondary-light-hover! active:bg-secondary-light-active! text-secondary-dark-hover hover:text-secondary-dark-hover active:text-secondary-dark-hover shadow-none px-6 py-[14px] text-[15px] leading-[22px] font-raleway font-semibold hover:border-secondary-dark-hover active:border-secondary-dark-hover"
                 >
-                  Get a Group Quote →
-                </button>
+                  Get a Group Quote
+                </Button>
               </div>
             </div>
 
-            {/* ⑨ YOU MIGHT ALSO LOVE */}
-            <div style={{ paddingTop: "40px" }}>
-              <h2
-                style={{
-                  fontFamily: "Raleway, sans-serif",
-                  fontWeight: 600,
-                  fontSize: "20px",
-                  lineHeight: "28px",
-                  color: "#4a1a73",
-                  marginBottom: "24px",
-                }}
-              >
+            {/* ⑨ YOU MIGHT ALSO LOVE — flex-wrap: 351px cards × 3 exceeds 928px col; avoid overflow under sidebar */}
+            <div className="pt-10 w-full min-w-0">
+            <h2 className="text-semi-md-semibold text-secondary-dark-hover mb-5.5 ml-5">
+
                 You Might Also Love
               </h2>
-              <div className="grid grid-cols-3" style={{ gap: "24px" }}>
+              <div className="flex w-full min-w-0 flex-wrap justify-start gap-5">
                 {RELATED_TOURS.map((t) => (
                   <PopularTourCard
                     key={t.id}
@@ -2579,13 +2258,22 @@ const TourDetailPage = () => {
                 ))}
               </div>
             </div>
+
+            
           </div>
 
           {/* ── RIGHT: Booking Widget — Figma 3156:45940 ─────────────────── */}
-          {/* sticky top = 112px navbar + 64px detail nav + 12px buffer = 188px */}
+          {/* sticky top = 112px navbar + 64px detail nav + 12px buffer = 188px   */}
+          {/* maxHeight clamps to viewport so the full widget is always on-screen */}
           <div
-            className="flex-shrink-0 sticky"
-            style={{ width: "457px", top: "188px" }}
+            className="z-10 lg:min-w-[457px] max-w-full flex-shrink-0 sticky"
+            style={{
+              top: "188px",
+              maxHeight: "calc(100vh - 200px)",
+              overflowY: "auto",
+              scrollbarWidth: "none",   /* Firefox */
+              msOverflowStyle: "none",  /* IE 11  */
+            }}
           >
             <BookingWidget
               tourData={tourData}
@@ -2601,8 +2289,14 @@ const TourDetailPage = () => {
               setBookmarked={setBookmarked}
             />
           </div>
+          
         </div>
+        
       </div>
+      <div>
+            <CtaSection />
+
+            </div>
 
       {/* Gallery Modal */}
       {galleryOpen && (
