@@ -910,280 +910,153 @@ const flagUrl = (code) => {
   return `https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/${pts.join("-")}.svg`;
 };
 
-// ─── Tour Hero Section — Figma 3075:39137 ─────────────────────────────────────
-// Full-width section: title+meta header (pl-156px) + 4-photo image grid (h-717px)
-// Must sit OUTSIDE the padded content container so images reach edge-to-edge.
-//
-// Image grid layout (all absolute-positioned within the 1728×717 frame):
-//   Left carousel:   left-0       w-856px  h-717px (gap of 8px to right column)
-//   Right column:    left-864px   w-864px  h-717px   flex-col gap-4px
-//     ↳ Top image:   w-full       h-366px
-//     ↳ Bottom row:  w-full       h-347px  flex gap-4px
-//         Bottom-L:  w-430px      h-347px
-//         Bottom-R:  flex-1       h-347px  + "Show all photos" button
-//
-// "Show all photos" button — Figma 3071:39004:
-//   backdrop-blur(7.45px) bg rgba(123,44,191,0.5) border-[#f2eaf9] rounded-[10px]
-//   left-248px top-294px  w-160px h-38px  within the 432×347 bottom-right image
+// ─── Tour Hero Section — Figma (title + meta pl-156, grid 856 | 8 | 864, h-717) ─
+// Left column: main image. Right: 366 + row 430+432. 30% black overlay on tiles.
 const TourHeroSection = React.forwardRef(({ tourData, onOpenGallery }, ref) => {
-  const [slideIndex, setSlideIndex] = useState(0);
+    const mainSrc = tourData.heroMainImage;
 
-  return (
-    <div
-      ref={ref}
-      className="w-full flex flex-col bg-secondary-light-hover"
-      style={{ gap: "16px" }}
-    >
-      {/* ── Title + meta row — Figma 3075:39109 ──────────────────────────── */}
-      {/* pl-156px matches the standard page left gutter; pt-32px from gap to tab nav */}
+    return (
       <div
-        className="flex flex-col pl-[156px]"
-        style={{ gap: "8px", paddingTop: "32px" }}
+        ref={ref}
+        className="flex w-full flex-col gap-4 bg-secondary-light-hover"
       >
-        {/* h1 — Raleway SemiBold 39px/50lh #7b2cbf — Figma 3075:39111 */}
-        <h1
-          style={{
-            fontFamily: "Raleway, sans-serif",
-            fontWeight: 600,
-            fontSize: "39px",
-            lineHeight: "50px",
-            color: "#7b2cbf",
-            whiteSpace: "nowrap",
-          }}
-        >
-          {tourData.title}
-        </h1>
-
-        {/* Meta row — Figma 3075:39112 — h-20px flex gap-8px */}
-        <div
-          className="flex items-center"
-          style={{ gap: "8px", height: "20px" }}
-        >
-          {/* Star + rating + review count */}
-          <div className="flex items-center" style={{ gap: "4px" }}>
-            {/* star SVG 18×19px — Figma 3075:39115 */}
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 18 18"
-              fill="none"
-              aria-hidden="true"
-            >
-              <path
-                d="M8.523 1.164c.292-.842 1.662-.842 1.954 0l1.12 3.232a1.04 1.04 0 0 0 .987.716h3.4c.893 0 1.264 1.145.542 1.67l-2.75 2.002a1.04 1.04 0 0 0-.378 1.163l1.052 3.042c.29.84-.69 1.54-1.408 1.017l-2.752-2.003a1.04 1.04 0 0 0-1.224 0L6.358 14.006c-.718.523-1.698-.176-1.408-1.017l1.052-3.042a1.04 1.04 0 0 0-.378-1.163L2.874 6.782c-.722-.525-.351-1.67.542-1.67h3.4a1.04 1.04 0 0 0 .987-.716L8.923 1.164Z"
-                fill="#7b2cbf"
-              />
-            </svg>
-            {/* rating value — Raleway SemiBold 13px #0a0a0a */}
-            <span
-              style={{
-                fontFamily: "Raleway, sans-serif",
-                fontWeight: 600,
-                fontSize: "13px",
-                lineHeight: "18px",
-                color: "#0a0a0a",
-              }}
-            >
-              {tourData.rating}
-            </span>
-            {/* review count — Raleway SemiBold 13px #4a5565 */}
-            <span
-              style={{
-                fontFamily: "Raleway, sans-serif",
-                fontWeight: 600,
-                fontSize: "13px",
-                lineHeight: "18px",
-                color: "#4a5565",
-              }}
-            >
-              ({tourData.reviewCount} reviews)
-            </span>
-          </div>
-
-          {/* Dot separator — Inter Regular 14px #99a1af tracking-[-0.15px] */}
-          <span
-            aria-hidden="true"
-            style={{
-              fontFamily: "Inter, sans-serif",
-              fontWeight: 400,
-              fontSize: "14px",
-              lineHeight: "20px",
-              color: "#99a1af",
-              letterSpacing: "-0.1504px",
-            }}
-          >
-            ·
-          </span>
-
-          {/* Location — Raleway SemiBold 13px #2d2d2d underline — Figma 3075:39124 */}
-          <span
-            style={{
-              fontFamily: "Raleway, sans-serif",
-              fontWeight: 600,
-              fontSize: "13px",
-              lineHeight: "18px",
-              color: "#2d2d2d",
-              textDecoration: "underline",
-              textDecorationStyle: "solid",
-              whiteSpace: "nowrap",
-            }}
-          >
-            {tourData.location}
-          </span>
-        </div>
-      </div>
-
-      {/* ── 4-photo image grid — Figma 3047:42325 ────────────────────────── */}
-      {/* Full width, h-717px, border-r #d6beeb, overflow-hidden */}
-      <div
-        className="relative w-full overflow-hidden"
-        style={{ height: "717px", borderRight: "1px solid #d6beeb" }}
-      >
-        {/* LEFT: carousel — absolute, left-0, w-856px */}
-        <div
-          className="absolute left-0 top-0 overflow-hidden cursor-pointer"
-          style={{ width: "856px", height: "717px" }}
-          onClick={() => onOpenGallery(slideIndex)}
-        >
-          <img
-            src={tourData.heroMainImage}
-            alt={tourData.title}
-            className="absolute inset-0 w-full h-full object-cover"
-          />
-        </div>
-
-        {/* RIGHT: 3-image column — absolute, left-864px (8px gap), w-864px */}
-        <div
-          className="absolute top-0 flex flex-col"
-          style={{ left: "864px", width: "864px", height: "717px", gap: "4px" }}
-        >
-          {/* Top image — h-366px, full right width */}
-          <div
-            className="overflow-hidden flex-shrink-0 cursor-pointer"
-            style={{ width: "100%", height: "366px" }}
-            onClick={() => onOpenGallery(1)}
-          >
-            <img
-              src={tourData.heroTopRight}
-              alt="Tour view 2"
-              className="w-full h-full object-cover"
-            />
-          </div>
-
-          {/* Bottom row — h-347px, two images side by side gap-4px */}
-          <div className="flex" style={{ gap: "4px", height: "347px" }}>
-            {/* Bottom-left — w-430px */}
-            <div
-              className="overflow-hidden flex-shrink-0 cursor-pointer"
-              style={{ width: "430px", height: "347px" }}
-              onClick={() => onOpenGallery(2)}
-            >
-              <img
-                src={tourData.heroBottomLeft}
-                alt="Tour view 3"
-                className="w-full h-full object-cover"
-              />
-            </div>
-
-            {/* Bottom-right — flex-1 (~432px), has "Show all photos" button */}
-            <div
-              className="relative overflow-hidden cursor-pointer"
-              style={{ flex: "1 0 0", height: "347px" }}
-              onClick={() => onOpenGallery(3)}
-            >
-              <img
-                src={tourData.heroBottomRight}
-                alt="Tour view 4"
-                className="w-full h-full object-cover"
-              />
-
-              {/* "Show all photos" button — Figma 3071:39004
-                  Frosted glass: backdrop-blur(7.45px) rgba(123,44,191,0.5) border-[#f2eaf9]
-                  Position within image: left-248px top-294px
-                  Interaction: opens image gallery carousel (pop-up) */}
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onOpenGallery(0);
-                }}
-                className="absolute flex items-center"
-                style={{
-                  left: "248px",
-                  top: "294px",
-                  width: "160px",
-                  height: "38px",
-                  borderRadius: "10px",
-                  backdropFilter: "blur(7.45px)",
-                  WebkitBackdropFilter: "blur(7.45px)",
-                  backgroundColor: "rgba(123, 44, 191, 0.5)",
-                  border: "1px solid #f2eaf9",
-                  paddingLeft: "12px",
-                  gap: "8px",
-                }}
+        <div className="flex flex-col gap-2 pl-[156px] pr-4 pt-8">
+          <h1 className="font-raleway text-Display-md-small-semibold leading-[50px] text-secondary-normal-default">
+            {tourData.title}
+          </h1>
+          <div className="flex h-5 flex-wrap items-center gap-2">
+            <div className="flex items-center gap-1">
+              <svg
+                width="11"
+                height="11"
+                viewBox="0 0 18 18"
+                fill="none"
+                className="shrink-0"
+                aria-hidden="true"
               >
-                {/* Grid icon — Figma uses ⋮⋮ (two vertical ellipsis chars); rendered as SVG 4-square grid for crisp rendering */}
-                <svg
-                  width="12"
-                  height="12"
-                  viewBox="0 0 12 12"
-                  fill="none"
-                  aria-hidden="true"
-                  style={{ flexShrink: 0 }}
+                <path
+                  d="M8.523 1.164c.292-.842 1.662-.842 1.954 0l1.12 3.232a1.04 1.04 0 0 0 .987.716h3.4c.893 0 1.264 1.145.542 1.67l-2.75 2.002a1.04 1.04 0 0 0-.378 1.163l1.052 3.042c.29.84-.69 1.54-1.408 1.017l-2.752-2.003a1.04 1.04 0 0 0-1.224 0L6.358 14.006c-.718.523-1.698-.176-1.408-1.017l1.052-3.042a1.04 1.04 0 0 0-.378-1.163L2.874 6.782c-.722-.525-.351-1.67.542-1.67h3.4a1.04 1.04 0 0 0 .987-.716L8.923 1.164Z"
+                  fill="#7b2cbf"
+                />
+              </svg>
+              <span className="font-raleway text-med-small-semibold text-neutral-950">
+                {tourData.rating}
+              </span>
+              <span className="font-raleway text-med-small-semibold text-[#4a5565]">
+                ({tourData.reviewCount} reviews)
+              </span>
+            </div>
+            <span
+              aria-hidden="true"
+              className="font-sans text-sm leading-5 tracking-[-0.15px] text-[#99a1af]"
+            >
+              ·
+            </span>
+            <span className="font-raleway text-med-small-semibold text-[#364153] underline decoration-solid underline-offset-2">
+              {tourData.location}
+            </span>
+          </div>
+        </div>
+
+        <div className="flex w-full flex-col items-stretch border-r border-solid border-secondary-light-active">
+          <div
+            className="grid min-h-[320px] w-full auto-rows-fr gap-2 overflow-hidden max-xl:grid-cols-1 xl:h-[717px] xl:min-h-0 xl:grid-cols-[minmax(0,856fr)_minmax(0,864fr)]"
+          >
+            {/* Left: main image */}
+            <div
+              className="relative min-h-0 min-w-0 cursor-pointer"
+              onClick={() => onOpenGallery(0)}
+              role="presentation"
+            >
+              <img
+                src={mainSrc}
+                alt={tourData.title}
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+              <div
+                className="pointer-events-none absolute inset-0 bg-black/30"
+                aria-hidden
+              />
+            </div>
+
+            {/* Right column */}
+            <div className="flex min-h-0 min-w-0 flex-col gap-1">
+              <div
+                className="relative h-[min(200px,40%)] min-h-0 shrink-0 cursor-pointer overflow-hidden xl:h-[366px]"
+                onClick={() => onOpenGallery(1)}
+                role="presentation"
+              >
+                <img
+                  src={tourData.heroTopRight}
+                  alt=""
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+                <div
+                  className="pointer-events-none absolute inset-0 bg-black/30"
+                  aria-hidden
+                />
+              </div>
+              <div className="flex min-h-0 flex-1 gap-1 xl:h-[347px] xl:flex-none">
+                <div
+                  className="relative w-[calc(50%-2px)] min-w-0 shrink-0 cursor-pointer overflow-hidden xl:w-[430px]"
+                  onClick={() => onOpenGallery(2)}
+                  role="presentation"
                 >
-                  <rect
-                    x="0"
-                    y="0"
-                    width="5"
-                    height="5"
-                    rx="1"
-                    fill="#ebdff5"
+                  <img
+                    src={tourData.heroBottomLeft}
+                    alt=""
+                    className="absolute inset-0 h-full w-full object-cover"
                   />
-                  <rect
-                    x="7"
-                    y="0"
-                    width="5"
-                    height="5"
-                    rx="1"
-                    fill="#ebdff5"
+                  <div
+                    className="pointer-events-none absolute inset-0 bg-black/30"
+                    aria-hidden
                   />
-                  <rect
-                    x="0"
-                    y="7"
-                    width="5"
-                    height="5"
-                    rx="1"
-                    fill="#ebdff5"
-                  />
-                  <rect
-                    x="7"
-                    y="7"
-                    width="5"
-                    height="5"
-                    rx="1"
-                    fill="#ebdff5"
-                  />
-                </svg>
-                <span
-                  style={{
-                    fontFamily: "Raleway, sans-serif",
-                    fontWeight: 600,
-                    fontSize: "13px",
-                    lineHeight: "18px",
-                    color: "#f2eaf9",
-                    whiteSpace: "nowrap",
-                  }}
+                </div>
+                <div
+                  className="relative min-h-[140px] min-w-0 flex-1 cursor-pointer overflow-hidden"
+                  onClick={() => onOpenGallery(3)}
+                  role="presentation"
                 >
-                  Show all photos
-                </span>
-              </button>
+                  <img
+                    src={tourData.heroBottomRight}
+                    alt=""
+                    className="absolute inset-0 h-full w-full object-cover"
+                  />
+                  <div
+                    className="pointer-events-none absolute inset-0 bg-black/30"
+                    aria-hidden
+                  />
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onOpenGallery(0);
+                    }}
+                    className="absolute bottom-[43px] right-8 z-10 flex h-[38px] items-center gap-2 rounded-[10px] border border-secondary-light-default px-3 backdrop-blur-[7.45px]"
+                    style={{
+                      backgroundColor: "rgba(123, 44, 191, 0.5)",
+                      width: "160px",
+                    }}
+                  >
+                    <span
+                      className="font-sans text-sm font-semibold leading-5 tracking-[-0.15px] text-secondary-light-hover"
+                      aria-hidden
+                    >
+                      ⋮⋮
+                    </span>
+                    <span className="font-raleway text-med-small-semibold text-secondary-light-default">
+                      Show all photos
+                    </span>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  );
-});
+    );
+  }
+);
 TourHeroSection.displayName = "TourHeroSection";
 
 // ─── Sticky section nav bar — Figma 3045:42287 ────────────────────────────────
@@ -2146,7 +2019,10 @@ const TourDetailPage = () => {
       {/* Full-width tour hero — Figma 3075:39137
           Title + meta (pl-156px) + 4-photo image grid (h-717px)
           Must be OUTSIDE the padded content div so images reach both edges */}
-      <TourHeroSection tourData={tourData} onOpenGallery={openGallery} />
+      <TourHeroSection
+        tourData={tourData}
+        onOpenGallery={openGallery}
+      />
 
       {/* ── Main content — Figma Frame 1000006773 ────────────────────────────────
            px-156px matches page gutter (same as hero title / sticky nav)

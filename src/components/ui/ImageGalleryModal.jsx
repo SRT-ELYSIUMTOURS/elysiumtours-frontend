@@ -1,47 +1,39 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 
-// ─── ImageGalleryModal — Figma 3159:47607 / 3159:47614 / 3159:47642 ──────────
-//
-// Full-screen layout (fixed inset-0 z-200):
-//   Background overlay: rgba(45,45,45,0.6) — #2d2d2d at 60% opacity so
-//   the page shows through (Figma 3159:47607)
-//
-// Two rows:
-//   ① Viewer (flex-1, flex-row stretch):
-//       [← circle arrow] [image card — flex-1, rounded-20px] [→ circle arrow]
-//       Image card has:
-//         • bg #f7f7f7 + photo cover + rgba(0,0,0,0.1) tint
-//         • Top frosted bar h-120px: backdrop-blur(25px), gradient, mix-blend-multiply
-//           Content at left-73px top-46px: expand-icon | title(SemiBold 25 #fefefe) | close-circle
-//         • Bottom frosted bar h-146px: same blur
-//           Content centred vertically at left-81px:
-//             Left col (flex-col gap-7): 🇬🇭 + location text | "Description"
-//             Right: share circle (47px) + wishlist circle (47px), gap-19
-//
-//   ② Image changer bar (flex-shrink-0, pt-24px):
-//       separator line (1px rgba(255,255,255,0.12))
-//       thumbnail strip: active→172px h-175px no-overlay, inactive→120px rgba(0,0,0,0.8) overlay
-//       controls: prev(rgba(235,223,245,0.5)) + next(#ebdff5) | counter(#ebdff5)
+// Full-screen lightbox: smaller center frame; prev/next peek strips pinned to viewport edges;
+// Share then Like; chrome on hover (touch: always visible on small screens).
 
 const ImageGalleryModal = React.forwardRef(
-  ({ images = [], currentIndex = 0, onClose, title = "", location = "" }, ref) => {
+  (
+    {
+      images = [],
+      currentIndex = 0,
+      onClose,
+      title = "",
+      location = "",
+      descriptionLabel = "Description",
+    },
+    ref
+  ) => {
     const [activeIndex, setActiveIndex] = useState(currentIndex);
     const [bookmarked, setBookmarked] = useState(false);
     const thumbStripRef = useRef(null);
     const activeThumbRef = useRef(null);
 
-    useEffect(() => { setActiveIndex(currentIndex); }, [currentIndex]);
+    useEffect(() => {
+      setActiveIndex(currentIndex);
+    }, [currentIndex]);
 
+    const len = images.length;
     const goNext = useCallback(
-      () => setActiveIndex((i) => (i + 1) % images.length),
-      [images.length]
+      () => setActiveIndex((i) => (i + 1) % len),
+      [len]
     );
     const goPrev = useCallback(
-      () => setActiveIndex((i) => (i - 1 + images.length) % images.length),
-      [images.length]
+      () => setActiveIndex((i) => (i - 1 + len) % len),
+      [len]
     );
 
-    // Keyboard navigation
     useEffect(() => {
       const handleKey = (e) => {
         if (e.key === "Escape") onClose?.();
@@ -52,431 +44,189 @@ const ImageGalleryModal = React.forwardRef(
       return () => document.removeEventListener("keydown", handleKey);
     }, [onClose, goNext, goPrev]);
 
-    // Auto-scroll thumbnail strip to keep active thumb centred
     useEffect(() => {
-      if (activeThumbRef.current) {
-        activeThumbRef.current.scrollIntoView({
-          behavior: "smooth",
-          inline: "center",
-          block: "nearest",
-        });
-      }
+      activeThumbRef.current?.scrollIntoView({
+        behavior: "smooth",
+        inline: "center",
+        block: "nearest",
+      });
     }, [activeIndex]);
 
-    // Lock body scroll while modal is open
     useEffect(() => {
       const prev = document.body.style.overflow;
       document.body.style.overflow = "hidden";
-      return () => { document.body.style.overflow = prev; };
+      return () => {
+        document.body.style.overflow = prev;
+      };
     }, []);
 
-    if (!images.length) return null;
+    if (!len) return null;
 
-    const imgSrc = images[activeIndex]?.src || images[activeIndex];
+    const imgAt = (i) => images[i]?.src || images[i];
+    const activeSrc = imgAt(activeIndex);
+    const prevSrc = len > 1 ? imgAt((activeIndex - 1 + len) % len) : activeSrc;
+    const nextSrc = len > 1 ? imgAt((activeIndex + 1) % len) : activeSrc;
+
+    const chromeVisibility =
+      "pointer-events-none opacity-0 transition-opacity duration-200 ease-out max-md:pointer-events-auto max-md:opacity-100 md:group-hover/main:pointer-events-auto md:group-hover/main:opacity-100 md:group-focus-within/main:pointer-events-auto md:group-focus-within/main:opacity-100";
 
     return (
       <div
         ref={ref}
+        className="fixed inset-0 z-[200] flex flex-col overflow-hidden font-raleway"
         style={{
-          position: "fixed",
-          inset: 0,
-          zIndex: 200,
-          // Figma 3159:47607 — #2d2d2d at opacity 60%
-          backgroundColor: "rgba(45,45,45,0.6)",
-          display: "flex",
-          flexDirection: "column",
-          fontFamily: "Raleway, sans-serif",
+          backgroundColor: "rgba(45, 45, 45, 0.65)",
+          mixBlendMode: "normal",
         }}
       >
-        {/* ─────────────────────────────────────────────────────────────────
-            ① VIEWER AREA — flex-1
-            Three-column: [arrow] [image card] [arrow]
-            alignItems:stretch so card fills full height; arrows self-centre
-        ───────────────────────────────────────────────────────────────── */}
-        <div
-          style={{
-            flex: 1,
-            minHeight: 0,
-            display: "flex",
-            alignItems: "stretch",   // card stretches full height
-            paddingTop: "24px",
-          }}
-        >
-          {/* ── Left navigation arrow — centred vertically ────────────── */}
+        {/* Carousel — peeks flush to viewport edges; smaller center floats above */}
+        <div className="relative flex min-h-0 w-full flex-1 items-center justify-center px-0 pt-8 pb-2">
+          {/* Left peek — flush to screen left, clipped */}
           <button
             type="button"
             onClick={goPrev}
             aria-label="Previous image"
-            style={{
-              flexShrink: 0,
-              width: "80px",
-              alignSelf: "center",   // centre arrow against the tall card
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-            }}
+            className="absolute left-0 top-1/2 z-[5] hidden h-[min(42vw,560px)] max-h-[68vh] w-[clamp(44px,6vw,88px)] -translate-y-1/2 overflow-hidden rounded-r-[20px] shadow-[0px_4px_20px_rgba(0,0,0,0.12)] md:block"
           >
-            <div
-              style={{
-                width: "40px",
-                height: "40px",
-                borderRadius: "50%",
-                backgroundColor: "rgba(235,223,245,0.25)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              {/* Left chevron */}
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path
-                  d="M13 4L7 10L13 16"
-                  stroke="#fefefe"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </div>
+            <div className="absolute inset-0 bg-[#f7f7f7]" />
+            <img
+              src={prevSrc}
+              alt=""
+              className="absolute left-0 top-0 h-full min-w-[min(420px,140vw)] max-w-none rounded-r-[20px] object-cover object-right"
+            />
+            <div className="absolute inset-0 bg-black/70" aria-hidden />
           </button>
 
-          {/* ── Main image card — flex-1, fills full viewer height ──────── */}
-          {/* Figma 3159:47614: rounded-20px, shadow, bg layers */}
+          {/* Center — reduced width */}
           <div
-            style={{
-              flex: 1,
-              position: "relative",
-              overflow: "hidden",
-              borderRadius: "20px",
-              boxShadow: "0px 4px 20px 0px rgba(0,0,0,0.15)",
-              // Ensure the card fills the flex row height
-              alignSelf: "stretch",
-            }}
+            className="group/main relative z-[10] mx-4 flex min-h-[200px] min-w-0 max-h-[68vh] w-[min(56vw,880px)] flex-col overflow-hidden rounded-[20px] shadow-[0px_4px_20px_rgba(0,0,0,0.15)] sm:mx-6 md:mx-8"
+            style={{ aspectRatio: "1567 / 988" }}
           >
-            {/* Layer 1: neutral base colour */}
-            <div
-              style={{
-                position: "absolute",
-                inset: 0,
-                backgroundColor: "#f7f7f7",
-                borderRadius: "20px",
-              }}
-            />
-            {/* Layer 2: hero image */}
+            <div className="absolute inset-0 rounded-[20px] bg-[#f7f7f7]" />
             <img
-              src={imgSrc}
+              src={activeSrc}
               alt={title}
-              style={{
-                position: "absolute",
-                inset: 0,
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-                borderRadius: "20px",
-                display: "block",
-              }}
+              className="absolute inset-0 z-0 h-full w-full rounded-[20px] object-cover"
             />
-            {/* Layer 3: 10% black tint — Figma rgba(0,0,0,0.1) */}
             <div
-              style={{
-                position: "absolute",
-                inset: 0,
-                backgroundColor: "rgba(0,0,0,0.1)",
-                borderRadius: "20px",
-              }}
+              className="pointer-events-none absolute inset-0 z-[1] rounded-[20px] bg-black/10"
+              aria-hidden
             />
 
-            {/* ── TOP FROSTED BAR — h-120px, absolute top-0 ────────────── */}
-            {/* Figma 3159:47615: backdrop-blur(25px), gradient mix-blend-multiply */}
+            {/* Top chrome — hover / focus only */}
             <div
-              style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                right: 0,
-                height: "120px",
-                overflow: "hidden",
-                backdropFilter: "blur(25px)",
-                WebkitBackdropFilter: "blur(25px)",
-                // Exact Figma gradient (stops outside 0-100% intentional — creates subtle effect)
-                backgroundImage:
-                  "linear-gradient(175.015deg, rgba(255,255,255,0) 186.69%, rgba(153,153,153,0.5) 339.94%)",
-                mixBlendMode: "multiply",
-              }}
+              className={`absolute left-0 right-0 top-0 z-[2] h-[120px] bg-gradient-to-b from-black/55 via-black/35 to-transparent backdrop-blur-md ${chromeVisibility}`}
             >
-              {/* Content row: expand | title | close — at left-73px top-46px */}
-              <div
-                style={{
-                  position: "absolute",
-                  left: "73px",
-                  right: "73px",
-                  top: "46px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                }}
-              >
-                {/* Expand / fullscreen icon — 40×40px SVG arrow-expand-01 */}
+              <div className="absolute left-[clamp(16px,4vw,73px)] right-[clamp(16px,4vw,73px)] top-[46px] flex items-center justify-between gap-4">
                 <button
                   type="button"
-                  aria-label="Toggle fullscreen"
-                  style={{
-                    width: "40px",
-                    height: "40px",
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    flexShrink: 0,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    padding: 0,
-                  }}
+                  aria-label="Open in full view"
+                  className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-white/10 p-0 text-white outline-none ring-offset-2 ring-offset-transparent hover:bg-white/15 focus-visible:ring-2 focus-visible:ring-white/70"
                 >
-                  {/* arrow-expand-01 icon — 4 corner arrows pointing outward */}
-                  <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
                     <path
-                      d="M6 6H14M6 6V14M6 6L14 14"
-                      stroke="#fefefe"
-                      strokeWidth="1.8"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <path
-                      d="M34 6H26M34 6V14M34 6L26 14"
-                      stroke="#fefefe"
-                      strokeWidth="1.8"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <path
-                      d="M6 34H14M6 34V26M6 34L14 26"
-                      stroke="#fefefe"
-                      strokeWidth="1.8"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <path
-                      d="M34 34H26M34 34V26M34 34L26 26"
-                      stroke="#fefefe"
-                      strokeWidth="1.8"
+                      d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
                       strokeLinecap="round"
                       strokeLinejoin="round"
                     />
                   </svg>
                 </button>
-
-                {/* Title — Raleway SemiBold 25px #fefefe, centred, w-298px */}
-                <p
-                  style={{
-                    fontFamily: "Raleway, sans-serif",
-                    fontWeight: 600,
-                    fontSize: "25px",
-                    lineHeight: "normal",
-                    color: "#fefefe",
-                    textAlign: "center",
-                    width: "298px",
-                    flexShrink: 0,
-                    margin: 0,
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  }}
-                >
+                <h1 className="max-w-[min(298px,45vw)] shrink truncate text-center font-raleway text-High-md-semibold text-white drop-shadow-sm">
                   {title}
-                </p>
-
-                {/* Close circle — Hicon / Linear / Close Circle, 40px */}
+                </h1>
                 <button
                   type="button"
                   onClick={onClose}
                   aria-label="Close gallery"
-                  style={{
-                    width: "40px",
-                    height: "40px",
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    flexShrink: 0,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    padding: 0,
-                  }}
+                  className="flex size-10 shrink-0 items-center justify-center rounded-full border border-white/40 bg-white/10 p-0 text-white outline-none backdrop-blur-sm hover:bg-white/20 focus-visible:ring-2 focus-visible:ring-white/70"
                 >
-                  <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-                    <circle cx="20" cy="20" r="16.5" stroke="#fefefe" strokeWidth="1.5" />
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                     <path
-                      d="M14.5 14.5L25.5 25.5M25.5 14.5L14.5 25.5"
-                      stroke="#fefefe"
-                      strokeWidth="1.5"
+                      d="M18 6L6 18M6 6l12 12"
+                      stroke="currentColor"
+                      strokeWidth="2"
                       strokeLinecap="round"
+                      strokeLinejoin="round"
                     />
                   </svg>
                 </button>
               </div>
             </div>
 
-            {/* ── BOTTOM FROSTED BAR — h-146px, absolute bottom-0 ─────── */}
-            {/* Figma 3159:47622: same blur + gradient mix-blend-multiply */}
+            {/* Bottom chrome — hover / focus only */}
             <div
-              style={{
-                position: "absolute",
-                bottom: 0,
-                left: 0,
-                right: 0,
-                height: "146px",
-                overflow: "hidden",
-                backdropFilter: "blur(25px)",
-                WebkitBackdropFilter: "blur(25px)",
-                backgroundImage:
-                  "linear-gradient(173.942deg, rgba(255,255,255,0) 186.69%, rgba(153,153,153,0.5) 339.94%)",
-                mixBlendMode: "multiply",
-              }}
+              className={`absolute bottom-0 left-0 right-0 z-[2] h-[146px] bg-gradient-to-t from-black/55 via-black/35 to-transparent backdrop-blur-md ${chromeVisibility}`}
             >
-              {/* Content: vertically centred, left-81px right side for icons */}
-              <div
-                style={{
-                  position: "absolute",
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  left: "81px",
-                  right: "81px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                }}
-              >
-                {/* Left block: flag+location / description — flex-col gap-7px */}
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "7px",
-                    width: "298px",
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", gap: "7px" }}>
-                    {/* Ghana flag circle — Ellipse10 26×26px */}
+              <div className="absolute left-[clamp(16px,5vw,81px)] right-[clamp(16px,5vw,81px)] top-1/2 flex -translate-y-1/2 items-center justify-between gap-8">
+                <div className="flex min-w-0 max-w-[min(298px,42vw)] shrink flex-col gap-[7px]">
+                  <div className="flex items-start gap-[7px]">
                     <span
-                      style={{
-                        fontSize: "18px",
-                        lineHeight: "26px",
-                        flexShrink: 0,
-                        width: "26px",
-                        height: "26px",
-                        display: "inline-flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
+                      className="relative mt-0.5 flex size-[26px] shrink-0 items-center justify-center rounded-full bg-white/15 text-white"
+                      aria-hidden
                     >
-                      🇬🇭
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                      >
+                        <path
+                          d="M12 21s7-4.5 7-11a7 7 0 1 0-14 0c0 6.5 7 11 7 11Z"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          strokeLinejoin="round"
+                        />
+                        <circle cx="12" cy="10" r="2" fill="currentColor" />
+                      </svg>
                     </span>
-                    <span
-                      style={{
-                        fontFamily: "Raleway, sans-serif",
-                        fontWeight: 500,
-                        fontSize: "16px",
-                        lineHeight: "26px",
-                        color: "#fefefe",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                    >
+                    <p className="truncate font-raleway text-md-Medium text-white drop-shadow-sm">
                       {location}
-                    </span>
+                    </p>
                   </div>
-                  <span
-                    style={{
-                      fontFamily: "Raleway, sans-serif",
-                      fontWeight: 500,
-                      fontSize: "16px",
-                      lineHeight: "26px",
-                      color: "#fefefe",
-                    }}
-                  >
-                    Description
-                  </span>
+                  <p className="font-raleway text-md-Medium text-white/90">
+                    {descriptionLabel}
+                  </p>
                 </div>
-
-                {/* Right block: share + wishlist circles — gap-19px */}
-                {/* Figma 3159:47629: left-1355px (relative to 1567px bar = near right) */}
-                <div style={{ display: "flex", alignItems: "center", gap: "19px" }}>
-                  {/* Share button — Group3267 (47×47px, rgba(235,223,245,0.25)) */}
+                <div className="flex shrink-0 items-center gap-[19px]">
                   <button
                     type="button"
-                    aria-label="Share"
-                    style={{
-                      width: "47px",
-                      height: "47px",
-                      borderRadius: "50%",
-                      border: "none",
-                      cursor: "pointer",
-                      backgroundColor: "rgba(235,223,245,0.25)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      flexShrink: 0,
-                      padding: 0,
-                    }}
+                    aria-label="Share image"
+                    className="flex size-[47px] shrink-0 cursor-pointer items-center justify-center rounded-[23.5px] border border-white/45 bg-white/10 text-white backdrop-blur-sm hover:bg-white/15"
                   >
-                    {/* Share / Send4 icon rotated 180° per Figma */}
                     <svg
-                      width="22"
-                      height="22"
+                      width="20"
+                      height="20"
                       viewBox="0 0 24 24"
                       fill="none"
-                      style={{ transform: "rotate(180deg)" }}
                     >
                       <path
-                        d="M22 2L11 13"
-                        stroke="#fefefe"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <path
-                        d="M22 2L15 22L11 13L2 9L22 2Z"
-                        stroke="#fefefe"
+                        d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"
+                        stroke="currentColor"
                         strokeWidth="1.5"
                         strokeLinecap="round"
                         strokeLinejoin="round"
                       />
                     </svg>
                   </button>
-
-                  {/* Wishlist button — Ellipse7 (47×47px) + heart icon */}
                   <button
                     type="button"
-                    onClick={() => setBookmarked(!bookmarked)}
-                    aria-label="Save to wishlist"
-                    style={{
-                      width: "47px",
-                      height: "47px",
-                      borderRadius: "50%",
-                      border: "none",
-                      cursor: "pointer",
-                      // Filled purple when bookmarked, semi-transparent otherwise
-                      backgroundColor: bookmarked
-                        ? "rgba(123,44,191,0.7)"
-                        : "rgba(235,223,245,0.25)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      flexShrink: 0,
-                      padding: 0,
-                      transition: "background-color 0.2s",
-                    }}
+                    onClick={() => setBookmarked((b) => !b)}
+                    aria-label="Add to favorites"
+                    aria-pressed={bookmarked}
+                    className="flex size-[47px] shrink-0 cursor-pointer items-center justify-center rounded-[23.5px] border border-white/45 bg-white/10 text-white backdrop-blur-sm hover:bg-white/15"
                   >
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                    >
                       <path
                         d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"
-                        stroke="#fefefe"
-                        fill={bookmarked ? "#fefefe" : "none"}
+                        stroke="currentColor"
+                        fill={bookmarked ? "white" : "none"}
                         strokeWidth="1.5"
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -488,77 +238,60 @@ const ImageGalleryModal = React.forwardRef(
             </div>
           </div>
 
-          {/* ── Right navigation arrow — centred vertically ──────────────── */}
+          {/* Right peek — flush to screen right */}
           <button
             type="button"
             onClick={goNext}
             aria-label="Next image"
-            style={{
-              flexShrink: 0,
-              width: "80px",
-              alignSelf: "center",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-            }}
+            className="absolute right-0 top-1/2 z-[5] hidden h-[min(42vw,560px)] max-h-[68vh] w-[clamp(44px,6vw,88px)] -translate-y-1/2 overflow-hidden rounded-l-[20px] shadow-[0px_4px_20px_rgba(0,0,0,0.12)] md:block"
           >
-            <div
-              style={{
-                width: "40px",
-                height: "40px",
-                borderRadius: "50%",
-                backgroundColor: "rgba(235,223,245,0.25)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              {/* Right chevron */}
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path
-                  d="M7 4L13 10L7 16"
-                  stroke="#fefefe"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </div>
+            <div className="absolute inset-0 bg-[#f7f7f7]" />
+            <img
+              src={nextSrc}
+              alt=""
+              className="absolute right-0 top-0 h-full min-w-[min(420px,140vw)] max-w-none rounded-l-[20px] object-cover object-left"
+            />
+            <div className="absolute inset-0 bg-black/70" aria-hidden />
           </button>
         </div>
 
-        {/* ─────────────────────────────────────────────────────────────────
-            ② IMAGE CHANGER BAR — Figma 3159:47642
-            pt-24px → separator → thumbnail strip → controls row
-        ───────────────────────────────────────────────────────────────── */}
-        <div style={{ flexShrink: 0, paddingTop: "24px" }}>
+        {/* Edge chevrons — plain white strokes (no filled circle) */}
+        <nav
+          className="pointer-events-none fixed inset-x-0 top-1/2 z-[210] flex -translate-y-1/2 justify-between px-3 sm:px-4"
+          aria-label="Main gallery navigation"
+        >
+          <button
+            type="button"
+            onClick={goPrev}
+            aria-label="Show previous featured image"
+            className="pointer-events-auto flex size-10 cursor-pointer items-center justify-center drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]"
+          >
+           <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
+  <path d="M26.6641 17.25C27.3544 17.25 27.9141 16.6903 27.9141 16C27.9141 15.3096 27.3544 14.75 26.6641 14.75L26.6641 16L26.6641 17.25ZM5.33073 14.75C4.64037 14.75 4.08073 15.3096 4.08073 16C4.08073 16.6903 4.64037 17.25 5.33073 17.25V16V14.75ZM9.78413 23.5545C10.2745 24.0404 11.0659 24.0369 11.5519 23.5466C12.0379 23.0562 12.0343 22.2648 11.544 21.7788L10.6641 22.6666L9.78413 23.5545ZM8.31344 20.3369L9.19337 19.4491L8.31344 20.3369ZM8.31343 11.6631L9.19337 12.5509L8.31343 11.6631ZM11.544 10.2211C12.0343 9.73516 12.0379 8.94371 11.5519 8.45338C11.0659 7.96305 10.2745 7.95952 9.78413 8.44549L10.6641 9.33331L11.544 10.2211ZM5.35725 16.4178L4.11728 16.5758V16.5758L5.35725 16.4178ZM5.35725 15.5822L4.11728 15.4242V15.4242L5.35725 15.5822ZM26.6641 16L26.6641 14.75L5.33073 14.75V16V17.25L26.6641 17.25L26.6641 16ZM10.6641 22.6666L11.544 21.7788L9.19337 19.4491L8.31344 20.3369L7.43351 21.2247L9.78413 23.5545L10.6641 22.6666ZM8.31343 11.6631L9.19337 12.5509L11.544 10.2211L10.6641 9.33331L9.78413 8.44549L7.4335 10.7752L8.31343 11.6631ZM8.31344 20.3369L9.19337 19.4491C8.2352 18.4994 7.59294 17.8602 7.16111 17.3225C6.74512 16.8045 6.62827 16.5033 6.59722 16.2597L5.35725 16.4178L4.11728 16.5758C4.23055 17.4645 4.6545 18.1939 5.21188 18.8879C5.75342 19.5622 6.51709 20.3164 7.43351 21.2247L8.31344 20.3369ZM8.31343 11.6631L7.4335 10.7752C6.51709 11.6835 5.75342 12.4377 5.21188 13.1121C4.6545 13.8061 4.23055 14.5355 4.11728 15.4242L5.35725 15.5822L6.59722 15.7403C6.62827 15.4967 6.74512 15.1954 7.16111 14.6775C7.59294 14.1398 8.2352 13.5005 9.19337 12.5509L8.31343 11.6631ZM5.35725 16.4178L6.59722 16.2597C6.57523 16.0872 6.57523 15.9127 6.59722 15.7402L5.35725 15.5822L4.11728 15.4242C4.06854 15.8065 4.06854 16.1934 4.11728 16.5758L5.35725 16.4178Z" fill="#EBDFF5"/>
+</svg>
+          </button>
+          <button
+            type="button"
+            onClick={goNext}
+            aria-label="Show next featured image"
+            className="pointer-events-auto flex size-10 cursor-pointer items-center justify-center drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]"
+          >
+           <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
+  <path d="M5.33594 14.75C4.64558 14.75 4.08594 15.3097 4.08594 16C4.08594 16.6904 4.64558 17.25 5.33594 17.25L5.33594 16L5.33594 14.75ZM26.6693 17.25C27.3596 17.25 27.9193 16.6904 27.9193 16C27.9193 15.3097 27.3596 14.75 26.6693 14.75V16V17.25ZM22.2159 8.44554C21.7255 7.95956 20.9341 7.96309 20.4481 8.45342C19.9621 8.94375 19.9657 9.7352 20.456 10.2212L21.3359 9.33335L22.2159 8.44554ZM23.6866 11.6631L22.8066 12.5509L23.6866 11.6631ZM23.6866 20.3369L22.8066 19.4491L23.6866 20.3369ZM20.456 21.7789C19.9657 22.2648 19.9621 23.0563 20.4481 23.5466C20.9341 24.0369 21.7255 24.0405 22.2159 23.5545L21.3359 22.6667L20.456 21.7789ZM26.6428 15.5822L27.8827 15.4242V15.4242L26.6428 15.5822ZM26.6428 16.4178L27.8827 16.5758V16.5758L26.6428 16.4178ZM5.33594 16L5.33594 17.25L26.6693 17.25V16V14.75L5.33594 14.75L5.33594 16ZM21.3359 9.33335L20.456 10.2212L22.8066 12.5509L23.6866 11.6631L24.5665 10.7753L22.2159 8.44554L21.3359 9.33335ZM23.6866 20.3369L22.8066 19.4491L20.456 21.7789L21.3359 22.6667L22.2159 23.5545L24.5665 21.2248L23.6866 20.3369ZM23.6866 11.6631L22.8066 12.5509C23.7648 13.5006 24.4071 14.1398 24.8389 14.6775C25.2549 15.1955 25.3717 15.4967 25.4028 15.7403L26.6428 15.5822L27.8827 15.4242C27.7695 14.5355 27.3455 13.8061 26.7881 13.1121C26.2466 12.4378 25.4829 11.6836 24.5665 10.7753L23.6866 11.6631ZM23.6866 20.3369L24.5665 21.2248C25.4829 20.3165 26.2466 19.5623 26.7881 18.8879C27.3455 18.1939 27.7694 17.4645 27.8827 16.5758L26.6428 16.4178L25.4028 16.2597C25.3717 16.5033 25.2549 16.8046 24.8389 17.3225C24.4071 17.8602 23.7648 18.4995 22.8066 19.4491L23.6866 20.3369ZM26.6428 15.5822L25.4028 15.7403C25.4248 15.9128 25.4248 16.0873 25.4028 16.2598L26.6428 16.4178L27.8827 16.5758C27.9315 16.1935 27.9315 15.8066 27.8827 15.4242L26.6428 15.5822Z" fill="#EBDFF5"/>
+</svg>
+          </button>
+        </nav>
 
-          {/* Separator line — Figma: Line7 (full width, very thin) */}
-          <div
-            style={{
-              width: "100%",
-              height: "1px",
-              backgroundColor: "rgba(255,255,255,0.15)",
-            }}
-          />
+        {/* Thumbnails + pills */}
+        <div className="flex shrink-0 flex-col items-center gap-6 pt-6">
+          <div className="mx-auto h-px w-full max-w-[1723px] bg-white/15" />
 
-          {/* ── Thumbnail strip ───────────────────────────────────────── */}
-          {/* Figma 3159:47646: active=172px wide, inactive=120px, h-175px, no gaps */}
           <div
             ref={thumbStripRef}
-            style={{
-              display: "flex",
-              overflowX: "auto",
-              // Hide scrollbar cross-browser
-              scrollbarWidth: "none",
-              msOverflowStyle: "none",
-            }}
+            className="scrollbar-none flex w-full overflow-x-auto"
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
-            {/* Hide WebKit scrollbar via inline pseudo — handled via global CSS if needed */}
-            <div style={{ display: "flex", alignItems: "stretch" }}>
+            <div className="flex items-stretch">
               {images.map((img, i) => {
                 const isActive = i === activeIndex;
                 const src = img?.src || img;
@@ -569,51 +302,20 @@ const ImageGalleryModal = React.forwardRef(
                     type="button"
                     onClick={() => setActiveIndex(i)}
                     aria-label={`View image ${i + 1}`}
+                    className="relative block shrink-0 cursor-pointer overflow-hidden border-0 p-0 transition-[width] duration-200"
                     style={{
-                      // Active: 172px wide, no overlay; inactive: 120px, dark overlay
                       width: isActive ? "172px" : "120px",
                       height: "175px",
-                      position: "relative",
-                      overflow: "hidden",
-                      flexShrink: 0,
-                      border: "none",
-                      padding: 0,
-                      cursor: "pointer",
-                      transition: "width 0.2s ease",
-                      display: "block",
                     }}
                   >
-                    {/* Base colour */}
-                    <div
-                      style={{
-                        position: "absolute",
-                        inset: 0,
-                        backgroundColor: "#d9d9d9",
-                      }}
-                    />
-                    {/* Thumbnail image */}
+                    <div className="absolute inset-0 bg-[#d9d9d9]" />
                     <img
                       src={src}
-                      alt={`Image ${i + 1}`}
-                      style={{
-                        position: "absolute",
-                        inset: 0,
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                        display: "block",
-                      }}
+                      alt=""
+                      className="absolute inset-0 block h-full w-full object-cover"
                     />
-                    {/* Dark overlay on inactive thumbnails — Figma: rgba(0,0,0,0.8) */}
                     {!isActive && (
-                      <div
-                        style={{
-                          position: "absolute",
-                          inset: 0,
-                          backgroundColor: "rgba(0,0,0,0.8)",
-                          transition: "opacity 0.2s ease",
-                        }}
-                      />
+                      <div className="absolute inset-0 bg-black/80 transition-opacity duration-200" />
                     )}
                   </button>
                 );
@@ -621,37 +323,13 @@ const ImageGalleryModal = React.forwardRef(
             </div>
           </div>
 
-          {/* ── Controls row — Figma 3159:47662 (Built-in pagination) ──── */}
-          {/* max-w-1381px centred, prev/next left + counter right */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              padding: "24px 0 24px",
-              maxWidth: "1381px",
-              width: "calc(100% - 160px)",
-              margin: "0 auto",
-            }}
-          >
-            {/* Carets — Figma 3159:47663, gap-4px */}
-            <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-              {/* PREV — Figma 3159:47664: bg rgba(235,223,245,0.5), rounded-30px, p-8px */}
-              {/* Down chevron rotated 90° = points left */}
+          <div className="flex w-full max-w-[1381px] items-center justify-between px-4 pb-6">
+            <div className="inline-flex items-center gap-1">
               <button
                 type="button"
                 onClick={goPrev}
-                aria-label="Previous"
-                style={{
-                  backgroundColor: "rgba(235,223,245,0.5)",
-                  borderRadius: "30px",
-                  padding: "8px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  border: "none",
-                  cursor: "pointer",
-                }}
+                aria-label="Previous image"
+                className="inline-flex cursor-pointer items-center gap-0.5 rounded-[30px] bg-[#ebdff5]/50 p-2"
               >
                 <svg
                   width="24"
@@ -669,23 +347,11 @@ const ImageGalleryModal = React.forwardRef(
                   />
                 </svg>
               </button>
-
-              {/* NEXT — Figma 3159:47666: bg #ebdff5, rounded-30px, p-8px */}
-              {/* Down chevron rotated -90° = points right */}
               <button
                 type="button"
                 onClick={goNext}
-                aria-label="Next"
-                style={{
-                  backgroundColor: "#ebdff5",
-                  borderRadius: "30px",
-                  padding: "8px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  border: "none",
-                  cursor: "pointer",
-                }}
+                aria-label="Next image"
+                className="inline-flex cursor-pointer items-center gap-0.5 rounded-[30px] bg-secondary-light-hover p-2"
               >
                 <svg
                   width="24"
@@ -704,20 +370,8 @@ const ImageGalleryModal = React.forwardRef(
                 </svg>
               </button>
             </div>
-
-            {/* Image counter — Figma 3159:47668: Raleway Medium 16px #ebdff5 */}
-            <p
-              style={{
-                fontFamily: "Raleway, sans-serif",
-                fontWeight: 500,
-                fontSize: "16px",
-                lineHeight: "26px",
-                color: "#ebdff5",
-                margin: 0,
-                whiteSpace: "nowrap",
-              }}
-            >
-              {activeIndex + 1} of {images.length} images
+            <p className="m-0 whitespace-nowrap font-raleway text-md-Medium text-secondary-light-hover">
+              {activeIndex + 1} of {len} images
             </p>
           </div>
         </div>
