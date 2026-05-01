@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
+import ShareModal from "./ShareModal";
 
 // Full-screen lightbox: smaller center frame; prev/next peek strips pinned to viewport edges;
 // Share then Like; chrome on hover (touch: always visible on small screens).
@@ -11,12 +12,14 @@ const ImageGalleryModal = React.forwardRef(
       onClose,
       title = "",
       location = "",
+      description = "",
       descriptionLabel = "Description",
     },
     ref
   ) => {
     const [activeIndex, setActiveIndex] = useState(currentIndex);
     const [bookmarked, setBookmarked] = useState(false);
+    const [shareOpen, setShareOpen] = useState(false);
     const thumbStripRef = useRef(null);
     const activeThumbRef = useRef(null);
 
@@ -99,7 +102,7 @@ const ImageGalleryModal = React.forwardRef(
 
           {/* Center — reduced width */}
           <div
-            className="group/main relative z-[10] mx-4 flex min-h-[200px] min-w-0 max-h-[68vh] w-[min(56vw,880px)] flex-col overflow-hidden rounded-[20px] shadow-[0px_4px_20px_rgba(0,0,0,0.15)] sm:mx-6 md:mx-8"
+            className="group/main relative z-[10] mx-4 flex min-h-[200px] min-w-0 max-h-[82vh] w-[min(67vw,1056px)] flex-col overflow-hidden rounded-[20px] shadow-[0px_4px_20px_rgba(0,0,0,0.15)] sm:mx-6 md:mx-8"
             style={{ aspectRatio: "1567 / 988" }}
           >
             <div className="absolute inset-0 rounded-[20px] bg-[#f7f7f7]" />
@@ -193,6 +196,7 @@ const ImageGalleryModal = React.forwardRef(
                   <button
                     type="button"
                     aria-label="Share image"
+                    onClick={() => setShareOpen(true)}
                     className="flex size-[47px] shrink-0 cursor-pointer items-center justify-center rounded-[23.5px] border border-white/45 bg-white/10 text-white backdrop-blur-sm hover:bg-white/15"
                   >
                     <svg
@@ -375,6 +379,19 @@ const ImageGalleryModal = React.forwardRef(
             </p>
           </div>
         </div>
+
+        {shareOpen && (
+          <ShareModal
+            onClose={() => setShareOpen(false)}
+            tour={{
+              title,
+              description: description || descriptionLabel,
+              image: activeSrc,
+              url: window.location.href,
+              location,
+            }}
+          />
+        )}
       </div>
     );
   }
