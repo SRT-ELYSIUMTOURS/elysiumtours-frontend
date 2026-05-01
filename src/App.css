@@ -228,11 +228,8 @@
   background-size: 200px 200px;
 }
 
-/* Hide scrollbar for horizontal scroll sections on mobile */
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
+/* Tour detail: custom Leaflet DivIcon (no default white tile behind pin) */
+.leaflet-div-icon.leaflet-meeting-pin-icon {
+  background: transparent !important;
+  border: none !important;
 }

@@ -65,16 +65,17 @@ const GHANA_TOURS = [
     id: 2,
     image: "https://picsum.photos/seed/at-ghana-2/351/373",
     location: "Accra/Greater Accra",
-    duration: { class: "Day Tour", span: "1 Day" },
-    maxGroupSize: 15,
-    pickupIncluded: false,
-    tags: ["Heritage", "City"],
+    duration: { class: "Multi-Day", span: "4 Days/3 Nights" },
+    maxGroupSize: 20,
+    pickupIncluded: true,
+    tags: ["Business", "Executive"],
     rating: 4.8,
-    title: "Accra City & Culture Full-Day Tour",
+    title: "Accra Corporate Executive Tour",
     availabilityBadge: "Opened Daily",
-    price: "Ghs.250.00",
+    price: "USD 1,200",
     country: "ghana",
-    slug: "accra-city-culture-tour",
+    slug: "accra-corporate-executive-tour",
+    statusBadge: { label: "Corporate", color: "#7b2cbf" },
   },
   {
     id: 3,
@@ -250,8 +251,7 @@ const AllToursSection = React.forwardRef(({ country = "Ghana", tourCount = 10, c
   return (
     <section
       ref={ref}
-      className={classNames("w-full py-[48px] md:py-[60px] lg:py-[80px]", className)}
-      style={{ backgroundColor: "#fefefe" }}
+      className={classNames("w-full py-[80px] bg-secondary-light-default", className)}
       {...props}
     >
       <div className="px-6 md:px-[30px] lg:px-[148px]">

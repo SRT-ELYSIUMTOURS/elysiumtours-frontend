@@ -117,7 +117,7 @@ const CountryBlogFeatureSection = React.forwardRef(
                     gridRow: 1,
                     gridColumn: 1,
                     marginLeft: "154.71px",
-                    marginTop: "309.78px",
+                    marginTop: "312.78px",
                   }}
                 >
                   <div className="skew-x-[5.41deg] flex-none">

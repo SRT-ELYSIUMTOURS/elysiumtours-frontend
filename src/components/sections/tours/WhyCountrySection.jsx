@@ -22,7 +22,7 @@ const COUNTRY_DATA = {
       { label: "Population", value: "34 million (2024)" },
       { label: "Ethnic Groups", value: "100+ distinct groups" },
     ],
-    image: "https://picsum.photos/seed/ghana-castle-why/1419/960",
+    image: "/tourCountryAssets/Image-1.webp",
     imageTitle: "Elmina Castle, Central Region",
     imageSubtitle: "Built in 1932. A UNESCO World Heritage Site.",
   },
@@ -38,7 +38,7 @@ const COUNTRY_DATA = {
       { label: "Population", value: "220 million (2024)" },
       { label: "Ethnic Groups", value: "250+ distinct groups" },
     ],
-    image: "https://picsum.photos/seed/nigeria-why/1419/960",
+    image: "/tourCountryAssets/Image-1.webp",
     imageTitle: "Olumo Rock, Abeokuta",
     imageSubtitle: "A historic fortress used during intertribal wars.",
   },
@@ -56,8 +56,12 @@ const WhyCountrySection = React.forwardRef(
     return (
       <section
         ref={ref}
-        className={classNames("relative w-full", className)}
-        style={{ backgroundColor: "#fefefe", paddingTop: "80px", paddingBottom: "80px" }}
+        className={classNames("relative w-full noise", className)}
+        style={{
+          backgroundColor: "#fefefe",
+          paddingTop: "80px",
+          paddingBottom: "80px",
+        }}
         {...props}
       >
         <div
@@ -66,11 +70,16 @@ const WhyCountrySection = React.forwardRef(
         >
           {/* ── Header row ──────────────────────────────────────────────────── */}
           {/* Figma 1942:31920 — justify-between, full width */}
-          <div className="flex flex-col lg:flex-row items-center lg:items-start justify-between w-full gap-4">
-
+          <div className="flex items-start justify-between w-full">
             {/* Left — Figma 1942:31921: 46px line + "WHY GHANA" label */}
             <div className="flex items-center gap-[8px] shrink-0">
-              <div style={{ width: "46px", height: "1px", backgroundColor: "#2b0f43" }} />
+              <div
+                style={{
+                  width: "46px",
+                  height: "1px",
+                  backgroundColor: "#2b0f43",
+                }}
+              />
               <span
                 style={{
                   fontFamily: "Raleway, sans-serif",
@@ -86,8 +95,10 @@ const WhyCountrySection = React.forwardRef(
             </div>
 
             {/* Right — Figma 1942:31925: w=677px, flex-col gap-16px, items-end */}
-            <div className="flex flex-col items-center lg:items-end w-full lg:max-w-[677px]" style={{ gap: "16px" }}>
-
+            <div
+              className="flex flex-col items-end"
+              style={{ width: "677px", gap: "16px" }}
+            >
               {/* Title — Figma 1942:31927: Bold 25px #2d2d2d, text-right */}
               <h2
                 className="text-center lg:text-right"
@@ -104,10 +115,15 @@ const WhyCountrySection = React.forwardRef(
               </h2>
 
               {/* Description + stats — Figma 1942:31928: flex-col gap-29px */}
-              <div className="flex flex-col items-center lg:items-end" style={{ gap: "29px", width: "100%" }}>
-
+              <div
+                className="flex flex-col items-end"
+                style={{ gap: "29px", width: "100%" }}
+              >
                 {/* Body text — Figma 1942:31929: Regular 16px #2d2d2d, text-right, w=565px */}
-                <div className="flex flex-col w-full lg:max-w-[565px]" style={{ gap: "0px" }}>
+                <div
+                  className="flex flex-col"
+                  style={{ width: "565px", gap: "0px" }}
+                >
                   {data.paragraphs.map((p, i) => (
                     <p
                       key={i}
@@ -118,7 +134,9 @@ const WhyCountrySection = React.forwardRef(
                         fontSize: "16px",
                         lineHeight: "24px",
                         color: "#2d2d2d",
-                        margin: i < data.paragraphs.length - 1 ? "0 0 16px 0" : 0,
+                        textAlign: "right",
+                        margin:
+                          i < data.paragraphs.length - 1 ? "0 0 16px 0" : 0,
                       }}
                     >
                       {p}
@@ -139,7 +157,10 @@ const WhyCountrySection = React.forwardRef(
                         padding: "12px",
                       }}
                     >
-                      <div className="flex flex-col items-start" style={{ gap: "3px" }}>
+                      <div
+                        className="flex flex-col items-start"
+                        style={{ gap: "3px" }}
+                      >
                         <span
                           style={{
                             fontFamily: "Raleway, sans-serif",
@@ -168,7 +189,6 @@ const WhyCountrySection = React.forwardRef(
                     </div>
                   ))}
                 </div>
-
               </div>
             </div>
           </div>
@@ -224,7 +244,12 @@ const WhyCountrySection = React.forwardRef(
                     />
                     <feColorMatrix type="saturate" values="0" />
                   </filter>
-                  <rect width="100%" height="100%" filter="url(#grain-filter)" opacity="0.09" />
+                  <rect
+                    width="100%"
+                    height="100%"
+                    filter="url(#grain-filter)"
+                    opacity="0.09"
+                  />
                 </svg>
               </div>
 
@@ -236,33 +261,16 @@ const WhyCountrySection = React.forwardRef(
                 }}
               >
                 {/* Caption title — Bold 25px #2d2d2d */}
-                <p
-                  className="text-[18px] leading-[26px] lg:text-[25px] lg:leading-[34px]"
-                  style={{
-                    fontFamily: "Raleway, sans-serif",
-                    fontWeight: 700,
-                    color: "#2d2d2d",
-                    margin: 0,
-                  }}
-                >
+                <p className=" text-High-md-bold text-tertiary-normal-default">
                   {data.imageTitle}
                 </p>
                 {/* Caption subtitle — Regular 16px #2d2d2d */}
-                <p
-                  className="text-[14px] leading-[20px] lg:text-[16px] lg:leading-[24px]"
-                  style={{
-                    fontFamily: "Raleway, sans-serif",
-                    fontWeight: 400,
-                    color: "#2d2d2d",
-                    margin: 0,
-                  }}
-                >
+                <p className=" text-md-regular text-tertiary-normal-default">
                   {data.imageSubtitle}
                 </p>
               </div>
             </div>
           </div>
-
         </div>
       </section>
     );
