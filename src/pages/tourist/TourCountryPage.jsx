@@ -7,8 +7,8 @@ import SignatureExperiencesSection from "../../components/sections/tours/Signatu
 import AllToursSection from "../../components/sections/tours/AllToursSection";
 import LocalGuidesSection from "../../components/sections/tours/LocalGuidesSection";
 import WhyCountrySection from "../../components/sections/tours/WhyCountrySection";
-import CountryStorySection from "../../components/sections/tours/CountryStorySection";
-import BlogCtaSection from "../../components/sections/blog/BlogCtaSection";
+import CountryBlogFeatureSection from "../../components/sections/tours/CountryBlogFeatureSection";
+import CtaSection from "../../components/sections/tours/CtaSection";
 
 // Figma: 1914:40895 — Tours country page (Ghana example)
 // Stack: Breadcrumb → CountryHero+Stats → FilterBar → SignatureExperiences → LocalGuides → CountryStory → CTA
@@ -33,8 +33,8 @@ const TourCountryPage = () => {
       <AllToursSection country={displayName} />
       <LocalGuidesSection country={displayName} />
       <WhyCountrySection country={country} />
-      <CountryStorySection country={country} />
-      <BlogCtaSection />
+      <CountryBlogFeatureSection country={country} />
+      <CtaSection />
     </main>
   );
 };

@@ -95,10 +95,10 @@ const TourHero = React.forwardRef(({ className, ...props }, ref) => {
         </p>
       </div>
 
-      {/* Up Next Card */}
+      {/* Up Next Card — hidden on mobile to avoid crowding the hero */}
       <div className="
+        hidden md:block
         absolute bottom-4 right-4
-        w-[220px] h-[120px]
         md:w-[280px] md:h-[150px]
         lg:w-[337px] lg:h-[178px]
         bg-black/50 text-white p-2 rounded z-30

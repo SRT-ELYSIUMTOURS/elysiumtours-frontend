@@ -319,8 +319,8 @@ const PopularTourCard = React.forwardRef(
             {/* Title + availability sub-group */}
             <div className="flex flex-col gap-[4px] items-start">
               {/* Title row — h-[28px], Raleway SemiBold 20px/28px #2d2d2d */}
-              <div className="flex h-[28px] items-center justify-center w-full max-w-[330px]">
-                <h3 className="flex-1 font-raleway font-semibold text-[20px] leading-[28px] text-[#2d2d2d] min-h-px min-w-px">
+              <div className="flex h-[28px] mb-2  items-center justify-center w-[330px]">
+                <h3 className="flex-1 font-raleway line-clamp-1 font-semibold text-[20px] leading-[28px] text-[#2d2d2d] min-h-px min-w-px">
                   {title}
                 </h3>
               </div>

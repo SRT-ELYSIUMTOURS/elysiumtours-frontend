@@ -7,6 +7,7 @@ import FeaturedDestinationsSection from "../../components/sections/home/Featured
 import PartnerHighlightsSection from "../../components/sections/home/PartnerHighlightsSection";
 import GallerySection from "../../components/sections/home/GallerySection";
 import BlogCtaSection from "../../components/sections/home/BlogCtaSection";
+import BlogFeatureSection from "../../components/sections/home/BlogFeatureSection";
 import TestimonialsSection from "../../components/sections/home/TestimonialsSection";
 import CtaSection from "../../components/sections/home/CtaSection";
 
@@ -17,13 +18,13 @@ const HomePage = React.forwardRef(({ className, ...props }, ref) => {
       className={classNames("font-raleway", className)}
       {...props}
     >
-      <HeroSection />
+      <HeroSection/>
       <DiscoverSection />
       <FeaturedToursSection />
       <FeaturedDestinationsSection />
       <PartnerHighlightsSection />
       <GallerySection />
-      <BlogCtaSection />
+      <BlogFeatureSection />
       <TestimonialsSection />
       <CtaSection />
     </main>

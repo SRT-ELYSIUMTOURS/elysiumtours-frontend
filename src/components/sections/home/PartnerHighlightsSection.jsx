@@ -45,7 +45,7 @@ const PartnerHighlightsSection = React.forwardRef(
               <h2 className="font-raleway font-bold text-[22px] leading-[30px] lg:text-High-md-bold lg:leading-[34px] text-tertiary-normal-default text-center lg:text-right">
                 Trusted Partners, Unforgettable Journeys
               </h2>
-              <p className="font-raleway font-medium text-[14px] lg:pl-[111px] leading-[22px] lg:text-md-Medium lg:leading-[26px] text-primary-dark-active text-center lg:text-right">
+              <p className=" lg:pl-[111px] leading-[22px] lg:text-md-regular lg:leading-[26px] text-primary-dark-active text-right">
                 Team up with our trusted tour partners for smooth, stress-free
                 adventures. With expert guides, strong local connections, and
                 authentic experiences, every trip becomes more seamless,

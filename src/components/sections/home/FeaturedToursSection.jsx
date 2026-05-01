@@ -17,6 +17,8 @@ const TOUR_DATA = [
     title: "Elmina Heritage & Coastal Journey",
     availabilityBadge: "Opened Daily",
     price: "Ghs.400.00",
+    country: "ghana",
+    tourSlug: "elmina-heritage-coastal-journey",
   },
   {
     id: 2,
@@ -30,6 +32,8 @@ const TOUR_DATA = [
     title: "Accra Bustling City & Market Tour",
     availabilityBadge: "Opened Daily",
     price: "Ghs.350.00",
+    country: "ghana",
+    tourSlug: "accra-bustling-city-market-tour",
   },
   {
     id: 3,
@@ -43,6 +47,8 @@ const TOUR_DATA = [
     title: "Kumasi Heritage & Market Discovery",
     availabilityBadge: "Opened Daily",
     price: "Ghs.500.00",
+    country: "ghana",
+    tourSlug: "kumasi-heritage-market-discovery",
   },
   {
     id: 4,
@@ -55,6 +61,8 @@ const TOUR_DATA = [
     title: "Wli Waterfalls & Nature Exploration",
     availabilityBadge: "Opened Daily",
     price: "Ghs.450.00",
+    country: "ghana",
+    tourSlug: "wli-waterfalls-nature-exploration",
   },
 ];
 
@@ -129,6 +137,8 @@ const FeaturedToursSection = React.forwardRef(
                   duration={tour.duration}
                   pickupIncluded={tour.pickupIncluded}
                   maxGroupSize={tour.maxGroupSize}
+                  country={tour.country}
+                  tourSlug={tour.tourSlug}
                 />
               </div>
             ))}
@@ -150,6 +160,8 @@ const FeaturedToursSection = React.forwardRef(
                 duration={tour.duration}
                 pickupIncluded={tour.pickupIncluded}
                 maxGroupSize={tour.maxGroupSize}
+                country={tour.country}
+                tourSlug={tour.tourSlug}
               />
             ))}
           </div>

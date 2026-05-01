@@ -73,11 +73,16 @@ const RegionDropdownPanel = ({
   onClear,
   onApply,
   resultsCount,
+  position,
 }) => (
   <div
-    className="absolute top-full left-0 mt-[6px] z-50 bg-white rounded-[20px] border border-solid border-[#e9eaeb] flex flex-col overflow-hidden"
+    data-filter-dropdown="region"
+    className="z-50 bg-white rounded-[20px] border border-solid border-[#e9eaeb] flex flex-col overflow-hidden"
     style={{
-      width: "min(460px, calc(100vw - 48px))",
+      position: "fixed",
+      top: position?.top ?? 0,
+      left: position?.left ?? 0,
+      width: "min(460px, calc(100vw - 32px))",
       paddingTop: "22px",
       paddingBottom: "22px",
       gap: "22px",
@@ -350,19 +355,48 @@ const TourCountryFilterBar = React.forwardRef(
     const [type,            setType]            = useState("all");
     const [category,        setCategory]        = useState(null);
     const [regionOpen,      setRegionOpen]      = useState(false);
+    const [panelPosition,   setPanelPosition]   = useState(null);
 
-    const barRef = useRef(null);
+    const wrapperRef    = useRef(null);
+    const barRef        = useRef(null);
+    const regionAnchorRef = useRef(null);
 
-    // Close dropdown on outside click
+    // Close dropdown on outside click (excluding clicks inside the dropdown panel)
     useEffect(() => {
       const handler = (e) => {
-        if (barRef.current && !barRef.current.contains(e.target)) {
-          setRegionOpen(false);
-        }
+        if (wrapperRef.current?.contains(e.target)) return;
+        if (e.target.closest("[data-filter-dropdown]")) return;
+        setRegionOpen(false);
       };
       document.addEventListener("mousedown", handler);
       return () => document.removeEventListener("mousedown", handler);
     }, []);
+
+    // Compute fixed-positioning coordinates for the open dropdown panel
+    useEffect(() => {
+      if (!regionOpen) {
+        setPanelPosition(null);
+        return;
+      }
+      const computePosition = () => {
+        if (!regionAnchorRef.current) return;
+        const rect = regionAnchorRef.current.getBoundingClientRect();
+        const panelWidth = Math.min(460, window.innerWidth - 32);
+        let left = rect.left;
+        if (left + panelWidth > window.innerWidth - 16) {
+          left = Math.max(16, window.innerWidth - panelWidth - 16);
+        }
+        setPanelPosition({ top: rect.bottom + 6, left });
+      };
+      computePosition();
+      const handler = () => computePosition();
+      window.addEventListener("scroll", handler, true);
+      window.addEventListener("resize", handler);
+      return () => {
+        window.removeEventListener("scroll", handler, true);
+        window.removeEventListener("resize", handler);
+      };
+    }, [regionOpen]);
 
     const toggleRegion = (region) => {
       setSelectedRegions((prev) =>
@@ -385,7 +419,11 @@ const TourCountryFilterBar = React.forwardRef(
 
     return (
       <div
-        ref={ref}
+        ref={(el) => {
+          wrapperRef.current = el;
+          if (typeof ref === "function") ref(el);
+          else if (ref) ref.current = el;
+        }}
         className={classNames("w-full", className)}
         style={{
           minHeight: "113px",
@@ -394,29 +432,17 @@ const TourCountryFilterBar = React.forwardRef(
         {...props}
       >
         <div className="h-full flex items-center px-6 md:px-[30px] lg:px-[156px] py-4 lg:py-0">
-          <div ref={barRef} className="flex items-center gap-[12px] flex-1 overflow-x-auto scrollbar-hide">
+          <div ref={barRef} className="flex items-center gap-[12px] flex-1 overflow-x-auto scrollbar-hide py-2 -my-2 px-1 -mx-1">
 
             {/* ── REGION — Figma 1942:34258 ───────────────────────────────── */}
             <div className="flex items-center gap-[12px] shrink-0">
               <FilterLabel>REGION</FilterLabel>
-              <div className="relative" style={{ minWidth: "137px", height: "44px" }}>
+              <div ref={regionAnchorRef} style={{ minWidth: "137px", height: "44px" }}>
                 <RegionTrigger
                   label={regionLabel}
                   isOpen={regionOpen}
                   onClick={() => setRegionOpen((prev) => !prev)}
                 />
-                {regionOpen && (
-                  <RegionDropdownPanel
-                    country={config.displayName}
-                    regions={config.regions}
-                    selected={selectedRegions}
-                    onToggle={toggleRegion}
-                    onClose={() => setRegionOpen(false)}
-                    onClear={clearRegions}
-                    onApply={applyFilters}
-                    resultsCount={resultsCount}
-                  />
-                )}
               </div>
             </div>
 
@@ -471,6 +497,22 @@ const TourCountryFilterBar = React.forwardRef(
 
           </div>
         </div>
+
+        {/* Region dropdown panel — rendered with position: fixed so it
+            escapes the bar's overflow-x-auto scroll container */}
+        {regionOpen && panelPosition && (
+          <RegionDropdownPanel
+            country={config.displayName}
+            regions={config.regions}
+            selected={selectedRegions}
+            onToggle={toggleRegion}
+            onClose={() => setRegionOpen(false)}
+            onClear={clearRegions}
+            onApply={applyFilters}
+            resultsCount={resultsCount}
+            position={panelPosition}
+          />
+        )}
       </div>
     );
   }

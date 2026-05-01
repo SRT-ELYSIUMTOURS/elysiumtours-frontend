@@ -56,16 +56,20 @@ const SORT_OPTIONS = [
   { value: "newest",      label: "Newest"        },
 ];
 
-const SortDropdownPanel = ({ options, value, onSelect, onClose }) => (
+const SortDropdownPanel = ({ options, value, onSelect, onClose, position }) => (
   <div
-    className="absolute top-full left-0 mt-[6px] z-50 flex flex-col rounded-[20px] border border-solid"
+    data-filter-dropdown="sort"
+    className="z-50 flex flex-col rounded-[20px] border border-solid"
     style={{
+      position: "fixed",
+      top: position?.top ?? 0,
+      left: position?.left ?? 0,
       backgroundColor: "#ffffff",
       borderColor: "#e9eaeb",
       padding: "20px 18px",
       gap: "13px",
       boxShadow: "0px 0px 4px 0px rgba(255,56,60,0.2)",
-      width: "274px",
+      width: "min(274px, calc(100vw - 32px))",
     }}
   >
     {/* "None selected" + divider */}
@@ -94,10 +98,9 @@ const SortDropdownPanel = ({ options, value, onSelect, onClose }) => (
           key={opt.value}
           type="button"
           onClick={() => { onSelect(opt.value); onClose(); }}
-          className="flex items-center transition-all duration-200 rounded-[8px]"
+          className="flex items-center transition-all duration-200 rounded-[8px] w-full lg:w-[238px]"
           style={{
             height: "42px",
-            width: "238px",
             padding: "10px 12px",
             gap: isSelected ? "8px" : undefined,
             backgroundColor: isSelected ? "#7b2cbf" : "transparent",
@@ -132,7 +135,7 @@ const SortDropdownPanel = ({ options, value, onSelect, onClose }) => (
 // Value: "Gh.X.00" Raleway SemiBold 16px/22px #565656 (shows min value)
 // Slider track: bg #e9eaeb, filled #7b2cbf, h-[7px], handles: #d6beeb fill + #7b2cbf border
 // Button row: w-[768px], Clear (Raleway Bold 16px #2d2d2d underline), Save Input (bg #7b2cbf)
-const PriceRangePanel = ({ onClose, minVal, maxVal, setMinVal, setMaxVal, onSave, onClear }) => {
+const PriceRangePanel = ({ onClose, minVal, maxVal, setMinVal, setMaxVal, onSave, onClear, position }) => {
   const MAX = 5000;
   const trackRef = useRef(null);
   // Which input is on top — swapped dynamically based on cursor proximity to each handle
@@ -156,13 +159,15 @@ const PriceRangePanel = ({ onClose, minVal, maxVal, setMinVal, setMaxVal, onSave
 
   return (
     <div
-      className="absolute top-full left-0 mt-[8px] z-50 bg-white rounded-[20px] border border-solid border-[#e9eaeb] flex flex-col"
+      data-filter-dropdown="price"
+      className="z-50 bg-white rounded-[20px] border border-solid border-[#e9eaeb] flex flex-col px-5 lg:px-[40px]"
       style={{
-        width: "850px",
+        position: "fixed",
+        top: position?.top ?? 0,
+        left: position?.left ?? 0,
+        width: "min(850px, calc(100vw - 32px))",
         paddingTop: "24px",
         paddingBottom: "42px",
-        paddingLeft: "40px",
-        paddingRight: "40px",
         gap: "29px",
         boxShadow: "0px 1px 2px 0px rgba(0,0,0,0.3), 0px 1px 3px 1px rgba(0,0,0,0.15)",
       }}
@@ -170,8 +175,8 @@ const PriceRangePanel = ({ onClose, minVal, maxVal, setMinVal, setMaxVal, onSave
       {/* Top section */}
       <div className="flex flex-col" style={{ gap: "16px" }}>
 
-        {/* Close button — right-aligned within 770px content row */}
-        <div className="flex justify-end" style={{ width: "770px" }}>
+        {/* Close button — right-aligned within content row */}
+        <div className="flex justify-end w-full lg:w-[770px]">
           <button type="button" onClick={onClose} className="cursor-pointer shrink-0">
             <img src={closeCircle} alt="Close" width={24} height={24} />
           </button>
@@ -189,8 +194,8 @@ const PriceRangePanel = ({ onClose, minVal, maxVal, setMinVal, setMaxVal, onSave
             Price Range
           </span>
 
-          {/* Slider area — 770px wide */}
-          <div style={{ width: "770px" }}>
+          {/* Slider area — 770px wide on desktop */}
+          <div className="w-full lg:w-[770px]">
             {/* Value label — shows full range so dragging either handle gives feedback */}
             <span style={{
               fontFamily: "Raleway, sans-serif",
@@ -281,8 +286,8 @@ const PriceRangePanel = ({ onClose, minVal, maxVal, setMinVal, setMaxVal, onSave
         </div>
       </div>
 
-      {/* Button row — Figma w-[768px] */}
-      <div className="flex items-center justify-between" style={{ width: "768px" }}>
+      {/* Button row — Figma w-[768px] on desktop */}
+      <div className="flex items-center justify-between w-full lg:w-[768px]">
         {/* Clear — Raleway Bold 16px #2d2d2d, underline, no border */}
         <button
           type="button"
@@ -402,20 +407,69 @@ const TourFilterBar = React.forwardRef(({ resultsCount = 48, className, ...props
   const [duration, setDuration]     = useState("all-day");
   const [type, setType]             = useState("all");
   const [openPanel, setOpenPanel]   = useState(null); // "sort" | "price" | null
+  const [panelPosition, setPanelPosition] = useState(null);
   // Price range — state lives here so the trigger label can reflect the saved values
   const [priceMin, setPriceMin]     = useState(0);
   const [priceMax, setPriceMax]     = useState(2000);
   const [savedPrice, setSavedPrice] = useState(null); // { min, max } once saved
 
+  const wrapperRef = useRef(null);
   const barRef = useRef(null);
+  const sortAnchorRef = useRef(null);
+  const priceAnchorRef = useRef(null);
 
   useEffect(() => {
     const handler = (e) => {
-      if (barRef.current && !barRef.current.contains(e.target)) setOpenPanel(null);
+      // Close if click is outside the bar AND outside any open dropdown panel
+      if (wrapperRef.current?.contains(e.target)) return;
+      if (e.target.closest("[data-filter-dropdown]")) return;
+      setOpenPanel(null);
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
+
+  // Compute fixed-positioning coordinates for the open dropdown panel
+  // (so it escapes the bar's overflow-x-auto container and isn't clipped)
+  useEffect(() => {
+    if (!openPanel) {
+      setPanelPosition(null);
+      return;
+    }
+
+    const computePosition = () => {
+      const anchorRef = openPanel === "sort" ? sortAnchorRef : priceAnchorRef;
+      if (!anchorRef.current) return;
+
+      const rect = anchorRef.current.getBoundingClientRect();
+      // Panel width: sort=274px, price=850px (clamped to viewport on small screens)
+      const panelWidth = openPanel === "sort"
+        ? Math.min(274, window.innerWidth - 32)
+        : Math.min(850, window.innerWidth - 32);
+
+      let left = rect.left;
+      // Keep panel inside viewport on the right
+      if (left + panelWidth > window.innerWidth - 16) {
+        left = Math.max(16, window.innerWidth - panelWidth - 16);
+      }
+
+      setPanelPosition({
+        top: rect.bottom + 6,
+        left,
+      });
+    };
+
+    computePosition();
+
+    // Recompute on scroll (any ancestor) or viewport resize
+    const handler = () => computePosition();
+    window.addEventListener("scroll", handler, true);
+    window.addEventListener("resize", handler);
+    return () => {
+      window.removeEventListener("scroll", handler, true);
+      window.removeEventListener("resize", handler);
+    };
+  }, [openPanel]);
 
   const togglePanel = (name) => setOpenPanel(prev => prev === name ? null : name);
   const sortLabel  = SORT_OPTIONS.find(o => o.value === sortValue)?.label ?? "None-Selected";
@@ -425,35 +479,31 @@ const TourFilterBar = React.forwardRef(({ resultsCount = 48, className, ...props
 
   return (
     <div
-      ref={ref}
+      ref={(el) => {
+        wrapperRef.current = el;
+        if (typeof ref === "function") ref(el);
+        else if (ref) ref.current = el;
+      }}
       className={classNames("w-full bg-white", className)}
       style={{
-        height: "147px",
+        minHeight: "147px",
         borderTop: "0.5px solid #f2eaf9",
         borderBottom: "0.5px solid #f2eaf9",
       }}
       {...props}
     >
-      <div className="h-full flex items-center px-[156px]">
-        <div ref={barRef} className="flex items-center gap-[12px] flex-1">
+      <div className="h-full flex items-center px-6 md:px-[30px] lg:px-[156px] py-4 lg:py-0">
+        <div ref={barRef} className="flex items-center gap-[12px] flex-1 overflow-x-auto scrollbar-hide py-2 -my-2 px-1 -mx-1">
 
           {/* SORT — Figma 1914:37476 */}
           <div className="flex items-center gap-[12px] shrink-0">
             <FilterLabel>SORT</FilterLabel>
-            <div className="relative" style={{ minWidth: "134px", height: "44px" }}>
+            <div ref={sortAnchorRef} style={{ minWidth: "134px", height: "44px" }}>
               <SortTrigger
                 label={sortLabel}
                 isOpen={openPanel === "sort"}
                 onClick={() => togglePanel("sort")}
               />
-              {openPanel === "sort" && (
-                <SortDropdownPanel
-                  options={SORT_OPTIONS}
-                  value={sortValue}
-                  onSelect={setSortValue}
-                  onClose={() => setOpenPanel(null)}
-                />
-              )}
             </div>
           </div>
 
@@ -462,23 +512,12 @@ const TourFilterBar = React.forwardRef(({ resultsCount = 48, className, ...props
           {/* PRICE — Figma 1914:37455 */}
           <div className="flex items-center gap-[12px] shrink-0">
             <FilterLabel>PRICE</FilterLabel>
-            <div className="relative" style={{ minWidth: "126px", height: "44px" }}>
+            <div ref={priceAnchorRef} style={{ minWidth: "126px", height: "44px" }}>
               <SortTrigger
                 label={priceLabel}
                 isOpen={openPanel === "price"}
                 onClick={() => togglePanel("price")}
               />
-              {openPanel === "price" && (
-                <PriceRangePanel
-                  minVal={priceMin}
-                  maxVal={priceMax}
-                  setMinVal={setPriceMin}
-                  setMaxVal={setPriceMax}
-                  onSave={(min, max) => setSavedPrice({ min, max })}
-                  onClear={() => setSavedPrice(null)}
-                  onClose={() => setOpenPanel(null)}
-                />
-              )}
             </div>
           </div>
 
@@ -522,6 +561,30 @@ const TourFilterBar = React.forwardRef(({ resultsCount = 48, className, ...props
 
         </div>
       </div>
+
+      {/* Dropdown panels — rendered with position: fixed so they escape the
+          bar's overflow-x-auto scroll container and aren't clipped */}
+      {openPanel === "sort" && panelPosition && (
+        <SortDropdownPanel
+          options={SORT_OPTIONS}
+          value={sortValue}
+          onSelect={setSortValue}
+          onClose={() => setOpenPanel(null)}
+          position={panelPosition}
+        />
+      )}
+      {openPanel === "price" && panelPosition && (
+        <PriceRangePanel
+          minVal={priceMin}
+          maxVal={priceMax}
+          setMinVal={setPriceMin}
+          setMaxVal={setPriceMax}
+          onSave={(min, max) => setSavedPrice({ min, max })}
+          onClear={() => setSavedPrice(null)}
+          onClose={() => setOpenPanel(null)}
+          position={panelPosition}
+        />
+      )}
     </div>
   );
 });

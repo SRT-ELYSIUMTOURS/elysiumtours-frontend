@@ -24,7 +24,7 @@ const HERO_SLIDES = [
   },
 ];
 
-const HeroSection = React.forwardRef(({ className, ...props }, ref) => {
+const HeroSection = React.forwardRef(({ className, titleClassName, ...props }, ref) => {
   return (
     <section
       ref={ref}
@@ -41,10 +41,10 @@ const HeroSection = React.forwardRef(({ className, ...props }, ref) => {
       <div className="absolute inset-0 flex flex-col items-center justify-center z-20 px-4 md:px-8">
         <div className="flex flex-col items-center gap-xl max-w-[957px] w-full">
           <div className="flex flex-col items-center gap-md w-full">
-            <h1 className="font-raleway font-bold text-[32px] leading-[40px] md:text-[44px] md:leading-[54px] xl:text-Display-xl xl:leading-[66px] text-primary-light-default text-center">
+            <h1 className={classNames("font-raleway font-bold text-[20px] lg:text-Display-xl-bold leading-[40px] md:text-[44px] md:leading-[54px] xl:text-Display-xl xl:leading-[66px] text-primary-light-default text-center", titleClassName)}>
               Discover Ghana with Elysium Tours
             </h1>
-            <p className="font-raleway font-medium text-[14px] leading-[22px] md:text-md-Medium md:leading-[26px] text-primary-light-default text-center max-w-[850px]">
+            <p className="font-raleway text-md-Medium md:leading-[26px] text-primary-light-default text-center max-w-[850px]">
               Elysium Tours offers exceptional travel experiences in Ghana,
               combining cultural immersion, historical landmarks, and natural
               beauty to create unforgettable and authentic journeys.

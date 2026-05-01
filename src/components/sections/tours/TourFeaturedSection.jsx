@@ -29,6 +29,8 @@ const BASE_TOURS = [
     featureLabel: "Pickup Included",
     statusBadge: { label: "New Tour", color: "#027920" },
     reviewCount: 231,
+    country: "ghana",
+    tourSlug: "elmina-heritage-coastal-journey",
   },
   {
     id: 2,
@@ -45,6 +47,8 @@ const BASE_TOURS = [
     featureLabel: "Eco-Certified",
     statusBadge: { label: "Fully-Booked", color: "#940a02" },
     reviewCount: 189,
+    country: "ghana",
+    tourSlug: "mole-national-park-safari",
   },
   {
     id: 3,
@@ -61,6 +65,8 @@ const BASE_TOURS = [
     featureLabel: "Lunch Included",
     statusBadge: null,
     reviewCount: 312,
+    country: "ghana",
+    tourSlug: "accra-arts-culture-food-day",
   },
   {
     id: 4,
@@ -77,14 +83,13 @@ const BASE_TOURS = [
     featureLabel: "Business Included",
     statusBadge: null,
     reviewCount: 145,
+    country: "senegal",
+    tourSlug: "dakar-business-immersion",
   },
 ];
 
-// 4 unique cards × 4 rows = 16 total
-const TOURS = Array.from({ length: 16 }, (_, i) => ({
-  ...BASE_TOURS[i % 4],
-  id: i + 1,
-}));
+// Show the 4 unique featured tours (no duplication)
+const TOURS = BASE_TOURS;
 
 const TourFeaturedSection = React.forwardRef(({ className, ...props }, ref) => {
   return (

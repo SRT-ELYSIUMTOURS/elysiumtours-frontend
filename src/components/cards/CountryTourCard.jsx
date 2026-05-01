@@ -24,12 +24,10 @@ const CountryTourCard = React.forwardRef(({
       className={classNames(
         "relative overflow-clip cursor-pointer group transition-all duration-300 ease-in",
         "hover:-translate-y-1",
+        "w-full max-w-[331px] h-[140px] md:h-[192px] rounded-[40px]",
         className
       )}
       style={{
-        width: "331px",
-        height: "192px",
-        borderRadius: "40px",
         boxShadow: "0px 4px 20px 0px rgba(0,0,0,0.05)",
       }}
       {...props}

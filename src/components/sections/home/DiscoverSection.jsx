@@ -24,7 +24,7 @@ const DiscoverSection = React.forwardRef(({ className, ...props }, ref) => {
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-16 lg:justify-between mb-8 lg:mb-12">
           <div className="flex items-center justify-center lg:justify-start h-fit gap-sm shrink-0">
             <div className="w-[46px] h-[2px] bg-secondary-dark-darker" />
-            <span className="font-raleway font-bold text-med-small-bold text-secondary-dark-darker uppercase tracking-wide">
+            <span className=" text-med-small-bold text-secondary-dark-darker uppercase tracking-wide">
               Discover Ghana Like Never Before
             </span>
           </div>

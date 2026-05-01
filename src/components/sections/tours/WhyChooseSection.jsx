@@ -20,13 +20,13 @@ const WhyChooseSection = React.forwardRef(({ className, ...props }, ref) => {
   return (
     <section
       ref={ref}
-      className={classNames("w-full bg-[#f2eaf9] px-[156px] pt-[80px] pb-[80px]", className)}
+      className={classNames("w-full bg-[#f2eaf9] px-6 md:px-[30px] lg:px-[156px] pt-12 lg:pt-[80px] pb-12 lg:pb-[80px]", className)}
       {...props}
     >
       {/* ── HEADER ──────────────────────────────────────────────────────────── */}
       {/* Figma 1914:37694 — flex items-start justify-between, w=1416
           mb-[40px]: gap between header bottom and image top                    */}
-      <div className="flex items-start justify-between w-full mb-[40px]">
+      <div className="flex flex-col lg:flex-row items-center lg:items-start justify-between w-full mb-8 lg:mb-[40px] gap-4">
 
         {/* Left block — section-line + label
             Figma: flex gap-[8px] items-center
@@ -40,7 +40,7 @@ const WhyChooseSection = React.forwardRef(({ className, ...props }, ref) => {
             style={{ width: "46px", height: "2px", display: "block" }}
           />
           <div className="flex items-center justify-center p-[10px]">
-            <span className="font-raleway font-bold text-[13px] leading-[18px] text-[#2b0f43] w-[274px]">
+            <span className="font-raleway font-bold text-[13px] leading-[18px] text-[#2b0f43] lg:w-[274px] whitespace-nowrap">
               AUTHENTIC.SEAMLESS.UNFOREGETTABLE
             </span>
           </div>
@@ -50,18 +50,18 @@ const WhyChooseSection = React.forwardRef(({ className, ...props }, ref) => {
             Title:  h=37, w=597 inner, Raleway Bold 25px/34px #2d2d2d text-right
             Desc:   h=93, w=565 inner, Raleway Regular 16px/24px #2d2d2d text-right
             Button: h=32, Raleway SemiBold 13px #7b2cbf + arrow 14px           */}
-        <div className="flex flex-col gap-[16px] items-end w-[677px]">
+        <div className="flex flex-col gap-[16px] items-center lg:items-end w-full lg:w-[677px]">
 
           {/* Title */}
-          <div className="flex h-[37px] items-center justify-center pl-[10px] py-[10px] w-[597px]">
-            <h2 className="font-raleway font-bold text-[25px] leading-[34px] text-[#2d2d2d] text-right w-[581px]">
+          <div className="flex lg:h-[37px] items-center justify-center lg:pl-[10px] py-[10px] w-full lg:w-[597px]">
+            <h2 className="font-raleway font-bold text-[22px] leading-[30px] lg:text-[25px] lg:leading-[34px] text-[#2d2d2d] text-center lg:text-right w-full lg:w-[581px]">
               Why Choose Elysium Tours?
             </h2>
           </div>
 
           {/* Description */}
-          <div className="flex h-[93px] items-center justify-end pl-[10px] pr-px py-[10px] w-full">
-            <p className="font-raleway font-normal text-[16px] leading-[24px] text-[#2d2d2d] text-right w-[565px]">
+          <div className="flex lg:h-[93px] items-center justify-center lg:justify-end lg:pl-[10px] lg:pr-px py-[10px] w-full">
+            <p className="font-raleway font-normal text-[14px] leading-[22px] lg:text-[16px] lg:leading-[24px] text-[#2d2d2d] text-center lg:text-right w-full lg:w-[565px]">
               At Elysium Tours, we believe travel is more than visiting destinations — it's
               about experiencing the soul of a place. With expert local guides and
               personalized itineraries, every journey is seamless, stress-free, and
@@ -105,7 +105,7 @@ const WhyChooseSection = React.forwardRef(({ className, ...props }, ref) => {
             height: 172.44% of 554px ≈ 955px
             top:   -24.49% of 554px ≈ -136px
           This crops to the lower/centre portion of the panoramic photo.        */}
-      <div className="relative w-full h-[554px] rounded-[20px] overflow-clip shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)]">
+      <div className="relative w-full h-[280px] md:h-[400px] lg:h-[554px] rounded-[20px] overflow-clip shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)]">
         <img
           src={whyChooseBg}
           alt="Safari vehicles and canoes in an African national park"

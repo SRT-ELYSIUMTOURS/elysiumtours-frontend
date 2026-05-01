@@ -53,14 +53,15 @@ const Footer = ({
 
   return (
     <footer className={classNames("w-full overflow-hidden", className)}>
-      {/* Main grid — Frame 75: padding 16px. Frame 96: horizontal row, gap 118px */}
-      <div className="w-full bg-primary-light-default px-16 pt-10 pb-5">
-        {/* Frame 96: horizontal flex, gap 118px */}
-        <div className="flex flex-row gap-8 items-start flex-wrap justify-between">
+      {/* Main grid */}
+      <div className="w-full bg-primary-light-default px-6 md:px-16 pt-10 pb-5">
+
+        {/* Mobile: stacked — Desktop: horizontal row */}
+        <div className="flex flex-col md:flex-row md:flex-wrap gap-8 md:items-start md:justify-between">
 
           {/* Col 1 — Logo + tagline */}
-          <div className="flex flex-col gap-4 max-w-[220px] shrink">
-            <div className="h-20 w-auto">
+          <div className="flex flex-col gap-4 max-w-[220px]">
+            <div className="h-16 md:h-20 w-auto">
               <img src={ElysiumLogo} alt="Elysium Group" className="h-full w-auto object-contain" />
             </div>
             <p className="text-med-small-regular text-primary-dark-active leading-relaxed">
@@ -68,35 +69,40 @@ const Footer = ({
             </p>
           </div>
 
-          {/* Col 2 — Company */}
-          <div className="shrink-0">
-            <FooterColHeading>Company</FooterColHeading>
-            <div className="flex flex-col gap-4">
-              {(companyLinks.length ? companyLinks : [
-                { label: "Home",          href: "#" },
-                { label: "Tour",          href: "#" },
-                { label: "Tour Partners", href: "#" },
-                { label: "Gallery",       href: "#" },
-                { label: "Blogs",         href: "#" },
-              ]).map(link => (
-                <FooterLink key={link.label} href={link.href}>{link.label}</FooterLink>
-              ))}
-            </div>
-          </div>
+          {/* Cols 2+3 — Company & Support side by side on mobile */}
+          <div className="flex flex-row gap-12 md:gap-8 md:contents">
 
-          {/* Col 3 — Support */}
-          <div className="shrink-0">
-            <FooterColHeading>Support</FooterColHeading>
-            <div className="flex flex-col gap-3">
-              {(supportLinks.length ? supportLinks : [
-                { label: "Support Center",  href: "#" },
-                { label: "FAQS",            href: "#" },
-                { label: "Troubleshooting", href: "#" },
-                { label: "Feedback",        href: "#" },
-              ]).map(link => (
-                <FooterLink key={link.label} href={link.href}>{link.label}</FooterLink>
-              ))}
+            {/* Col 2 — Company */}
+            <div className="flex-1 md:flex-none md:shrink-0">
+              <FooterColHeading>Company</FooterColHeading>
+              <div className="flex flex-col gap-4">
+                {(companyLinks.length ? companyLinks : [
+                  { label: "Home",          href: "#" },
+                  { label: "Tour",          href: "#" },
+                  { label: "Tour Partners", href: "#" },
+                  { label: "Gallery",       href: "#" },
+                  { label: "Blogs",         href: "#" },
+                ]).map(link => (
+                  <FooterLink key={link.label} href={link.href}>{link.label}</FooterLink>
+                ))}
+              </div>
             </div>
+
+            {/* Col 3 — Support */}
+            <div className="flex-1 md:flex-none md:shrink-0">
+              <FooterColHeading>Support</FooterColHeading>
+              <div className="flex flex-col gap-3">
+                {(supportLinks.length ? supportLinks : [
+                  { label: "Support Center",  href: "#" },
+                  { label: "FAQS",            href: "#" },
+                  { label: "Troubleshooting", href: "#" },
+                  { label: "Feedback",        href: "#" },
+                ]).map(link => (
+                  <FooterLink key={link.label} href={link.href}>{link.label}</FooterLink>
+                ))}
+              </div>
+            </div>
+
           </div>
 
           {/* Col 4 — Legal */}
@@ -104,21 +110,21 @@ const Footer = ({
             <FooterColHeading>Legal</FooterColHeading>
             <div className="flex flex-col gap-3">
               {(legalLinks.length ? legalLinks : [
-                { label: "Privacy Policy", href: "#" },
+                { label: "Privacy Policy",   href: "#" },
                 { label: "Terms of Service", href: "#" },
-                { label: "Cookie Policy",  href: "#" },
+                { label: "Cookie Policy",    href: "#" },
               ]).map(link => (
                 <FooterLink key={link.label} href={link.href}>{link.label}</FooterLink>
               ))}
             </div>
           </div>
 
-          {/* Col 5 — Newsletter (Frame 95: vertical, width 379, gap 14) */}
-          <div className="shrink">
+          {/* Col 5 — Newsletter */}
+          <div className="w-full md:w-auto md:max-w-[379px]">
             <NewsletterInput
               onSubmit={onSubscribe}
               buttonText="Partner With Us"
-              className="w-[300px]"
+              className="w-full"
             />
           </div>
 
@@ -126,14 +132,14 @@ const Footer = ({
       </div>
 
       {/* Bottom bar */}
-      <div className="w-full border-t border-solid border-primary-normal-active bg-primary-light-default px-20 py-4">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 ">
-          <p className="text-med-small-regular text-primary-dark-hover" >
+      <div className="w-full border-t border-solid border-primary-normal-active bg-primary-light-default px-6 md:px-20 py-4">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
+          <p className="text-med-small-regular text-primary-dark-hover">
             {copyrightText || `Copyright © ElysiumTours`}
           </p>
           <div className="flex items-center gap-6">
             <FooterLink className="text-med-small-regular text-primary-dark-hover" href="#">Privacy Policy</FooterLink>
-            <FooterLink className="text-med-small-regular text-primary-dark-hover"href="#">Terms Of Use</FooterLink>
+            <FooterLink className="text-med-small-regular text-primary-dark-hover" href="#">Terms Of Use</FooterLink>
           </div>
         </div>
       </div>
