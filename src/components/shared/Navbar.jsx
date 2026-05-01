@@ -2,6 +2,9 @@ import React, { useState, useRef, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { classNames } from "../../utils/classNames";
 import Button from "../ui/button";
+import { useAuth } from "../../context/AuthContext";
+import AuthModal from "../ui/AuthModal";
+import Toast from "../ui/toast";
 
 // ── Figma icon assets (node 1073:10307) — downloaded from Figma MCP ──────────
 import iconBackpack from "../../assets/ElysiumAssets/menu-icons/backpack.svg";
@@ -353,6 +356,71 @@ const TourPartnersDropdown = ({ items, currentPath, onClose }) => (
   </div>
 );
 
+// ── UserDropdown ──────────────────────────────────────────────────────────────
+const USER_MENU_ITEMS = [
+  { label: "My Profile", icon: "👤", href: "/profile" },
+  { label: "My Bookings", icon: "🗓️", href: "/bookings" },
+  { label: "Wishlist", icon: "❤️", href: "/wishlist" },
+  { label: "Settings", icon: "⚙️", href: "/settings" },
+];
+
+const UserDropdown = ({ user, onSignOut, onClose }) => {
+  const initials = user.name
+    .split(" ")
+    .map(w => w[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+
+  return (
+    <div
+      className="absolute top-full right-0 mt-2 z-50 bg-white rounded-[20px] overflow-hidden"
+      style={{ width: "305px", boxShadow: "0px 8px 24px rgba(0,0,0,0.12)", border: "1px solid #f0e8f8" }}
+    >
+      {/* User header */}
+      <div className="flex items-center gap-[12px] px-[20px] py-[16px] border-b border-[#f0e8f8]">
+        <div
+          className="shrink-0 flex items-center justify-center rounded-full font-raleway font-bold text-[16px] text-white"
+          style={{ width: "42px", height: "42px", backgroundColor: "#7b2cbf" }}
+        >
+          {initials}
+        </div>
+        <div className="flex flex-col min-w-0">
+          <p className="font-raleway font-semibold text-[15px] text-[#2b0f43] truncate">{user.name}</p>
+          <p className="font-raleway text-[13px] text-[#9b8aab] truncate">{user.email}</p>
+        </div>
+      </div>
+
+      {/* Menu items */}
+      <div className="py-[8px]">
+        {USER_MENU_ITEMS.map(item => (
+          <Link
+            key={item.href}
+            to={item.href}
+            onClick={onClose}
+            className="flex items-center gap-[12px] px-[20px] py-[11px] transition-colors hover:bg-[#f6f2f9]"
+          >
+            <span className="text-[16px]">{item.icon}</span>
+            <span className="font-raleway font-medium text-[15px] text-[#2b0f43]">{item.label}</span>
+          </Link>
+        ))}
+      </div>
+
+      {/* Divider + Sign Out */}
+      <div className="border-t border-[#f0e8f8] py-[8px]">
+        <button
+          type="button"
+          onClick={() => { onSignOut(); onClose(); }}
+          className="w-full flex items-center gap-[12px] px-[20px] py-[11px] transition-colors hover:bg-[#fff5f7] cursor-pointer"
+        >
+          <span className="text-[16px]">🚪</span>
+          <span className="font-raleway font-semibold text-[15px] text-[#cd003d]">Sign Out</span>
+        </button>
+      </div>
+    </div>
+  );
+};
+
 // ── Main Navbar ───────────────────────────────────────────────────────────────
 // Frame 1: 1728×112, fill:#fefefe
 // Frame 4 inner: 1408×76, HORIZONTAL gap:284
@@ -361,17 +429,40 @@ const TourPartnersDropdown = ({ items, currentPath, onClose }) => (
 //   Button: 169×56, fill:#7b2cbf, r:40
 const Navbar = () => {
   const location = useLocation();
+  const { user, logout } = useAuth();
   const [openDropdown, setOpenDropdown] = useState(null);
+  const [authModal, setAuthModal] = useState({ open: false, view: "login" });
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [toast, setToast] = useState(null);
   const navRef = useRef(null);
+  const userMenuRef = useRef(null);
 
   useEffect(() => {
     const handler = (e) => {
       if (navRef.current && !navRef.current.contains(e.target))
         setOpenDropdown(null);
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target))
+        setUserMenuOpen(false);
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
+
+  const openAuth = (view) => setAuthModal({ open: true, view });
+  const closeAuth = () => setAuthModal(m => ({ ...m, open: false }));
+
+  const handleAuthSuccess = () => {
+    setToast({ variant: "success", Heading: "Welcome back!", text: "You've successfully signed in." });
+  };
+
+  const handleLogout = () => {
+    logout();
+    setToast({ variant: "success", Heading: "Signed out", text: "You've been signed out successfully." });
+  };
+
+  const userInitials = user
+    ? user.name.split(" ").map(w => w[0]).slice(0, 2).join("").toUpperCase()
+    : "";
 
   const toggle = (name) =>
     setOpenDropdown((prev) => (prev === name ? null : name));
@@ -379,7 +470,11 @@ const Navbar = () => {
     location.pathname === path ||
     (path !== "/" && location.pathname.startsWith(path));
 
+  // Dismiss toast
+  const dismissToast = () => setToast(null);
+
   return (
+    <>
     <nav
       ref={navRef}
       role="navigation"
@@ -531,47 +626,81 @@ const Navbar = () => {
               English
             </span>
           </Button>
-          {/* Login */}
-          <Button
-            className="shadow-none! px-0!"
-            startIcon={
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 20 20"
-                fill="none"
+          {/* Auth buttons — logged out */}
+          {!user && (
+            <>
+              <Button
+                className="shadow-none! px-0!"
+                startIcon={
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M14.1667 7.61627H5.83333C4.68274 7.61627 3.75 8.54901 3.75 9.69961V15.9496C3.75 17.1002 4.68274 18.0329 5.83333 18.0329H14.1667C15.3173 18.0329 16.25 17.1002 16.25 15.9496V9.69961C16.25 8.54901 15.3173 7.61627 14.1667 7.61627Z" stroke="#565656" strokeWidth="1.66667" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M10 1.36627C8.89497 1.36627 7.83516 1.80526 7.05376 2.58666C6.27236 3.36806 5.83337 4.42787 5.83337 5.53294V7.61627H14.1667V5.53294C14.1667 4.42787 13.7277 3.36806 12.9463 2.58666C12.1649 1.80526 11.1051 1.36627 10 1.36627V1.36627Z" stroke="#565656" strokeWidth="1.66667" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                }
+                variant="outline"
+                size="md"
+                onClick={() => openAuth("login")}
               >
-                <path
-                  d="M14.1667 7.61627H5.83333C4.68274 7.61627 3.75 8.54901 3.75 9.69961V15.9496C3.75 17.1002 4.68274 18.0329 5.83333 18.0329H14.1667C15.3173 18.0329 16.25 17.1002 16.25 15.9496V9.69961C16.25 8.54901 15.3173 7.61627 14.1667 7.61627Z"
-                  stroke="#565656"
-                  stroke-width="1.66667"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
+                <span className="text-md-semibold text-primary-dark-darker">Login</span>
+              </Button>
+              <Button className="px-10 py-4" variant="secondary" size="md" shape="pill" onClick={() => openAuth("signup")}>
+                <span className="text-nowrap">Sign Up</span>
+              </Button>
+            </>
+          )}
+
+          {/* Auth — logged in: user avatar + dropdown */}
+          {user && (
+            <div className="relative" ref={userMenuRef}>
+              <button
+                type="button"
+                onClick={() => setUserMenuOpen(v => !v)}
+                className="flex items-center gap-[10px] cursor-pointer rounded-[40px] px-[14px] py-[8px] transition-colors hover:bg-[#f6f2f9]"
+              >
+                <div
+                  className="flex items-center justify-center rounded-full font-raleway font-bold text-[14px] text-white shrink-0"
+                  style={{ width: "36px", height: "36px", backgroundColor: "#7b2cbf" }}
+                >
+                  {userInitials}
+                </div>
+                <span className="font-raleway font-semibold text-[15px] text-[#2b0f43] max-w-[120px] truncate">
+                  {user.name}
+                </span>
+                <ChevronDown stroke={userMenuOpen ? "#7b2cbf" : "#565656"} />
+              </button>
+
+              {userMenuOpen && (
+                <UserDropdown
+                  user={user}
+                  onSignOut={handleLogout}
+                  onClose={() => setUserMenuOpen(false)}
                 />
-                <path
-                  d="M10 1.36627C8.89497 1.36627 7.83516 1.80526 7.05376 2.58666C6.27236 3.36806 5.83337 4.42787 5.83337 5.53294V7.61627H14.1667V5.53294C14.1667 4.42787 13.7277 3.36806 12.9463 2.58666C12.1649 1.80526 11.1051 1.36627 10 1.36627V1.36627Z"
-                  stroke="#565656"
-                  stroke-width="1.66667"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-            }
-            variant="outline"
-            size="md"
-          >
-            <span className="text-md-semibold text-primary-dark-darker">
-              Login
-            </span>
-          </Button>
-          {/* Sign Up */}
-          <Button className="px-10 py-4" variant="secondary" size="md" shape="pill">
-            <span className="text-nowrap">Sign Up</span>
-          </Button>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </nav>
+
+    {/* Auth modal */}
+    <AuthModal
+      isOpen={authModal.open}
+      onClose={closeAuth}
+      initialView={authModal.view}
+      onAuthSuccess={handleAuthSuccess}
+    />
+
+    {/* Toast notification */}
+    {toast && (
+      <Toast
+        variant={toast.variant}
+        Heading={toast.Heading}
+        text={toast.text}
+        onCancel={dismissToast}
+        duration={4000}
+      />
+    )}
+    </>
   );
 };
 

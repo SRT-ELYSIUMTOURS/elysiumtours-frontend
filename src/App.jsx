@@ -2,6 +2,7 @@ import React, { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "./App.css";
 import TouristLayout from "./layout/touristLayout.jsx";
+import { AuthProvider } from "./context/AuthContext";
 
 const AdminApp = lazy(() => import("./admin/AdminApp"));
 import HomePage from "./pages/tourist/HomePage";
@@ -19,6 +20,7 @@ import GalleryCategoryPage from "./pages/tourist/GalleryCategoryPage";
 
 function App() {
   return (
+    <AuthProvider>
     <BrowserRouter>
       <div id="toast-root" />
       <Routes>
@@ -46,6 +48,7 @@ function App() {
         </Route>
       </Routes>
     </BrowserRouter>
+    </AuthProvider>
   );
 }
 
