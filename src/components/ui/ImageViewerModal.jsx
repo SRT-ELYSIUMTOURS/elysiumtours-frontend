@@ -2,8 +2,7 @@ import React, { useState, useEffect } from "react";
 import { classNames } from "../../utils/classNames";
 
 // Image Viewer Modal — Figma node 751:9961
-// Full-screen lightbox with:
-//   - Top bar (blur): shrink icon left, title center, X close right
+// Top bar: expand (fullscreen gallery) when onOpenFullscreen is set; title; close (X).
 //   - Large image fills the container (rounded bottom corners + top-right)
 //   - Bottom bar (blur): location+description left, share+like buttons right
 //   - Thumbnail strip below with darkened inactive tiles, active tile (172px wide) highlighted
@@ -40,10 +39,16 @@ const HeartIcon = () => (
   </svg>
 );
 
-// Shrink/collapse icon
-const ShrinkIcon = () => (
-  <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-    <path d="M15 25L9 31M9 25v6h6M25 15l6-9M31 15V9h-6" stroke="#fefefe" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+// Expand — open immersive fullscreen gallery (when onOpenFullscreen is provided)
+const ExpandFullscreenIcon = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+    <path
+      d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"
+      stroke="#fefefe"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
   </svg>
 );
 
@@ -85,6 +90,8 @@ const ImageViewerModal = React.forwardRef(({
   onPrev,
   onNext,
   onShare,
+  /** Immersive gallery (e.g. ImageGalleryModal); top-left expand control */
+  onOpenFullscreen,
   className = "",
   ...props
 }, ref) => {
@@ -171,13 +178,17 @@ const ImageViewerModal = React.forwardRef(({
             />
             {/* Content */}
             <div className="absolute top-[46px] left-0 right-0 flex items-center justify-between px-[154px]">
-              {/* Shrink icon */}
               <button
-                className="cursor-pointer"
-                onClick={onClose}
-                aria-label="Collapse viewer"
+                type="button"
+                className={classNames(
+                  "rounded-lg p-2 transition-colors hover:bg-white/10",
+                  onOpenFullscreen ? "cursor-pointer" : "pointer-events-none opacity-40"
+                )}
+                onClick={() => onOpenFullscreen?.()}
+                disabled={!onOpenFullscreen}
+                aria-label="Open fullscreen gallery"
               >
-                <ShrinkIcon />
+                <ExpandFullscreenIcon />
               </button>
 
               {/* Title */}
