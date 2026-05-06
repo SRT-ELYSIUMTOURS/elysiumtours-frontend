@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import BlogBreadcrumbBar from "../../components/sections/blog/BlogBreadcrumbBar";
 import GalleryHero from "../../components/sections/gallery/GalleryHero";
 import GalleryCategoryFilterBar from "../../components/sections/gallery/GalleryCategoryFilterBar";
 import GalleryCategorySection from "../../components/sections/gallery/GalleryCategorySection";
-import GalleryBecomePartSection from "../../components/sections/gallery/GalleryBecomePartSection";
-import PartnerCtaSection from "../../components/sections/partners/PartnerCtaSection";
+import PartnerPromoCtaSection from "../../components/sections/PartnerPromoCtaSection";
+import { partnerPromoGallery } from "../../data/partnerPromoCtaPresets.jsx";
+import PartnerWithUsModal from "../../components/ui/PartnerWithUsModal";
 
 // Route: /gallery
 // Gallery main page — Figma nodes 616:6236 (Videos tab) + variants for other tabs
@@ -13,13 +13,13 @@ import PartnerCtaSection from "../../components/sections/partners/PartnerCtaSect
 // 1. Breadcrumb bar
 // 2. Hero — "Discover Ghana Through Our Lens"
 // 3. Category filter bar — All / Destinations / Activities / Nature / Culture / Videos / Partners / Captured by You
-// 4. All category sections (when All tab active) or single section
-// 5. "Become Part of the Gallery" upload section
-// 6. CTA (Plan Your West African Adventure)
+// 4. All category sections (when All tab) or single section; "Share your travel moments"
+//    is rendered with Captured by you (see GalleryCategorySection)
+// 5. CTA (Plan Your West African Adventure)
 
 const GalleryPage = () => {
   const [activeTab, setActiveTab] = useState("all");
-  const navigate = useNavigate();
+  const [partnerModalOpen, setPartnerModalOpen] = useState(false);
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
@@ -51,11 +51,18 @@ const GalleryPage = () => {
         <GalleryCategorySection category={activeTab} />
       )}
 
-      {/* 5. Become Part of the Gallery */}
-      <GalleryBecomePartSection />
+      {/* 5. CTA */}
+      <PartnerPromoCtaSection
+        {...partnerPromoGallery}
+        onCtaClick={() => setPartnerModalOpen(true)}
+      />
 
-      {/* 6. CTA */}
-      <PartnerCtaSection />
+      {partnerModalOpen && (
+        <PartnerWithUsModal
+          onClose={() => setPartnerModalOpen(false)}
+          onSubmit={() => {}}
+        />
+      )}
     </main>
   );
 };

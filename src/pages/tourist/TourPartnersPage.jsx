@@ -6,7 +6,9 @@ import PartnerCategoryFilterBar from "../../components/sections/partners/Partner
 import PartnerCategorySection from "../../components/sections/partners/PartnerCategorySection";
 import PartnerFeaturedGuide from "../../components/sections/partners/PartnerFeaturedGuide";
 import PartnerStoriesSection from "../../components/sections/partners/PartnerStoriesSection";
-import PartnerCtaSection from "../../components/sections/partners/PartnerCtaSection";
+import PartnerPromoCtaSection from "../../components/sections/PartnerPromoCtaSection";
+import { partnerPromoGallery } from "../../data/partnerPromoCtaPresets.jsx";
+import PartnerWithUsModal from "../../components/ui/PartnerWithUsModal";
 
 // Route: /tour-partners
 // Section order from Figma (13 nodes):
@@ -37,6 +39,7 @@ const CATEGORY_TO_SECTION_KEY = {
 
 const TourPartnersPage = () => {
   const [activeCategory, setActiveCategory] = useState("all");
+  const [partnerModalOpen, setPartnerModalOpen] = useState(false);
   const navigate = useNavigate();
 
   const handleCategoryChange = (cat) => {
@@ -84,7 +87,17 @@ const TourPartnersPage = () => {
       <PartnerStoriesSection />
 
       {/* 13. CTA */}
-      <PartnerCtaSection />
+      <PartnerPromoCtaSection
+        {...partnerPromoGallery}
+        onCtaClick={() => setPartnerModalOpen(true)}
+      />
+
+      {partnerModalOpen && (
+        <PartnerWithUsModal
+          onClose={() => setPartnerModalOpen(false)}
+          onSubmit={() => {}}
+        />
+      )}
     </main>
   );
 };

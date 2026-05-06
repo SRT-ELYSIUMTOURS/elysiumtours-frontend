@@ -4,7 +4,9 @@ import BlogBreadcrumbBar from "../../components/sections/blog/BlogBreadcrumbBar"
 import PartnerCategoryFilterBar from "../../components/sections/partners/PartnerCategoryFilterBar";
 import PartnerListingFilterBar from "../../components/sections/partners/PartnerListingFilterBar";
 import PartnerListingGrid from "../../components/sections/partners/PartnerListingGrid";
-import PartnerCtaSection from "../../components/sections/partners/PartnerCtaSection";
+import PartnerPromoCtaSection from "../../components/sections/PartnerPromoCtaSection";
+import { partnerPromoGallery } from "../../data/partnerPromoCtaPresets.jsx";
+import PartnerWithUsModal from "../../components/ui/PartnerWithUsModal";
 
 // Route: /tour-partners/:category/all
 // Full listing page with sort/filter/date controls + grid of PartnerListingCard
@@ -24,6 +26,7 @@ const TourPartnerListingPage = () => {
   const navigate = useNavigate();
   const [filters, setFilters] = useState(null);
   const [sort, setSort] = useState("recommended");
+  const [partnerModalOpen, setPartnerModalOpen] = useState(false);
 
   const categoryLabel = CATEGORY_LABELS[category] ?? category;
   const isGuide = category === "guides";
@@ -70,7 +73,17 @@ const TourPartnerListingPage = () => {
         sort={sort}
       />
 
-      <PartnerCtaSection />
+      <PartnerPromoCtaSection
+        {...partnerPromoGallery}
+        onCtaClick={() => setPartnerModalOpen(true)}
+      />
+
+      {partnerModalOpen && (
+        <PartnerWithUsModal
+          onClose={() => setPartnerModalOpen(false)}
+          onSubmit={() => {}}
+        />
+      )}
     </main>
   );
 };

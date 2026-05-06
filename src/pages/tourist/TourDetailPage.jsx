@@ -6,8 +6,10 @@ import BlogBreadcrumbBar from "../../components/sections/blog/BlogBreadcrumbBar"
 import PopularTourCard from "../../components/cards/PopularTourCard";
 import ImageGalleryModal from "../../components/ui/ImageGalleryModal";
 import ShareModal from "../../components/ui/ShareModal";
+import PartnerWithUsModal from "../../components/ui/PartnerWithUsModal";
 import Button from "../../components/ui/button";
-import CtaSection from "../../components/sections/tours/CtaSection";
+import PartnerPromoCtaSection from "../../components/sections/PartnerPromoCtaSection";
+import { partnerPromoTour } from "../../data/partnerPromoCtaPresets.jsx";
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -1933,6 +1935,7 @@ const TourDetailPage = () => {
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [galleryIndex, setGalleryIndex] = useState(0);
   const [shareOpen, setShareOpen] = useState(false);
+  const [partnerModalOpen, setPartnerModalOpen] = useState(false);
   const [bookmarked, setBookmarked] = useState(false);
   const [adults, setAdults] = useState(2);
   const [children, setChildren] = useState(2);
@@ -2499,7 +2502,10 @@ const TourDetailPage = () => {
         
       </div>
       <div>
-            <CtaSection />
+            <PartnerPromoCtaSection
+              {...partnerPromoTour}
+              onCtaClick={() => setPartnerModalOpen(true)}
+            />
 
             </div>
 
@@ -2532,6 +2538,13 @@ const TourDetailPage = () => {
               subtitle: tourData.title,
             },
           }}
+        />
+      )}
+
+      {partnerModalOpen && (
+        <PartnerWithUsModal
+          onClose={() => setPartnerModalOpen(false)}
+          onSubmit={() => {}}
         />
       )}
     </main>

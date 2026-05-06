@@ -50,10 +50,7 @@ const MapEmbed = React.forwardRef(({
       style={{ height }}
       {...props}
     >
-      {/* Map icon — top-left indicator */}
-      <div className="absolute top-3 left-3 z-10 bg-primary-light-default rounded-full p-1.5 shadow">
-        <MapIcon />
-      </div>
+     
 
       {/* Zoom controls — top-right, matching Figma Down 3 / Down 4 */}
       <div className="absolute top-3 right-3 z-10 flex flex-col rounded-[8px] overflow-hidden border border-primary-dark-default bg-primary-light-default shadow">

@@ -16,6 +16,12 @@ import { classNames } from "../../utils/classNames";
 // Label style: [16px/500] #2d2d2d
 // Phone prefix: "GH +233" [13px/700] #2d2d2d in bordered box
 
+/** Figma: focused field — box-shadow 0 4px 20px #4A1A73 */
+const FIELD_FOCUS =
+  "focus:border-secondary-normal-default focus:shadow-[0_4px_20px_0_#4A1A73]";
+const FIELD_FOCUS_WITHIN =
+  "focus-within:border-secondary-normal-default focus-within:shadow-[0_4px_20px_0_#4A1A73]";
+
 const InputField = ({ label, required, placeholder, type = "text", value, onChange, className = "", half = false }) => (
   <div className={classNames("flex flex-col gap-[6px]", className)}>
     {label && (
@@ -28,7 +34,10 @@ const InputField = ({ label, required, placeholder, type = "text", value, onChan
       value={value}
       onChange={onChange}
       placeholder={placeholder}
-      className="w-full rounded-[10px] border border-primary-dark-default px-4 outline-none transition-all duration-300 ease-in focus:border-secondary-normal-default focus:ring-1 focus:ring-secondary-light-default"
+      className={classNames(
+        "w-full rounded-[10px] border border-primary-dark-default px-4 outline-none transition-all duration-300 ease-in",
+        FIELD_FOCUS
+      )}
       style={{ height:"48px", fontSize:"13px", fontWeight:500, color:"#2d2d2d", fontFamily:"Raleway,sans-serif",
         "::placeholder": { color:"#949494" } }}
     />
@@ -81,7 +90,14 @@ const ContactForm = React.forwardRef(({
     // Frame 173: VERTICAL gap:32
     <div ref={ref} className={classNames("flex flex-col gap-[32px]", className)} {...props}>
       {/* Top accent line — Line 6 stroke:#7b2cbf */}
-      <div className="w-full h-[2px] rounded-full bg-secondary-normal-default" />
+<div
+          className="w-[100%] mb-3 mx-auto h-[2px] border border-secondary-normal-default"
+          style={{
+            opacity: 0.8,
+            background: "var(--violet-secondary-30-normal, #7B2CBF)",
+            filter: "blur(10px)",
+          }}
+        />
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-[16px]">
 
@@ -92,10 +108,16 @@ const ContactForm = React.forwardRef(({
           </label>
           <div className="flex gap-[24px]">
             <input value={form.firstName} onChange={set("firstName")} placeholder="First Name" required
-              className="flex-1 rounded-[10px] border border-primary-dark-default px-4 outline-none transition-all duration-300 ease-in focus:border-secondary-normal-default"
+              className={classNames(
+                "flex-1 rounded-[10px] border border-primary-dark-default px-4 outline-none transition-all duration-300 ease-in",
+                FIELD_FOCUS
+              )}
               style={{ height:"48px", fontSize:"13px", fontWeight:500, color:"#2d2d2d", fontFamily:"Raleway,sans-serif" }} />
             <input value={form.lastName} onChange={set("lastName")} placeholder="Last Name" required
-              className="flex-1 rounded-[10px] border border-primary-dark-default px-4 outline-none transition-all duration-300 ease-in focus:border-secondary-normal-default"
+              className={classNames(
+                "flex-1 rounded-[10px] border border-primary-dark-default px-4 outline-none transition-all duration-300 ease-in",
+                FIELD_FOCUS
+              )}
               style={{ height:"48px", fontSize:"13px", fontWeight:500, color:"#2d2d2d", fontFamily:"Raleway,sans-serif" }} />
           </div>
         </div>
@@ -106,7 +128,10 @@ const ContactForm = React.forwardRef(({
             Email<span style={{ color:"#7b2cbf" }}>*</span>
           </label>
           <input value={form.email} onChange={set("email")} placeholder="First Name" type="email" required
-            className="w-full rounded-[10px] border border-primary-dark-default px-4 outline-none transition-all duration-300 ease-in focus:border-secondary-normal-default"
+            className={classNames(
+              "w-full rounded-[10px] border border-primary-dark-default px-4 outline-none transition-all duration-300 ease-in",
+              FIELD_FOCUS
+            )}
             style={{ height:"48px", fontSize:"13px", fontWeight:500, color:"#2d2d2d", fontFamily:"Raleway,sans-serif" }} />
         </div>
 
@@ -115,7 +140,12 @@ const ContactForm = React.forwardRef(({
           <label style={{ fontSize:"16px", fontWeight:500, color:"#2d2d2d", fontFamily:"Raleway,sans-serif" }}>
             Phone Number
           </label>
-          <div className="flex rounded-[10px] border border-primary-dark-default overflow-hidden focus-within:border-secondary-normal-default transition-all duration-300 ease-in">
+          <div
+            className={classNames(
+              "flex overflow-hidden rounded-[10px] border border-primary-dark-default transition-all duration-300 ease-in",
+              FIELD_FOCUS_WITHIN
+            )}
+          >
             {/* Country code prefix */}
             <select value={form.phoneCode} onChange={set("phoneCode")}
               className="border-r border-primary-dark-default bg-transparent px-3 outline-none shrink-0"
@@ -138,7 +168,10 @@ const ContactForm = React.forwardRef(({
             Subject<span style={{ color:"#7b2cbf" }}>*</span>
           </label>
           <input value={form.subject} onChange={set("subject")} placeholder="Enter your message title" required
-            className="w-full rounded-[10px] border border-primary-dark-default px-4 outline-none transition-all duration-300 ease-in focus:border-secondary-normal-default"
+            className={classNames(
+              "w-full rounded-[10px] border border-primary-dark-default px-4 outline-none transition-all duration-300 ease-in",
+              FIELD_FOCUS
+            )}
             style={{ height:"48px", fontSize:"13px", fontWeight:500, color:"#2d2d2d", fontFamily:"Raleway,sans-serif" }} />
         </div>
 
@@ -148,7 +181,10 @@ const ContactForm = React.forwardRef(({
             Message<span style={{ color:"#7b2cbf" }}>*</span>
           </label>
           <textarea value={form.message} onChange={set("message")} placeholder="Enter your message" required
-            className="w-full rounded-[10px] border border-primary-dark-default px-4 py-3 outline-none resize-none transition-all duration-300 ease-in focus:border-secondary-normal-default"
+            className={classNames(
+              "w-full resize-none rounded-[10px] border border-primary-dark-default px-4 py-3 outline-none transition-all duration-300 ease-in",
+              FIELD_FOCUS
+            )}
             style={{ height:"150px", fontSize:"13px", fontWeight:500, color:"#2d2d2d", fontFamily:"Raleway,sans-serif" }} />
         </div>
 

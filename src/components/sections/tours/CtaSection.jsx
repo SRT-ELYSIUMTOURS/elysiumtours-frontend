@@ -23,7 +23,7 @@ import ctaGlowLeft    from "../../../assets/ElysiumAssets/cta-glow-left.svg";
 // Image card: left=156px, vertically centred, 711×559px, rounded-[40px]
 // Text block: right=156px, vertically centred, w=592px, flex-col items-end
 
-const CtaSection = React.forwardRef(({ className, ...props }, ref) => {
+const CtaSection = React.forwardRef(({ className, onPartnerClick, ...props }, ref) => {
   return (
     <section
       ref={ref}
@@ -123,6 +123,7 @@ const CtaSection = React.forwardRef(({ className, ...props }, ref) => {
             p-[10px] is the Figma padding; h-[64px] is the fixed frame height */}
         <button
           type="button"
+          onClick={onPartnerClick}
           className="flex items-center justify-center bg-[#fefefe] border border-[#7b2cbf] rounded-[40px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.05)] font-raleway font-semibold text-[16px] leading-[22px] text-[#2b0f43] whitespace-nowrap cursor-pointer hover:bg-gray-50 transition-colors"
           style={{ width: "169px", height: "64px", padding: "10px" }}
         >
