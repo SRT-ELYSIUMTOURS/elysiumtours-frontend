@@ -10,6 +10,7 @@ const ContactInfoPill = React.forwardRef(({
   icon,
   text,
   href,
+  target,
   className = "",
   ...props
 }, ref) => {
@@ -20,7 +21,7 @@ const ContactInfoPill = React.forwardRef(({
       className={classNames(
         "inline-flex items-center gap-[12px] px-4 py-3",
         "rounded-[10px] border border-solid border-secondary-light-active",
-        "bg-primary-light-default transition-all duration-300 ease-in",
+        "bg-transparent transition-all duration-300 ease-in",
         href ? "hover:border-secondary-normal-default hover:bg-secondary-light-default cursor-pointer" : "",
         className
       )}
@@ -47,7 +48,7 @@ const ContactInfoPill = React.forwardRef(({
   );
 
   if (href) {
-    return <a href={href} className="inline-flex">{content}</a>;
+    return <a href={href} target={target} className="inline-flex">{content}</a>;
   }
 
   return content;

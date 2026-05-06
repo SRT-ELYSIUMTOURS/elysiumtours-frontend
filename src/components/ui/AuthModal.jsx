@@ -854,7 +854,7 @@ export default function AuthModal({ isOpen, onClose, initialView = "login", onAu
         <div
           className="w-[80%] mb-3 mx-auto h-[2px] border border-secondary-normal-default"
           style={{
-            opacity: 0.5,
+            opacity: 0.7,
             background: "var(--violet-secondary-30-normal, #7B2CBF)",
             filter: "blur(10px)",
           }}
