@@ -266,3 +266,12 @@
   background: transparent !important;
   border: none !important;
 }
+
+/* Twemoji (polyfill): SVG replaces emoji codepoints — regional flags render on Windows */
+.twemoji-root img.emoji {
+  display: inline-block;
+  height: 1.15em;
+  width: 1.15em;
+  margin: 0 0.1em 0.06em 0.08em;
+  vertical-align: -0.18em;
+}

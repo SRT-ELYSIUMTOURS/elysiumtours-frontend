@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { classNames } from "../../utils/classNames";
+import { openBlogPost } from "../../utils/blogPostRoute";
 import BlogHero from "../../components/sections/blog/BlogHero";
 import BlogBreadcrumbBar from "../../components/sections/blog/BlogBreadcrumbBar";
 import BlogCategoryFilter from "../../components/sections/blog/BlogCategoryFilter";
@@ -97,7 +98,7 @@ function generateCards(layout, seed = "cat") {
 }
 
 // Render the 2-column masonry grid
-function Masonry2ColGrid({ cards }) {
+function Masonry2ColGrid({ cards, navigate }) {
   // Alternating rows: [wide + short], [full-width], repeat
   const rows = [];
   for (let i = 0; i < cards.length; i += 3) {
@@ -110,6 +111,7 @@ function Masonry2ColGrid({ cards }) {
             category={cards[i].category}
             image={cards[i].image}
             className="!w-[70%] !h-[371px]"
+            onClick={() => navigate && openBlogPost(navigate, { ...cards[i], uniqueKey: cards[i].id })}
           />
           {cards[i + 1] && (
             <BlogContentCard
@@ -117,6 +119,7 @@ function Masonry2ColGrid({ cards }) {
               category={cards[i + 1].category}
               image={cards[i + 1].image}
               className="!w-[30%] !h-[371px]"
+              onClick={() => navigate && openBlogPost(navigate, { ...cards[i + 1], uniqueKey: cards[i + 1].id })}
             />
           )}
         </div>
@@ -131,6 +134,7 @@ function Masonry2ColGrid({ cards }) {
             category={cards[i + 2].category}
             image={cards[i + 2].image}
             className="!w-full !h-[415px]"
+            onClick={() => navigate && openBlogPost(navigate, { ...cards[i + 2], uniqueKey: cards[i + 2].id })}
           />
         </div>
       );
@@ -141,7 +145,7 @@ function Masonry2ColGrid({ cards }) {
 
 // Destination highlights: 4-column staggered grid (Figma)
 // Cols a & d: tall cards (340×653), top-aligned. Cols b/c & e/f: stacked small cards, shifted down slightly.
-function Grid4Col({ cards }) {
+function Grid4Col({ cards, navigate }) {
   const bands = [];
   for (let i = 0; i < cards.length; i += 6) {
     bands.push(cards.slice(i, i + 6));
@@ -164,6 +168,7 @@ function Grid4Col({ cards }) {
                 image={a.image}
                 size="tall"
                 className="shrink-0 shadow-card"
+                onClick={() => navigate && openBlogPost(navigate, { ...a, uniqueKey: a.id })}
               />
             ) : null}
 
@@ -176,6 +181,7 @@ function Grid4Col({ cards }) {
                   image={b.image}
                   size="small"
                   className="shrink-0 self-stretch shadow-card"
+                  onClick={() => navigate && openBlogPost(navigate, { ...b, uniqueKey: b.id })}
                 />
               ) : null}
               {c ? (
@@ -186,6 +192,7 @@ function Grid4Col({ cards }) {
                   image={c.image}
                   size="small"
                   className="shrink-0 self-stretch shadow-card"
+                  onClick={() => navigate && openBlogPost(navigate, { ...c, uniqueKey: c.id })}
                 />
               ) : null}
             </div>
@@ -198,6 +205,7 @@ function Grid4Col({ cards }) {
                 image={d.image}
                 size="tall"
                 className="shrink-0 shadow-card"
+                onClick={() => navigate && openBlogPost(navigate, { ...d, uniqueKey: d.id })}
               />
             ) : null}
 
@@ -210,6 +218,7 @@ function Grid4Col({ cards }) {
                   image={e.image}
                   size="small"
                   className="shrink-0 self-stretch shadow-card"
+                  onClick={() => navigate && openBlogPost(navigate, { ...e, uniqueKey: e.id })}
                 />
               ) : null}
               {f ? (
@@ -220,6 +229,7 @@ function Grid4Col({ cards }) {
                   image={f.image}
                   size="small"
                   className="shrink-0 self-stretch shadow-card"
+                  onClick={() => navigate && openBlogPost(navigate, { ...f, uniqueKey: f.id })}
                 />
               ) : null}
             </div>
@@ -231,7 +241,7 @@ function Grid4Col({ cards }) {
 }
 
 // Render 3-column masonry grid
-function Masonry3ColGrid({ cards }) {
+function Masonry3ColGrid({ cards, navigate }) {
   // Per-card heights (Figma). Cards go to col i % 3 — column totals must match or the shortest
   // column “hangs” above the longest. Last column had indices 2,5,8,11 summing higher until 433→419 on 5 & 11.
   const heights = [419, 339, 734, 734, 814, 419, 419, 339, 734, 734, 814, 419];
@@ -254,6 +264,7 @@ function Masonry3ColGrid({ cards }) {
                 image={card.image}
                 className={`!w-[100%] rounded-[40px] !h-[${card.height}px]`}
                 style={{ width: "457px", height: `${card.height}px` }}
+                onClick={() => navigate && openBlogPost(navigate, { ...card, uniqueKey: card.id })}
               />
             ))}
           </div>
@@ -264,7 +275,7 @@ function Masonry3ColGrid({ cards }) {
 }
 
 // Render 3x3 equal grid
-function Grid3x3({ cards }) {
+function Grid3x3({ cards, navigate }) {
   const rows = [];
   for (let i = 0; i < cards.length; i += 3) {
     rows.push(
@@ -276,6 +287,7 @@ function Grid3x3({ cards }) {
             category={card.category}
             image={card.image}
             className="!w-auto !h-[364px] flex-1"
+            onClick={() => navigate && openBlogPost(navigate, { ...card, uniqueKey: card.id })}
           />
         ))}
       </div>
@@ -285,7 +297,7 @@ function Grid3x3({ cards }) {
 }
 
 // Render 3-column partner cards (PartnerHighlightCard needs explicit height — same as PartnerSpotlightPreview)
-function Partner3Col({ cards }) {
+function Partner3Col({ cards, navigate }) {
   return (
     <div className="mx-auto flex w-full flex-col gap-xl lg:flex-row lg:items-stretch">
       {cards.map((card) => (
@@ -294,6 +306,15 @@ function Partner3Col({ cards }) {
           image={card.image}
           category={card.category}
           className="h-[400px] w-full min-w-0 md:h-[500px] lg:h-[656px] lg:flex-1"
+          onClick={() =>
+            navigate &&
+            openBlogPost(navigate, {
+              title: card.category,
+              image: card.image,
+              category: card.category,
+              uniqueKey: card.id,
+            })
+          }
         />
       ))}
     </div>
@@ -310,6 +331,7 @@ const GRID_COMPONENTS = {
 
 const BlogCategoryPage = React.forwardRef(({ className, ...props }, ref) => {
   const { category } = useParams();
+  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
 
   const config = CATEGORY_CONFIG[category];
@@ -362,7 +384,7 @@ const BlogCategoryPage = React.forwardRef(({ className, ...props }, ref) => {
 
           {/* Card grid */}
           <div className="mt-[80px]">
-            {GridComponent && <GridComponent cards={cards} />}
+            {GridComponent && <GridComponent cards={cards} navigate={navigate} />}
           </div>
         </div>
 

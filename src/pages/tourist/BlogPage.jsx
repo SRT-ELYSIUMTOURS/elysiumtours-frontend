@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { classNames } from "../../utils/classNames";
 import BlogHero from "../../components/sections/blog/BlogHero";
 import BlogBreadcrumbBar from "../../components/sections/blog/BlogBreadcrumbBar";
@@ -11,7 +11,13 @@ import FestivalCalendarCta from "../../components/sections/blog/FestivalCalendar
 import PartnerSpotlightPreview from "../../components/sections/blog/PartnerSpotlightPreview";
 import BlogCtaSection from "../../components/sections/blog/BlogCtaSection";
 
+function showBlogPreview(filter, slug) {
+  return filter === "all" || filter === slug;
+}
+
 const BlogPage = React.forwardRef(({ className, ...props }, ref) => {
+  const [categoryFilter, setCategoryFilter] = useState("all");
+
   return (
     <main ref={ref} className={classNames("font-raleway", className)} {...props}>
       <BlogBreadcrumbBar
@@ -21,13 +27,20 @@ const BlogPage = React.forwardRef(({ className, ...props }, ref) => {
         ]}
       />
       <BlogHero />
-      <BlogCategoryFilter />
-      <TravelGuidesPreview />
-      <DestinationHighlightsPreview />
-      <LocalGuidesPreview />
-      <TravelStoriesPreview />
-      <FestivalCalendarCta />
-      <PartnerSpotlightPreview />
+      <BlogCategoryFilter
+        selectedCategory={categoryFilter}
+        onCategoryChange={setCategoryFilter}
+      />
+      {showBlogPreview(categoryFilter, "travel-guides") && <TravelGuidesPreview />}
+      {showBlogPreview(categoryFilter, "destination-highlights") && (
+        <DestinationHighlightsPreview />
+      )}
+      {showBlogPreview(categoryFilter, "local-guides") && <LocalGuidesPreview />}
+      {showBlogPreview(categoryFilter, "travel-stories") && <TravelStoriesPreview />}
+      {showBlogPreview(categoryFilter, "festival-calendar") && <FestivalCalendarCta />}
+      {showBlogPreview(categoryFilter, "partner-spotlight") && (
+        <PartnerSpotlightPreview />
+      )}
       <BlogCtaSection />
     </main>
   );
