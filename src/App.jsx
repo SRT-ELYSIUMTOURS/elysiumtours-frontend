@@ -18,6 +18,7 @@ import TourPartnerCategoryPage from "./pages/tourist/TourPartnerCategoryPage";
 import TourPartnerListingPage from "./pages/tourist/TourPartnerListingPage";
 import GalleryPage from "./pages/tourist/GalleryPage";
 import GalleryCategoryPage from "./pages/tourist/GalleryCategoryPage";
+import NotFoundPage from "./pages/tourist/NotFoundPage";
 
 function App() {
   return (
@@ -48,6 +49,7 @@ function App() {
           <Route path="/gallery" element={<GalleryPage />} />
           <Route path="/gallery/:category/all" element={<GalleryCategoryPage />} />
         </Route>
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
     </AuthProvider>
