@@ -1,380 +1,301 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { classNames } from "../../utils/classNames";
 
-// ── Social platforms ───────────────────────────────────────────────────────────
+// ShareModal — layout matches design (523×642, rounded 30px, codia assets).
+// Props: onClose, tour { title, description, image, url?, locationTag?, author { name, avatar, subtitle } }
+
+const ASSETS = {
+  close:
+    "https://codia-f2c.s3.us-west-1.amazonaws.com/image/2026-04-30/UwRV1dk8Jy.png",
+  avatarFallback:
+    "https://codia-f2c.s3.us-west-1.amazonaws.com/image/2026-04-30/VzgyKxRcfy.png",
+  flag:
+    "https://codia-f2c.s3.us-west-1.amazonaws.com/image/2026-04-30/0HjBKzuLFa.png",
+  linkIcon:
+    "https://codia-f2c.s3.us-west-1.amazonaws.com/image/2026-04-30/j4uW6GFOO1.png",
+  copyIcon:
+    "https://codia-f2c.s3.us-west-1.amazonaws.com/image/2026-04-30/bOu78QPSx9.png",
+  divider:
+    "https://codia-f2c.s3.us-west-1.amazonaws.com/image/2026-04-30/mn35fGD0mN.png",
+  spine:
+    "https://codia-f2c.s3.us-west-1.amazonaws.com/image/2026-04-30/jMKq3MQt5D.png",
+};
+
+/** 8 social icons left-to-right (design order) */
+const SOCIAL_ICON_BG = [
+  "https://codia-f2c.s3.us-west-1.amazonaws.com/image/2026-04-30/UYiCExHbeq.png",
+  "https://codia-f2c.s3.us-west-1.amazonaws.com/image/2026-04-30/Rhp2F0uKTO.png",
+  "https://codia-f2c.s3.us-west-1.amazonaws.com/image/2026-04-30/aD66ubJi49.png",
+  "https://codia-f2c.s3.us-west-1.amazonaws.com/image/2026-04-30/716yXub5ax.png",
+  "https://codia-f2c.s3.us-west-1.amazonaws.com/image/2026-04-30/tjm8xb4X5c.png",
+  "https://codia-f2c.s3.us-west-1.amazonaws.com/image/2026-04-30/J7F5KyqkAX.png",
+  "https://codia-f2c.s3.us-west-1.amazonaws.com/image/2026-04-30/xKa8XaeTfK.png",
+  "https://codia-f2c.s3.us-west-1.amazonaws.com/image/2026-04-30/cxUzmwdWmQ.png",
+];
+
 const SOCIAL_PLATFORMS = [
   {
     name: "Instagram",
-    bg: "bg-gradient-to-br from-[#f9ce34] via-[#ee2a7b] to-[#6228d7]",
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36" fill="none">
-        <g clipPath="url(#clip0_3159_51160)">
-          <path d="M28.2516 -1.79688H8.64844C3.87204 -1.79688 0 2.1696 0 7.0625V27.1437C0 32.0366 3.87204 36.0031 8.64844 36.0031H28.2516C33.028 36.0031 36.9 32.0366 36.9 27.1437V7.0625C36.9 2.1696 33.028 -1.79688 28.2516 -1.79688Z" fill="url(#paint0_radial_3159_51160)"/>
-          <path d="M18.5565 7C15.6898 7 15.33 7.01256 14.2041 7.06375C13.0804 7.11527 12.3133 7.29312 11.6422 7.55416C10.9478 7.82375 10.359 8.18443 9.77228 8.77131C9.18507 9.35809 8.82439 9.94698 8.55396 10.641C8.29218 11.3123 8.11411 12.0797 8.06354 13.2029C8.01319 14.3289 8 14.6888 8 17.5556C8 20.4223 8.01267 20.781 8.06376 21.9068C8.11548 23.0306 8.29334 23.7976 8.55417 24.4687C8.82397 25.1631 9.18465 25.752 9.77154 26.3386C10.3581 26.9258 10.947 27.2874 11.6408 27.5569C12.3125 27.818 13.0796 27.9958 14.2032 28.0474C15.3291 28.0985 15.6887 28.1111 18.5552 28.1111C21.4222 28.1111 21.7809 28.0985 22.9068 28.0474C24.0305 27.9958 24.7984 27.818 25.4701 27.5569C26.1641 27.2874 26.7522 26.9258 27.3386 26.3386C27.9258 25.752 28.2864 25.1631 28.5569 24.4691C28.8164 23.7976 28.9946 23.0303 29.0474 21.907C29.0979 20.7812 29.1111 20.4223 29.1111 17.5556C29.1111 14.6888 29.0979 14.3291 29.0474 13.2031C28.9946 12.0794 28.8164 11.3124 28.5569 10.6413C28.2864 9.94698 27.9258 9.35809 27.3386 8.77131C26.7515 8.18422 26.1643 7.82354 25.4694 7.55427C24.7965 7.29312 24.029 7.11516 22.9053 7.06375C21.7793 7.01256 21.4209 7 18.5532 7H18.5565ZM17.6096 8.90088C17.8916 8.90178 18.2048 8.9022 18.5565 8.9022C21.3749 8.9022 21.7089 8.91233 22.8219 8.96289C23.8511 9.00997 24.4097 9.18192 24.7817 9.32642C25.2744 9.51769 25.6256 9.74642 25.9948 10.116C26.3642 10.4854 26.5929 10.8372 26.7847 11.3298C26.9292 11.7014 27.1013 12.26 27.1482 13.2891C27.1988 14.4019 27.2097 14.7361 27.2097 17.5531C27.2097 20.3702 27.1988 20.7045 27.1482 21.8171C27.1011 22.8463 26.9292 23.4049 26.7847 23.7765C26.5934 24.2691 26.3642 24.6199 25.9948 24.9891C25.6253 25.3586 25.2746 25.5872 24.7817 25.7786C24.4101 25.9237 23.8511 26.0952 22.8219 26.1423C21.7091 26.1929 21.3749 26.2038 18.5565 26.2038C15.738 26.2038 15.4039 26.1929 14.2912 26.1423C13.262 26.0948 12.7034 25.9229 12.331 25.7784C11.8385 25.587 11.4866 25.3584 11.1172 24.9889C10.7477 24.6195 10.5191 24.2685 10.3273 23.7757C10.1828 23.404 10.0106 22.8454 9.96376 21.8163C9.91319 20.7035 9.90306 20.3693 9.90306 17.5505C9.90306 14.7317 9.91319 14.3993 9.96376 13.2865C10.0108 12.2574 10.1828 11.6988 10.3273 11.3267C10.5187 10.8341 10.7477 10.4822 11.1173 10.1128C11.4868 9.74336 11.8385 9.51462 12.3312 9.32294C12.7032 9.1778 13.262 9.00627 14.2912 8.95899C15.2647 8.91498 15.6422 8.90178 17.6082 8.89956L17.6096 8.90088ZM24.1911 10.6548C23.4918 10.6548 22.9244 11.2217 22.9244 11.9211C22.9244 12.6204 23.4918 13.1877 24.1911 13.1877C24.8904 13.1877 25.4577 12.6204 25.4577 11.9211C25.4577 11.2218 24.8904 10.6548 24.1911 10.6548ZM18.5565 12.1348C15.5629 12.1348 13.1358 14.5619 13.1358 17.5556C13.1358 20.5492 15.5629 22.9751 18.5565 22.9751C21.5502 22.9751 23.9765 20.5492 23.9765 17.5556C23.9765 14.562 21.5502 12.1348 18.5565 12.1348ZM18.5565 14.037C20.4997 14.037 22.0751 15.6122 22.0751 17.5556C22.0751 19.4987 20.4997 21.0741 18.5565 21.0741C16.6133 21.0741 15.038 19.4987 15.038 17.5556C15.038 15.6122 16.6132 14.037 18.5565 14.037Z" fill="white"/>
-        </g>
-        <defs>
-          <radialGradient id="paint0_radial_3159_51160" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(9.80156 38.9145) rotate(-90) scale(37.4626 34.0136)">
-            <stop stopColor="#FFDD55"/>
-            <stop offset="0.1" stopColor="#FFDD55"/>
-            <stop offset="0.5" stopColor="#FF543E"/>
-            <stop offset="1" stopColor="#C837AB"/>
-          </radialGradient>
-          <clipPath id="clip0_3159_51160">
-            <rect width="36" height="36" rx="18" fill="white"/>
-          </clipPath>
-        </defs>
-      </svg>
-    ),
-    href: () => `https://www.instagram.com/`,
+    href: (_url) => `https://www.instagram.com/`,
   },
   {
     name: "X",
-    bg: "bg-black",
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <g clipPath="url(#clip0_3159_51169)">
-          <mask id="mask0_3159_51169" style={{ maskType: "luminance" }} maskUnits="userSpaceOnUse" x="0" y="0" width="16" height="16">
-            <path d="M0 0H16V16H0V0Z" fill="white"/>
-          </mask>
-          <g mask="url(#mask0_3159_51169)">
-            <path d="M12.6 0.75H15.0537L9.69372 6.89171L16 15.2506H11.0629L7.19314 10.182L2.77029 15.2506H0.314286L6.04686 8.67914L0 0.751143H5.06286L8.55543 5.38314L12.6 0.75ZM11.7371 13.7786H13.0971L4.32 2.14543H2.86171L11.7371 13.7786Z" fill="#FEFEFE"/>
-          </g>
-        </g>
-        <defs>
-          <clipPath id="clip0_3159_51169">
-            <rect width="16" height="16" fill="white"/>
-          </clipPath>
-        </defs>
-      </svg>
-    ),
-    href: (url) => `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}`,
+    href: (url) =>
+      `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}`,
   },
   {
     name: "Facebook",
-    bg: "bg-[#1877f2]",
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36" fill="none">
-        <g clipPath="url(#clip0_3159_51176)">
-          <path d="M36 18C36 8.05894 27.9411 0 18 0C8.05894 0 0 8.05894 0 18C0 26.9842 6.58237 34.431 15.1875 35.7813V23.2031H10.6172V18H15.1875V14.0344C15.1875 9.52312 17.8748 7.03125 21.9864 7.03125C23.9558 7.03125 26.0156 7.38281 26.0156 7.38281V11.8125H23.7459C21.5099 11.8125 20.8125 13.2 20.8125 14.6236V18H25.8047L25.0066 23.2031H20.8125V35.7813C29.4176 34.431 36 26.9844 36 18Z" fill="#1877F2"/>
-          <path d="M25.0066 23.2031L25.8047 18H20.8125V14.6236C20.8125 13.1999 21.5099 11.8125 23.7459 11.8125H26.0156V7.38281C26.0156 7.38281 23.9558 7.03125 21.9863 7.03125C17.8748 7.03125 15.1875 9.52313 15.1875 14.0344V18H10.6172V23.2031H15.1875V35.7813C16.1179 35.9271 17.0582 36.0002 18 36C18.9418 36.0002 19.8821 35.9271 20.8125 35.7813V23.2031H25.0066Z" fill="white"/>
-        </g>
-        <defs>
-          <clipPath id="clip0_3159_51176">
-            <rect width="36" height="36" fill="white"/>
-          </clipPath>
-        </defs>
-      </svg>
-    ),
-    href: (url) => `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
+    href: (url) =>
+      `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
   },
   {
     name: "WhatsApp",
-    bg: "bg-[#25d366]",
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36" fill="none">
-        <g clipPath="url(#clip0_3159_51179)">
-          <path d="M0.769844 17.7883C0.769 20.813 1.5655 23.7664 3.08003 26.3696L0.625 35.2638L9.79825 32.8772C12.3355 34.2477 15.1782 34.9659 18.067 34.9661H18.0746C27.6111 34.9661 35.374 27.2661 35.3781 17.8019C35.3799 13.2158 33.5816 8.90333 30.3143 5.65886C27.0476 2.41467 22.703 0.627093 18.0739 0.625C8.53628 0.625 0.773922 8.32454 0.769984 17.7883" fill="url(#paint0_linear_3159_51179)"/>
-          <path d="M0.150469 17.779C0.149484 20.9125 0.974531 23.9715 2.54306 26.6679L0 35.881L9.50217 33.4088C12.1203 34.8253 15.0681 35.572 18.0676 35.5732H18.0754C27.954 35.5732 35.9958 27.5962 36 17.7932C36.0017 13.0423 34.1387 8.57484 30.7547 5.21414C27.3703 1.85386 22.8703 0.00195349 18.0754 0C8.19506 0 0.154406 7.97581 0.150469 17.779ZM5.80936 26.2035L5.45456 25.6447C3.96309 23.2916 3.17587 20.5723 3.177 17.7801C3.18009 9.63195 9.86316 3.00279 18.081 3.00279C22.0607 3.00447 25.8007 4.54381 28.6138 7.33674C31.4267 10.13 32.9746 13.843 32.9736 17.7921C32.97 25.9402 26.2867 32.5702 18.0754 32.5702H18.0695C15.3958 32.5688 12.7735 31.8564 10.4867 30.51L9.94247 30.1898L4.30369 31.6567L5.80936 26.2035Z" fill="url(#paint1_linear_3159_51179)"/>
-          <path d="M13.5967 10.3485C13.2612 9.60856 12.9081 9.59363 12.589 9.58065C12.3277 9.56949 12.029 9.57033 11.7306 9.57033C11.4319 9.57033 10.9466 9.68182 10.5364 10.1262C10.1258 10.5711 8.96875 11.646 8.96875 13.8324C8.96875 16.0188 10.5737 18.1319 10.7974 18.4287C11.0215 18.7249 13.8958 23.3553 18.4481 25.1366C22.2315 26.6169 23.0014 26.3225 23.8225 26.2482C24.6438 26.1743 26.4725 25.1735 26.8456 24.1358C27.2189 23.0982 27.2189 22.2088 27.107 22.023C26.995 21.8378 26.6964 21.7266 26.2485 21.5045C25.8006 21.2823 23.5985 20.2071 23.188 20.0587C22.7774 19.9106 22.4789 19.8366 22.1802 20.2816C21.8815 20.7259 21.0238 21.7266 20.7624 22.023C20.5013 22.32 20.2398 22.357 19.7921 22.1347C19.3439 21.9118 17.9015 21.4431 16.1903 19.9293C14.8588 18.7513 13.96 17.2967 13.6987 16.8517C13.4374 16.4074 13.6707 16.1666 13.8953 15.9451C14.0965 15.746 14.3433 15.4262 14.5675 15.1668C14.7908 14.9073 14.8653 14.7221 15.0146 14.4257C15.1641 14.1291 15.0893 13.8695 14.9775 13.6473C14.8653 13.425 13.995 11.2272 13.5967 10.3485Z" fill="white"/>
-        </g>
-        <defs>
-          <linearGradient id="paint0_linear_3159_51179" x1="1738.28" y1="3464.51" x2="1738.28" y2="0.625" gradientUnits="userSpaceOnUse">
-            <stop stopColor="#1FAF38"/>
-            <stop offset="1" stopColor="#60D669"/>
-          </linearGradient>
-          <linearGradient id="paint1_linear_3159_51179" x1="1800" y1="3588.1" x2="1800" y2="0" gradientUnits="userSpaceOnUse">
-            <stop stopColor="#F9F9F9"/>
-            <stop offset="1" stopColor="white"/>
-          </linearGradient>
-          <clipPath id="clip0_3159_51179">
-            <rect width="36" height="36" fill="white"/>
-          </clipPath>
-        </defs>
-      </svg>
-    ),
     href: (url) => `https://wa.me/?text=${encodeURIComponent(url)}`,
   },
   {
-    name: "TikTok",
-    bg: "bg-black",
-    icon: (
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="white">
-        <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V9.05a8.16 8.16 0 004.78 1.52V7.1a4.85 4.85 0 01-1-.41z"/>
-      </svg>
-    ),
-    href: () => `https://www.tiktok.com/`,
+    name: "Pinterest",
+    href: (url) =>
+      `https://pinterest.com/pin/create/button/?url=${encodeURIComponent(url)}`,
   },
   {
     name: "Snapchat",
-    bg: "bg-[#fffc00]",
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-        <g clipPath="url(#clip0_3159_51196)">
-          <path d="M22.0671 17.711C22.2308 17.6647 22.3763 17.5691 22.4837 17.4372C22.5911 17.3052 22.6551 17.1433 22.6672 16.9736C22.6792 16.8039 22.6386 16.6346 22.5509 16.4889C22.4632 16.3431 22.3327 16.2279 22.1771 16.159C21.2019 15.708 20.2779 15.1535 19.4211 14.505C19.2496 14.375 19.112 14.2054 19.0202 14.0107C18.9284 13.816 18.8851 13.602 18.8939 13.387C18.9028 13.1719 18.9635 12.9622 19.071 12.7757C19.1785 12.5892 19.3295 12.4315 19.5111 12.316L20.7181 11.551C21.0166 11.3614 21.2276 11.0609 21.3046 10.7158C21.3815 10.3706 21.3183 10.009 21.1286 9.7105C20.939 9.412 20.6386 9.20105 20.2934 9.12407C19.9482 9.04709 19.5866 9.11037 19.2881 9.3L18.0031 10.116V7C18.0031 5.4087 17.371 3.88258 16.2458 2.75736C15.1206 1.63214 13.5944 1 12.0031 1C10.4118 1 8.88571 1.63214 7.76049 2.75736C6.63527 3.88258 6.00313 5.4087 6.00313 7V10.116L4.71513 9.3C4.56733 9.20611 4.40248 9.14224 4.22999 9.11205C4.05751 9.08187 3.88077 9.08595 3.70986 9.12407C3.53895 9.16219 3.37723 9.2336 3.23392 9.33422C3.09061 9.43484 2.96852 9.5627 2.87463 9.7105C2.78073 9.8583 2.71687 10.0232 2.68668 10.1956C2.6565 10.3681 2.66058 10.5449 2.6987 10.7158C2.73682 10.8867 2.80822 11.0484 2.90884 11.1917C3.00946 11.335 3.13733 11.4571 3.28513 11.551L4.49213 12.316C4.67378 12.4315 4.82478 12.5892 4.93226 12.7757C5.03974 12.9622 5.10049 13.1719 5.10933 13.387C5.11817 13.602 5.07484 13.816 4.98304 14.0107C4.89123 14.2054 4.75368 14.375 4.58213 14.505C3.72535 15.1535 2.80138 15.708 1.82613 16.159C1.67105 16.2283 1.54103 16.3436 1.45371 16.4893C1.36639 16.635 1.326 16.8041 1.33801 16.9735C1.35002 17.1429 1.41385 17.3046 1.52084 17.4365C1.62784 17.5684 1.77282 17.6643 1.93613 17.711L3.90613 18.111C4.11079 18.1695 4.28469 18.3053 4.39106 18.4897C4.49743 18.674 4.52793 18.8925 4.47613 19.099C4.42461 19.3054 4.42525 19.5213 4.478 19.7274C4.53074 19.9335 4.63394 20.1232 4.77828 20.2794C4.92262 20.4357 5.10358 20.5536 5.30483 20.6224C5.50609 20.6913 5.72132 20.709 5.93113 20.674L6.55713 20.574C7.00433 20.5006 7.4626 20.5348 7.89391 20.674C8.32522 20.8131 8.71714 21.0531 9.03713 21.374C9.78975 22.2653 10.8469 22.8449 12.0031 23C13.1592 22.8434 14.2157 22.2624 14.9671 21.37C15.2871 21.0491 15.679 20.8091 16.1103 20.67C16.5417 20.5308 16.9999 20.4966 17.4471 20.57L18.0741 20.67C18.2834 20.7047 18.4981 20.687 18.6988 20.6183C18.8995 20.5497 19.0801 20.4323 19.2243 20.2767C19.3685 20.1211 19.4718 19.9322 19.525 19.7268C19.5782 19.5214 19.5796 19.306 19.5291 19.1C19.4773 18.8935 19.5078 18.675 19.6142 18.4907C19.7206 18.3063 19.8945 18.1705 20.0991 18.112L22.0671 17.711Z" fill="#FEFEFE"/>
-          <path d="M12.0021 1C10.4125 1.00527 8.88939 1.63911 7.76531 2.76318C6.64124 3.88726 6.0074 5.41032 6.00213 7V10.116L4.71513 9.3C4.41661 9.11708 4.05815 9.05884 3.71708 9.13785C3.37601 9.21686 3.07967 9.42679 2.89199 9.72234C2.70432 10.0179 2.64036 10.3754 2.7139 10.7177C2.78745 11.06 2.99261 11.3596 3.28513 11.552L4.49213 12.317C4.67378 12.4325 4.82478 12.5902 4.93226 12.7767C5.03974 12.9632 5.10049 13.1729 5.10933 13.388C5.11817 13.603 5.07484 13.817 4.98304 14.0117C4.89123 14.2064 4.75368 14.376 4.58213 14.506C3.72535 15.1545 2.80138 15.709 1.82613 16.16C1.67105 16.2293 1.54103 16.3446 1.45371 16.4903C1.36639 16.636 1.326 16.8051 1.33801 16.9745C1.35002 17.1439 1.41385 17.3056 1.52084 17.4375C1.62784 17.5694 1.77282 17.6653 1.93613 17.712L3.90613 18.112C3.94613 18.1293 3.98446 18.149 4.02113 18.171L17.5281 4.668C17.0675 3.58262 16.2982 2.65642 15.3158 2.00434C14.3335 1.35227 13.1812 1.00304 12.0021 1Z" fill="#EBDFF5"/>
-          <path d="M22.0671 17.711C22.2308 17.6647 22.3763 17.5691 22.4837 17.4372C22.5911 17.3052 22.6551 17.1433 22.6672 16.9736C22.6792 16.8039 22.6386 16.6346 22.5509 16.4889C22.4632 16.3431 22.3327 16.2279 22.1771 16.159C21.2019 15.708 20.2779 15.1535 19.4211 14.505C19.2496 14.375 19.112 14.2054 19.0202 14.0107C18.9284 13.816 18.8851 13.602 18.8939 13.387C18.9028 13.1719 18.9635 12.9622 19.071 12.7757C19.1785 12.5892 19.3295 12.4315 19.5111 12.316L20.7181 11.551C21.0166 11.3614 21.2276 11.0609 21.3046 10.7158C21.3815 10.3706 21.3183 10.009 21.1286 9.7105C20.939 9.412 20.6386 9.20105 20.2934 9.12407C19.9482 9.04709 19.5866 9.11037 19.2881 9.3L18.0031 10.116V7C18.0031 5.4087 17.371 3.88258 16.2458 2.75736C15.1206 1.63214 13.5944 1 12.0031 1C10.4118 1 8.88571 1.63214 7.76049 2.75736C6.63527 3.88258 6.00313 5.4087 6.00313 7V10.116L4.71513 9.3C4.56733 9.20611 4.40248 9.14224 4.22999 9.11205C4.05751 9.08187 3.88077 9.08595 3.70986 9.12407C3.53896 9.16219 3.37723 9.2336 3.23392 9.33422C3.09061 9.43484 2.96852 9.5627 2.87463 9.7105C2.78073 9.8583 2.71687 10.0232 2.68668 10.1956C2.6565 10.3681 2.66058 10.5449 2.6987 10.7158C2.73682 10.8867 2.80822 11.0484 2.90884 11.1917C3.00946 11.335 3.13733 11.4571 3.28513 11.551L4.49213 12.316C4.67378 12.4315 4.82478 12.5892 4.93226 12.7757C5.03974 12.9622 5.10049 13.1719 5.10933 13.387C5.11817 13.602 5.07484 13.816 4.98304 14.0107C4.89123 14.2054 4.75368 14.375 4.58213 14.505C3.72535 15.1535 2.80138 15.708 1.82613 16.159C1.67105 16.2283 1.54103 16.3436 1.45371 16.4893C1.36639 16.635 1.326 16.8041 1.33801 16.9735C1.35002 17.1429 1.41385 17.3046 1.52084 17.4365C1.62784 17.5684 1.77282 17.6643 1.93613 17.711L3.90613 18.111C4.11079 18.1695 4.28469 18.3053 4.39106 18.4897C4.49743 18.674 4.52793 18.8925 4.47613 19.099C4.42461 19.3054 4.42525 19.5213 4.478 19.7274C4.53074 19.9335 4.63394 20.1232 4.77828 20.2794C4.92262 20.4357 5.10358 20.5536 5.30483 20.6224C5.50609 20.6913 5.72132 20.709 5.93113 20.674L6.55713 20.574C7.00433 20.5006 7.46261 20.5348 7.89391 20.674C8.32522 20.8131 8.71714 21.0531 9.03713 21.374C9.78975 22.2653 10.8469 22.8449 12.0031 23C13.1592 22.8434 14.2157 22.2624 14.9671 21.37C15.2871 21.0491 15.679 20.8091 16.1103 20.67C16.5417 20.5308 16.9999 20.4966 17.4471 20.57L18.0741 20.67C18.2834 20.7047 18.4981 20.687 18.6988 20.6183C18.8995 20.5497 19.0801 20.4323 19.2243 20.2767C19.3685 20.1211 19.4718 19.9322 19.525 19.7268C19.5782 19.5214 19.5796 19.306 19.5291 19.1C19.4773 18.8935 19.5078 18.675 19.6142 18.4907C19.7206 18.3063 19.8945 18.1705 20.0991 18.112L22.0671 17.711Z" stroke="#191919" strokeLinecap="round" strokeLinejoin="round"/>
-        </g>
-        <defs>
-          <clipPath id="clip0_3159_51196">
-            <rect width="24" height="24" fill="white"/>
-          </clipPath>
-        </defs>
-      </svg>
-    ),
-    href: () => `https://www.snapchat.com/`,
+    href: (_url) => `https://www.snapchat.com/`,
   },
- 
   {
     name: "Telegram",
-    bg: "bg-[#2aabee]",
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36" fill="none">
-        <g clipPath="url(#clip0_3159_51201)">
-          <path d="M18 0C13.2272 0 8.64563 1.89759 5.27344 5.27203C1.8978 8.64783 0.000965949 13.226 0 18C0 22.772 1.89844 27.3535 5.27344 30.728C8.64563 34.1024 13.2272 36 18 36C22.7728 36 27.3544 34.1024 30.7266 30.728C34.1016 27.3535 36 22.772 36 18C36 13.228 34.1016 8.64647 30.7266 5.27203C27.3544 1.89759 22.7728 0 18 0Z" fill="url(#paint0_linear_3159_51201)"/>
-          <path d="M8.14825 17.8101C13.3964 15.5241 16.8951 14.0169 18.6445 13.2887C23.6451 11.2094 24.6829 10.8483 25.3608 10.836C25.5098 10.8337 25.8417 10.8705 26.0583 11.0456C26.2383 11.1932 26.2889 11.3929 26.3142 11.5331C26.3367 11.6732 26.3676 11.9924 26.3423 12.2416C26.0723 15.0878 24.8995 21.9948 24.3033 25.1827C24.0529 26.5316 23.5551 26.9839 23.0742 27.028C22.0279 27.1242 21.2348 26.3373 20.2223 25.6738C18.6389 24.6352 17.7445 23.9888 16.2061 22.9755C14.4286 21.8044 15.5817 21.1606 16.5942 20.1087C16.8586 19.8334 21.4654 15.6442 21.5526 15.2642C21.5639 15.2167 21.5751 15.0395 21.4683 14.9461C21.3642 14.8524 21.2095 14.8845 21.097 14.9098C20.9367 14.9458 18.4083 16.6187 13.5033 19.9282C12.7861 20.4215 12.1364 20.6619 11.5514 20.6493C10.9101 20.6355 9.67263 20.2859 8.75294 19.9872C7.62794 19.6207 6.73075 19.427 6.8095 18.8046C6.84888 18.4806 7.29607 18.149 8.14825 17.8101Z" fill="white"/>
-        </g>
-        <defs>
-          <linearGradient id="paint0_linear_3159_51201" x1="1800" y1="0" x2="1800" y2="3600" gradientUnits="userSpaceOnUse">
-            <stop stopColor="#2AABEE"/>
-            <stop offset="1" stopColor="#229ED9"/>
-          </linearGradient>
-          <clipPath id="clip0_3159_51201">
-            <rect width="36" height="36" rx="18" fill="white"/>
-          </clipPath>
-        </defs>
-      </svg>
-    ),
-    href: (url) => `https://t.me/share/url?url=${encodeURIComponent(url)}`,
+    href: (url) =>
+      `https://t.me/share/url?url=${encodeURIComponent(url)}`,
   },
   {
     name: "Threads",
-    bg: "bg-black",
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <path fillRule="evenodd" clipRule="evenodd" d="M3.05319 2.15667C4.30652 0.693333 6.04185 0 7.92252 0C9.71785 0 11.3052 0.43 12.5299 1.30867C13.7679 2.19667 14.5765 3.5 14.8645 5.11667C14.8857 5.2252 14.885 5.33685 14.8625 5.44512C14.8401 5.55338 14.7963 5.6561 14.7338 5.74728C14.6712 5.83847 14.5912 5.91629 14.4983 5.97622C14.4053 6.03616 14.3014 6.077 14.1926 6.09638C14.0837 6.11575 13.9721 6.11327 13.8642 6.08907C13.7563 6.06488 13.6543 6.01945 13.5641 5.95545C13.474 5.89144 13.3975 5.81013 13.339 5.71626C13.2806 5.62239 13.2415 5.51782 13.2239 5.40867C13.0072 4.194 12.4225 3.282 11.5592 2.66333C10.6832 2.03533 9.46185 1.66667 7.92252 1.66667C6.46919 1.66667 5.21852 2.19067 4.31852 3.24067C3.40852 4.30333 2.78385 5.99267 2.78385 8.44733C2.78385 10.8153 3.58452 12.2447 4.61052 13.0987C5.66385 13.976 7.06119 14.3333 8.37052 14.3333C10.9559 14.3333 12.5405 12.812 12.6145 11.148C12.6512 10.322 12.3065 9.65467 11.6665 9.166L11.6199 9.13067C11.4912 9.716 11.2785 10.2373 10.9852 10.6827C10.3719 11.614 9.43852 12.158 8.36919 12.2367C7.38252 12.31 6.55452 12.0727 5.94919 11.586C5.66943 11.3621 5.43979 11.082 5.27511 10.7638C5.11043 10.4456 5.01439 10.0963 4.99319 9.73867C4.96119 9.19 5.05319 8.38 5.67852 7.71C6.30719 7.03667 7.32052 6.66933 8.76852 6.66933C9.19585 6.66933 9.61385 6.70067 10.0165 6.76467C9.87452 6.06467 9.55452 5.72467 9.27719 5.54067C8.90185 5.29067 8.47052 5.24267 8.26052 5.24267C7.67119 5.24267 7.14919 5.464 6.65852 6.02667C6.51266 6.19081 6.30791 6.29075 6.08877 6.30476C5.86963 6.31877 5.65382 6.24572 5.48824 6.10148C5.32266 5.95725 5.22071 5.7535 5.20453 5.53451C5.18835 5.31552 5.25927 5.09899 5.40185 4.932C6.18319 4.03533 7.15119 3.576 8.26052 3.576C8.64919 3.576 9.44785 3.65267 10.1999 4.152C10.9952 4.68067 11.6279 5.61067 11.7399 7.09133L11.7519 7.284C12.0852 7.44 12.3959 7.626 12.6779 7.84133C13.7172 8.63467 14.3419 9.80867 14.2792 11.222C14.1539 14.038 11.5605 16 8.37052 16C6.79252 16 4.97852 15.5733 3.54385 14.38C2.08185 13.1627 1.11719 11.2327 1.11719 8.448C1.11719 5.724 1.81052 3.606 3.05319 2.15667ZM10.0465 8.464C9.62617 8.37672 9.19783 8.33382 8.76852 8.336C7.57519 8.336 7.09252 8.638 6.89719 8.84733C6.69919 9.05933 6.63985 9.34267 6.65719 9.64067C6.67052 9.87667 6.77852 10.1133 6.99519 10.2873C7.20852 10.46 7.59452 10.6227 8.24652 10.5747C8.79319 10.5347 9.25985 10.2713 9.59319 9.766C9.80119 9.45 9.96785 9.01933 10.0465 8.464Z" fill="#EAEAEA"/>
-      </svg>
-    ),
-    href: () => `https://www.threads.net/`,
+    href: (_url) => `https://www.threads.net/`,
   },
 ];
 
-// ── ShareModal ─────────────────────────────────────────────────────────────────
+function formatDisplayUrl(href) {
+  if (!href) return "elysium.com/giraffesantuary";
+  try {
+    const u = new URL(href);
+    const host = u.hostname.replace(/^www\./, "");
+    const path = `${u.pathname}${u.search}`.replace(/\/$/, "") || "";
+    return `${host}${path}`;
+  } catch {
+    return href;
+  }
+}
+
 const ShareModal = React.forwardRef(({ onClose, tour = {} }, ref) => {
   const {
     title = "Giraffe Sanctuary",
-    description = "A Giraffe Sanctuary offers visitors a rare chance to get up close to these gentle giants in a safe, natural environment. Explore open landscapes where giraffes roam freely, learn about conservation efforts, and enjoy unforgettable guided encounters perfect for wildlife lovers and photographers.",
-    image,
-    url = window.location.href,
-    location = "Ghana",
+    description =
+      "A Giraffe Sanctuary offers visitors a rare chance to get up close to these gentle giants in a safe, natural environment. Explore open landscapes where giraffes roam freely, learn about conservation efforts, and enjoy unforgettable guided encounters perfect for wildlife lovers and photographers.",
+    image = "https://codia-f2c.s3.us-west-1.amazonaws.com/image/2026-04-30/Bs3VspDBUA.png",
+    url: urlProp,
+    locationTag = "Ghana",
     author = {
       name: "Davida Dzato",
-      avatar: "https://picsum.photos/seed/author-avatar/48/48",
+      avatar: ASSETS.avatarFallback,
       subtitle: "Giraffe Sanctuary",
     },
   } = tour;
 
-  const shareUrl = url.replace(/^https?:\/\//, "");
+  const url =
+    urlProp ??
+    (typeof window !== "undefined" ? window.location.href : "");
+
+  const displayUrl = useMemo(() => formatDisplayUrl(url), [url]);
+
   const [copied, setCopied] = useState(false);
 
-  const handleCopy = async () => {
-    try {
-      if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(url);
-      } else if (typeof document !== "undefined") {
-        const textArea = document.createElement("textarea");
-        textArea.value = url;
-        textArea.setAttribute("readonly", "");
-        textArea.style.position = "absolute";
-        textArea.style.left = "-9999px";
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand("copy");
-        document.body.removeChild(textArea);
-      }
+  const handleCopy = () => {
+    const textToCopy =
+      url ||
+      (typeof window !== "undefined" ? window.location.href : "") ||
+      displayUrl;
+    navigator.clipboard.writeText(textToCopy).then(() => {
       setCopied(true);
-      window.setTimeout(() => setCopied(false), 2000);
-    } catch {
-      setCopied(false);
-    }
+      setTimeout(() => setCopied(false), 2000);
+    });
   };
 
   useEffect(() => {
-    const handleKey = (e) => { if (e.key === "Escape") onClose?.(); };
+    const handleKey = (e) => {
+      if (e.key === "Escape") onClose?.();
+    };
     document.addEventListener("keydown", handleKey);
     return () => document.removeEventListener("keydown", handleKey);
   }, [onClose]);
 
-  const activeSrc = image || `https://picsum.photos/seed/share-modal/417/191`;
-
   return (
     <div
       ref={ref}
-      className="fixed inset-0 bg-black/60 z-[9999] flex items-center justify-center"
-      onClick={(e) => { if (e.target === e.currentTarget) onClose?.(); }}
+      className="fixed inset-0 z-[250] flex items-center justify-center bg-black/45 p-4 font-raleway"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose?.();
+      }}
     >
-      {/* Card — Figma: 523×642px, rounded-[30px] */}
-      <section
-        aria-label="Share photos form"
-        className="relative w-[523px] h-[642px] bg-white rounded-[30px] overflow-hidden shadow-[0_10px_4px_0_rgba(0,0,0,0.15)]"
+      <div
+        className="relative mx-auto my-0 h-[642px] w-[523px] max-h-[min(90vh,642px)] overflow-hidden overflow-y-auto rounded-[30px] bg-white shadow-[0_10px_4px_0_rgba(0,0,0,0.15)]"
+        onClick={(e) => e.stopPropagation()}
       >
-        {/* Close — Figma: absolute top-[17px] left-[449px] 24×24 */}
+        {/* Decorative spine (design) */}
+        <div
+          className="pointer-events-none absolute left-0 top-[5px] z-[51] h-[298px] w-[3px] shrink-0 bg-cover bg-no-repeat"
+          style={{ backgroundImage: `url(${ASSETS.spine})` }}
+          aria-hidden
+        />
+
         <button
           type="button"
           onClick={onClose}
-          aria-label="Close"
-          className="absolute top-[17px] left-[449px] flex h-6 w-6 items-center justify-center"
-        >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <circle cx="12" cy="12" r="10" stroke="#2d2d2d" strokeWidth="1.5"/>
-            <path d="M8 8L16 16M16 8L8 16" stroke="#2d2d2d" strokeWidth="1.5" strokeLinecap="round"/>
-          </svg>
-        </button>
+          className="absolute right-[17px] top-[17px] z-[60] h-[24px] w-[24px] shrink-0 overflow-hidden bg-cover bg-no-repeat transition-opacity hover:opacity-80"
+          style={{ backgroundImage: `url(${ASSETS.close})` }}
+          aria-label="Close share modal"
+        />
 
-        {/* Content — Figma: flex-col w-[443px] items-end gap-3 absolute top-[calc(50%-273px)] left-10 */}
-        <div className="flex flex-col w-[443px] items-end gap-3 absolute top-[calc(50%_-_273px)] left-10">
+        <div className="relative z-[1] mx-10 mt-10 flex w-[calc(100%-80px)] max-w-[443px] flex-col gap-5">
+          {/* User row — avatar + text side-by-side; text never overlaps avatar */}
+          <div className="flex w-full items-start gap-3 pr-2">
+            <div
+              className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full bg-[#f0f0f0] bg-cover bg-center bg-no-repeat"
+              style={{
+                backgroundImage: `url(${author.avatar || ASSETS.avatarFallback})`,
+              }}
+            />
+            <div className="flex min-w-0 flex-1 flex-col pt-0.5">
+              <p className="break-words font-raleway text-[13px] font-semibold leading-[18px] text-[#2d2d2d]">
+                {author.name}
+              </p>
+              <p className="mt-0.5 break-words font-raleway text-[10px] font-medium leading-[18px] text-[#565656]">
+                {author.subtitle}
+              </p>
+            </div>
+          </div>
 
-          {/* ── Header (author) ── */}
-          <header className="flex flex-col items-start gap-3 relative self-stretch w-full flex-[0_0_auto]">
-            <div className="inline-flex items-start gap-1 relative flex-[0_0_auto]">
-              <img
-                className="w-12 h-12 object-cover rounded-full shrink-0"
-                alt={author.name}
-                src={author.avatar}
-              />
-              <div className="inline-flex flex-col items-start justify-center relative flex-[0_0_auto]">
-                <div className="inline-flex h-7 items-center justify-center gap-2.5 px-0 py-2.5 relative">
-                  <h1 className="relative w-fit mt-[-6px] mb-[-4px] font-raleway text-[13px] font-semibold leading-[18px] text-[#2d2d2d] whitespace-nowrap">
-                    {author.name}
-                  </h1>
+          {/* Location, description, hero image, lavender — story column matches lavender outer width */}
+          <div className="relative z-10 flex w-full flex-col items-stretch gap-4 self-stretch">
+            <div className="flex w-full flex-col gap-4">
+              <div className="flex w-full min-w-0 flex-col gap-2">
+                <div className="flex h-[24px] shrink-0 items-center gap-[7px]">
+                  <div
+                    className="h-[16px] w-[16px] shrink-0 rounded-[50%] bg-cover bg-no-repeat"
+                    style={{ backgroundImage: `url(${ASSETS.flag})` }}
+                    aria-hidden
+                  />
+                  <span className="font-raleway text-[13px] font-medium leading-[22px] text-[#292929] whitespace-nowrap">
+                    {locationTag}
+                  </span>
                 </div>
-                <div className="inline-flex h-[23px] items-center justify-center gap-2.5 px-0 py-2.5 relative">
-                  <p className="relative w-fit mt-[-8.5px] mb-[-6.5px] font-raleway text-[10px] font-medium leading-[18px] text-[#565656] whitespace-nowrap">
-                    {author.subtitle}
-                  </p>
-                </div>
+                <p className="max-h-[120px] w-full overflow-y-auto text-left font-raleway text-[10px] font-medium leading-[18px] text-[#565656]">
+                  {description}
+                </p>
+              </div>
+
+              <div className="relative h-[191px] w-full shrink-0 overflow-hidden rounded-[15px] bg-[rgba(0,0,0,0.02)]">
+                <img
+                  src={image}
+                  alt={title}
+                  className="h-full w-full object-cover"
+                />
               </div>
             </div>
-          </header>
 
-          {/* ── Main ── */}
-          <main className="flex flex-col items-center gap-3 relative self-stretch w-full flex-[0_0_auto]">
-
-            {/* Location + description + image */}
-            <article className="flex w-[393px] items-center gap-7 relative flex-[0_0_auto]">
-              <div className="flex flex-col w-[393px] items-start gap-2 relative">
-
-                {/* Location + description */}
-                <div className="flex flex-col w-[417px] h-[105px] items-start gap-1 relative mr-[-24px]">
-                  <div className="flex h-6 items-center gap-[7px] relative self-stretch w-full">
-                    {/* Ghana flag SVG */}
-                    <svg width="16" height="16" viewBox="0 0 16 16" className="shrink-0" aria-hidden="true">
-                      <defs>
-                        <clipPath id="gh-flag-clip">
-                          <circle cx="8" cy="8" r="8"/>
-                        </clipPath>
-                      </defs>
-                      <g clipPath="url(#gh-flag-clip)">
-                        <rect width="16" height="5.33" fill="#CE1126"/>
-                        <rect y="5.33" width="16" height="5.34" fill="#FCD116"/>
-                        <rect y="10.67" width="16" height="5.33" fill="#006B3F"/>
-                        <text x="8" y="10.5" textAnchor="middle" fontSize="7" fill="black" fontFamily="sans-serif">★</text>
-                      </g>
-                    </svg>
-                    <span className="font-raleway text-[13px] font-medium leading-[22px] text-[#292929] whitespace-nowrap">
-                      {location}
-                    </span>
-                  </div>
-                  <p className="relative w-[418px] h-[77px] mr-[-1px] font-raleway text-[10px] font-medium leading-[18px] text-[#565656] overflow-hidden">
-                    {description}
-                  </p>
-                </div>
-
-                {/* Tour image */}
-                <div className="relative w-[417px] h-[191px] mr-[-24px] rounded-[15px] overflow-hidden shadow-[0px_4px_20px_rgba(0,0,0,0.15)]">
-                  <img src={activeSrc} alt={title} className="w-full h-full object-cover"/>
-                  <div className="absolute inset-0 bg-black/10" aria-hidden/>
-                </div>
-              </div>
-            </article>
-
-            {/* ── Share options ── */}
-            <div className="w-[443px] h-[168px] bg-[#f2eaf9] rounded-[15px] relative overflow-hidden">
-
-              {/* Copy URL */}
-              <div className="flex w-[393px] h-[72px] flex-col gap-[4px] items-start flex-nowrap relative mt-[12px] ml-[25px]">
-                <div className="flex flex-col gap-[8px] items-start self-stretch shrink-0 flex-nowrap">
-                  <div className="flex flex-col gap-[4px] items-start self-stretch shrink-0 flex-nowrap">
-                    <div className="flex w-[298px] h-[24px] gap-[7px] items-center shrink-0 flex-nowrap">
-                      <span className="font-raleway text-[10px] font-semibold leading-[11.74px] text-[#2d2d2d] text-center whitespace-nowrap">
+            {/* Lavender: Copy URL + Share With — same outer width as column above */}
+            <div className="relative z-[19] h-[168px] w-full shrink-0 overflow-hidden rounded-[15px] bg-[#f2eaf9]">
+              <div className="relative z-20 mx-[25px] mt-[12px] flex h-[72px] w-[calc(100%-50px)] max-w-none flex-col items-start gap-1">
+                <div className="relative z-[21] flex w-full flex-col items-start gap-2 self-stretch shrink-0">
+                  <div className="relative z-[22] flex w-full flex-col items-start gap-1 self-stretch shrink-0">
+                    <div className="relative z-[23] flex h-[24px] w-[298px] shrink-0 items-center gap-[7px]">
+                      <span className="relative z-[24] flex h-[12px] w-[41px] shrink-0 basis-auto items-start justify-center whitespace-nowrap text-center font-raleway text-[10px] font-semibold leading-[11.74px] text-[#2d2d2d]">
                         Copy Url
                       </span>
                     </div>
-                    <div className="flex h-[40px] px-[10px] justify-between items-center self-stretch shrink-0 flex-nowrap bg-[#fefefe] rounded-[20px]">
-                      <div className="flex gap-[7px] items-center flex-1 min-w-0 overflow-hidden">
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" className="shrink-0">
-                          <path d="M5.33333 11.8333C5.60948 11.8333 5.83333 11.6095 5.83333 11.3333C5.83333 11.0572 5.60948 10.8333 5.33333 10.8333V11.8333ZM10.6667 10.8333C10.3905 10.8333 10.1667 11.0572 10.1667 11.3333C10.1667 11.6095 10.3905 11.8333 10.6667 11.8333V10.8333ZM10.6667 5.16667C10.3905 5.16667 10.1667 4.94281 10.1667 4.66667C10.1667 4.39053 10.3905 4.16667 10.6667 4.16667V5.16667ZM5.33333 4.16667C5.60948 4.16667 5.83333 4.39053 5.83333 4.66667C5.83333 4.94281 5.60948 5.16667 5.33333 5.16667V4.16667ZM5.33333 8.5C5.05719 8.5 4.83333 8.27615 4.83333 8C4.83333 7.72386 5.05719 7.5 5.33333 7.5V8.5ZM10.6667 7.5C10.9428 7.5 11.1667 7.72386 11.1667 8C11.1667 8.27615 10.9428 8.5 10.6667 8.5V7.5ZM5.33333 10.8333C3.76853 10.8333 2.5 9.56481 2.5 8H1.5C1.5 10.1171 3.21624 11.8333 5.33333 11.8333V10.8333ZM13.5 8C13.5 9.56481 12.2315 10.8333 10.6667 10.8333V11.8333C12.7838 11.8333 14.5 10.1171 14.5 8H13.5ZM10.6667 5.16667C12.2315 5.16667 13.5 6.4352 13.5 8H14.5C14.5 5.88291 12.7838 4.16667 10.6667 4.16667V5.16667ZM5.33333 4.16667C3.21624 4.16667 1.5 5.88291 1.5 8H2.5C2.5 6.4352 3.76853 5.16667 5.33333 5.16667V4.16667ZM5.33333 8.5H10.6667V7.5H5.33333V8.5Z" fill="#565656"/>
-                        </svg>
-                        <span className="font-raleway text-[10px] font-medium leading-[18px] text-[#565656] truncate">
-                          {shareUrl}
+                    <div className="relative z-[25] flex h-10 w-full shrink-0 flex-nowrap items-center justify-between self-stretch rounded-[20px] bg-[#fefefe] px-[10px]">
+                      <div className="relative z-[26] flex min-w-0 flex-1 shrink-0 items-center gap-[7px]">
+                        <div
+                          className="relative z-[27] h-4 w-4 shrink-0 overflow-hidden bg-cover bg-no-repeat"
+                          style={{
+                            backgroundImage: `url(${ASSETS.linkIcon})`,
+                          }}
+                          aria-hidden
+                        />
+                        <span className="relative z-[28] min-w-0 truncate text-left font-raleway text-[10px] font-medium leading-[18px] text-[#565656]">
+                          {copied ? "Copied!" : displayUrl}
                         </span>
                       </div>
                       <button
                         type="button"
                         onClick={handleCopy}
-                        aria-label={copied ? "URL copied" : "Copy URL"}
-                        className="flex w-[32px] h-[32px] p-[10px] gap-[9px] justify-center items-center shrink-0 flex-nowrap rounded-[40px] border-[0.8px] border-[#7b2cbf] shadow-[0_4px_4px_0_rgba(0,0,0,0.05)]"
+                        className={classNames(
+                          "relative z-[29] flex h-8 w-8 shrink-0 flex-nowrap items-center justify-center rounded-[40px] border-[0.8px] border-solid border-[#7b2cbf] shadow-[0_4px_4px_0_rgba(0,0,0,0.05)] transition-colors",
+                          copied &&
+                            "border-secondary-normal-default bg-secondary-normal-default"
+                        )}
+                        aria-label="Copy URL"
                       >
                         {copied ? (
-                          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                            <path d="M2.5 7L5.5 10L11.5 4" stroke="#7b2cbf" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                          <svg
+                            width="14"
+                            height="14"
+                            viewBox="0 0 16 16"
+                            fill="none"
+                            className="relative z-30"
+                          >
+                            <path
+                              d="M3 8L6.5 11.5L13 5"
+                              stroke="white"
+                              strokeWidth="1.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
                           </svg>
                         ) : (
-                          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                            <rect x="4" y="4" width="8" height="9" rx="1.5" stroke="#7b2cbf" strokeWidth="1.2"/>
-                            <path d="M10 3.5V2.5C10 1.95 9.55 1.5 9 1.5H2.5C1.95 1.5 1.5 1.95 1.5 2.5V9.5C1.5 10.05 1.95 10.5 2.5 10.5H3.5" stroke="#7b2cbf" strokeWidth="1.2" strokeLinecap="round"/>
-                          </svg>
+                          <div
+                            className="relative z-30 h-[14px] w-[14px] shrink-0 bg-cover bg-no-repeat"
+                            style={{
+                              backgroundImage: `url(${ASSETS.copyIcon})`,
+                            }}
+                            aria-hidden
+                          />
                         )}
                       </button>
                     </div>
                   </div>
-                  <div className="w-[415px] h-[11px] shrink-0 flex items-center">
-                  </div>
+                  <div
+                    className="relative z-[31] h-[11px] w-full shrink-0 bg-cover bg-center bg-no-repeat"
+                    style={{ backgroundImage: `url(${ASSETS.divider})` }}
+                    aria-hidden
+                  />
                 </div>
               </div>
 
-              {/* Share With */}
-              <div className="flex w-[393px] flex-col gap-[4px] items-start flex-nowrap relative mt-[8px] ml-[25px]">
-                <div className="flex w-[298px] h-[24px] gap-[7px] items-center shrink-0 flex-nowrap">
-                  <span className="font-raleway text-[10px] font-semibold leading-[11.74px] text-[#2d2d2d] text-center whitespace-nowrap">
+              <div className="relative z-[32] mx-[25px] mt-2 flex w-[calc(100%-50px)] flex-col items-start gap-1">
+                <div className="relative z-[33] flex h-[24px] w-[298px] shrink-0 items-center gap-[7px]">
+                  <span className="relative z-[34] flex h-[12px] w-[52px] shrink-0 basis-auto items-start justify-center whitespace-nowrap text-center font-raleway text-[10px] font-semibold leading-[11.74px] text-[#2d2d2d]">
                     Share With
                   </span>
                 </div>
-                {/* 9 icons × 36px + 8 gaps × 8px = 388px — fits in 393px container */}
-                <div className="flex gap-[8px] justify-between items-center self-stretch shrink-0 flex-nowrap">
-                  {SOCIAL_PLATFORMS.map((p) => (
+                <div className="relative z-[35] flex shrink-0 flex-nowrap items-center gap-[15px] self-stretch">
+                  {SOCIAL_PLATFORMS.map((platform, i) => (
                     <a
-                      key={p.name}
-                      href={p.href(url)}
+                      key={platform.name}
+                      href={platform.href(url)}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={classNames(
-                        "w-[36px] h-[36px] rounded-[40px] flex items-center justify-center shrink-0 overflow-hidden hover:opacity-80 transition-opacity",
-                        p.bg
-                      )}
-                      aria-label={`Share on ${p.name}`}
-                      title={p.name}
-                    >
-                      {p.icon}
-                    </a>
+                      className="relative h-[36px] w-[36px] shrink-0 overflow-hidden rounded-[40px] bg-cover bg-center bg-no-repeat transition-opacity hover:opacity-90"
+                      style={{
+                        backgroundImage: `url(${SOCIAL_ICON_BG[i]})`,
+                      }}
+                      aria-label={`Share on ${platform.name}`}
+                      title={platform.name}
+                    />
                   ))}
                 </div>
               </div>
-
             </div>
-
-          </main>
+          </div>
         </div>
-      </section>
+      </div>
     </div>
   );
 });

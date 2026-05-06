@@ -434,11 +434,11 @@ function LoginView({ onSuccess, onForgot, onSignUp }) {
             Access your bookings, saved tours, and travel profile.
           </span>
         </div>
-        <OAuthButtons />
-        <OrDivider />
       </ViewHeader>
 
       <ViewFields>
+        <OAuthButtons />
+        <OrDivider />
         <AuthInput
           label="Email address"
           type="email"
@@ -520,11 +520,11 @@ function SignupView({ onSuccess, onLogin }) {
             Join thousands of travelers exploring West Africa.
           </span>
         </div>
-        <OAuthButtons />
-        <OrDivider />
       </ViewHeader>
 
       <ViewFields>
+        <OAuthButtons />
+        <OrDivider />
         {/* First Name + Last Name row */}
         <div className="flex gap-[16px] items-start self-stretch shrink-0">
           <div className="flex flex-col gap-[12px] items-start flex-1 shrink-0">
@@ -846,9 +846,19 @@ export default function AuthModal({ isOpen, onClose, initialView = "login", onAu
         </button>
 
         {/* Logo — fixed, never scrolls */}
-        <div className="shrink-0 flex justify-center pt-[24px] pb-[20px]">
+        <div className="shrink-0 flex justify-center pt-[24px] pb-2">
           <ModalLogo />
         </div>
+
+        {/* purble element */}
+        <div
+          className="w-[80%] mb-3 mx-auto h-[2px] border border-secondary-normal-default"
+          style={{
+            opacity: 0.5,
+            background: "var(--violet-secondary-30-normal, #7B2CBF)",
+            filter: "blur(10px)",
+          }}
+        />
 
         {/* View area — fills remaining height, inner scroll is per-view */}
         <div className="flex flex-col flex-1 min-h-0 px-[52px] pb-[40px]">

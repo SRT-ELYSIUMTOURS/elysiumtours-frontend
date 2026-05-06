@@ -5,6 +5,7 @@ import GalleryCategoryFilterBar from "../../components/sections/gallery/GalleryC
 import GalleryPhotoCard from "../../components/cards/GalleryPhotoCard";
 import GalleryVideoCard from "../../components/cards/GalleryVideoCard";
 import ImageViewerModal from "../../components/ui/ImageViewerModal";
+import ImageGalleryModal from "../../components/ui/ImageGalleryModal";
 import VideoViewerModal from "../../components/ui/VideoViewerModal";
 import SocialShareModal from "../../components/ui/SocialShareModal";
 import GalleryBecomePartSection from "../../components/sections/gallery/GalleryBecomePartSection";
@@ -68,6 +69,8 @@ const GalleryCategoryPage = () => {
 
   const [viewerOpen, setViewerOpen] = useState(false);
   const [viewerIndex, setViewerIndex] = useState(0);
+  const [fullGalleryOpen, setFullGalleryOpen] = useState(false);
+  const [galleryIndex, setGalleryIndex] = useState(0);
   const [shareOpen, setShareOpen] = useState(false);
   const [shareItem, setShareItem] = useState(null);
 
@@ -202,6 +205,23 @@ const GalleryCategoryPage = () => {
           onPrev={() => setViewerIndex((p) => Math.max(0, p - 1))}
           onNext={() => setViewerIndex((p) => Math.min(items.length - 1, p + 1))}
           onShare={() => handleShare(items[viewerIndex])}
+          onOpenFullscreen={() => {
+            setGalleryIndex(viewerIndex);
+            setViewerOpen(false);
+            setFullGalleryOpen(true);
+          }}
+        />
+      )}
+
+      {fullGalleryOpen && (
+        <ImageGalleryModal
+          images={thumbnails}
+          currentIndex={galleryIndex}
+          onClose={() => setFullGalleryOpen(false)}
+          title={items[galleryIndex]?.title ?? ""}
+          location="Ghana — Central Region, Cape Coast"
+          onShare={(i) => items[i] && handleShare(items[i])}
+          suppressEscapeClose={shareOpen}
         />
       )}
 

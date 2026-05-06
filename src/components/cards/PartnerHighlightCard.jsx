@@ -24,9 +24,9 @@ const PartnerHighlightCard = React.forwardRef(
     },
     ref
   ) => {
-    // Default: label flush to bottom, full-width, 27px vertical padding
+    // Default: label flush to bottom; frosted strip uses a separate layer so text stays sharp
     const defaultLabelClass =
-      "absolute bottom-0 left-0 right-0 px-6 py-[27px]";
+      "absolute bottom-0 left-0 h-[122px] right-0 isolate z-[2] overflow-hidden rounded-b-[40px] px-6 flex flex-col justify-center  ";
 
     return (
       <div
@@ -53,19 +53,27 @@ const PartnerHighlightCard = React.forwardRef(
           style={{ backgroundColor: overlayColor }}
         />
 
-        {/* Category label + optional subtitle */}
+        {/* Category label + optional subtitle — frosted strip behind text (Figma glass blend) */}
         <div className={labelClassName ?? defaultLabelClass}>
-          <h3 className="text-semi-md-bold text-primary-light-default">
-            {category}
-          </h3>
-          {subtitle && (
-            <p
-              className="font-raleway font-medium text-[16px] leading-[26px]"
-              style={{ color: subtitleColor }}
-            >
-              {subtitle}
-            </p>
+          {!labelClassName && (
+            <div
+              aria-hidden
+              className="partner-highlight-label-frost pointer-events-none absolute inset-0  rounded-b-[40px]"
+            />
           )}
+          <div className="relative z-1 ">
+            <h3 className="text-semi-md-bold text-primary-light-default">
+              {category}
+            </h3>
+            {subtitle && (
+              <p
+                className="font-raleway font-medium text-[16px] leading-[26px]"
+                style={{ color: subtitleColor }}
+              >
+                {subtitle}
+              </p>
+            )}
+          </div>
         </div>
       </div>
     );

@@ -3,6 +3,7 @@ import { classNames } from "../../utils/classNames";
 import HeroSection from "../../components/sections/home/HeroSection";
 import DiscoverSection from "../../components/sections/home/DiscoverSection";
 import FeaturedToursSection from "../../components/sections/home/FeaturedToursSection";
+import CustomTourSection from "../../components/sections/home/CustomTourSection";
 import FeaturedDestinationsSection from "../../components/sections/home/FeaturedDestinationsSection";
 import PartnerHighlightsSection from "../../components/sections/home/PartnerHighlightsSection";
 import GallerySection from "../../components/sections/home/GallerySection";
@@ -21,6 +22,7 @@ const HomePage = React.forwardRef(({ className, ...props }, ref) => {
       <HeroSection/>
       <DiscoverSection />
       <FeaturedToursSection />
+      <CustomTourSection />
       <FeaturedDestinationsSection />
       <PartnerHighlightsSection />
       <GallerySection />

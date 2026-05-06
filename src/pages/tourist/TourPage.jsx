@@ -6,7 +6,7 @@ import TourByCountriesSection from "../../components/sections/tours/TourByCountr
 import TourTypesSection from "../../components/sections/tours/TourTypesSection";
 import TourFeaturedSection from "../../components/sections/tours/TourFeaturedSection";
 import WhyChooseSection from "../../components/sections/tours/WhyChooseSection";
-import BlogCtaSection from "../../components/sections/blog/BlogCtaSection";
+import TourCtaSection from "../../components/sections/tours/TourCtaSection";
 import CtaSection from "../../components/sections/tours/CtaSection";
 
 // Figma: 1914:37486 — Tours landing page
@@ -26,7 +26,7 @@ const TourPage = () => {
       <TourTypesSection />
       <TourFeaturedSection />
       <WhyChooseSection />
-      <BlogCtaSection />
+      <TourCtaSection />
       <CtaSection />
     </main>
   );

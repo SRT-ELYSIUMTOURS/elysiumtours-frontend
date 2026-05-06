@@ -1,13 +1,14 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { classNames } from "../../../utils/classNames";
+import { openBlogPost } from "../../../utils/blogPostRoute";
 import BlogSectionHeader from "./BlogSectionHeader";
 import PartnerHighlightCard from "../../cards/PartnerHighlightCard";
 
 const PARTNERS = [
   { id: 1, category: "Accommodation", image: "https://picsum.photos/seed/ps1/451/656" },
   { id: 2, category: "Transportation", image: "https://picsum.photos/seed/ps2/451/656" },
-  { id: 3, category: "Dinning", image: "https://picsum.photos/seed/ps3/451/656" },
+  { id: 3, category: "Dining", image: "https://picsum.photos/seed/ps3/451/656" },
 ];
 
 const PartnerSpotlightPreview = React.forwardRef(({ className, ...props }, ref) => {
@@ -37,7 +38,14 @@ const PartnerSpotlightPreview = React.forwardRef(({ className, ...props }, ref) 
               image={partner.image}
               category={partner.category}
               className="h-[400px] md:h-[500px] w-full lg:h-[656px]"
-
+              onClick={() =>
+                openBlogPost(navigate, {
+                  title: partner.category,
+                  category: partner.category,
+                  image: partner.image,
+                  uniqueKey: partner.id,
+                })
+              }
             />
           ))}
         </div>

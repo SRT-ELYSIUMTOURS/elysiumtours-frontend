@@ -215,6 +215,39 @@
 .shadow-lg { box-shadow: var(--box-shadow-lg) !important; }
 
 
+/* PartnerHighlightCard — frosted bottom label strip (Figma glass blend) */
+.partner-highlight-label-frost {
+  /* Grey tint: strongest at bottom of strip, transparent toward top */
+  background: linear-gradient(
+    to top,
+    rgba(255, 255, 255, 0.3) 0%,
+    rgba(255, 255, 255, 0.4) 38%,
+    rgba(255, 255, 255, 0.1) 92%
+  );
+  filter: blur(15px);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  /* Fade blur + tint together toward the top edge of the label */
+  mask-image: linear-gradient(
+    to top,
+    white 0%,
+    white 18%,
+    rgba(255, 255, 255, 0.45) 92%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to top,
+    white 0%,
+    white 18%,
+    rgba(255, 255, 255, 0.45) 92%,
+    transparent 100%
+  );
+  mask-size: 100% 100%;
+  -webkit-mask-size: 100% 100%;
+  mask-repeat: no-repeat;
+  -webkit-mask-repeat: no-repeat;
+}
+
 /* Monotone noise — Size 1, Density 100%, #000000 30% (matches Figma) */
 .noise::after {
   content: '';
@@ -232,4 +265,13 @@
 .leaflet-div-icon.leaflet-meeting-pin-icon {
   background: transparent !important;
   border: none !important;
+}
+
+/* Twemoji (polyfill): SVG replaces emoji codepoints — regional flags render on Windows */
+.twemoji-root img.emoji {
+  display: inline-block;
+  height: 1.15em;
+  width: 1.15em;
+  margin: 0 0.1em 0.06em 0.08em;
+  vertical-align: -0.18em;
 }

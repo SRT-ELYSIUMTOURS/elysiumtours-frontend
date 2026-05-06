@@ -162,13 +162,13 @@ const CategorySectionBlock = ({ catKey, navigate }) => {
 
         {/* 4 partner highlight cards */}
         <div className="flex gap-[24px]">
-          {data.cards.map((card) => (
+          {data.cards.map((card, index) => (
             <PartnerHighlightCard
               key={card.id}
               image={card.image}
               category={card.category}
               onClick={() => navigate(`/tour-partners/${catKey}/all`)}
-              className="flex-1 h-[568px]"
+              className={` flex-1 h-[568px] ${index === 0 || index === 3 ? "lg:mt-[74px]" : ""}`}
             />
           ))}
         </div>
