@@ -89,7 +89,7 @@ function generateCards(layout, seed = "cat") {
       return [
         { id: 1, category: "Accommodation", image: `https://picsum.photos/seed/${seed}-acc/451/656` },
         { id: 2, category: "Transportation", image: `https://picsum.photos/seed/${seed}-trans/451/656` },
-        { id: 3, category: "Dinning", image: `https://picsum.photos/seed/${seed}-din/451/656` },
+        { id: 3, category: "Dining", image: `https://picsum.photos/seed/${seed}-din/451/656` },
       ];
     default:
       return [];
@@ -109,14 +109,14 @@ function Masonry2ColGrid({ cards }) {
             title={cards[i].title}
             category={cards[i].category}
             image={cards[i].image}
-            className="!w-[1028px] !h-[371px]"
+            className="!w-[70%] !h-[371px]"
           />
           {cards[i + 1] && (
             <BlogContentCard
               title={cards[i + 1].title}
               category={cards[i + 1].category}
               image={cards[i + 1].image}
-              className="!w-[363px] !h-[371px]"
+              className="!w-[30%] !h-[371px]"
             />
           )}
         </div>
@@ -139,51 +139,126 @@ function Masonry2ColGrid({ cards }) {
   return <div className="flex flex-col gap-[15px]">{rows}</div>;
 }
 
-// Render 4-column equal grid
+// Destination highlights: 4-column staggered grid (Figma)
+// Cols a & d: tall cards (340×653), top-aligned. Cols b/c & e/f: stacked small cards, shifted down slightly.
 function Grid4Col({ cards }) {
-  const rows = [];
-  for (let i = 0; i < cards.length; i += 4) {
-    rows.push(
-      <div key={i} className="flex gap-[15px]">
-        {cards.slice(i, i + 4).map((card) => (
-          <BlogContentCard
-            key={card.id}
-            title={card.title}
-            category={card.category}
-            image={card.image}
-            className="!w-[340px] !h-[364px]"
-          />
-        ))}
-      </div>
-    );
+  const bands = [];
+  for (let i = 0; i < cards.length; i += 6) {
+    bands.push(cards.slice(i, i + 6));
   }
-  return <div className="flex flex-col gap-[15px]">{rows}</div>;
+
+  return (
+    <div className="mx-auto flex w-full max-w-[1416px] flex-col gap-[64px]">
+      {bands.map((band, bandIdx) => {
+        const [a, b, c, d, e, f] = band;
+        return (
+          <div
+            key={bandIdx}
+            className="flex w-full flex-col items-center justify-between gap-[15px] lg:flex-row lg:items-start"
+          >
+            {a ? (
+              <BlogContentCard
+                key={a.id}
+                title={a.title}
+                category={a.category}
+                image={a.image}
+                size="tall"
+                className="shrink-0 shadow-card"
+              />
+            ) : null}
+
+            <div className="flex w-full max-w-[341px] shrink-0 flex-col gap-[15px] lg:mt-[32px]">
+              {b ? (
+                <BlogContentCard
+                  key={b.id}
+                  title={b.title}
+                  category={b.category}
+                  image={b.image}
+                  size="small"
+                  className="shrink-0 self-stretch shadow-card"
+                />
+              ) : null}
+              {c ? (
+                <BlogContentCard
+                  key={c.id}
+                  title={c.title}
+                  category={c.category}
+                  image={c.image}
+                  size="small"
+                  className="shrink-0 self-stretch shadow-card"
+                />
+              ) : null}
+            </div>
+
+            {d ? (
+              <BlogContentCard
+                key={d.id}
+                title={d.title}
+                category={d.category}
+                image={d.image}
+                size="tall"
+                className="shrink-0 shadow-card"
+              />
+            ) : null}
+
+            <div className="flex w-full max-w-[341px] shrink-0 flex-col gap-[15px] lg:mt-[32px]">
+              {e ? (
+                <BlogContentCard
+                  key={e.id}
+                  title={e.title}
+                  category={e.category}
+                  image={e.image}
+                  size="small"
+                  className="shrink-0 self-stretch shadow-card"
+                />
+              ) : null}
+              {f ? (
+                <BlogContentCard
+                  key={f.id}
+                  title={f.title}
+                  category={f.category}
+                  image={f.image}
+                  size="small"
+                  className="shrink-0 self-stretch shadow-card"
+                />
+              ) : null}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
 }
 
 // Render 3-column masonry grid
 function Masonry3ColGrid({ cards }) {
-  const heights = [419, 337, 734, 734, 814, 433, 419, 337, 734, 734, 814, 433];
+  // Per-card heights (Figma). Cards go to col i % 3 — column totals must match or the shortest
+  // column “hangs” above the longest. Last column had indices 2,5,8,11 summing higher until 433→419 on 5 & 11.
+  const heights = [419, 339, 734, 734, 814, 419, 419, 339, 734, 734, 814, 419];
   const cols = [[], [], []];
   cards.forEach((card, i) => {
     cols[i % 3].push({ ...card, height: heights[i] || 364 });
   });
 
   return (
-    <div className="flex gap-[15px]">
-      {cols.map((col, ci) => (
-        <div key={ci} className="flex flex-col gap-[15px]">
-          {col.map((card) => (
-            <BlogContentCard
-              key={card.id}
-              title={card.title}
-              category={card.category}
-              image={card.image}
-              className={`!w-[457px] !h-[${card.height}px]`}
-              style={{ width: "457px", height: `${card.height}px` }}
-            />
-          ))}
-        </div>
-      ))}
+    <div className="flex  gap-[15px]">
+      {cols.map((col, ci) => {
+        const columnCards = ci === 1 ? [...col].reverse() : col;
+        return (
+          <div key={ci} className="flex flex-1  flex-col gap-[15px]">
+            {columnCards.map((card) => (
+              <BlogContentCard
+                key={card.id}
+                title={card.title}
+                category={card.category}
+                image={card.image}
+                className={`!w-[100%] rounded-[40px] !h-[${card.height}px]`}
+                style={{ width: "457px", height: `${card.height}px` }}
+              />
+            ))}
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -209,15 +284,16 @@ function Grid3x3({ cards }) {
   return <div className="flex flex-col gap-[15px]">{rows}</div>;
 }
 
-// Render 3-column partner cards
+// Render 3-column partner cards (PartnerHighlightCard needs explicit height — same as PartnerSpotlightPreview)
 function Partner3Col({ cards }) {
   return (
-    <div className="flex items-center gap-xl">
+    <div className="mx-auto flex w-full flex-col gap-xl lg:flex-row lg:items-stretch">
       {cards.map((card) => (
         <PartnerHighlightCard
           key={card.id}
           image={card.image}
           category={card.category}
+          className="h-[400px] w-full min-w-0 md:h-[500px] lg:h-[656px] lg:flex-1"
         />
       ))}
     </div>
@@ -273,7 +349,7 @@ const BlogCategoryPage = React.forwardRef(({ className, ...props }, ref) => {
         ]}
       />
       <BlogHero />
-      <BlogCategoryFilter />
+      {/* <BlogCategoryFilter /> */}
 
       {/* Main content section */}
       <section className={classNames("w-full py-[80px]", config.bg)}>

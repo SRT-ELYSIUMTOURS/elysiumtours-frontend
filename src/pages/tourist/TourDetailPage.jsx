@@ -6,7 +6,7 @@ import BlogBreadcrumbBar from "../../components/sections/blog/BlogBreadcrumbBar"
 import PopularTourCard from "../../components/cards/PopularTourCard";
 import ImageGalleryModal from "../../components/ui/ImageGalleryModal";
 import ShareModal from "../../components/ui/ShareModal";
-import Button from "../../components/ui/Button";
+import Button from "../../components/ui/button";
 import CtaSection from "../../components/sections/tours/CtaSection";
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from "react-leaflet";
 import L from "leaflet";

@@ -43,7 +43,7 @@ const BlogPaginationBar = React.forwardRef(({
         variant="secondaryOutline"
         shape="pill"
         size="small"
-        className="h-[40px] px-[24px]"
+        className="h-[40px] bg-primary-light-default! px-[24px]"
         onClick={onLoadMore}
       >
         Load More
@@ -73,7 +73,7 @@ const BlogPaginationBar = React.forwardRef(({
 
       {/* Results text */}
       <p className="font-raleway font-normal text-[13px] leading-[18px] text-primary-dark-darker">
-        Showing results {startResult}-{endResult} of {totalResults}
+        Showing results <span className="font-semibold text-secondary-normal-active">{startResult}-{endResult}</span> of <span className="font-semibold text-secondary-normal-active">{totalResults}</span>
       </p>
     </div>
   );

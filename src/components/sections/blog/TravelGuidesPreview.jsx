@@ -37,13 +37,13 @@ const TravelGuidesPreview = React.forwardRef(({ className, ...props }, ref) => {
               title="8 ways to enjoy Ghana in fall"
               category="Leisure Tours"
               image="https://picsum.photos/seed/tg1/1028/371"
-              className="!w-[1028px] !h-[371px]"
+              className="!w-[70%] !h-[371px]"
             />
             <BlogContentCard
               title="8 ways to enjoy"
               category="Leisure Tours"
               image="https://picsum.photos/seed/tg2/363/371"
-              className="!w-[363px] !h-[371px]"
+              className="!w-[30%] !h-[371px]"
             />
           </div>
           {/* Row 2: wide card */}

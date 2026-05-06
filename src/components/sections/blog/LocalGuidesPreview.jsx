@@ -26,48 +26,48 @@ const LocalGuidesPreview = React.forwardRef(({ className, ...props }, ref) => {
         {/* 3-column masonry grid with varying heights */}
         <div className="mt-[80px] flex gap-[22px]">
           {/* Column 1 */}
-          <div className="flex flex-col gap-[48px]">
+          <div className="flex flex-1 flex-col gap-[48px]">
             <BlogContentCard
               title="Guide Kofi's Accra"
               category="City Guide"
               image="https://picsum.photos/seed/lg1/457/419"
-              className="!w-[457px] !h-[418px]"
+              className="!w-[100%] !h-[418px]"
             />
             <BlogContentCard
               title="Walking the Gold Coast"
               category="Heritage"
               image="https://picsum.photos/seed/lg4/457/734"
-              className="!w-[457px] !h-[734px]"
+              className="!w-[100%] !h-[734px]"
             />
           </div>
           {/* Column 2 */}
-          <div className="flex flex-col gap-[48px]">
+          <div className="flex flex-1 flex-col gap-[48px]">
             <BlogContentCard
               title="Forest Treks"
               category="Adventure"
               image="https://picsum.photos/seed/lg5/457/814"
-              className="!w-[457px] !h-[814px]"
+              className="!w-[100%] !h-[814px]"
             />
             <BlogContentCard
               title="A Day with Ama"
               category="Local Life"
               image="https://picsum.photos/seed/lg2/457/337"
-              className="!w-[457px] !h-[338px]"
+              className="!w-[100%] !h-[338px]"
             />
           </div>
           {/* Column 3 */}
-          <div className="flex flex-col gap-[48px]">
+          <div className="flex flex-1 flex-col gap-[48px]">
             <BlogContentCard
               title="Festival Season"
               category="Events"
               image="https://picsum.photos/seed/lg6/457/433"
-              className="!w-[457px] !h-[338px]"
+              className="!w-[100%] !h-[338px]"
             />
             <BlogContentCard
               title="Market Stories"
               category="Culture"
               image="https://picsum.photos/seed/lg3/457/734"
-              className="!w-[457px] !h-[814px]"
+              className="!w-[100%] !h-[814px]"
             />
           </div>
         </div>

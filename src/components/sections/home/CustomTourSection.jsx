@@ -1,6 +1,8 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState } from "react";
 import { classNames } from "../../../utils/classNames";
+import CustomizeTourModal from "../../ui/CustomizeTourModal";
+import CustomTourResultModal from "../../ui/CustomTourResultModal";
+import IdealTripFormModal from "../../ui/IdealTripFormModal";
 
 /** Corner SVGs: `ctabgTL.svg` (top-left), `ctabgBR.svg` (bottom-right). */
 const ASSETS = {
@@ -46,14 +48,24 @@ const PILLS = [
   "Any Budget",
 ];
 
-const CustomTourSection = React.forwardRef(({ className, ...props }, ref) => {
+const CustomTourSection = React.forwardRef(({ className, style, ...props }, ref) => {
+  const [customTourModalOpen, setCustomTourModalOpen] = useState(false);
+  const [idealTripFormOpen, setIdealTripFormOpen] = useState(false);
+  const [tripResultOpen, setTripResultOpen] = useState(false);
+  const [tripResultVariant, setTripResultVariant] = useState("success");
+
   return (
     <section
       ref={ref}
       className={classNames(
-        "relative overflow-hidden bg-[#2b0f43] py-16 md:py-20 lg:py-[96px]",
+        "relative overflow-hidden py-16 md:py-20 lg:py-[96px]",
         className
       )}
+      style={{
+        background:
+          "radial-gradient(80% 55% at 5% 50%, rgba(123, 44, 191, 0.30) 0%, rgba(123, 44, 191, 0.00) 65%), radial-gradient(60% 40% at 95% 20%, rgba(201, 168, 76, 0.12) 0%, rgba(201, 168, 76, 0.00) 55%), #2b0f43",
+        ...style,
+      }}
       {...props}
     >
       <img
@@ -63,7 +75,7 @@ const CustomTourSection = React.forwardRef(({ className, ...props }, ref) => {
         height={501}
         loading="lazy"
         decoding="async"
-        className="pointer-events-none absolute left-0 top-0 z-[1] hidden h-auto w-[min(55vw,380px)] max-w-none opacity-70 md:block"
+        className="pointer-events-none absolute left-0 top-0 z-[1] hidden h-auto w-[min(42vw,360px)] max-w-none -translate-x-[40%] -translate-y-[30%] opacity-70 md:block"
         aria-hidden
       />
       <img
@@ -73,7 +85,7 @@ const CustomTourSection = React.forwardRef(({ className, ...props }, ref) => {
         height={501}
         loading="lazy"
         decoding="async"
-        className="pointer-events-none absolute bottom-0 right-0 z-[1] hidden h-auto w-[min(55vw,380px)] max-w-none opacity-70 md:block"
+        className="pointer-events-none absolute bottom-0 right-0 z-[1] hidden h-auto w-[min(42vw,360px)] max-w-none translate-x-[40%] translate-y-[30%] opacity-70 md:block"
         aria-hidden
       />
       <div
@@ -111,12 +123,13 @@ const CustomTourSection = React.forwardRef(({ className, ...props }, ref) => {
               </div>
             </div>
             <div className="flex flex-col gap-6">
-              <Link
-                to="/contact"
-                className="inline-flex h-14 w-fit min-w-[239px] items-center justify-center rounded-[40px] bg-[#f2eaf9] px-6 font-raleway text-base font-semibold leading-[22px] text-[#7b2cbf] shadow-[0_8px_28px_0_rgba(214,190,235,0.4)] transition hover:brightness-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              <button
+                type="button"
+                onClick={() => setCustomTourModalOpen(true)}
+                className="inline-flex h-14 w-fit min-w-[239px] cursor-pointer items-center justify-center rounded-[40px] bg-[#f2eaf9] px-6 font-raleway text-base font-semibold leading-[22px] text-[#7b2cbf] shadow-[0_8px_28px_0_rgba(214,190,235,0.4)] transition hover:brightness-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
               >
                 Request a Custom Tour
-              </Link>
+              </button>
               <p className="font-raleway text-sm font-medium leading-4 text-[rgba(255,255,255,0.4)]">
                 No commitment · Free to request · Response within 24 hrs
               </p>
@@ -150,6 +163,33 @@ const CustomTourSection = React.forwardRef(({ className, ...props }, ref) => {
           </ul>
         </div>
       </div>
+
+      {customTourModalOpen ? (
+        <CustomizeTourModal
+          onClose={() => setCustomTourModalOpen(false)}
+          onGetStarted={() => setIdealTripFormOpen(true)}
+        />
+      ) : null}
+
+      <IdealTripFormModal
+        isOpen={idealTripFormOpen}
+        onClose={() => setIdealTripFormOpen(false)}
+        onComplete={(variant) => {
+          setIdealTripFormOpen(false);
+          setTripResultVariant(variant);
+          setTripResultOpen(true);
+        }}
+      />
+
+      <CustomTourResultModal
+        isOpen={tripResultOpen}
+        variant={tripResultVariant}
+        onClose={() => setTripResultOpen(false)}
+        onRetry={() => {
+          setTripResultOpen(false);
+          setIdealTripFormOpen(true);
+        }}
+      />
     </section>
   );
 });
