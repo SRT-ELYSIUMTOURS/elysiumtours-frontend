@@ -9,7 +9,9 @@ import LocalGuidesPreview from "../../components/sections/blog/LocalGuidesPrevie
 import TravelStoriesPreview from "../../components/sections/blog/TravelStoriesPreview";
 import FestivalCalendarCta from "../../components/sections/blog/FestivalCalendarCta";
 import PartnerSpotlightPreview from "../../components/sections/blog/PartnerSpotlightPreview";
-import BlogCtaSection from "../../components/sections/blog/BlogCtaSection";
+import PartnerPromoCtaSection from "../../components/sections/PartnerPromoCtaSection";
+import { partnerPromoBlogContact } from "../../data/partnerPromoCtaPresets.jsx";
+import PartnerWithUsModal from "../../components/ui/PartnerWithUsModal";
 
 function showBlogPreview(filter, slug) {
   return filter === "all" || filter === slug;
@@ -17,6 +19,7 @@ function showBlogPreview(filter, slug) {
 
 const BlogPage = React.forwardRef(({ className, ...props }, ref) => {
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [partnerModalOpen, setPartnerModalOpen] = useState(false);
 
   return (
     <main ref={ref} className={classNames("font-raleway", className)} {...props}>
@@ -41,7 +44,16 @@ const BlogPage = React.forwardRef(({ className, ...props }, ref) => {
       {showBlogPreview(categoryFilter, "partner-spotlight") && (
         <PartnerSpotlightPreview />
       )}
-      <BlogCtaSection />
+      <PartnerPromoCtaSection
+        {...partnerPromoBlogContact}
+        onCtaClick={() => setPartnerModalOpen(true)}
+      />
+      {partnerModalOpen && (
+        <PartnerWithUsModal
+          onClose={() => setPartnerModalOpen(false)}
+          onSubmit={() => {}}
+        />
+      )}
     </main>
   );
 });

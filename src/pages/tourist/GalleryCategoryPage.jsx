@@ -9,7 +9,9 @@ import ImageGalleryModal from "../../components/ui/ImageGalleryModal";
 import VideoViewerModal from "../../components/ui/VideoViewerModal";
 import SocialShareModal from "../../components/ui/SocialShareModal";
 import GalleryBecomePartSection from "../../components/sections/gallery/GalleryBecomePartSection";
-import PartnerCtaSection from "../../components/sections/partners/PartnerCtaSection";
+import PartnerPromoCtaSection from "../../components/sections/PartnerPromoCtaSection";
+import { partnerPromoGallery } from "../../data/partnerPromoCtaPresets.jsx";
+import PartnerWithUsModal from "../../components/ui/PartnerWithUsModal";
 import { classNames } from "../../utils/classNames";
 
 // Route: /gallery/:category/all
@@ -73,6 +75,7 @@ const GalleryCategoryPage = () => {
   const [galleryIndex, setGalleryIndex] = useState(0);
   const [shareOpen, setShareOpen] = useState(false);
   const [shareItem, setShareItem] = useState(null);
+  const [partnerModalOpen, setPartnerModalOpen] = useState(false);
 
   const categoryLabel = CATEGORY_LABELS[category] ?? category;
 
@@ -173,11 +176,14 @@ const GalleryCategoryPage = () => {
         )}
       </div>
 
-      {/* Become Part section */}
-      <GalleryBecomePartSection />
+      {/* Become Part — only with Captured by You listing */}
+      {category === "captured-by-you" && <GalleryBecomePartSection />}
 
       {/* CTA */}
-      <PartnerCtaSection />
+      <PartnerPromoCtaSection
+        {...partnerPromoGallery}
+        onCtaClick={() => setPartnerModalOpen(true)}
+      />
 
       {/* Image/Video Viewer Modal */}
       {isVideoCategory ? (
@@ -232,6 +238,13 @@ const GalleryCategoryPage = () => {
         image={shareItem?.image}
         userSubtitle={shareItem?.title}
       />
+
+      {partnerModalOpen && (
+        <PartnerWithUsModal
+          onClose={() => setPartnerModalOpen(false)}
+          onSubmit={() => {}}
+        />
+      )}
     </main>
   );
 };

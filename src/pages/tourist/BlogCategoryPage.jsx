@@ -7,7 +7,9 @@ import BlogBreadcrumbBar from "../../components/sections/blog/BlogBreadcrumbBar"
 import BlogCategoryFilter from "../../components/sections/blog/BlogCategoryFilter";
 import BlogSectionHeader from "../../components/sections/blog/BlogSectionHeader";
 import BlogPaginationBar from "../../components/sections/blog/BlogPaginationBar";
-import BlogCtaSection from "../../components/sections/blog/BlogCtaSection";
+import PartnerPromoCtaSection from "../../components/sections/PartnerPromoCtaSection";
+import { partnerPromoBlogContact } from "../../data/partnerPromoCtaPresets.jsx";
+import PartnerWithUsModal from "../../components/ui/PartnerWithUsModal";
 import BlogContentCard from "../../components/cards/BlogContentCard";
 import PartnerHighlightCard from "../../components/cards/PartnerHighlightCard";
 
@@ -333,6 +335,7 @@ const BlogCategoryPage = React.forwardRef(({ className, ...props }, ref) => {
   const { category } = useParams();
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
+  const [partnerModalOpen, setPartnerModalOpen] = useState(false);
 
   const config = CATEGORY_CONFIG[category];
 
@@ -399,7 +402,16 @@ const BlogCategoryPage = React.forwardRef(({ className, ...props }, ref) => {
         </div>
       </section>
 
-      <BlogCtaSection />
+      <PartnerPromoCtaSection
+        {...partnerPromoBlogContact}
+        onCtaClick={() => setPartnerModalOpen(true)}
+      />
+      {partnerModalOpen && (
+        <PartnerWithUsModal
+          onClose={() => setPartnerModalOpen(false)}
+          onSubmit={() => {}}
+        />
+      )}
     </main>
   );
 });

@@ -7,7 +7,9 @@ import FAQAccordion from "../../components/ui/FAQAccordion";
 import MapEmbed from "../../components/ui/MapEmbed";
 import { ToastItem } from "../../components/ui/toast";
 import BlogBreadcrumbBar from "../../components/sections/blog/BlogBreadcrumbBar";
-import BlogCtaSection from "../../components/sections/blog/BlogCtaSection";
+import PartnerPromoCtaSection from "../../components/sections/PartnerPromoCtaSection";
+import { partnerPromoBlogContact } from "../../data/partnerPromoCtaPresets.jsx";
+import PartnerWithUsModal from "../../components/ui/PartnerWithUsModal";
 
 
 // ─── Hero slides ─────────────────────────────────────────────────────────────
@@ -133,6 +135,7 @@ const ContactPage = React.forwardRef(({ className, ...props }, ref) => {
   const [showToast, setShowToast] = useState(false);
   const [activeTab, setActiveTab] = useState("General FAQs");
   const [faqSearch, setFaqSearch] = useState("");
+  const [partnerModalOpen, setPartnerModalOpen] = useState(false);
 
   const handleFormSubmit = () => setShowToast(true);
   const dismissToast = () => setShowToast(false);
@@ -436,9 +439,18 @@ const ContactPage = React.forwardRef(({ className, ...props }, ref) => {
         </div>
       </section>
 
-      {/* ── 6. CTA — "Promoting Ghana, Inspiring the World" ─────────────────── */}
-      <BlogCtaSection />
+      {/* ── 6. CTA — partner promo (shared with Blog) ─────────────────── */}
+      <PartnerPromoCtaSection
+        {...partnerPromoBlogContact}
+        onCtaClick={() => setPartnerModalOpen(true)}
+      />
 
+      {partnerModalOpen && (
+        <PartnerWithUsModal
+          onClose={() => setPartnerModalOpen(false)}
+          onSubmit={() => {}}
+        />
+      )}
 
       {/* ── TOAST OVERLAY ───────────────────────────────────────────────────── */}
       {showToast && (
