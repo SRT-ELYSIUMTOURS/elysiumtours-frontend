@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import BlogBreadcrumbBar from "../../components/sections/blog/BlogBreadcrumbBar";
 import GalleryCategoryFilterBar from "../../components/sections/gallery/GalleryCategoryFilterBar";
-import GalleryPhotoCard from "../../components/cards/GalleryPhotoCard";
 import GalleryVideoCard from "../../components/cards/GalleryVideoCard";
+import GalleryCategoryPhotoMasonry, {
+  GALLERY_PHOTO_PAGE_SIZE,
+} from "../../components/sections/gallery/GalleryCategoryPhotoMasonry";
 import ImageViewerModal from "../../components/ui/ImageViewerModal";
 import ImageGalleryModal from "../../components/ui/ImageGalleryModal";
 import VideoViewerModal from "../../components/ui/VideoViewerModal";
@@ -12,7 +14,6 @@ import GalleryBecomePartSection from "../../components/sections/gallery/GalleryB
 import PartnerPromoCtaSection from "../../components/sections/PartnerPromoCtaSection";
 import { partnerPromoGallery } from "../../data/partnerPromoCtaPresets.jsx";
 import PartnerWithUsModal from "../../components/ui/PartnerWithUsModal";
-import { classNames } from "../../utils/classNames";
 
 // Route: /gallery/:category/all
 // Sub-category listing page — photo masonry or video 3-col grid
@@ -29,13 +30,12 @@ const CATEGORY_LABELS = {
 };
 
 // Generate mock photo items for a category
-const generatePhotoItems = (catKey, count = 12) =>
+const generatePhotoItems = (catKey, count = 42) =>
   Array.from({ length: count }, (_, i) => ({
     id: i + 1,
     image: `https://picsum.photos/seed/${catKey}-item-${i}/600/600`,
     title: `${CATEGORY_LABELS[catKey] ?? catKey} ${i + 1}`,
     count: `${Math.floor(Math.random() * 40 + 10)} Photos`,
-    size: i % 5 === 0 ? "large" : i % 3 === 0 ? "small" : "medium",
   }));
 
 // Generate mock video items
@@ -76,10 +76,21 @@ const GalleryCategoryPage = () => {
   const [shareOpen, setShareOpen] = useState(false);
   const [shareItem, setShareItem] = useState(null);
   const [partnerModalOpen, setPartnerModalOpen] = useState(false);
+  const [photoVisibleCount, setPhotoVisibleCount] = useState(GALLERY_PHOTO_PAGE_SIZE);
 
   const categoryLabel = CATEGORY_LABELS[category] ?? category;
 
+  useEffect(() => {
+    if (!isVideoCategory) setPhotoVisibleCount(GALLERY_PHOTO_PAGE_SIZE);
+  }, [category, isVideoCategory]);
+
+  const visiblePhotoItems = isVideoCategory
+    ? items
+    : items.slice(0, photoVisibleCount);
+
   const thumbnails = items.map((item) => item.image);
+  const hasMorePhotos =
+    !isVideoCategory && items.length > photoVisibleCount;
 
   const handleItemClick = (index) => {
     setViewerIndex(index);
@@ -98,28 +109,24 @@ const GalleryCategoryPage = () => {
         items={[
           { label: "Home", href: "/" },
           { label: "Gallery", href: "/gallery" },
-          { label: categoryLabel, href: `/gallery/${category}` },
-          { label: "All" },
+          { label: categoryLabel },
         ]}
       />
 
       {/* Category filter bar */}
-      <GalleryCategoryFilterBar
+      {/* <GalleryCategoryFilterBar
         activeTab={category}
         onTabChange={(tab) => {
           if (tab === "all") navigate("/gallery");
           else navigate(`/gallery/${tab}/all`);
         }}
-      />
+      /> */}
 
       {/* Page content */}
       <div className="px-[156px] py-[80px] bg-primary-light-default">
         {/* Page heading + sort */}
-        <div className="flex items-center justify-between mb-[48px]">
-          <h1 className="font-raleway font-bold text-[31px] leading-[42px] text-secondary-dark-darker">
-            {categoryLabel}
-          </h1>
-          <div className="flex items-center gap-[12px]">
+        <div className="flex items-center  justify-between mb-[48px]">
+         
             {/* Sort dropdown */}
             <button className="flex items-center gap-[4px] h-[44px] px-[12px] border border-[#b9b9b9] rounded-[20px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.05)] bg-transparent cursor-pointer">
               <span className="font-raleway font-medium text-[13px] leading-[22px] text-[#949494] whitespace-nowrap">Sort By</span>
@@ -135,7 +142,6 @@ const GalleryCategoryPage = () => {
               <div className="absolute right-[8px] top-1/2 -translate-y-1/2 size-[37px] flex items-center justify-center">
                 <SearchIcon />
               </div>
-            </div>
           </div>
         </div>
 
@@ -155,29 +161,32 @@ const GalleryCategoryPage = () => {
             ))}
           </div>
         ) : (
-          // Photo masonry-style grid (alternating sizes)
-          <div className="grid grid-cols-4 gap-[24px]">
-            {items.map((item, i) => (
-              <GalleryPhotoCard
-                key={item.id}
-                image={item.image}
-                title={item.title}
-                count={item.count}
-                size={item.size}
-                className={classNames(
-                  item.size === "large" ? "h-[663px]" :
-                  item.size === "small" ? "h-[197px]" :
-                  "h-[568px]"
-                )}
-                onClick={() => handleItemClick(i)}
-              />
-            ))}
-          </div>
+          <>
+            <GalleryCategoryPhotoMasonry
+              items={visiblePhotoItems}
+              onPhotoClick={handleItemClick}
+            />
+            {hasMorePhotos && (
+              <div className="flex justify-center mt-[48px]">
+                <button
+                  type="button"
+                  className="min-w-[180px] h-[52px] px-[32px] rounded-[26px] border border-secondary-light-active bg-primary-light-default font-raleway font-semibold text-[15px] text-secondary-dark-darker shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)] cursor-pointer hover:opacity-90 transition-opacity"
+                  onClick={() =>
+                    setPhotoVisibleCount((c) =>
+                      Math.min(c + GALLERY_PHOTO_PAGE_SIZE, items.length)
+                    )
+                  }
+                >
+                  Load More
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
 
-      {/* Become Part — only with Captured by You listing */}
-      {category === "captured-by-you" && <GalleryBecomePartSection />}
+      {/* Share your travel moments — above partner CTA on every category listing */}
+      <GalleryBecomePartSection />
 
       {/* CTA */}
       <PartnerPromoCtaSection
