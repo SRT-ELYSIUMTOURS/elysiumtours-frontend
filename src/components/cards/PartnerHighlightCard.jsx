@@ -8,7 +8,7 @@ const PartnerHighlightCard = React.forwardRef(
   (
     {
       image,
-      category = "Accommodation",
+      category = "Accommodation", // primary label (title or name shown on the card)
       // Optional subtitle line below category (e.g. "24 experience available")
       subtitle = null,
       // Subtitle text colour — varies per card in TourTypesSection
@@ -24,6 +24,8 @@ const PartnerHighlightCard = React.forwardRef(
     },
     ref
   ) => {
+    const interactive = typeof onClick === "function";
+
     // Default: label flush to bottom; frosted strip uses a separate layer so text stays sharp
     const defaultLabelClass =
       "absolute bottom-0 left-0 h-[122px] right-0 isolate z-[2] overflow-hidden rounded-b-[40px] px-6 flex flex-col justify-center  ";
@@ -40,8 +42,9 @@ const PartnerHighlightCard = React.forwardRef(
           // doesn't clip background-image on absolute children.
           "relative rounded-[40px] bg-cover bg-center bg-primary-dark-default",
           "overflow-clip", // clip label content to card bounds (Figma: overflow-clip)
-          "cursor-pointer group transition-all duration-300 ease-in",
-          "hover:shadow-xl",
+          interactive
+            ? "cursor-pointer group transition-all duration-300 ease-in hover:shadow-xl"
+            : "cursor-default",
           className
         )}
         style={{ backgroundImage: image ? `url(${image})` : undefined }}

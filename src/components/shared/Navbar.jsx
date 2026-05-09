@@ -161,10 +161,78 @@ const TOUR_PARTNER_ITEMS = [
 //   Active:   text [16px/600] #7b2cbf + underline rect fill:#7b2cbf r:10
 //   Inactive: text [16px/500] #565656 + ChevronDown
 //   Open:     text [16px/600] #622399 + ChevronUp + underline fill:#622399
-const NavLink = ({ label, isActive, hasDropdown, isOpen, onClick }) => {
+//
+// When `href` + `hasDropdown`: label is a router Link to the hub page; only the
+// chevron toggles the dropdown (`onClick`). Optional `onNavigate` runs when the label is clicked (e.g. close menus).
+const NavLink = ({
+  label,
+  isActive,
+  hasDropdown,
+  isOpen,
+  onClick,
+  href,
+  onNavigate,
+}) => {
   const textColor = isOpen ? "#622399" : isActive ? "#7b2cbf" : "#565656";
   const lineColor = isOpen ? "#622399" : "#7b2cbf";
   const fontWeight = isActive || isOpen ? 600 : 500;
+
+  const labelSpan = (
+    <span
+      style={{
+        fontWeight,
+        color: textColor,
+        whiteSpace: "nowrap",
+      }}
+      className={classNames(`${!isActive ? `text-md-Medium` : `text-md-semibold`}`)}
+    >
+      {label}
+    </span>
+  );
+
+  const underline =
+    (isActive || isOpen) && (
+      <div
+        className="w-full max-w-[59px] mx-auto h-[3px] rounded-[10px] mt-[8px] transition-all duration-300 ease-in"
+        style={{ backgroundColor: lineColor }}
+      />
+    );
+
+  // Hub link + chevron only opens dropdown
+  if (hasDropdown && href) {
+    return (
+      <div className="relative flex flex-col items-start px-[10px] py-[10px] transition-all duration-300 ease-in">
+        <div className="flex items-center gap-0">
+          <Link
+            to={href}
+            onClick={() => onNavigate?.()}
+            className="inline-flex items-center no-underline visited:text-inherit"
+          >
+            {labelSpan}
+          </Link>
+          <button
+            type="button"
+            className="inline-flex items-center justify-center shrink-0 bg-transparent border-0 p-0 cursor-pointer"
+            aria-expanded={isOpen}
+            aria-haspopup="true"
+            aria-label={`${label} submenu`}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onClick?.();
+            }}
+          >
+            {isOpen ? (
+              <ChevronUp stroke={textColor} />
+            ) : (
+              <ChevronDown stroke={textColor} />
+            )}
+          </button>
+        </div>
+        {underline}
+      </div>
+    );
+  }
 
   return (
     <button
@@ -173,18 +241,7 @@ const NavLink = ({ label, isActive, hasDropdown, isOpen, onClick }) => {
       className="relative flex flex-col items-start px-[10px] py-[10px] transition-all duration-300 ease-in"
     >
       <div className="flex items-center gap-0">
-        <span
-          style={{
-            fontWeight,
-            color: textColor,
-            whiteSpace: "nowrap",
-          }}
-          className={classNames(
-            `${!isActive ? `text-md-Medium` : `text-md-semibold`}`
-          )}
-        >
-          {label}
-        </span>
+        {labelSpan}
         {hasDropdown &&
           (isOpen ? (
             <ChevronUp stroke={textColor} />
@@ -192,13 +249,7 @@ const NavLink = ({ label, isActive, hasDropdown, isOpen, onClick }) => {
             <ChevronDown stroke={textColor} />
           ))}
       </div>
-      {/* Underline — Rectangle r:10, only on active or open */}
-      {(isActive || isOpen) && (
-        <div
-          className="w-full max-w-[59px] mx-auto h-[3px] rounded-[10px] mt-[8px] transition-all duration-300 ease-in"
-          style={{ backgroundColor: lineColor }}
-        />
-      )}
+      {underline}
     </button>
   );
 };
@@ -500,12 +551,43 @@ const Navbar = () => {
               <NavLink label="Home" isActive={location.pathname === "/"} hasDropdown={false} isOpen={false} />
             </Link>
             <div className="relative">
-              <NavLink label="Tour" isActive={isActivePath("/tours") && openDropdown !== "tour"} hasDropdown isOpen={openDropdown === "tour"} onClick={() => toggle("tour")} />
-              {openDropdown === "tour" && <TourDropdown items={TOUR_ITEMS} currentPath={location.pathname} onClose={() => setOpenDropdown(null)} />}
+              <NavLink
+                label="Tour"
+                href="/tours"
+                isActive={isActivePath("/tours") && openDropdown !== "tour"}
+                hasDropdown
+                isOpen={openDropdown === "tour"}
+                onClick={() => toggle("tour")}
+                onNavigate={() => setOpenDropdown(null)}
+              />
+              {openDropdown === "tour" && (
+                <TourDropdown
+                  items={TOUR_ITEMS}
+                  currentPath={location.pathname}
+                  onClose={() => setOpenDropdown(null)}
+                />
+              )}
             </div>
             <div className="relative">
-              <NavLink label="Tour Partners" isActive={isActivePath("/tour-partners") && openDropdown !== "tour-partners"} hasDropdown isOpen={openDropdown === "tour-partners"} onClick={() => toggle("tour-partners")} />
-              {openDropdown === "tour-partners" && <TourPartnersDropdown items={TOUR_PARTNER_ITEMS} currentPath={location.pathname} onClose={() => setOpenDropdown(null)} />}
+              <NavLink
+                label="Tour Partners"
+                href="/tour-partners"
+                isActive={
+                  isActivePath("/tour-partners") &&
+                  openDropdown !== "tour-partners"
+                }
+                hasDropdown
+                isOpen={openDropdown === "tour-partners"}
+                onClick={() => toggle("tour-partners")}
+                onNavigate={() => setOpenDropdown(null)}
+              />
+              {openDropdown === "tour-partners" && (
+                <TourPartnersDropdown
+                  items={TOUR_PARTNER_ITEMS}
+                  currentPath={location.pathname}
+                  onClose={() => setOpenDropdown(null)}
+                />
+              )}
             </div>
             <Link to="/gallery" onClick={() => setOpenDropdown(null)}>
               <NavLink label="Gallery" isActive={isActivePath("/gallery")} hasDropdown={false} isOpen={false} />

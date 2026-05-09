@@ -4,6 +4,7 @@ import BlogBreadcrumbBar from "../../components/sections/blog/BlogBreadcrumbBar"
 import PartnerCategoryFilterBar from "../../components/sections/partners/PartnerCategoryFilterBar";
 import PartnerListingFilterBar from "../../components/sections/partners/PartnerListingFilterBar";
 import PartnerListingGrid from "../../components/sections/partners/PartnerListingGrid";
+import PartnerStoriesSection from "../../components/sections/partners/PartnerStoriesSection";
 import PartnerPromoCtaSection from "../../components/sections/PartnerPromoCtaSection";
 import { partnerPromoGallery } from "../../data/partnerPromoCtaPresets.jsx";
 import PartnerWithUsModal from "../../components/ui/PartnerWithUsModal";
@@ -89,6 +90,8 @@ const TourPartnerListingPage = () => {
       <div className="px-4 md:px-8 lg:px-16 mt-8">
         <PartnerCtaSection />
       </div>
+
+      <PartnerStoriesSection />
 
       <PartnerPromoCtaSection
         {...partnerPromoGallery}

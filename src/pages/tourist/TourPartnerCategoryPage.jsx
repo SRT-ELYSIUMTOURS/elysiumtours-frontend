@@ -4,6 +4,7 @@ import BlogBreadcrumbBar from "../../components/sections/blog/BlogBreadcrumbBar"
 import PartnerHero from "../../components/sections/partners/PartnerHero";
 import PartnerCategoryFilterBar from "../../components/sections/partners/PartnerCategoryFilterBar";
 import PartnerCategorySection from "../../components/sections/partners/PartnerCategorySection";
+import PartnerStoriesSection from "../../components/sections/partners/PartnerStoriesSection";
 import PartnerPromoCtaSection from "../../components/sections/PartnerPromoCtaSection";
 import { partnerPromoGallery } from "../../data/partnerPromoCtaPresets.jsx";
 import PartnerWithUsModal from "../../components/ui/PartnerWithUsModal";
@@ -46,6 +47,7 @@ const TourPartnerCategoryPage = () => {
         }}
       />
       <PartnerCategorySection category={category} />
+      <PartnerStoriesSection />
       <PartnerPromoCtaSection
         {...partnerPromoGallery}
         onCtaClick={() => setPartnerModalOpen(true)}
