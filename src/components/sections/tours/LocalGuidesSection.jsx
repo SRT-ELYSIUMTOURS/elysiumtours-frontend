@@ -1,5 +1,6 @@
 import React from "react";
 import { classNames } from "../../../utils/classNames";
+import GuideSpotlightCard from "../../cards/GuideSpotlightCard";
 import mapIcon from "../../../assets/ElysiumAssets/map-pin.svg";
 import starIcon from "../../../assets/ElysiumAssets/star.svg";
 
@@ -88,40 +89,6 @@ const getGuides = (country) => {
   const key = country?.toLowerCase();
   return GUIDES_BY_COUNTRY[key] || GUIDES_BY_COUNTRY.ghana;
 };
-
-const GuideCard = ({ guide }) => (
-  <div
-    className={classNames(
-      "relative h-[568px] min-w-[335px] w-full shrink-0 overflow-clip rounded-md border border-secondary-light-default",
-      "bg-[linear-gradient(203deg,var(--color-secondary-dark-darker)_14.88%,rgb(108_38_169)_122.89%)]",
-      "shadow-[var(--shadow-card)]"
-    )}
-  >
-    <div
-      className="pointer-events-none absolute left-[-63.5px] top-[267.5px] h-[324px] w-[455px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(108,38,169,0.75)_0%,rgba(108,38,169,0.3)_45%,transparent_70%)]"
-      aria-hidden
-    />
-    <div className="relative z-0">
-      <div className="absolute left-1/2 top-1/2 z-0 h-[324px] w-[455px] -translate-x-1/2 bg-secondary-light-default blur-[50px] rounded-4xl" />
-      <img
-        src={guide.image}
-        alt={guide.name}
-        className="relative z-10 h-full w-full object-cover object-top"
-      />
-    </div>
-    <div className="absolute left-1/2 top-[385.5px] h-[182px] w-full -translate-x-1/2">
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-full w-full bg-[rgba(153,153,153,0.16)] backdrop-blur-[20px] [mask-image:linear-gradient(to_bottom,transparent_0%,black_30%)] [-webkit-mask-image:linear-gradient(to_bottom,transparent_0%,black_30%)]"
-      />
-      <div className="absolute left-[31px] top-[calc(50%+18px)] h-[86px] w-full -translate-y-1/2">
-        <p className="m-0 text-High-md-bold leading-[34px] text-primary-normal-default">
-          {guide.name}
-        </p>
-      </div>
-    </div>
-  </div>
-);
 
 const GuideInfo = ({ guide }) => (
   <div className="w-[340px]">
@@ -366,7 +333,12 @@ const LocalGuidesSection = React.forwardRef(
                 key={guide.id}
                 className="flex flex-1 shrink-0 flex-col gap-[22px]"
               >
-                <GuideCard guide={guide} />
+                <GuideSpotlightCard
+                  image={guide.image}
+                  title={guide.name}
+                  alt={guide.name}
+                  className="h-[568px] min-w-[335px] w-full shrink-0"
+                />
                 <GuideInfo guide={guide} />
               </div>
             ))}

@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { classNames } from "../../../utils/classNames";
+import ExploreMoreArrowIcon from "../../icons/ExploreMoreArrowIcon";
 import GalleryPhotoCard from "../../cards/GalleryPhotoCard";
 import GalleryBecomePartSection from "./GalleryBecomePartSection";
 
@@ -10,12 +11,6 @@ import GalleryBecomePartSection from "./GalleryBecomePartSection";
 // Figma nodes: 616:6236 (Videos tab), plus other tab variants
 
 // ─── Shared SVG icons ────────────────────────────────────────────────────────
-
-const ArrowRightIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-    <path d="M5.25 3.5L8.75 7L5.25 10.5" stroke="#7b2cbf" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
 
 // Large play circle icon (52px) used on video cards in the gallery Videos section
 const PlayCircleIcon = () => (
@@ -39,7 +34,7 @@ const ExploreButton = ({ onClick }) => (
     )}
   >
     Explore More
-    <ArrowRightIcon />
+    <ExploreMoreArrowIcon />
   </button>
 );
 

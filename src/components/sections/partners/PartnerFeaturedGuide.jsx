@@ -1,16 +1,10 @@
 import React from "react";
+import ExploreMoreArrowIcon from "../../icons/ExploreMoreArrowIcon";
 import { classNames } from "../../../utils/classNames";
 
 // Figma: 940:6299 — Featured Guide callout
-// bg-[#f2eaf9], inner card: bg-[#f7f7f7] h-[291px] rounded-[20px] w-[1416px] left-[156px]
 // Inside: decorative rotated pill shapes (left) + guide info (center/right)
 // Guide name "Meet Yam Obeng: Your Guide Through Cape Coast History"
-
-const ArrowRightIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-    <path d="M5.25 3.5L8.75 7L5.25 10.5" stroke="#7b2cbf" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
 
 const PartnerFeaturedGuide = React.forwardRef(({
   guideName = "Yam Obeng",
@@ -79,7 +73,7 @@ const PartnerFeaturedGuide = React.forwardRef(({
               "hover:bg-secondary-light-default transition-all duration-300 ease-in cursor-pointer bg-transparent"
             )}>
               View Profile
-              <ArrowRightIcon />
+              <ExploreMoreArrowIcon />
             </button>
           </div>
 
