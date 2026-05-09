@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import BlogBreadcrumbBar from "../../components/sections/blog/BlogBreadcrumbBar";
 import PartnerHero from "../../components/sections/partners/PartnerHero";
 import PartnerCategoryFilterBar from "../../components/sections/partners/PartnerCategoryFilterBar";
@@ -26,29 +25,13 @@ import PartnerWithUsModal from "../../components/ui/PartnerWithUsModal";
 // 12. Partner Stories section (939:6017)
 // 13. CTA section (772:10509)
 
-const CATEGORY_TO_SECTION_KEY = {
-  "all": null,
-  "tour-sites": "tour-sites",
-  "accommodation": "accommodation",
-  "transportation": "transportation",
-  "guides": "guides",
-  "restaurants": "restaurants",
-  "photographers": "photographers",
-  "insurance": "insurance",
-};
-
 const TourPartnersPage = () => {
+  /** Pills only filter sections — URL stays /tour-partners. Listing opens via Explore More only. */
   const [activeCategory, setActiveCategory] = useState("all");
   const [partnerModalOpen, setPartnerModalOpen] = useState(false);
-  const navigate = useNavigate();
 
-  const handleCategoryChange = (cat) => {
-    if (cat === "all") {
-      setActiveCategory("all");
-    } else {
-      navigate(`/tour-partners/${cat}`);
-    }
-  };
+  const showCategory = (key) =>
+    activeCategory === "all" || activeCategory === key;
 
   return (
     <main>
@@ -66,22 +49,34 @@ const TourPartnersPage = () => {
       {/* 3. Category filter bar */}
       <PartnerCategoryFilterBar
         activeCategory={activeCategory}
-        onCategoryChange={handleCategoryChange}
+        onCategoryChange={setActiveCategory}
       />
 
       {/* 4–7. First four category sections */}
-      <PartnerCategorySection category="tour-sites" />
-      <PartnerCategorySection category="accommodation" />
-      <PartnerCategorySection category="transportation" />
-      <PartnerCategorySection category="guides" />
+      {showCategory("tour-sites") && (
+        <PartnerCategorySection category="tour-sites" />
+      )}
+      {showCategory("accommodation") && (
+        <PartnerCategorySection category="accommodation" />
+      )}
+      {showCategory("transportation") && (
+        <PartnerCategorySection category="transportation" />
+      )}
+      {showCategory("guides") && <PartnerCategorySection category="guides" />}
 
       {/* 8. Featured Guide callout */}
-      <PartnerFeaturedGuide />
+      {showCategory("guides") && <PartnerFeaturedGuide />}
 
       {/* 9–11. Remaining category sections */}
-      <PartnerCategorySection category="restaurants" />
-      <PartnerCategorySection category="photographers" />
-      <PartnerCategorySection category="insurance" />
+      {showCategory("restaurants") && (
+        <PartnerCategorySection category="restaurants" />
+      )}
+      {showCategory("photographers") && (
+        <PartnerCategorySection category="photographers" />
+      )}
+      {showCategory("insurance") && (
+        <PartnerCategorySection category="insurance" />
+      )}
 
       {/* 12. Partner Stories */}
       <PartnerStoriesSection />

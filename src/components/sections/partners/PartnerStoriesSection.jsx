@@ -171,7 +171,7 @@ const PartnerStoriesSection = React.forwardRef(({ className = "", ...props }, re
     <section
       ref={ref}
       className={classNames(
-        "relative w-full overflow-hidden bg-secondary-light-default",
+        "relative w-full overflow-hidden bg-primary-light-default",
         "min-h-[698px] pb-[80px] pt-[80px]",
         className
       )}

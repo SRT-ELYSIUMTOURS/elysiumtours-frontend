@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import BlogBreadcrumbBar from "../../components/sections/blog/BlogBreadcrumbBar";
-import PartnerCategoryFilterBar from "../../components/sections/partners/PartnerCategoryFilterBar";
+import PartnerHero from "../../components/sections/partners/PartnerHero";
 import PartnerListingFilterBar from "../../components/sections/partners/PartnerListingFilterBar";
 import PartnerListingGrid from "../../components/sections/partners/PartnerListingGrid";
 import PartnerStoriesSection from "../../components/sections/partners/PartnerStoriesSection";
@@ -10,7 +10,7 @@ import { partnerPromoGallery } from "../../data/partnerPromoCtaPresets.jsx";
 import PartnerWithUsModal from "../../components/ui/PartnerWithUsModal";
 
 // Route: /tour-partners/:category/all
-// Full listing page with sort/filter/date controls + grid of PartnerListingCard
+// Hero + listing toolbar + grid (same highlight/guide cards as category page + meta below)
 
 const CATEGORY_LABELS = {
   "tour-sites": "Tour Sites & Events",
@@ -24,9 +24,7 @@ const CATEGORY_LABELS = {
 
 const TourPartnerListingPage = () => {
   const { category } = useParams();
-  const navigate = useNavigate();
   const [filters, setFilters] = useState(null);
-  const [sort, setSort] = useState("recommended");
   const [partnerModalOpen, setPartnerModalOpen] = useState(false);
 
   const categoryLabel = CATEGORY_LABELS[category] ?? category;
@@ -34,61 +32,28 @@ const TourPartnerListingPage = () => {
 
   return (
     <main className="w-full">
+      <BlogBreadcrumbBar
+        items={[
+          { label: "Home", href: "/" },
+          { label: "Tour Partners", href: "/tour-partners" },
+          { label: categoryLabel, href: `/tour-partners/${category}` },
+        ]}
+      />
 
-      {/* Breadcrumb */}
-      <div className="px-4 md:px-8 lg:px-16">
-        <BlogBreadcrumbBar
-          items={[
-            { label: "Home", href: "/" },
-            { label: "Tour Partners", href: "/tour-partners" },
-            { label: categoryLabel, href: `/tour-partners/${category}` },
-            { label: "All" },
-          ]}
-        />
-      </div>
+      <PartnerHero />
 
-      {/* Category filter bar */}
-      <div className="px-4 md:px-8 lg:px-16 overflow-x-auto">
-        <PartnerCategoryFilterBar
-          activeCategory={category}
-          onCategoryChange={(cat) => {
-            if (cat === "all") navigate("/tour-partners");
-            else navigate(`/tour-partners/${cat}/all`);
-          }}
-        />
-      </div>
+      <PartnerListingFilterBar
+        category={category}
+        showLocationFilter={isGuide}
+        onFiltersApply={setFilters}
+      />
 
-      {/* Filters */}
-      <div className="px-4 md:px-8 lg:px-16">
-        <div className="flex flex-col md:flex-row gap-3">
-          <PartnerListingFilterBar
-            category={category}
-            showLocationFilter={isGuide}
-            onSortChange={setSort}
-            onFiltersApply={setFilters}
-          />
-        </div>
-      </div>
-
-      {/* Heading */}
-      <div className="px-4 md:px-8 lg:px-16 pt-6 md:pt-10 pb-2">
-        <h1 className="font-raleway font-bold text-xl md:text-2xl lg:text-3xl text-tertiary-normal-default">
-          {categoryLabel}
-        </h1>
-      </div>
-
-      {/* Grid */}
-      <div className="px-4 md:px-8 lg:px-16">
+      <div className="px-4 lg:px-[156px] bg-secondary-light-default py-12 lg:pb-20">
         <PartnerListingGrid
           category={category}
           filters={filters}
-          sort={sort}
+          onResetFilters={() => setFilters(null)}
         />
-      </div>
-
-      {/* CTA */}
-      <div className="px-4 md:px-8 lg:px-16 mt-8">
-        <PartnerCtaSection />
       </div>
 
       <PartnerStoriesSection />
@@ -107,4 +72,5 @@ const TourPartnerListingPage = () => {
     </main>
   );
 };
+
 export default TourPartnerListingPage;
