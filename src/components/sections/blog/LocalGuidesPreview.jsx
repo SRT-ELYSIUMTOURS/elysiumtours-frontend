@@ -15,7 +15,7 @@ const LocalGuidesPreview = React.forwardRef(({ className, ...props }, ref) => {
       )}
       {...props}
     >
-      <div className="mx-[156px]">
+      <div className="mx-4 md:mx-8 lg:mx-[156px]">
         <BlogSectionHeader
           label="BEHIND THE SCENCES WITH GUIDES"
           title="Inside the World of Our Local Guides"
@@ -23,52 +23,31 @@ const LocalGuidesPreview = React.forwardRef(({ className, ...props }, ref) => {
           onButtonClick={() => navigate("/blog/local-guides")}
         />
 
-        {/* 3-column masonry grid with varying heights */}
-        <div className="mt-[80px] flex gap-[22px]">
-          {/* Column 1 */}
-          <div className="flex flex-col gap-[48px]">
-            <BlogContentCard
-              title="Guide Kofi's Accra"
-              category="City Guide"
-              image="https://picsum.photos/seed/lg1/457/419"
-              className="!w-[457px] !h-[418px]"
-            />
-            <BlogContentCard
-              title="Walking the Gold Coast"
-              category="Heritage"
-              image="https://picsum.photos/seed/lg4/457/734"
-              className="!w-[457px] !h-[734px]"
-            />
+        {/* Mobile/tablet: 2-col grid. Desktop: 3-col masonry */}
+        <div className="mt-10 lg:mt-[80px]">
+          {/* Desktop: 3-col masonry */}
+          <div className="hidden lg:flex gap-[22px]">
+            <div className="flex flex-col gap-[48px]">
+              <BlogContentCard title="Guide Kofi's Accra" category="City Guide" image="https://picsum.photos/seed/lg1/457/419" className="!w-[457px] !h-[418px]" />
+              <BlogContentCard title="Walking the Gold Coast" category="Heritage" image="https://picsum.photos/seed/lg4/457/734" className="!w-[457px] !h-[734px]" />
+            </div>
+            <div className="flex flex-col gap-[48px]">
+              <BlogContentCard title="Forest Treks" category="Adventure" image="https://picsum.photos/seed/lg5/457/814" className="!w-[457px] !h-[814px]" />
+              <BlogContentCard title="A Day with Ama" category="Local Life" image="https://picsum.photos/seed/lg2/457/337" className="!w-[457px] !h-[338px]" />
+            </div>
+            <div className="flex flex-col gap-[48px]">
+              <BlogContentCard title="Festival Season" category="Events" image="https://picsum.photos/seed/lg6/457/433" className="!w-[457px] !h-[338px]" />
+              <BlogContentCard title="Market Stories" category="Culture" image="https://picsum.photos/seed/lg3/457/734" className="!w-[457px] !h-[814px]" />
+            </div>
           </div>
-          {/* Column 2 */}
-          <div className="flex flex-col gap-[48px]">
-            <BlogContentCard
-              title="Forest Treks"
-              category="Adventure"
-              image="https://picsum.photos/seed/lg5/457/814"
-              className="!w-[457px] !h-[814px]"
-            />
-            <BlogContentCard
-              title="A Day with Ama"
-              category="Local Life"
-              image="https://picsum.photos/seed/lg2/457/337"
-              className="!w-[457px] !h-[338px]"
-            />
-          </div>
-          {/* Column 3 */}
-          <div className="flex flex-col gap-[48px]">
-            <BlogContentCard
-              title="Festival Season"
-              category="Events"
-              image="https://picsum.photos/seed/lg6/457/433"
-              className="!w-[457px] !h-[338px]"
-            />
-            <BlogContentCard
-              title="Market Stories"
-              category="Culture"
-              image="https://picsum.photos/seed/lg3/457/734"
-              className="!w-[457px] !h-[814px]"
-            />
+          {/* Mobile/tablet: 2-col grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:hidden">
+            <BlogContentCard title="Guide Kofi's Accra" category="City Guide" image="https://picsum.photos/seed/lg1/457/419" className="!w-full !h-[240px]" />
+            <BlogContentCard title="Forest Treks" category="Adventure" image="https://picsum.photos/seed/lg5/457/814" className="!w-full !h-[240px]" />
+            <BlogContentCard title="Festival Season" category="Events" image="https://picsum.photos/seed/lg6/457/433" className="!w-full !h-[240px]" />
+            <BlogContentCard title="A Day with Ama" category="Local Life" image="https://picsum.photos/seed/lg2/457/337" className="!w-full !h-[240px]" />
+            <BlogContentCard title="Walking the Gold Coast" category="Heritage" image="https://picsum.photos/seed/lg4/457/734" className="!w-full !h-[240px]" />
+            <BlogContentCard title="Market Stories" category="Culture" image="https://picsum.photos/seed/lg3/457/734" className="!w-full !h-[240px]" />
           </div>
         </div>
       </div>

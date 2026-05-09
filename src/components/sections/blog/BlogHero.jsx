@@ -32,7 +32,7 @@ const BlogHero = React.forwardRef(({ className, ...props }, ref) => {
   return (
     <section
       ref={ref}
-      className={classNames("relative  w-full h-[711px] overflow-hidden", className)}
+      className={classNames("relative w-full h-[350px] md:h-[500px] lg:h-[711px] overflow-hidden", className)}
       {...props}
     >
       {/* Slide images */}
@@ -55,12 +55,12 @@ const BlogHero = React.forwardRef(({ className, ...props }, ref) => {
       ))}
 
       {/* Centered content */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center gap-xl z-30">
+      <div className="absolute inset-0 flex flex-col items-center justify-center gap-xl z-30 px-4 md:px-10">
         <div className="flex flex-col items-center gap-md">
-          <h1 className="font-raleway font-bold text-[56px] leading-[66px] text-primary-light-default text-center w-[957px]">
+          <h1 className="font-raleway font-bold text-[28px] md:text-[40px] lg:text-[56px] leading-tight lg:leading-[66px] text-primary-light-default text-center w-full max-w-[957px]">
             Flavors of Ghana: A Culinary Adventure Through Accra
           </h1>
-          <p className="font-raleway font-medium text-[16px] leading-[26px] text-primary-light-default text-center">
+          <p className="font-raleway font-medium text-[14px] md:text-[16px] leading-[26px] text-primary-light-default text-center max-w-[700px]">
             Savor jollof, street grills, and market bites that tell the story of Ghana&apos;s vibrant spirit.
           </p>
         </div>
@@ -78,9 +78,9 @@ const BlogHero = React.forwardRef(({ className, ...props }, ref) => {
         </Button>
       </div>
 
-      {/* "Up Next" floating card — Figma: 337×178px, right side */}
+      {/* "Up Next" floating card — hidden on mobile, visible lg+ */}
       <div
-        className="absolute right-[156px] bottom-[51px] w-[337px] h-[178px] rounded-[2px] overflow-hidden z-30"
+        className="hidden lg:block absolute right-[156px] bottom-[51px] w-[337px] h-[178px] rounded-[2px] overflow-hidden z-30"
         style={{ boxShadow: "4px 4px 4px 0px rgba(255,255,255,0.05)" }}
       >
         <img

@@ -132,36 +132,34 @@ const PopularTourCard = React.forwardRef(
       return null;
     };
 
-    return (
-      <div
-        ref={ref}
-        onClick={handleClick}
-        // Figma: w-351 h-615, flex-col gap-12, p-10, items-center justify-center
-        className={classNames(
-          "relative flex flex-col gap-[12px] items-center justify-center p-[10px]",
-          "w-full max-w-[351px] min-h-[615px] shrink-0",
-          "cursor-pointer hover:-translate-y-1 transition-transform duration-300 ease-in",
-          className
-        )}
-        {...props}
-      >
-        {/* ── IMAGE SECTION ───────────────────────────────────────────────── */}
-        {/* Figma: h-373 w-331, rounded-[10px], overflow-clip */}
-        <div className="relative h-[373px] w-full max-w-[331px] shrink-0 rounded-[10px] overflow-clip">
-          {/* Background image + black overlay */}
-          {image ? (
-            <img
-              src={image}
-              alt={title}
-              className="absolute object-cover rounded-[10px] size-full max-w-none"
-            />
-          ) : (
-            <div className="absolute inset-0 rounded-[10px] bg-[#7b2cbf]" />
-          )}
-          {/* Figma: bg-[rgba(0,0,0,0.5)] overlay */}
-          <div className="absolute inset-0 bg-[rgba(0,0,0,0.5)] rounded-[10px]" />
+return (
+  <div
+    ref={ref}
+    onClick={handleClick}
+    className={classNames(
+      "relative flex flex-col gap-[12px] items-center p-[10px]",
+      "w-full max-w-[351px] min-h-[660px] shrink-0",
+      "cursor-pointer hover:-translate-y-1 transition-transform duration-300 ease-in",
+      className
+    )}
+    {...props}
+  >
 
-          {/* Top bar — badges left, heart right, all center-aligned on one row
+    {/* IMAGE SECTION (unchanged) */}
+    <div className="relative h-[373px] w-full max-w-[331px] shrink-0 rounded-[10px] overflow-clip">
+      {image ? (
+        <img
+          src={image}
+          alt={title}
+          className="absolute object-cover rounded-[10px] size-full max-w-none"
+        />
+      ) : (
+        <div className="absolute inset-0 rounded-[10px] bg-[#7b2cbf]" />
+      )}
+
+      <div className="absolute inset-0 bg-[rgba(0,0,0,0.5)] rounded-[10px]" />
+
+    {/* Top bar — badges left, heart right, all center-aligned on one row
               Single absolute row so everything shares the same baseline */}
           <div className="absolute top-[22px] left-[12px] right-[12px] flex items-center gap-[8px]">
             {/* Duration type badge */}
@@ -171,8 +169,7 @@ const PopularTourCard = React.forwardRef(
               </span>
             </div>
 
-            {/* Status badge (optional) */}
-            {statusBadge && (
+           {statusBadge && (
               <div
                 className="h-[24px] backdrop-blur-[50px] flex items-center justify-center px-[10px] rounded-[16px] shrink-0"
                 style={{ backgroundColor: statusBadge.color }}
@@ -193,11 +190,12 @@ const PopularTourCard = React.forwardRef(
             </button>
           </div>
 
+
           {/* Location — bottom-left of image area
               Figma: left-[12px] top-[329px] flex items-center
                      Map icon 16px + Raleway Medium 10px/18px #fefefe p-[10px] */}
           <div className="absolute left-[12px] top-[329px] flex items-center">
-            <div className="relative shrink-0 size-[16px] overflow-clip">
+            <div className="relative shrink-0 size-[16px] overflow-clip"> 
               <img src={mapPinImg} alt="" aria-hidden="true" className="block size-full max-w-none" />
             </div>
             <div className="flex items-center justify-center p-[10px]">
@@ -228,9 +226,11 @@ const PopularTourCard = React.forwardRef(
           </div>
         </div>
 
-        {/* ── BODY SECTION ────────────────────────────────────────────────── */}
-        {/* Figma: flex-col gap-[4px] h-[210px] py-[8px] w-[330px] */}
-        <div className="flex flex-col gap-[4px] h-[210px] items-start py-[8px] w-full max-w-[330px]">
+     {/* ── BODY SECTION ────────────────────────────────────────────────── */}
+        {/* Figma: flex-col gap-[4px] h-[210px] py-[8px] w-[330px]
+            On mobile we use flex-1 so the body fills remaining card space and
+            mt-auto on Group 2 (price) lands at the same bottom across cards. */}
+        <div className="flex flex-col gap-[4px] flex-1 min-h-[210px] items-start py-[8px] w-full max-w-[330px]">
 
           {/* ── Group 1: Tags + Info row + Divider ── */}
           {/* Figma: flex-col gap-[4px] w-[326px] */}
@@ -244,7 +244,7 @@ const PopularTourCard = React.forwardRef(
               {tags.map((tag, i) => (
                 <div
                   key={i}
-                  className="border-[0.5px] border-[#6f6f6f] h-[28px] flex items-center px-[9px] rounded-[20px] shrink-0"
+                  className="border border-[#6f6f6f] px-[9px] h-[28px] flex items-center  rounded-[20px] shrink-0"
                 >
                   <div className="flex h-full items-center justify-center p-[10px]">
                     <span className="font-raleway font-medium text-[10px] text-[#565656] leading-[18px] whitespace-nowrap">
@@ -313,8 +313,10 @@ const PopularTourCard = React.forwardRef(
           </div>
 
           {/* ── Group 2: Title + Availability + Price ── */}
-          {/* Figma: flex-col h-[129px] items-start pr-[10px] pt-[10px] w-[330px] */}
-          <div className="flex flex-col h-[129px] items-start pr-[10px] pt-[10px] w-full max-w-[330px]">
+          {/* Figma: flex-col h-[129px] items-start pr-[10px] pt-[10px] w-[330px]
+              mt-auto pushes this group to the bottom of the card so the price
+              row is always at the same position regardless of content above. */}
+          <div className="flex flex-col h-[129px] items-start pr-[10px] pt-[10px] w-full max-w-[330px] mt-auto">
 
             {/* Title + availability sub-group */}
             <div className="flex flex-col gap-[4px] items-start">
@@ -338,30 +340,18 @@ const PopularTourCard = React.forwardRef(
               </div>
             </div>
 
-            {/* Price row — "From" + price amount + "/ Person"
-                Figma: flex gap-[16px] items-center
-                       "From": Raleway Medium 13px/22px #2d2d2d
-                       price: Raleway Bold 20px/28px #5c218f opacity-80
-                       "/Person": Raleway Medium 13px/22px #2d2d2d */}
-            <div className="flex gap-[16px] items-center">
-              <div className="flex items-center justify-center py-[10px]">
-                <span className="font-raleway font-medium text-[13px] text-[#2d2d2d] leading-[22px] whitespace-nowrap">
-                  From
-                </span>
-              </div>
-              <div className="flex h-[38px] items-center justify-center py-[10px]">
-                <span className="font-raleway font-bold text-[20px] text-[#5c218f] leading-[28px] opacity-80 whitespace-nowrap">
-                  {price}
-                </span>
-                <span className="font-raleway font-medium text-[13px] text-[#2d2d2d] leading-[22px]">
-                  / Person
-                </span>
-              </div>
-            </div>
-          </div>
+        <div className="mt-auto flex gap-[6px] items-center">
+          <span className="text-[13px]">From</span>
+          <span className="text-[20px] font-bold text-[#5c218f]">
+            {price}
+          </span>
+          <span className="text-[13px]">/ Person</span>
         </div>
+
       </div>
-    );
+    </div>
+  </div>
+);
   }
 );
 

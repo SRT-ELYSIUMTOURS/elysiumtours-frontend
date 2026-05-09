@@ -42,10 +42,10 @@ const BlogCategoryFilter = React.forwardRef(({
       )}
       {...props}
     >
-      <div className="h-[80px] mx-[156px] flex items-center border-t-[0.5px] border-b-[0.5px] border-solid border-secondary-light-default">
-        <div className="flex items-center gap-[109px] ml-[20px]">
+      <div className="h-auto lg:h-[80px] mx-4 md:mx-8 lg:mx-[156px] flex items-center border-t-[0.5px] border-b-[0.5px] border-solid border-secondary-light-default py-3 lg:py-0">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 lg:gap-[109px] lg:ml-[20px] w-full">
           {/* Category pills */}
-          <div className="flex items-center gap-md">
+          <div className="flex flex-wrap items-center gap-md">
             {CATEGORIES.map((cat) => {
               const isActive = selected === cat.value;
               return (

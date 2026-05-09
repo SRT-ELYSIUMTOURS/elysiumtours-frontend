@@ -28,9 +28,9 @@ const GalleryBecomePartSection = React.forwardRef(({
       )}
       {...props}
     >
-      <div className="px-[156px]">
+      <div className="px-4 md:px-8 lg:px-[156px]">
         {/* Header row: LEFT eyebrow + RIGHT title */}
-        <div className="flex items-start justify-between w-full mb-[48px]">
+        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between w-full mb-8 lg:mb-[48px] gap-4 lg:gap-0">
           {/* Left — eyebrow */}
           <div className="flex items-center gap-[8px] pt-[10px]">
             <div className="w-[46px] h-px shrink-0 bg-secondary-dark-darker" />
@@ -40,20 +40,17 @@ const GalleryBecomePartSection = React.forwardRef(({
           </div>
 
           {/* Right — title */}
-          <div className="flex flex-col gap-[16px] items-end w-[677px]">
-            <h2 className="font-raleway font-bold text-[25px] leading-[34px] text-[#2d2d2d] text-right w-[630px]">
+          <div className="flex flex-col gap-[16px] items-start lg:items-end w-full lg:w-[677px]">
+            <h2 className="font-raleway font-bold text-[20px] md:text-[25px] leading-[34px] text-[#2d2d2d] text-left lg:text-right w-full lg:w-[630px]">
               Become Part of the Gallery
             </h2>
           </div>
         </div>
 
-        {/* Content row */}
-        <div className="flex gap-[24px] items-start w-full">
-          {/* Large photo card — left */}
-          <div
-            className="relative overflow-hidden rounded-[40px] border border-secondary-light-active shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)] shrink-0"
-            style={{ width: "594px", height: "631px" }}
-          >
+        {/* Content: stacks on mobile, side-by-side on lg+ */}
+        <div className="flex flex-col lg:flex-row gap-[24px] items-start w-full">
+          {/* Large photo card */}
+          <div className="relative overflow-hidden rounded-[40px] border border-secondary-light-active shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)] w-full lg:w-[594px] h-[260px] md:h-[380px] lg:h-[631px] shrink-0">
             <img
               src="https://picsum.photos/seed/become-part/594/631"
               alt="Become part of the gallery"
@@ -62,21 +59,18 @@ const GalleryBecomePartSection = React.forwardRef(({
             <div className="absolute inset-0 bg-black/50" />
           </div>
 
-          {/* Right side: two smaller cards + description + button */}
-          <div className="flex flex-col gap-[24px] flex-1">
-            {/* Description + button */}
-            <div className="flex flex-col gap-[16px] items-end mb-[8px]" style={{ marginLeft: "144px" }}>
-              <p className="font-raleway font-normal text-[16px] leading-[26px] text-[#2d2d2d] text-right w-[532px]">
+          {/* Right side: description + two smaller cards + button */}
+          <div className="flex flex-col gap-[24px] flex-1 w-full">
+            {/* Description */}
+            <div className="flex flex-col gap-[16px] items-start lg:items-end">
+              <p className="font-raleway font-normal text-[14px] md:text-[16px] leading-[26px] text-[#2d2d2d] text-left lg:text-right w-full lg:w-[532px]">
                 Be part of our story. Upload your travel photos, share the memory behind them, and see your moments come alive in our community gallery. Once approved, your shots will appear in our community gallery for other explorers to enjoy.
               </p>
             </div>
 
             {/* Two photo cards row */}
-            <div className="flex gap-[24px] items-start">
-              <div
-                className="relative overflow-hidden rounded-[40px] border border-secondary-light-active shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)] flex-1"
-                style={{ height: "337px" }}
-              >
+            <div className="flex gap-[16px] lg:gap-[24px] items-start">
+              <div className="relative overflow-hidden rounded-[40px] border border-secondary-light-active shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)] flex-1 h-[180px] md:h-[260px] lg:h-[337px]">
                 <img
                   src="https://picsum.photos/seed/become-part-b/401/337"
                   alt=""
@@ -84,10 +78,7 @@ const GalleryBecomePartSection = React.forwardRef(({
                 />
                 <div className="absolute inset-0 bg-black/50" />
               </div>
-              <div
-                className="relative overflow-hidden rounded-[40px] border border-secondary-light-active shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)]"
-                style={{ width: "363px", height: "337px" }}
-              >
+              <div className="relative overflow-hidden rounded-[40px] border border-secondary-light-active shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)] flex-1 lg:w-[363px] lg:flex-none h-[180px] md:h-[260px] lg:h-[337px]">
                 <img
                   src="https://picsum.photos/seed/become-part-c/363/337"
                   alt=""
@@ -97,8 +88,8 @@ const GalleryBecomePartSection = React.forwardRef(({
               </div>
             </div>
 
-            {/* Upload button — aligned right */}
-            <div className="flex justify-end">
+            {/* Upload button */}
+            <div className="flex justify-start lg:justify-end">
               <Button
                 variant="primary"
                 shape="pill"

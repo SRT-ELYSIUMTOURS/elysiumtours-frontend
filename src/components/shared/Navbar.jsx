@@ -434,6 +434,7 @@ const Navbar = () => {
   const [authModal, setAuthModal] = useState({ open: false, view: "login" });
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [toast, setToast] = useState(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const navRef = useRef(null);
   const userMenuRef = useRef(null);
 

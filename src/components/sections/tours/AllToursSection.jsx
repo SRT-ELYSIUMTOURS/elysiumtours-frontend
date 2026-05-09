@@ -43,11 +43,15 @@ const SORT_OPTIONS = [
 
 // ── Tour data — 12 Ghana placeholder tours (3 rows × 4 cols) ──────────────────
 // statusBadge colours: #027920 (New Tour), #940a02 (Fully Booked), #b28f05 (Limited)
+// Use the slug as the picsum seed so the same tour always shows the same image
+// across SignatureExperiencesSection, AllToursSection, related tours, etc.
+const tourImage = (slug) => `https://picsum.photos/seed/${slug}/351/373`;
+
 const GHANA_TOURS = [
   // ── Row 1 ─────────────────────────────────────────────────────────────────
   {
     id: 1,
-    image: "https://picsum.photos/seed/at-ghana-1/351/373",
+    image: tourImage("elmina-heritage-coastal-journey"),
     location: "Cape Coast/Central Region",
     duration: { class: "Multi-Day", span: "3 Days/2 Nights" },
     maxGroupSize: 12,
@@ -63,7 +67,7 @@ const GHANA_TOURS = [
   },
   {
     id: 2,
-    image: "https://picsum.photos/seed/at-ghana-2/351/373",
+    image: tourImage("accra-corporate-executive-tour"),
     location: "Accra/Greater Accra",
     duration: { class: "Multi-Day", span: "4 Days/3 Nights" },
     maxGroupSize: 20,
@@ -79,7 +83,7 @@ const GHANA_TOURS = [
   },
   {
     id: 3,
-    image: "https://picsum.photos/seed/at-ghana-3/351/373",
+    image: tourImage("kumasi-heritage-market-discovery"),
     location: "Kumasi/Ashanti Region",
     duration: { class: "Multi-Day", span: "2 Days/1 Night" },
     maxGroupSize: 10,
@@ -94,7 +98,7 @@ const GHANA_TOURS = [
   },
   {
     id: 4,
-    image: "https://picsum.photos/seed/at-ghana-4/351/373",
+    image: tourImage("wli-waterfalls-nature-exploration"),
     location: "Volta Region/Ghana",
     duration: { class: "Day Tour", span: "1 Day" },
     maxGroupSize: 8,
@@ -111,7 +115,7 @@ const GHANA_TOURS = [
   // ── Row 2 ─────────────────────────────────────────────────────────────────
   {
     id: 5,
-    image: "https://picsum.photos/seed/at-ghana-5/351/373",
+    image: tourImage("canopy-bridges-kakum"),
     location: "Central Region/Ghana",
     duration: { class: "Day Tour", span: "1 Day" },
     maxGroupSize: 20,
@@ -126,7 +130,7 @@ const GHANA_TOURS = [
   },
   {
     id: 6,
-    image: "https://picsum.photos/seed/at-ghana-6/351/373",
+    image: tourImage("legacy-return-diaspora-experience"),
     location: "Cape Coast/Ghana",
     duration: { class: "Multi-Day", span: "4 Days/3 Nights" },
     maxGroupSize: 12,
@@ -142,7 +146,7 @@ const GHANA_TOURS = [
   },
   {
     id: 7,
-    image: "https://picsum.photos/seed/at-ghana-7/351/373",
+    image: tourImage("mole-national-park-safari"),
     location: "Northern Region/Ghana",
     duration: { class: "Multi-Day", span: "3 Days" },
     maxGroupSize: 10,
@@ -161,7 +165,7 @@ const GHANA_TOURS = [
   },
   {
     id: 8,
-    image: "https://picsum.photos/seed/at-ghana-8/351/373",
+    image: tourImage("boti-falls-umbrella-rock"),
     location: "Eastern Region/Ghana",
     duration: { class: "Day Tour", span: "1 Day" },
     maxGroupSize: 8,
@@ -178,7 +182,7 @@ const GHANA_TOURS = [
   // ── Row 3 ─────────────────────────────────────────────────────────────────
   {
     id: 9,
-    image: "https://picsum.photos/seed/at-ghana-9/351/373",
+    image: tourImage("premium-accra-heritage-business"),
     location: "Greater Accra/Ghana",
     duration: { class: "Multi-Day", span: "2 Days/1 Night" },
     maxGroupSize: 15,
@@ -195,7 +199,7 @@ const GHANA_TOURS = [
   },
   {
     id: 10,
-    image: "https://picsum.photos/seed/at-ghana-10/351/373",
+    image: tourImage("bolgatanga-arts-crafts-paga"),
     location: "Upper East/Ghana",
     duration: { class: "Multi-Day", span: "5 Days/4 Nights" },
     maxGroupSize: 12,
@@ -210,7 +214,7 @@ const GHANA_TOURS = [
   },
   {
     id: 11,
-    image: "https://picsum.photos/seed/at-ghana-11/351/373",
+    image: tourImage("kintampo-falls-rock-village"),
     location: "Brong-Ahafo/Ghana",
     duration: { class: "Day Tour", span: "1 Day" },
     maxGroupSize: 10,
@@ -225,7 +229,7 @@ const GHANA_TOURS = [
   },
   {
     id: 12,
-    image: "https://picsum.photos/seed/at-ghana-12/351/373",
+    image: tourImage("cape-three-points-coastal-heritage"),
     location: "Western Region/Ghana",
     duration: { class: "Multi-Day", span: "3 Days/2 Nights" },
     maxGroupSize: 8,
@@ -359,7 +363,7 @@ const AllToursSection = React.forwardRef(({ country = "Ghana", tourCount = 10, c
 
         {/* ── Tour grid — 3 rows × 4 cols, gap-x-[8px] gap-y-[20px] ──────── */}
         {/* Figma 1942:31179: cards 351×615, rows at y=0/635/1270, col spacing=359 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-x-[8px] gap-y-[20px]">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-x-[8px] gap-y-6 md:gap-y-[20px]">
           {GHANA_TOURS.map((tour) => (
             <PopularTourCard
               key={tour.id}

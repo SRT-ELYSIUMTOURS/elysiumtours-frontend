@@ -21,7 +21,7 @@ const TravelGuidesPreview = React.forwardRef(({ className, ...props }, ref) => {
       )}
       {...props}
     >
-      <div className="mx-[156px]">
+      <div className="mx-4 md:mx-8 lg:mx-[156px]">
         <BlogSectionHeader
           label="TRAVEL GUIDE & TIPS"
           title="Travel Guides & Tips for Every Explorer"
@@ -29,32 +29,30 @@ const TravelGuidesPreview = React.forwardRef(({ className, ...props }, ref) => {
           onButtonClick={() => navigate("/blog/travel-guides")}
         />
 
-        {/* 2-column masonry grid — Figma layout */}
-        <div className="mt-[80px] flex flex-col gap-[15px]">
-          {/* Row 1: tall left + short right */}
-          <div className="flex gap-[15px]">
+        {/* Card grid — stacks on mobile, side-by-side on md+ */}
+        <div className="mt-10 lg:mt-[80px] flex flex-col gap-[15px]">
+          {/* Row 1 */}
+          <div className="flex flex-col md:flex-row gap-[15px]">
             <BlogContentCard
               title="8 ways to enjoy Ghana in fall"
               category="Leisure Tours"
               image="https://picsum.photos/seed/tg1/1028/371"
-              className="!w-[1028px] !h-[371px]"
+              className="!w-full !h-[220px] md:!h-[371px]"
             />
             <BlogContentCard
               title="8 ways to enjoy"
               category="Leisure Tours"
               image="https://picsum.photos/seed/tg2/363/371"
-              className="!w-[363px] !h-[371px]"
+              className="!w-full md:!w-[280px] lg:!w-[363px] !h-[220px] md:!h-[371px]"
             />
           </div>
-          {/* Row 2: wide card */}
-          <div className="flex gap-[15px]">
-            <BlogContentCard
-              title="8 ways to enjoy Ghana in fall"
-              category="Leisure Tours"
-              image="https://picsum.photos/seed/tg3/1028/415"
-              className="!w-full !h-[415px]"
-            />
-          </div>
+          {/* Row 2: full-width card */}
+          <BlogContentCard
+            title="8 ways to enjoy Ghana in fall"
+            category="Leisure Tours"
+            image="https://picsum.photos/seed/tg3/1028/415"
+            className="!w-full !h-[220px] md:!h-[415px]"
+          />
         </div>
       </div>
     </section>

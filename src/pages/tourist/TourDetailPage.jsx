@@ -72,19 +72,24 @@ function escapeHtml(text) {
 /** Purple pin + pill label (Leaflet DivIcon — tip of pin at lat/lng) */
 function createMeetingPinIcon(labelText) {
   const safe = escapeHtml(labelText);
+  // Mobile-aware sizing: cap label width to leave breathing room from map edges
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+  const maxW = isMobile ? 200 : 280;
+  const padX = isMobile ? 12 : 18;
+  const wrap = isMobile ? "normal" : "nowrap";
   return L.divIcon({
     className: "leaflet-meeting-pin-icon",
-    html: `<div style="display:flex;flex-direction:column;align-items:center;gap:8px;width:max-content;max-width:min(280px,70vw);">
+    html: `<div style="display:flex;flex-direction:column;align-items:center;gap:8px;width:max-content;max-width:${maxW}px;">
       <svg width="38" height="47" viewBox="0 0 38 47" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <path d="M19 0C8.51 0 0 8.51 0 19C0 33.25 19 47 19 47C19 47 38 33.25 38 19C38 8.51 29.49 0 19 0Z" fill="#7b2cbf"/>
         <circle cx="19" cy="19" r="8" fill="white"/>
       </svg>
-      <div style="background:#fff;padding:12px 18px;border-radius:40px;box-shadow:0 2px 8px rgba(0,0,0,0.12);font-family:Raleway,sans-serif;font-size:13px;font-weight:600;color:#7b2cbf;border-bottom:1px solid #7b2cbf;white-space:nowrap;text-align:center;">
+      <div style="background:#fff;padding:10px ${padX}px;border-radius:40px;box-shadow:0 2px 8px rgba(0,0,0,0.12);font-family:Raleway,sans-serif;font-size:13px;font-weight:600;color:#7b2cbf;border-bottom:1px solid #7b2cbf;white-space:${wrap};text-align:center;line-height:1.3;">
         ${safe}
       </div>
     </div>`,
-    iconAnchor: [19, 47],
-    iconSize: [280, 140],
+    iconAnchor: [maxW / 2, 47],
+    iconSize: [maxW, 140],
     popupAnchor: [0, -47],
   });
 }
@@ -769,8 +774,249 @@ const TOUR_DATA = {
   },
 };
 
-// Build TOUR_DATA by merging template + overrides for each slug
-const TOUR_DATA = Object.fromEntries(
+// ─── Templated tour data (fallback) ────────────────────────────────────────
+// For tour slugs that don't have rich curated data in TOUR_DATA above, we
+// build per-tour entries by merging a shared TOUR_TEMPLATE with slug-specific
+// overrides (title, location, price, duration, description, country).
+// This way every tour link in the app routes to a detail page with at least
+// the right title and basic info, instead of falling back to Elmina.
+const TOUR_TEMPLATE = {
+  rating: 4.8,
+  reviewCount: 24,
+  maxGuests: 12,
+  languages: "English, Twi, French",
+  cancellation: "Cancellation available",
+  images: Array.from({ length: 24 }, (_, i) => `https://picsum.photos/seed/tour-detail-${i + 1}/856/717`),
+  heroMainImage: "https://picsum.photos/seed/tour-hero-main/856/717",
+  heroTopRight: "https://picsum.photos/seed/tour-hero-top/867/366",
+  heroBottomLeft: "https://picsum.photos/seed/tour-hero-bl/430/347",
+  heroBottomRight: "https://picsum.photos/seed/tour-hero-bottom/432/347",
+  bestFor: ["Cultural Enthusiasts", "Diaspora Travelers", "International Tourists", "Couples"],
+  included: [
+    { type: "check", text: "Expert certified local guides" },
+    { type: "check", text: "Hotel accommodation (where applicable)" },
+    { type: "check", text: "Daily meals as per itinerary" },
+    { type: "check", text: "All entrance fees" },
+    { type: "check", text: "Hotel pickup & drop-off" },
+    { type: "check", text: "Private comfortable transport" },
+    { type: "cross", text: "International/domestic flights" },
+    { type: "cross", text: "Personal spending & tips" },
+    { type: "cross", text: "Travel insurance" },
+    { type: "cross", text: "Alcoholic beverages" },
+  ],
+  itinerary: [
+    {
+      day: 1,
+      title: "Departure & Arrival",
+      activities: ["Hotel pickup and orientation", "Scenic transit to destination", "Traditional welcome dinner"],
+    },
+    {
+      day: 2,
+      title: "Main Exploration Day",
+      activities: ["Guided tour of key sights", "Cultural immersion experience", "Local cuisine tasting"],
+    },
+    {
+      day: 3,
+      title: "Return Journey",
+      activities: ["Optional morning excursion", "Souvenir shopping", "Departure and transfer back"],
+    },
+  ],
+  guide: {
+    name: "Ailsa Mensah-Asante",
+    rating: 4.9,
+    reviews: 124,
+    speciality: "Heritage Guide",
+    yearsExp: 8,
+    languages: [
+      { code: "gb", name: "English" },
+      { code: "fr", name: "French" },
+      { code: "gh", name: "Twi" },
+    ],
+    certifications: ["UNESCO Certified", "History MA"],
+    image: "https://picsum.photos/seed/guide-ailsa/296/393",
+    testimonials: [
+      { quote: "Ailsa's depth of knowledge brought the history to life in a way no textbook ever could.", reviewer: "Estella Sackey", date: "2 weeks ago" },
+      { quote: "Her passion for Ghana's heritage is infectious. Every stop felt personal and deeply meaningful.", reviewer: "James O.", date: "1 month ago" },
+    ],
+  },
+  reviews: [
+    { id: 1, name: "Sarah M.", avatar: "https://picsum.photos/seed/reviewer-1/40/40", rating: 5, date: "January 2025", text: "Absolutely life-changing experience. The guide's knowledge was profound and deeply moving. Highly recommend." },
+    { id: 2, name: "James O.", avatar: "https://picsum.photos/seed/reviewer-2/40/40", rating: 5, date: "December 2024", text: "A perfect blend of history, culture, and natural beauty. Elysium Tours truly exceeded our expectations." },
+    { id: 3, name: "Priya K.", avatar: "https://picsum.photos/seed/reviewer-3/40/40", rating: 4, date: "November 2024", text: "Wonderful tour with excellent organisation. Comfortable accommodations and delicious meals." },
+  ],
+  ratingBreakdown: { 5: 85, 4: 10, 3: 3, 2: 1, 1: 1 },
+  totalReviews: 3249,
+  categoryRatings: [
+    { label: "Guide Quality", score: 4.9 },
+    { label: "Value for Money", score: 4.8 },
+    { label: "Logistical Quality", score: 4.9 },
+    { label: "Transport", score: 4.5 },
+  ],
+  addOns: [
+    { name: "Professional Photo Package", desc: "High-resolution photos & edited highlights reel", price: "GH₵ 850" },
+    { name: "Private Vehicle Upgrade", desc: "Exclusive private transfer throughout the tour", price: "GH₵ 850" },
+    { name: "International Flights", desc: "Return flights from your home country", price: "GH₵ 850" },
+    { name: "Souvenir Bundle", desc: "Curated artisan souvenirs and gifts", price: "GH₵ 850" },
+  ],
+};
+
+// Per-tour overrides — only the fields that should be unique per tour.
+// Anything not specified falls back to TOUR_TEMPLATE.
+const TOUR_OVERRIDES = {
+  // ── Featured tours (TourPage's TourFeaturedSection) ──────────────────
+  "mole-national-park-safari": {
+    title: "Mole National Park Safari",
+    country: "Ghana",
+    location: "Northern Region, Ghana",
+    rating: 4.8,
+    duration: "3 Days / 2 Nights",
+    price: "GHC 5,500",
+    description: "Experience Ghana's largest wildlife sanctuary on this immersive safari adventure. Spot elephants, antelopes, baboons, and over 300 bird species across 4,840 km² of pristine savannah. Take guided walking safaris with armed rangers, swim in the lodge's pool overlooking the watering hole, and learn about traditional northern Ghanaian culture. An eco-certified experience that supports local conservation.",
+  },
+  "accra-arts-culture-food-day": {
+    title: "Accra Arts, Culture & Food Day",
+    country: "Ghana",
+    location: "Accra, Greater Accra",
+    rating: 4.7,
+    duration: "1 Day (8 hours)",
+    price: "GHC 2,500",
+    description: "A vibrant single-day immersion into Ghana's capital. Explore the Centre for National Culture for traditional crafts, visit the Kwame Nkrumah Memorial Park, sample street food at Makola Market, and enjoy a curated lunch at a local fusion restaurant. Perfect for first-time visitors looking to capture the essence of Accra in a single, memorable day.",
+  },
+  "dakar-business-immersion": {
+    title: "Dakar Business & Immersion",
+    country: "Senegal",
+    location: "Dakar, Senegal",
+    rating: 4.9,
+    duration: "3 Days / 2 Nights",
+    price: "GHC 6,500",
+    description: "A premium business-class tour of West Africa's francophone hub. Combine networking opportunities with cultural immersion: visit the historic Île de Gorée (UNESCO World Heritage Site), explore the bustling Sandaga Market, dine at Senegal's finest restaurants, and experience the warmth of Teranga hospitality.",
+  },
+
+  // ── HomePage FeaturedToursSection ────────────────────────────────────
+  "accra-bustling-city-market-tour": {
+    title: "Accra Bustling City & Market Tour",
+    country: "Ghana",
+    location: "Accra, Greater Accra",
+    rating: 4.8,
+    duration: "3 Days / 2 Nights",
+    price: "GHC 3,500",
+    description: "Dive into the energetic heart of Accra with this multi-day exploration. Wander through Makola, Kantamanto, and Madina markets to experience daily Ghanaian life. Visit Jamestown's lighthouse, the W.E.B. Du Bois Memorial Centre, and Independence Square.",
+  },
+  "kumasi-heritage-market-discovery": {
+    title: "Kumasi Heritage & Market Discovery",
+    country: "Ghana",
+    location: "Kumasi, Ashanti Region",
+    rating: 4.7,
+    duration: "2 Days / 1 Night",
+    price: "GHC 5,000",
+    description: "Experience the cultural heart of the Ashanti Kingdom. Visit the Manhyia Palace Museum, Kejetia Market (one of West Africa's largest open-air markets), and the National Cultural Centre. Watch master craftsmen weave authentic kente cloth in Bonwire village, and learn the history of the Golden Stool — sacred symbol of the Ashanti people.",
+  },
+  "wli-waterfalls-nature-exploration": {
+    title: "Wli Waterfalls & Nature Exploration",
+    country: "Ghana",
+    location: "Volta Region, Ghana",
+    rating: 4.9,
+    duration: "1 Day",
+    price: "GHC 4,500",
+    description: "Trek to West Africa's highest waterfall in the lush mountains of the Volta Region. The hike through the Agumatsa Wildlife Sanctuary takes you past tropical butterflies, fruit bats, and dense rainforest before revealing the spectacular 80-metre Wli Falls.",
+  },
+
+  // ── Country page tours ──────────────────────────────────────────────
+  "homecoming-kakum-national-park": {
+    title: "The Homecoming Experience to Kakum National Park",
+    country: "Ghana",
+    location: "Cape Coast, Ghana",
+    rating: 4.8,
+    duration: "5 Days / 4 Nights",
+    price: "GHC 4,000",
+    description: "A specially curated diaspora homecoming experience combining heritage with adventure. Walk through the Cape Coast and Elmina Castles, traverse Kakum's iconic canopy walkway high above the rainforest, and join in a naming ceremony at a traditional Akan village.",
+  },
+  "accra-city-culture-tour": {
+    title: "Accra City & Culture Full-Day Tour",
+    country: "Ghana",
+    location: "Accra, Greater Accra",
+    rating: 4.8,
+    duration: "1 Day",
+    price: "GHC 250",
+    description: "The definitive single-day introduction to Accra. From Independence Square to the National Museum, from Jamestown fishing harbour to the Arts Centre, this tour packs the highlights of Ghana's capital into one carefully-paced day.",
+  },
+  "canopy-bridges-kakum": {
+    title: "Canopy Bridges & Adventure at Kakum",
+    country: "Ghana",
+    location: "Central Region, Ghana",
+    rating: 4.6,
+    duration: "1 Day",
+    price: "GHC 350",
+    description: "An adrenaline-filled day at Kakum National Park's famous canopy walkway. Suspended 30 metres above the rainforest floor across seven swaying bridges, this is one of only three such walkways in Africa.",
+  },
+  "legacy-return-diaspora-experience": {
+    title: "Legacy & Return — Diaspora Experience",
+    country: "Ghana",
+    location: "Cape Coast, Ghana",
+    rating: 5.0,
+    duration: "4 Days / 3 Nights",
+    price: "GHC 7,500",
+    description: "An emotionally profound diaspora journey designed for travelers tracing their African roots. Visit Cape Coast and Elmina Castles with specialised heritage guides, participate in libation and naming ceremonies, meet with traditional chiefs, and explore W.E.B. Du Bois's legacy.",
+  },
+  "boti-falls-umbrella-rock": {
+    title: "Boti Falls & Umbrella Rock Day Trip",
+    country: "Ghana",
+    location: "Eastern Region, Ghana",
+    rating: 4.7,
+    duration: "1 Day",
+    price: "GHC 300",
+    description: "Discover the natural wonders of Ghana's Eastern Region. The twin Boti Falls plunge 30 metres into a serene pool — locals affectionately call them the 'male and female' falls. A short hike away, marvel at the gravity-defying Umbrella Rock and the mysterious 'three-headed' palm tree.",
+  },
+  "premium-accra-heritage-business": {
+    title: "Premium Accra Heritage & Business Tour",
+    country: "Ghana",
+    location: "Greater Accra, Ghana",
+    rating: 4.8,
+    duration: "2 Days / 1 Night",
+    price: "GHC 6,000",
+    description: "A business-class tour designed for executives visiting Accra. Combines high-quality cultural sites (Du Bois Centre, Nkrumah Mausoleum, Jamestown) with networking opportunities at Accra's premier business venues.",
+  },
+  "bolgatanga-arts-crafts-paga-crocodile": {
+    title: "Bolgatanga Arts, Crafts & Paga Crocodile",
+    country: "Ghana",
+    location: "Upper East, Ghana",
+    rating: 4.6,
+    duration: "5 Days / 4 Nights",
+    price: "GHC 8,500",
+    description: "Travel to Ghana's far north for a deep cultural immersion. Visit the famous Bolgatanga craft market for handmade leather and basketry, see the legendary Paga Crocodile Pond where sacred crocodiles coexist peacefully with humans.",
+  },
+  "bolgatanga-arts-crafts-paga": {
+    title: "Bolgatanga Arts, Crafts & Paga Crocodile",
+    country: "Ghana",
+    location: "Upper East, Ghana",
+    rating: 4.6,
+    duration: "5 Days / 4 Nights",
+    price: "GHC 8,500",
+    description: "Travel to Ghana's far north for a deep cultural immersion. Visit the famous Bolgatanga craft market for handmade leather and basketry, see the legendary Paga Crocodile Pond where sacred crocodiles coexist peacefully with humans.",
+  },
+  "kintampo-falls-rock-village": {
+    title: "Kintampo Falls & Rock Village Tour",
+    country: "Ghana",
+    location: "Brong-Ahafo, Ghana",
+    rating: 4.8,
+    duration: "1 Day",
+    price: "GHC 320",
+    description: "Visit the breathtaking Kintampo Falls — three cascading falls plunging into deep emerald pools surrounded by tropical forest. Continue to the unique Rock Village (Tongo Rocks) where traditional shrines are built into the natural rock formations.",
+  },
+  "cape-three-points-coastal-heritage": {
+    title: "Cape Three Points & Coastal Heritage",
+    country: "Ghana",
+    location: "Western Region, Ghana",
+    rating: 4.9,
+    duration: "3 Days / 2 Nights",
+    price: "GHC 5,500",
+    description: "Visit the southernmost tip of Ghana — Cape Three Points — where three coastal points meet the Atlantic. Explore the historic Fort Apollonia, walk the pristine beaches of Princes Town, and experience the slower pace of Ghana's lesser-known western coast.",
+  },
+};
+
+// Build templated tour data by merging TOUR_TEMPLATE + per-tour overrides.
+// Used as fallback for tour slugs that don't have rich curated data in TOUR_DATA above.
+const TEMPLATED_TOURS = Object.fromEntries(
   Object.entries(TOUR_OVERRIDES).map(([slug, overrides]) => [
     slug,
     { ...TOUR_TEMPLATE, ...overrides },
@@ -1084,11 +1330,11 @@ const TourHeroSection = React.forwardRef(({ tourData, onOpenGallery }, ref) => {
         ref={ref}
         className="flex w-full flex-col gap-4 bg-secondary-light-hover"
       >
-        <div className="flex flex-col gap-2 pl-[156px] pr-4 pt-8">
-          <h1 className="font-raleway text-Display-md-small-semibold leading-[50px] text-secondary-normal-default">
+        <div className="flex flex-col gap-2 px-6 md:px-[30px] lg:pl-[156px] lg:pr-4 pt-8">
+          <h1 className="font-raleway text-[28px] leading-[36px] md:text-[32px] md:leading-[42px] lg:text-Display-md-small-semibold lg:leading-[50px] text-secondary-normal-default">
             {tourData.title}
           </h1>
-          <div className="flex h-5 flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 mb-2">
             <div className="flex items-center gap-1">
               <svg
                 width="11"
@@ -1122,9 +1368,29 @@ const TourHeroSection = React.forwardRef(({ tourData, onOpenGallery }, ref) => {
           </div>
         </div>
 
-        <div className="flex w-full flex-col items-stretch border-r border-solid border-secondary-light-active">
+        {/* Mobile: single hero image with "Show all photos" overlay */}
+        <div className="relative w-full h-[280px] cursor-pointer overflow-hidden xl:hidden" onClick={() => onOpenGallery(0)} role="presentation">
+          <img
+            src={mainSrc}
+            alt={tourData.title}
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+          <div className="pointer-events-none absolute inset-0 bg-black/30" aria-hidden />
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); onOpenGallery(0); }}
+            className="absolute bottom-4 right-4 z-10 flex h-[38px] items-center gap-2 rounded-[10px] border border-secondary-light-default px-3 backdrop-blur-[7.45px]"
+            style={{ backgroundColor: "rgba(123, 44, 191, 0.5)", width: "160px" }}
+          >
+            <span className="font-sans text-sm font-semibold leading-5 tracking-[-0.15px] text-secondary-light-hover" aria-hidden>⋮⋮</span>
+            <span className="font-raleway text-med-small-semibold text-secondary-light-default">Show all photos</span>
+          </button>
+        </div>
+
+        {/* Desktop: original 4-photo grid */}
+        <div className="hidden xl:flex w-full flex-col items-stretch border-r border-solid border-secondary-light-active">
           <div
-            className="grid min-h-[320px] w-full auto-rows-fr gap-2 overflow-hidden max-xl:grid-cols-1 xl:h-[717px] xl:min-h-0 xl:grid-cols-[minmax(0,856fr)_minmax(0,864fr)]"
+            className="grid h-[717px] w-full grid-cols-[minmax(0,856fr)_minmax(0,864fr)] gap-2 overflow-hidden"
           >
             {/* Left: main image */}
             <div
@@ -1146,7 +1412,7 @@ const TourHeroSection = React.forwardRef(({ tourData, onOpenGallery }, ref) => {
             {/* Right column */}
             <div className="flex min-h-0 min-w-0 flex-col gap-1">
               <div
-                className="relative h-[min(200px,40%)] min-h-0 shrink-0 cursor-pointer overflow-hidden xl:h-[366px]"
+                className="relative h-[366px] min-h-0 shrink-0 cursor-pointer overflow-hidden"
                 onClick={() => onOpenGallery(1)}
                 role="presentation"
               >
@@ -1160,9 +1426,9 @@ const TourHeroSection = React.forwardRef(({ tourData, onOpenGallery }, ref) => {
                   aria-hidden
                 />
               </div>
-              <div className="flex min-h-0 flex-1 gap-1 xl:h-[347px] xl:flex-none">
+              <div className="flex h-[347px] gap-1">
                 <div
-                  className="relative w-[calc(50%-2px)] min-w-0 shrink-0 cursor-pointer overflow-hidden xl:w-[430px]"
+                  className="relative w-[430px] min-w-0 shrink-0 cursor-pointer overflow-hidden"
                   onClick={() => onOpenGallery(2)}
                   role="presentation"
                 >
@@ -1177,7 +1443,7 @@ const TourHeroSection = React.forwardRef(({ tourData, onOpenGallery }, ref) => {
                   />
                 </div>
                 <div
-                  className="relative min-h-[140px] min-w-0 flex-1 cursor-pointer overflow-hidden"
+                  className="relative min-w-0 flex-1 cursor-pointer overflow-hidden"
                   onClick={() => onOpenGallery(3)}
                   role="presentation"
                 >
@@ -1401,20 +1667,20 @@ const ItineraryStep = ({ day, isFirst }) => {
 const AddOnRow = ({ addon }) => {
   const [selected, setSelected] = useState(false);
   return (
-    <div className="flex items-center pl-1.5 pr-6 justify-between">
-      <div>
+    <div className="flex items-center pl-1.5 pr-3 md:pr-6 justify-between gap-3">
+      <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
           {/* Icon chip */}
-          <div>{addon.icon}</div>
-          <div>
-            <p className="text-semi-md-semibold text-tertiary-normal-default">
+          <div className="shrink-0">{addon.icon}</div>
+          <div className="min-w-0 flex-1">
+            <p className="text-[15px] font-semibold leading-[20px] md:text-semi-md-semibold text-tertiary-normal-default">
               {addon.name}
             </p>
           </div>
         </div>
         <p className="text-med-small-Medium text-secondary-dark-default">
           {addon.desc}
-        </p>{" "}
+        </p>
       </div>
 
       <div className="flex items-center" style={{ gap: "14px", flexShrink: 0 }}>
@@ -1476,11 +1742,10 @@ const AddOnRow = ({ addon }) => {
 // Figma 3112:40961 — rounded-30px card; left photo panel (gradient #2b0f43→#6c26a9)
 // Right content: name / subtitle / language+cert badges / 2 testimonial quotes / link
 const GuideCard = ({ guide }) => (
-  <div className="relative overflow-hidden min-h-[393px] border border-secondary-light-active rounded-[30px] bg-[#FEFEFE] flex">
-    {/* Left: photo panel */}
+  <div className="relative overflow-hidden md:min-h-[393px] border border-secondary-light-active rounded-[30px] bg-[#FEFEFE] flex flex-col md:flex-row">
+    {/* Left (desktop) / Top (mobile): photo panel */}
     <div
-      className="relative flex-shrink-0 overflow-hidden"
-      style={{ width: "296px" }}
+      className="relative flex-shrink-0 overflow-hidden w-full h-[260px] md:h-auto md:w-[296px]"
     >
       {/* Gradient behind image so transparent PNG reveals gradient */}
       <div
@@ -1499,15 +1764,13 @@ const GuideCard = ({ guide }) => (
       <img
         src={guide.image}
         alt={guide.name}
-        className="relative z-[1] h-full w-full object-cover"
-        style={{ borderRadius: "28px 0 0 28px" }}
+        className="relative z-[1] h-full w-full object-cover object-top md:object-center"
       />
     </div>
 
-    {/* Right: content */}
+    {/* Right (desktop) / Below (mobile): content */}
     <div
-      className="flex-1 py-[32px] flex flex-col justify-center"
-      style={{ padding: "32px 32px 32px 36px" }}
+      className="flex-1 flex flex-col justify-center p-6 md:p-8 md:pl-9"
     >
       {/* Name */}
       <h3 className="max-w-[509px] text-semi-md-semibold text-tertiary-normal-default">
@@ -2131,8 +2394,19 @@ const TourDetailPage = () => {
   const [departureDate, setDepartureDate] = useState("");
   const [returnDate, setReturnDate] = useState("");
 
-  const tourData =
-    TOUR_DATA[tour] || TOUR_DATA["elmina-heritage-coastal-journey"];
+  // Lookup priority:
+  //   1. Rich curated data in TOUR_DATA (elmina-heritage-coastal-journey, accra-corporate-executive-tour)
+  //   2. Templated data in TEMPLATED_TOURS (per-tour title/location/price overrides on TOUR_TEMPLATE)
+  //   3. Fallback to elmina-heritage-coastal-journey
+  // Merge with TOUR_TEMPLATE so basic fields (maxGuests, languages, cancellation,
+  // images, etc.) are always present even when rich curated data omits them.
+  const tourData = useMemo(() => {
+    const rich = TOUR_DATA[tour];
+    const templated = TEMPLATED_TOURS[tour];
+    const fallback = TOUR_DATA["elmina-heritage-coastal-journey"];
+    const baseData = rich || templated || fallback;
+    return { ...TOUR_TEMPLATE, ...baseData };
+  }, [tour]);
   const importantInfo = tourData.importantInformation;
   const importantInfoRows = importantInfo?.blocks ?? [];
   const importantInfoFooter = importantInfo?.footerNote;
@@ -2143,8 +2417,13 @@ const TourDetailPage = () => {
   );
 
   useEffect(() => {
-    const data = TOUR_DATA[tour] || TOUR_DATA["elmina-heritage-coastal-journey"];
+    const data = TOUR_DATA[tour] || TEMPLATED_TOURS[tour] || TOUR_DATA["elmina-heritage-coastal-journey"];
     setMeetingPin(data.meetingPoint ?? DEFAULT_MEETING_POINT);
+  }, [tour]);
+
+  // Reset scroll to top whenever the user navigates to a different tour
+  useEffect(() => {
+    window.scrollTo(0, 0);
   }, [tour]);
 
   const countryDisplay = country
@@ -2219,12 +2498,12 @@ const TourDetailPage = () => {
       />
 
       {/* ── Main content — Figma Frame 1000006773 ────────────────────────────────
-           px-156px matches page gutter (same as hero title / sticky nav)
-           Left col max-w-928px + gap + right widget 457px sticky              */}
-      <div className="px-[156px] pt-[56px] pb-[80px]">
-        <div className="flex gap-[32px] items-start">
-          {/* ── LEFT CONTENT — w=928px ─────────────────────────────────── */}
-          <div className="flex-1 lg:min-w-[70%] max-w-[928px] min-w-0 flex flex-col">
+           Mobile: stacked (booking widget below content)
+           Desktop: two-column (left content + sticky right widget)            */}
+      <div className="px-6 md:px-[30px] lg:px-[156px] pt-8 lg:pt-[56px] pb-12 lg:pb-[80px]">
+        <div className="flex flex-col lg:flex-row gap-8 lg:gap-[32px] items-start">
+          {/* ── LEFT CONTENT — full width on mobile, max-w-928px on desktop */}
+          <div className="w-full lg:flex-1 lg:min-w-[70%] lg:max-w-[928px] min-w-0 flex flex-col">
             {/* ① OVERVIEW: Tour Meta Bar + About The Tour ─ id=section-overview */}
             <div id="section-overview" className="mb-6">
               {/* Meta subtitle — "3-day tour hosted by Heritage Guides" */}
@@ -2510,7 +2789,7 @@ const TourDetailPage = () => {
               className="pb-14.5 pt-8 border-b border-secondary-light-hover"
             >
               {showImportantInformation && (
-                <div className="mb-10 w-full rounded-[20px] border border-solid border-[#e8d9f5] bg-white px-[33px] pb-8 pt-[29px]">
+                <div className="mb-10 w-full rounded-[20px] border border-solid border-[#e8d9f5] bg-white px-5 md:px-[33px] pb-8 pt-[29px]">
                   <h2 className="font-raleway text-xl font-bold leading-8 tracking-normal text-secondary-dark-hover">
                     Important Information
                   </h2>
@@ -2601,10 +2880,10 @@ const TourDetailPage = () => {
             className="pt-5 pb-[64px] border-b border-secondary-light-hover "
             >
               <div
-              className="px-5 py-8 rounded-[30px] bg-secondary-dark-darker border border-secondary-light-hover flex items-center justify-between gap-6"
-               
+              className="px-5 py-8 rounded-[30px] bg-secondary-dark-darker border border-secondary-light-hover flex flex-col md:flex-row md:items-center md:justify-between gap-6"
+
               >
-                <div>
+                <div className="flex-1 min-w-0">
                   <h4
                   className="text-semi-md-semibold text-white mb-2 "
                    
@@ -2662,11 +2941,10 @@ const TourDetailPage = () => {
           </div>
 
           {/* ── RIGHT: Booking Widget — Figma 3156:45940 ─────────────────── */}
-          {/* sticky top = 112px navbar + 64px detail nav + 12px buffer = 188px   */}
-          {/* maxHeight clamps to viewport so the full widget is always on-screen */}
+          {/* Mobile: full width, below content. Desktop: sticky 457px right column
+              sticky top = 112px navbar + 64px detail nav + 12px buffer = 188px   */}
           <div
-            className="z-10 lg:min-w-[457px] max-w-full flex-shrink-0 sticky"
-            style={{ top: "188px" }}
+            className="w-full lg:w-auto max-w-[457px] mx-auto lg:mx-0 lg:flex-shrink-0 lg:min-w-[457px] lg:sticky lg:top-[188px] z-10"
           >
             <BookingWidget
               tourData={tourData}

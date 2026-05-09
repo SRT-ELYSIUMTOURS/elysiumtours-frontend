@@ -7,10 +7,14 @@ import Button from "../../ui/button";
 // Header: "ONLY IN {COUNTRY}" left label + "Signature Experiences" title + "See All Tours" btn right
 // Grid: 4 cards, fixed — "See All Tours" navigates to the full listing
 
+// Use the slug as the picsum seed so the same tour always shows the same image,
+// regardless of which section it appears in (Signature, All Tours, etc.)
+const tourImage = (slug) => `https://picsum.photos/seed/${slug}/351/373`;
+
 const TOURS = [
   {
     id: 1,
-    image: "https://picsum.photos/seed/sig-exp-1/351/373",
+    image: tourImage("homecoming-kakum-national-park"),
     location: "Cape Coast/Central Region",
     duration: { class: "Multi-Day", span: "3 Days/2 Nights" },
     maxGroupSize: 12,
@@ -25,7 +29,7 @@ const TOURS = [
   },
   {
     id: 2,
-    image: "https://picsum.photos/seed/sig-exp-2/351/373",
+    image: tourImage("elmina-heritage-coastal-journey"),
     location: "Accra/Ghana",
     duration: { class: "Day Tour", span: "1 Day" },
     maxGroupSize: 8,
@@ -40,7 +44,7 @@ const TOURS = [
   },
   {
     id: 3,
-    image: "https://picsum.photos/seed/sig-exp-3/351/373",
+    image: tourImage("kumasi-heritage-market-discovery"),
     location: "Ashanti/Ghana",
     duration: { class: "Multi-Day", span: "5 Days/4 Nights" },
     maxGroupSize: 15,
@@ -55,7 +59,7 @@ const TOURS = [
   },
   {
     id: 4,
-    image: "https://picsum.photos/seed/sig-exp-4/351/373",
+    image: tourImage("wli-waterfalls-nature-exploration"),
     location: "Volta Region/Ghana",
     duration: { class: "Day Tour", span: "1 Day" },
     maxGroupSize: 10,
@@ -143,7 +147,7 @@ const SignatureExperiencesSection = React.forwardRef(({ country = "Ghana", class
         </div>
 
         {/* ── 4-card grid — Figma 1914:40952 body ────────────────────────── */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-x-[8px] gap-y-[16px]">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-x-[8px] gap-y-6 md:gap-y-[20px]">
           {TOURS.map((tour) => (
             <PopularTourCard
               key={tour.id}

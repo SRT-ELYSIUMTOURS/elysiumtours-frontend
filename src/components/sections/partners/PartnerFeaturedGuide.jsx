@@ -24,29 +24,37 @@ const PartnerFeaturedGuide = React.forwardRef(({
   return (
     <section
       ref={ref}
-      className={classNames("w-full bg-secondary-light-default py-[80px]", className)}
+      className={classNames("w-full bg-secondary-light-default py-10 sm:py-14 lg:py-[80px]", className)}
       {...props}
     >
-      <div className="px-[156px]">
-        {/* Inner card: bg-[#f7f7f7] h-[291px] rounded-[20px] overflow-hidden */}
-        <div className="relative bg-primary-normal-default h-[291px] rounded-[20px] overflow-hidden shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)] flex items-center">
+      <div className="px-4 sm:px-10 lg:px-[156px]">
+        {/*
+          Inner card:
+          Mobile: stacked column — decorative pills on top, text below
+          Desktop (lg+): flex row — pills left, text center, watermark right
+        */}
+        <div className="relative bg-primary-normal-default rounded-[20px] overflow-hidden shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)] flex flex-col lg:flex-row lg:items-center lg:h-[291px]">
 
-          {/* Decorative rotated pill shapes (left) — from Figma node 940:6303 */}
-          <div className="relative shrink-0 w-[220px] h-full flex items-center justify-center">
-            {/* Back pill - rotated, light purple */}
+          {/*
+            Decorative rotated pill shapes
+            Mobile: reduced size, horizontal strip at top
+            Desktop: left column, fixed width
+          */}
+          <div className="relative shrink-0 w-full h-[140px] lg:w-[220px] lg:h-full flex items-center justify-center overflow-hidden">
+            {/* Back pill */}
             <div
-              className="absolute w-[144px] h-[157px] rounded-[100px] bg-secondary-light-default shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)]"
-              style={{ transform: "rotate(-21deg)", top: "20px", left: "40px" }}
+              className="absolute w-[110px] h-[120px] lg:w-[144px] lg:h-[157px] rounded-[100px] bg-secondary-light-default shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)]"
+              style={{ transform: "rotate(-21deg)", top: "10px", left: "30px" }}
             />
             {/* Second pill */}
             <div
-              className="absolute w-[144px] h-[157px] rounded-[100px] bg-secondary-light-default shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)]"
-              style={{ transform: "rotate(-21deg)", top: "80px", left: "60px" }}
+              className="absolute w-[110px] h-[120px] lg:w-[144px] lg:h-[157px] rounded-[100px] bg-secondary-light-default shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)]"
+              style={{ transform: "rotate(-21deg)", top: "50px", left: "50px" }}
             />
-            {/* Front pill with guide image - purple with photo */}
+            {/* Front pill with guide image */}
             <div
-              className="absolute w-[203px] h-[194px] rounded-[100px] overflow-hidden shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)]"
-              style={{ transform: "rotate(-21deg)", top: "50px", left: "10px" }}
+              className="absolute w-[155px] h-[148px] lg:w-[203px] lg:h-[194px] rounded-[100px] overflow-hidden shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)]"
+              style={{ transform: "rotate(-21deg)", top: "20px", left: "5px" }}
             >
               <div className="absolute inset-0 bg-secondary-normal-default" />
               <img
@@ -58,19 +66,14 @@ const PartnerFeaturedGuide = React.forwardRef(({
             </div>
           </div>
 
-          {/* Guide info — centered */}
-          <div className="flex flex-col gap-[20px] items-center flex-1 px-[40px]">
-            {/* Title */}
-            <h3 className="font-raleway font-bold text-[25px] leading-[34px] text-tertiary-normal-default text-center">
+          {/* Guide info */}
+          <div className="flex flex-col gap-4 lg:gap-[20px] items-center flex-1 px-6 py-8 lg:px-[40px] lg:py-0">
+            <h3 className="font-raleway font-bold text-[18px] sm:text-[22px] lg:text-[25px] leading-[28px] sm:leading-[32px] lg:leading-[34px] text-tertiary-normal-default text-center">
               {guideTitle}
             </h3>
-
-            {/* Description */}
-            <p className="font-raleway font-normal text-[16px] leading-[24px] text-primary-dark-active text-center max-w-[600px]">
+            <p className="font-raleway font-normal text-[14px] sm:text-[15px] lg:text-[16px] leading-[22px] sm:leading-[24px] text-primary-dark-active text-center max-w-[600px]">
               {guideDescription}
             </p>
-
-            {/* Button */}
             <button className={classNames(
               "flex items-center gap-[9px] h-[32px] px-[10px]",
               "border-[0.8px] border-solid border-secondary-normal-default",
@@ -83,8 +86,8 @@ const PartnerFeaturedGuide = React.forwardRef(({
             </button>
           </div>
 
-          {/* Decorative logo watermark — from Figma (opacity-7 positioned center-right) */}
-          <div className="absolute right-[60px] top-1/2 -translate-y-1/2 opacity-[0.07] pointer-events-none">
+          {/* Decorative logo watermark — desktop only */}
+          <div className="hidden lg:block absolute right-[60px] top-1/2 -translate-y-1/2 opacity-[0.07] pointer-events-none">
             <div className="w-[200px] h-[200px] rounded-full border-[3px] border-secondary-normal-default" />
           </div>
         </div>

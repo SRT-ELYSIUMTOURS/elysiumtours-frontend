@@ -46,7 +46,7 @@ const ExploreButton = ({ onClick }) => (
 // ─── Section header (eyebrow left + title/desc/button right) ─────────────────
 
 const SectionHeader = ({ label, title, description, onExplore }) => (
-  <div className="flex items-start justify-between w-full mb-[48px]">
+  <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between w-full mb-8 lg:mb-[48px] gap-4 lg:gap-0">
     {/* Left — eyebrow */}
     <div className="flex items-center gap-[8px] pt-[10px]">
       <div className="w-[46px] h-px shrink-0 bg-secondary-dark-darker" />
@@ -55,11 +55,11 @@ const SectionHeader = ({ label, title, description, onExplore }) => (
       </span>
     </div>
     {/* Right — title + description + button */}
-    <div className="flex flex-col gap-[16px] items-end w-[677px]">
-      <h2 className="font-raleway font-bold text-[25px] leading-[34px] text-[#2d2d2d] text-right w-[630px]">
+    <div className="flex flex-col gap-[16px] items-start lg:items-end w-full lg:w-[677px]">
+      <h2 className="font-raleway font-bold text-[20px] md:text-[25px] leading-[34px] text-[#2d2d2d] text-left lg:text-right w-full lg:w-[630px]">
         {title}
       </h2>
-      <p className="font-raleway font-normal text-[16px] leading-[24px] text-[#2d2d2d] text-right w-[565px]">
+      <p className="font-raleway font-normal text-[14px] md:text-[16px] leading-[24px] text-[#2d2d2d] text-left lg:text-right w-full lg:w-[565px]">
         {description}
       </p>
       <ExploreButton onClick={onExplore} />
@@ -177,18 +177,18 @@ const OVERVIEW_ORDER = [
 // ─── Videos section card row (3 equal flex-1 cards with play icons) ───────────
 
 const VideosSectionCards = ({ cards, navigate, catKey }) => (
-  <div className="flex gap-[15px] items-start w-full" style={{ marginTop: "0" }}>
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[15px] items-start w-full">
     {cards.map((card) => (
       <button
         key={card.id}
         className={classNames(
-          "relative overflow-hidden flex-1",
+          "relative overflow-hidden w-full",
           "border border-secondary-light-active",
           "rounded-[40px]",
           "shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)]",
           "cursor-pointer bg-[rgba(0,0,0,0.5)]"
         )}
-        style={{ height: "364px" }}
+        style={{ height: "264px" }}
         onClick={() => navigate(`/gallery/${catKey}/all`)}
       >
         {card.image && (
@@ -228,7 +228,23 @@ const VideosSectionCards = ({ cards, navigate, catKey }) => (
 const DestinationsBentoGrid = ({ cards, navigate, catKey }) => {
   const [cardA, cardB, cardC, cardD, cardE, cardF, cardG, cardH] = cards;
   return (
-    <div className="relative w-full" style={{ height: "705px" }}>
+    <>
+      {/* Mobile/tablet: 2-col grid */}
+      <div className="grid grid-cols-2 gap-[15px] lg:hidden">
+        {cards.map((card) => (
+          <GalleryPhotoCard
+            key={card.id}
+            image={card.image}
+            title={card.title}
+            count={card.count}
+            size="medium"
+            className="w-full h-[200px]"
+            onClick={() => navigate(`/gallery/${catKey}/all`)}
+          />
+        ))}
+      </div>
+      {/* Desktop: original absolute bento */}
+      <div className="hidden lg:block relative w-full" style={{ height: "705px" }}>
       {/* Col A — tall, offset 42px from top */}
       <div className="absolute" style={{ left: 0, top: 42, width: 335, height: 663 }}>
         <GalleryPhotoCard
@@ -307,17 +323,15 @@ const DestinationsBentoGrid = ({ cards, navigate, catKey }) => {
           onClick={() => navigate(`/gallery/${catKey}/all`)}
         />
       </div>
-    </div>
+      </div>
+    </>
   );
 };
 
 // ─── Standard grid (2-3 cols of medium cards) ────────────────────────────────
 
 const StandardPhotoGrid = ({ cards, navigate, catKey, cols = 3 }) => (
-  <div
-    className="grid gap-[24px]"
-    style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}
-  >
+  <div className={`grid gap-[24px] grid-cols-1 md:grid-cols-2 lg:grid-cols-${cols}`}>
     {cards.map((card) => (
       <GalleryPhotoCard
         key={card.id}
@@ -325,7 +339,7 @@ const StandardPhotoGrid = ({ cards, navigate, catKey, cols = 3 }) => (
         title={card.title}
         count={card.count}
         size={card.size || "medium"}
-        className={card.size === "large" ? "h-[663px]" : card.size === "small" ? "h-[197px] w-[162px]" : "h-[568px]"}
+        className="w-full h-[220px] md:h-[300px] lg:h-[400px]"
         onClick={() => navigate(`/gallery/${catKey}/all`)}
       />
     ))}
@@ -337,42 +351,59 @@ const StandardPhotoGrid = ({ cards, navigate, catKey, cols = 3 }) => (
 const NatureGrid = ({ cards, navigate, catKey }) => {
   const [cardA, cardB, cardC, cardD] = cards;
   return (
-    <div className="flex gap-[24px] items-start w-full">
-      <GalleryPhotoCard
-        image={cardA?.image}
-        title={cardA?.title}
-        count={cardA?.count}
-        size="large"
-        className="w-[335px] h-[663px]"
-        onClick={() => navigate(`/gallery/${catKey}/all`)}
-      />
-      <div className="flex flex-col gap-[24px] flex-1">
+    <>
+      {/* Mobile/tablet */}
+      <div className="grid grid-cols-2 gap-[16px] lg:hidden">
+        {cards.map((card) => (
+          <GalleryPhotoCard
+            key={card.id}
+            image={card.image}
+            title={card.title}
+            count={card.count}
+            size="medium"
+            className="w-full h-[220px]"
+            onClick={() => navigate(`/gallery/${catKey}/all`)}
+          />
+        ))}
+      </div>
+      {/* Desktop */}
+      <div className="hidden lg:flex gap-[24px] items-start w-full">
         <GalleryPhotoCard
-          image={cardB?.image}
-          title={cardB?.title}
-          count={cardB?.count}
-          size="medium"
-          className="w-full h-[568px]"
+          image={cardA?.image}
+          title={cardA?.title}
+          count={cardA?.count}
+          size="large"
+          className="w-[335px] h-[663px]"
           onClick={() => navigate(`/gallery/${catKey}/all`)}
         />
+        <div className="flex flex-col gap-[24px] flex-1">
+          <GalleryPhotoCard
+            image={cardB?.image}
+            title={cardB?.title}
+            count={cardB?.count}
+            size="medium"
+            className="w-full h-[568px]"
+            onClick={() => navigate(`/gallery/${catKey}/all`)}
+          />
+          <GalleryPhotoCard
+            image={cardC?.image}
+            title={cardC?.title}
+            count={cardC?.count}
+            size="medium"
+            className="w-full h-[568px]"
+            onClick={() => navigate(`/gallery/${catKey}/all`)}
+          />
+        </div>
         <GalleryPhotoCard
-          image={cardC?.image}
-          title={cardC?.title}
-          count={cardC?.count}
-          size="medium"
-          className="w-full h-[568px]"
+          image={cardD?.image}
+          title={cardD?.title}
+          count={cardD?.count}
+          size="large"
+          className="w-[335px] h-[663px]"
           onClick={() => navigate(`/gallery/${catKey}/all`)}
         />
       </div>
-      <GalleryPhotoCard
-        image={cardD?.image}
-        title={cardD?.title}
-        count={cardD?.count}
-        size="large"
-        className="w-[335px] h-[663px]"
-        onClick={() => navigate(`/gallery/${catKey}/all`)}
-      />
-    </div>
+    </>
   );
 };
 
@@ -381,26 +412,43 @@ const NatureGrid = ({ cards, navigate, catKey }) => {
 const CultureBentoGrid = ({ cards, navigate, catKey }) => {
   const [c1, c2, c3, c4, c5, c6, c7] = cards;
   return (
-    <div className="flex gap-[24px] items-start w-full">
-      {/* Col 1: medium + small pair */}
-      <div className="flex flex-col gap-[24px]" style={{ width: 338 }}>
-        <GalleryPhotoCard image={c1?.image} title={c1?.title} count={c1?.count} size="medium" className="w-full h-[568px]" onClick={() => navigate(`/gallery/${catKey}/all`)} />
-        <div className="flex gap-[14px]">
-          <GalleryPhotoCard image={c2?.image} title={c2?.title} size="small" className="w-[162px] h-[197px]" onClick={() => navigate(`/gallery/${catKey}/all`)} />
-          <GalleryPhotoCard image={c3?.image} title={c3?.title} size="small" className="w-[162px] h-[197px]" onClick={() => navigate(`/gallery/${catKey}/all`)} />
+    <>
+      {/* Mobile/tablet: 2-col grid */}
+      <div className="grid grid-cols-2 gap-[16px] lg:hidden">
+        {cards.map((card) => (
+          <GalleryPhotoCard
+            key={card.id}
+            image={card.image}
+            title={card.title}
+            count={card.count}
+            size="medium"
+            className="w-full h-[200px]"
+            onClick={() => navigate(`/gallery/${catKey}/all`)}
+          />
+        ))}
+      </div>
+      {/* Desktop: 3-col bento */}
+      <div className="hidden lg:flex gap-[24px] items-start w-full">
+        {/* Col 1: medium + small pair */}
+        <div className="flex flex-col gap-[24px]" style={{ width: 338 }}>
+          <GalleryPhotoCard image={c1?.image} title={c1?.title} count={c1?.count} size="medium" className="w-full h-[568px]" onClick={() => navigate(`/gallery/${catKey}/all`)} />
+          <div className="flex gap-[14px]">
+            <GalleryPhotoCard image={c2?.image} title={c2?.title} size="small" className="w-[162px] h-[197px]" onClick={() => navigate(`/gallery/${catKey}/all`)} />
+            <GalleryPhotoCard image={c3?.image} title={c3?.title} size="small" className="w-[162px] h-[197px]" onClick={() => navigate(`/gallery/${catKey}/all`)} />
+          </div>
+        </div>
+        {/* Col 2: large (tall) */}
+        <GalleryPhotoCard image={c4?.image} title={c4?.title} count={c4?.count} size="large" className="h-[663px]" style={{ width: 335 }} onClick={() => navigate(`/gallery/${catKey}/all`)} />
+        {/* Col 3: small pair + medium */}
+        <div className="flex flex-col gap-[24px]" style={{ width: 338 }}>
+          <div className="flex gap-[14px]">
+            <GalleryPhotoCard image={c5?.image} title={c5?.title} size="small" className="w-[162px] h-[197px]" onClick={() => navigate(`/gallery/${catKey}/all`)} />
+            <GalleryPhotoCard image={c6?.image} title={c6?.title} size="small" className="w-[162px] h-[197px]" onClick={() => navigate(`/gallery/${catKey}/all`)} />
+          </div>
+          <GalleryPhotoCard image={c7?.image} title={c7?.title} count={c7?.count} size="medium" className="w-full h-[568px]" onClick={() => navigate(`/gallery/${catKey}/all`)} />
         </div>
       </div>
-      {/* Col 2: large (tall) */}
-      <GalleryPhotoCard image={c4?.image} title={c4?.title} count={c4?.count} size="large" className="h-[663px]" style={{ width: 335 }} onClick={() => navigate(`/gallery/${catKey}/all`)} />
-      {/* Col 3: small pair + medium */}
-      <div className="flex flex-col gap-[24px]" style={{ width: 338 }}>
-        <div className="flex gap-[14px]">
-          <GalleryPhotoCard image={c5?.image} title={c5?.title} size="small" className="w-[162px] h-[197px]" onClick={() => navigate(`/gallery/${catKey}/all`)} />
-          <GalleryPhotoCard image={c6?.image} title={c6?.title} size="small" className="w-[162px] h-[197px]" onClick={() => navigate(`/gallery/${catKey}/all`)} />
-        </div>
-        <GalleryPhotoCard image={c7?.image} title={c7?.title} count={c7?.count} size="medium" className="w-full h-[568px]" onClick={() => navigate(`/gallery/${catKey}/all`)} />
-      </div>
-    </div>
+    </>
   );
 };
 
@@ -427,8 +475,8 @@ const CategorySectionBlock = ({ catKey, navigate }) => {
   };
 
   return (
-    <section className={classNames("w-full py-[80px]", data.bg)}>
-      <div className="px-[156px]">
+    <section className={classNames("w-full py-10 lg:py-[80px]", data.bg)}>
+      <div className="px-4 md:px-8 lg:px-[156px]">
         <SectionHeader
           label={data.label}
           title={data.title}

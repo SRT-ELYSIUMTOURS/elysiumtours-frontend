@@ -21,7 +21,7 @@ const PartnerSpotlightPreview = React.forwardRef(({ className, ...props }, ref) 
       )}
       {...props}
     >
-      <div className="mx-[156px]">
+      <div className="mx-4 md:mx-8 lg:mx-[156px]">
         <BlogSectionHeader
           label="PARTNER SPOTLIGHT"
           title="Building Meaningful Journeys Together"
@@ -29,8 +29,8 @@ const PartnerSpotlightPreview = React.forwardRef(({ className, ...props }, ref) 
           onButtonClick={() => navigate("/blog/partner-spotlight")}
         />
 
-        {/* 3 large partner cards — Figma: 451×656px each, gap-32px */}
-        <div className="mt-[80px] flex items-center gap-xl">
+        {/* 1-col on mobile, 3-col on md+ */}
+        <div className="mt-10 lg:mt-[80px] grid grid-cols-1 md:grid-cols-3 gap-xl">
           {PARTNERS.map((partner) => (
             <PartnerHighlightCard
               key={partner.id}

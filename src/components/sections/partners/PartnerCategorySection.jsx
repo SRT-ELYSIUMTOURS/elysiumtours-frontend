@@ -5,9 +5,9 @@ import PartnerHighlightCard from "../../cards/PartnerHighlightCard";
 
 // Figma: Category section layout — used for all 7 partner categories on the overview page
 // Layout: LEFT = eyebrow (line + label), RIGHT = title + description + "Explore More" button
-// BELOW: 4 PartnerHighlightCard in a flex row
-// px-[156px] matches Figma's left-[156px] w-[1416px] content area on 1728px design
-// Backgrounds alternate: #f2eaf9 (purple-tint) and #fefefe (white)
+// BELOW: 4 PartnerHighlightCards in a flex row
+// Desktop: px-[156px] matches Figma's left-[156px] w-[1416px] content area on 1728px design
+// Mobile/tablet: responsive padding + stacked header + scrollable card row
 
 const ArrowRightIcon = () => (
   <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -136,39 +136,50 @@ const CategorySectionBlock = ({ catKey, navigate }) => {
   if (!data) return null;
 
   return (
-    <section className={classNames("w-full py-[80px]", data.bg)}>
-      <div className="px-[156px]">
-        {/* Header: LEFT eyebrow | RIGHT title + desc + button */}
-        <div className="flex items-start justify-between w-full mb-[48px]">
-          {/* Left — eyebrow (line + uppercase label) */}
-          <div className="flex items-center gap-[8px] pt-[10px]">
+    <section className={classNames("w-full py-10 sm:py-14 lg:py-[80px]", data.bg)}>
+      <div className="px-4 sm:px-10 lg:px-[156px]">
+
+        {/*
+          Header:
+          Mobile/tablet (< lg): stacked — eyebrow on top, then title + desc + button below (left-aligned)
+          Desktop (lg+): side-by-side — LEFT eyebrow | RIGHT title + desc + button (right-aligned)
+        */}
+        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between w-full mb-8 sm:mb-10 lg:mb-[48px] gap-6 lg:gap-0">
+
+          {/* Eyebrow — left-aligned on all breakpoints */}
+          <div className="flex items-center gap-[8px] lg:pt-[10px]">
             <div className="w-[46px] h-[1px] shrink-0 bg-secondary-dark-darker" />
             <span className="font-raleway font-bold text-[13px] leading-[18px] text-secondary-dark-darker uppercase tracking-[0.05em]">
               {data.label}
             </span>
           </div>
 
-          {/* Right — title + description + button (right-aligned) */}
-          <div className="flex flex-col gap-[16px] items-end w-[597px]">
-            <h2 className="font-raleway font-bold text-[25px] leading-[34px] text-tertiary-normal-default text-right">
+          {/* Title + description + button */}
+          <div className="flex flex-col gap-[16px] lg:items-end lg:w-[597px]">
+            <h2 className="font-raleway font-bold text-[22px] sm:text-[25px] leading-[32px] sm:leading-[34px] text-tertiary-normal-default lg:text-right">
               {data.title}
             </h2>
-            <p className="font-raleway font-normal text-[16px] leading-[24px] text-tertiary-normal-default text-right w-[565px]">
+            <p className="font-raleway font-normal text-[15px] sm:text-[16px] leading-[24px] text-tertiary-normal-default lg:text-right lg:w-[565px]">
               {data.description}
             </p>
             <ExploreButton onClick={() => navigate(`/tour-partners/${catKey}/all`)} />
           </div>
         </div>
 
-        {/* 4 partner highlight cards */}
-        <div className="flex gap-[24px]">
+        {/*
+          Cards:
+          Mobile: horizontal scroll row, each card fixed 260px wide, 380px tall
+          Tablet (sm): horizontal scroll row, 300px wide, 450px tall
+          Desktop (lg): 4-across flex row, h-[568px], rounded-[40px]
+        */}
+        <div className="flex gap-4 sm:gap-5 lg:gap-[24px] overflow-x-auto scrollbar-none touch-pan-x lg:overflow-visible">
           {data.cards.map((card) => (
             <PartnerHighlightCard
               key={card.id}
               image={card.image}
               category={card.category}
               onClick={() => navigate(`/tour-partners/${catKey}/all`)}
-              className="flex-1 h-[568px]"
+              className="flex-shrink-0 w-[260px] h-[380px] sm:w-[300px] sm:h-[450px] lg:flex-1 lg:w-auto lg:h-[568px] rounded-[20px] lg:rounded-[40px]"
             />
           ))}
         </div>

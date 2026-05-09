@@ -15,7 +15,7 @@ const DestinationHighlightsPreview = React.forwardRef(({ className, ...props }, 
       )}
       {...props}
     >
-      <div className="mx-[156px]">
+      <div className="mx-4 md:mx-8 lg:mx-[156px]">
         <BlogSectionHeader
           label="DESTINATION HIGHLIGHT"
           title="Unforgettable Places, Endless Discoveries"
@@ -23,51 +23,29 @@ const DestinationHighlightsPreview = React.forwardRef(({ className, ...props }, 
           onButtonClick={() => navigate("/blog/destination-highlights")}
         />
 
-        {/* 5-col grid: 1 large left + 2 cols of 2 stacked + 2 cols of 2 stacked */}
-        <div className="mt-[80px] items-center flex gap-[15px]">
-          {/* Large left card */}
-          <BlogContentCard
-            title="Cape Coast Heritage"
-            category="History"
-            image="https://picsum.photos/seed/dh1/340/653"
-            className="!w-[340px] !h-[653px]"
-          />
-          {/* Column 2: 2 stacked */}
-          <div className="flex flex-col gap-[15px]">
-            <BlogContentCard
-              title="Accra Markets"
-              category="Culture"
-              image="https://picsum.photos/seed/dh2/341/364"
-              className="!w-[341px] !h-[364px]"
-            />
-            <BlogContentCard
-              title="Elmina Castle"
-              category="Heritage"
-              image="https://picsum.photos/seed/dh3/341/364"
-              className="!w-[341px] !h-[364px]"
-            />
+        {/* Mobile/tablet: 2-col grid. Desktop: 4-col bento */}
+        <div className="mt-10 lg:mt-[80px]">
+          {/* Desktop layout */}
+          <div className="hidden lg:flex items-center gap-[15px]">
+            <BlogContentCard title="Cape Coast Heritage" category="History" image="https://picsum.photos/seed/dh1/340/653" className="!w-[340px] !h-[653px]" />
+            <div className="flex flex-col gap-[15px]">
+              <BlogContentCard title="Accra Markets" category="Culture" image="https://picsum.photos/seed/dh2/341/364" className="!w-[341px] !h-[364px]" />
+              <BlogContentCard title="Elmina Castle" category="Heritage" image="https://picsum.photos/seed/dh3/341/364" className="!w-[341px] !h-[364px]" />
+            </div>
+            <BlogContentCard title="Kakum National Park" category="Adventure" image="https://picsum.photos/seed/dh4/879/653" className="!w-[340px] !h-[653px]" />
+            <div className="flex flex-col gap-[15px]">
+              <BlogContentCard title="Lake Volta" category="Nature" image="https://picsum.photos/seed/dh5/341/364" className="!w-[341px] !h-[364px]" />
+              <BlogContentCard title="Mole Park Safari" category="Wildlife" image="https://picsum.photos/seed/dh6/341/364" className="!w-[341px] !h-[364px]" />
+            </div>
           </div>
-          {/* Large center-right card */}
-          <BlogContentCard
-            title="Kakum National Park"
-            category="Adventure"
-            image="https://picsum.photos/seed/dh4/879/653"
-            className="!w-[340px] !h-[653px]"
-          />
-          {/* Column 4: 2 stacked */}
-          <div className="flex flex-col gap-[15px]">
-            <BlogContentCard
-              title="Lake Volta"
-              category="Nature"
-              image="https://picsum.photos/seed/dh5/341/364"
-              className="!w-[341px] !h-[364px]"
-            />
-            <BlogContentCard
-              title="Mole Park Safari"
-              category="Wildlife"
-              image="https://picsum.photos/seed/dh6/341/364"
-              className="!w-[341px] !h-[364px]"
-            />
+          {/* Mobile/tablet: 2-column grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-[15px] lg:hidden">
+            <BlogContentCard title="Cape Coast Heritage" category="History" image="https://picsum.photos/seed/dh1/340/653" className="!w-full !h-[220px]" />
+            <BlogContentCard title="Accra Markets" category="Culture" image="https://picsum.photos/seed/dh2/341/364" className="!w-full !h-[220px]" />
+            <BlogContentCard title="Elmina Castle" category="Heritage" image="https://picsum.photos/seed/dh3/341/364" className="!w-full !h-[220px]" />
+            <BlogContentCard title="Kakum National Park" category="Adventure" image="https://picsum.photos/seed/dh4/879/653" className="!w-full !h-[220px]" />
+            <BlogContentCard title="Lake Volta" category="Nature" image="https://picsum.photos/seed/dh5/341/364" className="!w-full !h-[220px]" />
+            <BlogContentCard title="Mole Park Safari" category="Wildlife" image="https://picsum.photos/seed/dh6/341/364" className="!w-full !h-[220px]" />
           </div>
         </div>
       </div>

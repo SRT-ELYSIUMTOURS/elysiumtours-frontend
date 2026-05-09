@@ -26,7 +26,7 @@ const GalleryHero = React.forwardRef(({
       ref={ref}
       className={classNames(
         "relative w-full overflow-hidden",
-        "h-[711px]",
+        "h-[350px] md:h-[500px] lg:h-[711px]",
         className
       )}
       {...props}
@@ -43,35 +43,26 @@ const GalleryHero = React.forwardRef(({
       </div>
 
       {/* Centered content */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col gap-[32px] items-center">
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col gap-[32px] items-center w-full px-4 md:px-10">
         <div className="flex flex-col gap-[16px] items-center">
           {/* Title */}
-          <p
-            className="font-raleway font-bold text-[56px] leading-[66px] text-primary-light-default text-center"
-            style={{ width: "957px" }}
-          >
+          <p className="font-raleway font-bold text-[28px] md:text-[40px] lg:text-[56px] leading-tight lg:leading-[66px] text-primary-light-default text-center w-full max-w-[957px]">
             {title}
           </p>
           {/* Description */}
-          <div className="flex h-[53px] items-start justify-center p-[10px]">
-            <p
-              className="font-raleway font-medium text-[16px] leading-[26px] text-primary-light-default text-center"
-              style={{ width: "850px" }}
-            >
-              {description}
-            </p>
-          </div>
+          <p className="font-raleway font-medium text-[14px] md:text-[16px] leading-[26px] text-primary-light-default text-center w-full max-w-[850px]">
+            {description}
+          </p>
         </div>
 
         {/* CTA Button */}
         <button
           className={classNames(
-            "flex gap-[16px] h-[56px] items-center justify-center p-[10px] rounded-[40px]",
+            "flex gap-[16px] h-[44px] md:h-[56px] items-center justify-center px-[20px] md:px-[10px] rounded-[40px]",
             "bg-primary-light-default border border-secondary-normal-default",
             "shadow-[0px_4px_4px_0px_rgba(0,0,0,0.1)]",
-            "cursor-pointer"
+            "cursor-pointer w-auto md:w-[217px]"
           )}
-          style={{ width: "217px" }}
           onClick={onExplore}
         >
           <p className="font-raleway font-semibold text-[16px] leading-[22px] text-secondary-dark-darker whitespace-nowrap">

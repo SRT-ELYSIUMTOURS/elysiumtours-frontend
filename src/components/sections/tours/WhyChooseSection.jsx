@@ -106,10 +106,18 @@ const WhyChooseSection = React.forwardRef(({ className, ...props }, ref) => {
             top:   -24.49% of 554px ≈ -136px
           This crops to the lower/centre portion of the panoramic photo.        */}
       <div className="relative w-full h-[280px] md:h-[400px] lg:h-[554px] rounded-[20px] overflow-clip shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)]">
+        {/* Mobile/tablet: clean object-cover render preserving aspect ratio */}
         <img
           src={whyChooseBg}
           alt="Safari vehicles and canoes in an African national park"
-          className="absolute left-0 w-full max-w-none pointer-events-none"
+          className="absolute inset-0 w-full h-full object-cover pointer-events-none lg:hidden"
+        />
+        {/* Desktop: Figma pixel-perfect crop (image is taller than container, top-shifted to show lower portion) */}
+        <img
+          src={whyChooseBg}
+          alt=""
+          aria-hidden="true"
+          className="hidden lg:block absolute left-0 w-full max-w-none pointer-events-none"
           style={{ height: "172.44%", top: "-24.49%" }}
         />
       </div>

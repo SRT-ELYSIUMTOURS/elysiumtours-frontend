@@ -15,7 +15,7 @@ const TravelStoriesPreview = React.forwardRef(({ className, ...props }, ref) => 
       )}
       {...props}
     >
-      <div className="mx-[156px]">
+      <div className="mx-4 md:mx-8 lg:mx-[156px]">
         <BlogSectionHeader
           label="DISPORA TRAVEL STORIES"
           title="BidsPora Travel Stories: Real Journeys, Real People"
@@ -23,25 +23,25 @@ const TravelStoriesPreview = React.forwardRef(({ className, ...props }, ref) => 
           onButtonClick={() => navigate("/blog/travel-stories")}
         />
 
-        {/* 3-column equal grid */}
-        <div className="mt-[80px] flex gap-[15px]">
+        {/* 1-col on mobile, 3-col on md+ */}
+        <div className="mt-10 lg:mt-[80px] grid grid-cols-1 md:grid-cols-3 gap-[15px]">
           <BlogContentCard
             title="My First Trip to Kumasi"
             category="Personal"
             image="https://picsum.photos/seed/ts1/461/364"
-            className="!w-auto !h-[364px] flex-1"
+            className="!w-full !h-[240px] md:!h-[364px]"
           />
           <BlogContentCard
             title="Reconnecting with Roots"
             category="Heritage"
             image="https://picsum.photos/seed/ts2/461/364"
-            className="!w-auto !h-[364px] flex-1"
+            className="!w-full !h-[240px] md:!h-[364px]"
           />
           <BlogContentCard
             title="A Week in Tamale"
             category="Adventure"
             image="https://picsum.photos/seed/ts3/461/364"
-            className="!w-auto !h-[364px] flex-1"
+            className="!w-full !h-[240px] md:!h-[364px]"
           />
         </div>
       </div>

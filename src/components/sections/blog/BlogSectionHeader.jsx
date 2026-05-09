@@ -22,7 +22,7 @@ const BlogSectionHeader = React.forwardRef(({
     <div
       ref={ref}
       className={classNames(
-        "flex items-start justify-between w-full",
+        "flex flex-col lg:flex-row items-start lg:justify-between w-full gap-4 lg:gap-0",
         className
       )}
       {...props}
@@ -36,12 +36,12 @@ const BlogSectionHeader = React.forwardRef(({
       </div>
 
       {/* Right — title + description + button */}
-      <div className="flex flex-col gap-md items-end w-[630px]">
-        <h2 className="font-raleway font-bold text-[25px] leading-[34px] text-tertiary-normal-default text-right">
+      <div className="flex flex-col gap-md items-start lg:items-end w-full lg:w-[630px]">
+        <h2 className="font-raleway font-bold text-[20px] md:text-[25px] leading-[34px] text-tertiary-normal-default text-left lg:text-right">
           {title}
         </h2>
         {description && (
-          <p className="font-raleway font-normal w-[565px] text-[16px] leading-[24px] text-tertiary-normal-default text-right w-[565px]">
+          <p className="font-raleway font-normal text-[14px] md:text-[16px] leading-[24px] text-tertiary-normal-default text-left lg:text-right w-full lg:w-[565px]">
             {description}
           </p>
         )}

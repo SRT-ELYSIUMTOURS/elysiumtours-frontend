@@ -43,35 +43,31 @@ const GalleryCategoryFilterBar = React.forwardRef(({
       ref={ref}
       className={classNames(
         "w-full bg-primary-light-default",
-        "h-[147px]",
+        "h-auto lg:h-[147px]",
         className
       )}
       {...props}
     >
-      <div
-        className="h-full mx-auto flex items-center"
-        style={{ maxWidth: "1728px" }}
-      >
+      <div className="h-full mx-auto flex items-center" style={{ maxWidth: "1728px" }}>
         {/* Tabs + controls row */}
         <div
-          className="flex items-center justify-between w-full"
+          className="flex flex-col lg:flex-row lg:items-center lg:justify-between w-full gap-3 lg:gap-0 py-4 lg:py-0 px-4 md:px-8 lg:px-[162px]"
           style={{
             borderTop: "0.5px solid #f2eaf9",
             borderBottom: "0.5px solid #f2eaf9",
-            margin: "0 162px",
-            height: "80px",
+            minHeight: "80px",
           }}
         >
-          {/* Tabs row */}
-          <div className="flex gap-[16px] items-center">
+          {/* Tabs row — horizontally scrollable on mobile */}
+          <div className="flex gap-[10px] lg:gap-[16px] items-center overflow-x-auto scrollbar-hide pb-1 lg:pb-0">
             {TABS.map((tab) => {
               const isActive = tab.key === activeTab;
               return (
                 <button
                   key={tab.key}
                   className={classNames(
-                    "flex items-center justify-center p-[10px] rounded-[20px]",
-                    "shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)] cursor-pointer whitespace-nowrap",
+                    "flex items-center justify-center p-[8px] lg:p-[10px] rounded-[20px]",
+                    "shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)] cursor-pointer whitespace-nowrap shrink-0",
                     isActive
                       ? "bg-[#622399]"
                       : "border border-[#b9b9b9] bg-transparent"
@@ -80,7 +76,7 @@ const GalleryCategoryFilterBar = React.forwardRef(({
                 >
                   <span
                     className={classNames(
-                      "font-raleway text-[13px]",
+                      "font-raleway text-[12px] lg:text-[13px]",
                       isActive
                         ? "font-semibold text-primary-light-default"
                         : "font-medium text-[#949494]"
@@ -94,11 +90,9 @@ const GalleryCategoryFilterBar = React.forwardRef(({
           </div>
 
           {/* Sort + Search */}
-          <div className="flex items-center gap-[16px]">
+          <div className="flex items-center gap-[12px] lg:gap-[16px] shrink-0">
             {/* Sort dropdown */}
-            <button
-              className="flex items-center gap-[4px] h-[44px] px-[12px] border border-[#b9b9b9] rounded-[20px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.05)] bg-transparent cursor-pointer"
-            >
+            <button className="flex items-center gap-[4px] h-[40px] lg:h-[44px] px-[12px] border border-[#b9b9b9] rounded-[20px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.05)] bg-transparent cursor-pointer shrink-0">
               <span className="font-raleway font-medium text-[13px] leading-[22px] text-[#949494] whitespace-nowrap">
                 Sort By
               </span>
@@ -106,7 +100,7 @@ const GalleryCategoryFilterBar = React.forwardRef(({
             </button>
 
             {/* Search field */}
-            <div className="relative flex items-center h-[44px] w-[379px] border border-[#b9b9b9] rounded-[20px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.05)] bg-transparent overflow-hidden">
+            <div className="relative flex items-center h-[40px] lg:h-[44px] w-full lg:w-[379px] border border-[#b9b9b9] rounded-[20px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.05)] bg-transparent overflow-hidden">
               <input
                 type="text"
                 placeholder="Search for Photos/Videos"

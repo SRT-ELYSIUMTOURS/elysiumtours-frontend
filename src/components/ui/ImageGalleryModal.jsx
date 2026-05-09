@@ -100,10 +100,9 @@ const ImageGalleryModal = React.forwardRef(
             <div className="absolute inset-0 bg-black/70" aria-hidden />
           </button>
 
-          {/* Center — reduced width */}
+          {/* Center — full-screen on mobile, reduced width on desktop */}
           <div
-            className="group/main relative z-[10] mx-4 flex min-h-[200px] min-w-0 max-h-[82vh] w-[min(67vw,1056px)] flex-col overflow-hidden rounded-[20px] shadow-[0px_4px_20px_rgba(0,0,0,0.15)] sm:mx-6 md:mx-8"
-            style={{ aspectRatio: "1567 / 988" }}
+            className="group/main relative z-[10] flex min-h-[200px] min-w-0 flex-col overflow-hidden shadow-[0px_4px_20px_rgba(0,0,0,0.15)] w-[calc(100vw-24px)] max-h-[calc(100vh-32px)] aspect-[3/4] mx-3 rounded-[16px] md:w-[min(67vw,1056px)] md:max-h-[82vh] md:mx-8 md:rounded-[20px] md:aspect-[1567/988]"
           >
             <div className="absolute inset-0 rounded-[20px] bg-[#f7f7f7]" />
             <img
@@ -116,11 +115,11 @@ const ImageGalleryModal = React.forwardRef(
               aria-hidden
             />
 
-            {/* Top chrome — hover / focus only */}
+            {/* Top chrome — always visible on mobile, hover/focus on desktop */}
             <div
-              className={`absolute left-0 right-0 top-0 z-[2] h-[120px] bg-gradient-to-b from-black/55 via-black/35 to-transparent backdrop-blur-md ${chromeVisibility}`}
+              className={`absolute left-0 right-0 top-0 z-[2] h-[64px] md:h-[120px] bg-gradient-to-b from-black/55 via-black/35 to-transparent backdrop-blur-md ${chromeVisibility}`}
             >
-              <div className="absolute left-[clamp(16px,4vw,73px)] right-[clamp(16px,4vw,73px)] top-[46px] flex items-center justify-between gap-4">
+              <div className="absolute left-[clamp(12px,4vw,73px)] right-[clamp(12px,4vw,73px)] top-3 md:top-[46px] flex items-center justify-between gap-4">
                 <button
                   type="button"
                   aria-label="Open in full view"
