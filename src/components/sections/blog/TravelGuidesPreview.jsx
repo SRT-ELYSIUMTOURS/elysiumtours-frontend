@@ -7,6 +7,7 @@ import BlogContentCard from "../../cards/BlogContentCard";
 
 const TravelGuidesPreview = React.forwardRef(({ className, ...props }, ref) => {
   const navigate = useNavigate();
+  const go = (payload) => () => openBlogPost(navigate, payload);
   return (
     <section
       ref={ref}
@@ -32,54 +33,25 @@ const TravelGuidesPreview = React.forwardRef(({ className, ...props }, ref) => {
               title="8 ways to enjoy Ghana in fall"
               category="Leisure Tours"
               image="https://picsum.photos/seed/tg1/1028/371"
-<<<<<<< HEAD
-              className="!w-full !h-[220px] md:!h-[371px]"
-=======
-              className="!w-[70%] !h-[371px]"
-              onClick={() =>
-                openBlogPost(navigate, {
-                  title: "8 ways to enjoy Ghana in fall",
-                  category: "Leisure Tours",
-                  image: "https://picsum.photos/seed/tg1/1028/371",
-                  uniqueKey: "tg1",
-                })
-              }
->>>>>>> 404b32fd78bf81291300a90563016ded1c14c196
+              className="!w-full md:!w-[70%] !h-[220px] md:!h-[371px]"
+              onClick={go({
+                title: "8 ways to enjoy Ghana in fall",
+                category: "Leisure Tours",
+                image: "https://picsum.photos/seed/tg1/1028/371",
+                uniqueKey: "tg1",
+              })}
             />
             <BlogContentCard
               title="8 ways to enjoy"
               category="Leisure Tours"
               image="https://picsum.photos/seed/tg2/363/371"
-<<<<<<< HEAD
-              className="!w-full md:!w-[280px] lg:!w-[363px] !h-[220px] md:!h-[371px]"
-=======
-              className="!w-[30%] !h-[371px]"
-              onClick={() =>
-                openBlogPost(navigate, {
-                  title: "8 ways to enjoy",
-                  category: "Leisure Tours",
-                  image: "https://picsum.photos/seed/tg2/363/371",
-                  uniqueKey: "tg2",
-                })
-              }
-            />
-          </div>
-          {/* Row 2: wide card */}
-          <div className="flex gap-[15px]">
-            <BlogContentCard
-              title="8 ways to enjoy Ghana in fall"
-              category="Leisure Tours"
-              image="https://picsum.photos/seed/tg3/1028/415"
-              className="!w-full !h-[415px]"
-              onClick={() =>
-                openBlogPost(navigate, {
-                  title: "8 ways to enjoy Ghana in fall",
-                  category: "Leisure Tours",
-                  image: "https://picsum.photos/seed/tg3/1028/415",
-                  uniqueKey: "tg3",
-                })
-              }
->>>>>>> 404b32fd78bf81291300a90563016ded1c14c196
+              className="!w-full md:!w-[30%] !h-[220px] md:!h-[371px]"
+              onClick={go({
+                title: "8 ways to enjoy",
+                category: "Leisure Tours",
+                image: "https://picsum.photos/seed/tg2/363/371",
+                uniqueKey: "tg2",
+              })}
             />
           </div>
           {/* Row 2: full-width card */}
@@ -88,6 +60,12 @@ const TravelGuidesPreview = React.forwardRef(({ className, ...props }, ref) => {
             category="Leisure Tours"
             image="https://picsum.photos/seed/tg3/1028/415"
             className="!w-full !h-[220px] md:!h-[415px]"
+            onClick={go({
+              title: "8 ways to enjoy Ghana in fall",
+              category: "Leisure Tours",
+              image: "https://picsum.photos/seed/tg3/1028/415",
+              uniqueKey: "tg3",
+            })}
           />
         </div>
       </div>

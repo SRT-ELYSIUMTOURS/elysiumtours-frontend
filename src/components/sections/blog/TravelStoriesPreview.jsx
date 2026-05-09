@@ -31,49 +31,22 @@ const TravelStoriesPreview = React.forwardRef(({ className, ...props }, ref) => 
             title="My First Trip to Kumasi"
             category="Personal"
             image="https://picsum.photos/seed/ts1/461/364"
-<<<<<<< HEAD
             className="!w-full !h-[240px] md:!h-[364px]"
-=======
-            className="!w-auto !h-[364px] flex-1"
-            onClick={go({
-              title: "My First Trip to Kumasi",
-              category: "Personal",
-              image: "https://picsum.photos/seed/ts1/461/364",
-              uniqueKey: "ts1",
-            })}
->>>>>>> 404b32fd78bf81291300a90563016ded1c14c196
+            onClick={go({ title: "My First Trip to Kumasi", category: "Personal", image: "https://picsum.photos/seed/ts1/461/364", uniqueKey: "ts1" })}
           />
           <BlogContentCard
             title="Reconnecting with Roots"
             category="Heritage"
             image="https://picsum.photos/seed/ts2/461/364"
-<<<<<<< HEAD
             className="!w-full !h-[240px] md:!h-[364px]"
-=======
-            className="!w-auto !h-[364px] flex-1"
-            onClick={go({
-              title: "Reconnecting with Roots",
-              category: "Heritage",
-              image: "https://picsum.photos/seed/ts2/461/364",
-              uniqueKey: "ts2",
-            })}
->>>>>>> 404b32fd78bf81291300a90563016ded1c14c196
+            onClick={go({ title: "Reconnecting with Roots", category: "Heritage", image: "https://picsum.photos/seed/ts2/461/364", uniqueKey: "ts2" })}
           />
           <BlogContentCard
             title="A Week in Tamale"
             category="Adventure"
             image="https://picsum.photos/seed/ts3/461/364"
-<<<<<<< HEAD
             className="!w-full !h-[240px] md:!h-[364px]"
-=======
-            className="!w-auto !h-[364px] flex-1"
-            onClick={go({
-              title: "A Week in Tamale",
-              category: "Adventure",
-              image: "https://picsum.photos/seed/ts3/461/364",
-              uniqueKey: "ts3",
-            })}
->>>>>>> 404b32fd78bf81291300a90563016ded1c14c196
+            onClick={go({ title: "A Week in Tamale", category: "Adventure", image: "https://picsum.photos/seed/ts3/461/364", uniqueKey: "ts3" })}
           />
         </div>
       </div>

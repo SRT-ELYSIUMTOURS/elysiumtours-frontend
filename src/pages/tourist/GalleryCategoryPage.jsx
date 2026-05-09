@@ -123,39 +123,38 @@ const GalleryCategoryPage = () => {
       /> */}
 
       {/* Page content */}
-      <div className="px-[156px] py-[80px] bg-primary-light-default">
-        {/* Page heading + sort */}
-        <div className="flex items-center  justify-between mb-[48px]">
-         
-            {/* Sort dropdown */}
-            <button className="flex items-center gap-[4px] h-[44px] px-[12px] border border-[#b9b9b9] rounded-[20px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.05)] bg-transparent cursor-pointer">
-              <span className="font-raleway font-medium text-[13px] leading-[22px] text-[#949494] whitespace-nowrap">Sort By</span>
-              <DownIcon />
-            </button>
-            {/* Search */}
-            <div className="relative flex items-center h-[44px] w-[379px] border border-[#b9b9b9] rounded-[20px] bg-transparent overflow-hidden">
-              <input
-                type="text"
-                placeholder={`Search ${categoryLabel}`}
-                className="flex-1 h-full px-[16px] font-raleway font-medium text-[13px] text-[#949494] outline-none bg-transparent"
-              />
-              <div className="absolute right-[8px] top-1/2 -translate-y-1/2 size-[37px] flex items-center justify-center">
-                <SearchIcon />
-              </div>
+      <div className="px-4 md:px-8 lg:px-[156px] py-10 lg:py-[80px] bg-primary-light-default">
+        {/* Sort + Search — compact row, sort sized to content + search fills remaining */}
+        <div className="flex items-center justify-end gap-3 mb-8 lg:mb-[48px]">
+          {/* Sort dropdown — auto width */}
+          <button className="flex items-center justify-center gap-[6px] h-[40px] lg:h-[44px] px-4 border border-[#b9b9b9] rounded-[20px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.05)] bg-transparent cursor-pointer shrink-0">
+            <span className="font-raleway font-medium text-[13px] leading-[22px] text-[#949494] whitespace-nowrap">Sort By</span>
+            <DownIcon />
+          </button>
+          {/* Search — fills remaining width, capped at 379px on lg+ */}
+          <div className="relative flex items-center h-[40px] lg:h-[44px] flex-1 min-w-0 lg:max-w-[379px] border border-[#b9b9b9] rounded-[20px] bg-transparent overflow-hidden">
+            <input
+              type="text"
+              placeholder={`Search ${categoryLabel}`}
+              className="flex-1 min-w-0 h-full pl-[16px] pr-[44px] font-raleway font-medium text-[13px] text-[#949494] outline-none bg-transparent"
+            />
+            <div className="absolute right-[8px] top-1/2 -translate-y-1/2 size-[37px] flex items-center justify-center pointer-events-none">
+              <SearchIcon />
+            </div>
           </div>
         </div>
 
         {/* Grid */}
         {isVideoCategory ? (
-          // Video 3-column grid
-          <div className="grid grid-cols-3 gap-[24px]">
+          // Video grid — 1-col on mobile, 2-col on md, 3-col on lg+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-[24px]">
             {items.map((item, i) => (
               <GalleryVideoCard
                 key={item.id}
                 image={item.image}
                 title={item.title}
                 count={item.count}
-                className="h-[364px]"
+                className="h-[220px] md:h-[280px] lg:h-[364px]"
                 onClick={() => handleItemClick(i)}
               />
             ))}

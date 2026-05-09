@@ -53,17 +53,17 @@ const PartnerCtaSection = React.forwardRef(({
         </div>
 
         {/* Right — text content */}
-        <div className="flex flex-col items-start lg:items-end gap-4 lg:gap-[16px] lg:w-[581px] lg:pl-10">
-          <h2 className="font-raleway font-bold text-[32px] sm:text-[40px] lg:text-[56px] leading-[42px] sm:leading-[52px] lg:leading-[66px] text-primary-light-default lg:text-right">
+        <div className="flex w-full min-w-0 flex-col items-start lg:items-end gap-4 lg:gap-[16px] lg:w-[581px] lg:pl-10">
+          <h2 className="w-full font-raleway font-bold text-[24px] sm:text-[32px] md:text-[40px] lg:text-[56px] leading-tight lg:leading-[66px] text-primary-light-default lg:text-right break-words">
             Join Ghana's Most Trusted Travel Network
           </h2>
-          <p className="font-raleway font-normal text-[15px] sm:text-[16px] leading-[24px] lg:leading-[26px] text-primary-light-default lg:text-right lg:w-[483px]">
+          <p className="w-full font-raleway font-normal text-[14px] sm:text-[16px] leading-[22px] sm:leading-[24px] lg:leading-[26px] text-primary-light-default lg:text-right lg:w-[483px]">
             Are you a tour guide, hotel, restaurant, or service provider? Partner with Elysium Tours and connect your business to thousands of travellers exploring West Africa.
           </p>
           <Button
             variant="white"
             shape="pill"
-            className="h-[64px] px-[32px]! gap-md mt-[8px]"
+            className="h-[48px] sm:h-[64px] px-[24px] sm:px-[32px]! gap-md mt-[8px]"
             type="button"
             onClick={onBecomePartnerClick}
           >

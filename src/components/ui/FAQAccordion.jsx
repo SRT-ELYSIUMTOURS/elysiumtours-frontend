@@ -19,19 +19,15 @@ const QuestionIcon = () => (
 
 // Single FAQ item — always visible, no expand/collapse
 const FAQItem = ({ question, answer }) => (
-  <div className="flex items-start gap-[18px]">
-    {/* Question mark box — Group 3270: rect 40×40 stroke:#d6beeb r:10 */}
-    <div className="shrink-0 w-10 h-10 rounded-[10px] border border-secondary-light-active flex items-center justify-center" style={{ minWidth:"40px" }}>
+  <div className="flex items-start gap-3 md:gap-[18px]">
+    <div className="shrink-0 w-10 h-10 rounded-[10px] border border-secondary-light-active flex items-center justify-center">
       <QuestionIcon />
     </div>
-    {/* Text column — VERTICAL gap:8 */}
-    <div className="flex flex-col gap-[18px]">
-      {/* Question — [20px/600] #2d2d2d, Frame 27 */}
-      <p style={{ fontSize:"20px", fontWeight:600, color:"#2d2d2d", lineHeight:"28px", fontFamily:"Raleway,sans-serif" }}>
+    <div className="flex flex-col gap-2 md:gap-[18px] min-w-0">
+      <p className="font-raleway font-semibold text-[#2d2d2d] text-[16px] md:text-[20px] leading-[22px] md:leading-[28px]">
         {question}
       </p>
-      {/* Answer — [16px/400] #2d2d2d, Frame 28 */}
-      <p style={{ fontSize:"16px", fontWeight:400, color:"#2d2d2d", lineHeight:"24px", fontFamily:"Raleway,sans-serif" }}>
+      <p className="font-raleway font-normal text-[#2d2d2d] text-[14px] md:text-[16px] leading-[22px] md:leading-[24px]">
         {answer}
       </p>
     </div>
@@ -52,7 +48,7 @@ const FAQAccordion = React.forwardRef(({
   return (
     <div
       ref={ref}
-      className={classNames(columns === 2 ? "flex gap-[21px]" : "flex flex-col gap-[19px]", className)}
+      className={classNames(columns === 2 ? "flex flex-col lg:flex-row gap-[19px] lg:gap-[21px]" : "flex flex-col gap-[19px]", className)}
       {...props}
     >
       {/* Column 1 — Frame 176: VERTICAL gap:19 */}

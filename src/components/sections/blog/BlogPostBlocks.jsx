@@ -110,14 +110,14 @@ const BlogPostBlocks = React.forwardRef(({ blocks = [], slug, className = "", ..
 
         if (block.type === "imageTriplet") {
           return (
-            <div key={key} className="w-full max-w-[1728px] px-[156px]">
+            <div key={key} className="w-full max-w-[1728px] px-4 md:px-8 lg:px-[156px]">
               {inner}
             </div>
           );
         }
 
         return (
-          <div key={key} className="mx-auto w-full max-w-[1728px] px-[156px]">
+          <div key={key} className="mx-auto w-full max-w-[1728px] px-4 md:px-8 lg:px-[156px]">
             {inner}
           </div>
         );

@@ -100,12 +100,7 @@ const ImageGalleryModal = React.forwardRef(
 
           {/* Center — full-screen on mobile, reduced width on desktop */}
           <div
-<<<<<<< HEAD
             className="group/main relative z-[10] flex min-h-[200px] min-w-0 flex-col overflow-hidden shadow-[0px_4px_20px_rgba(0,0,0,0.15)] w-[calc(100vw-24px)] max-h-[calc(100vh-32px)] aspect-[3/4] mx-3 rounded-[16px] md:w-[min(67vw,1056px)] md:max-h-[82vh] md:mx-8 md:rounded-[20px] md:aspect-[1567/988]"
-=======
-            className="group/main relative z-[10] mx-4 flex min-h-[200px] min-w-0 max-h-[68vh] w-[min(56vw,880px)] flex-col overflow-hidden rounded-[20px] shadow-[0px_4px_20px_rgba(0,0,0,0.15)] sm:mx-6 md:mx-8"
-            style={{ aspectRatio: "1567 / 988" }}
->>>>>>> 404b32fd78bf81291300a90563016ded1c14c196
           >
             <div className="absolute inset-0 rounded-[20px] bg-[#f7f7f7]" />
             <img

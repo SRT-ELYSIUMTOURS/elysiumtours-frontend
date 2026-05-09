@@ -6,6 +6,9 @@ import { classNames } from "../../../utils/classNames";
  * Gallery category listing masonry — Figma 4-column layout (non-video).
  * Container max 1412px: cols 338 + 338 + 335 + 338, gap 21px.
  * One visual block = 21 images in fixed column-major slot order.
+ *
+ * Mobile/tablet: simple responsive grid (2 cols mobile, 3 cols tablet).
+ * Desktop (lg+): original 4-col masonry with fixed heights.
  */
 export const GALLERY_PHOTO_PAGE_SIZE = 21;
 
@@ -17,20 +20,38 @@ const GalleryCategoryPhotoMasonry = ({ items, onPhotoClick }) => {
   const blockCount = Math.ceil(items.length / SLOT_COUNT);
 
   return (
-    <div className="flex  flex-col gap-[48px] w-full items-center">
-      {Array.from({ length: blockCount }, (_, blockIdx) => {
-        const start = blockIdx * SLOT_COUNT;
-        const slice = items.slice(start, start + SLOT_COUNT);
-        return (
-          <MasonryBlock
-            key={`block-${blockIdx}`}
-            slice={slice}
-            startOffset={start}
-            onPhotoClick={onPhotoClick}
+    <>
+      {/* Mobile/tablet: simple grid */}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 lg:hidden">
+        {items.map((item, i) => (
+          <GalleryPhotoCard
+            key={`m-${i}`}
+            image={item.image}
+            title={item.title}
+            count={item.count}
+            size="medium"
+            className="w-full h-[180px] md:h-[220px]"
+            onClick={() => onPhotoClick(i)}
           />
-        );
-      })}
-    </div>
+        ))}
+      </div>
+
+      {/* Desktop: original 4-col masonry */}
+      <div className="hidden lg:flex flex-col gap-[48px] w-full items-center">
+        {Array.from({ length: blockCount }, (_, blockIdx) => {
+          const start = blockIdx * SLOT_COUNT;
+          const slice = items.slice(start, start + SLOT_COUNT);
+          return (
+            <MasonryBlock
+              key={`block-${blockIdx}`}
+              slice={slice}
+              startOffset={start}
+              onPhotoClick={onPhotoClick}
+            />
+          );
+        })}
+      </div>
+    </>
   );
 };
 
@@ -127,7 +148,7 @@ const MasonryBlock = ({ slice, startOffset, onPhotoClick }) => {
   );
 
   return (
-    <div className="flex w-full  gap-[21px] items-start flex-nowrap justify-center mx-auto">
+    <div className="flex w-full gap-[21px] items-start flex-nowrap justify-center mx-auto">
       {col1}
       {col2}
       {col3}

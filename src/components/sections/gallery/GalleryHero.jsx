@@ -21,6 +21,14 @@ const GalleryHero = React.forwardRef(({
   className = "",
   ...props
 }, ref) => {
+  const handleExplore = () => {
+    if (typeof onExplore === "function") {
+      onExplore();
+      return;
+    }
+    window.scrollBy({ top: window.innerHeight * 0.8, behavior: "smooth" });
+  };
+
   return (
     <div
       ref={ref}
@@ -63,7 +71,7 @@ const GalleryHero = React.forwardRef(({
             "shadow-[0px_4px_4px_0px_rgba(0,0,0,0.1)]",
             "cursor-pointer w-auto md:w-[217px]"
           )}
-          onClick={onExplore}
+          onClick={handleExplore}
         >
           <p className="font-raleway font-semibold text-[16px] leading-[22px] text-secondary-dark-darker whitespace-nowrap">
             Explore the Gallery
