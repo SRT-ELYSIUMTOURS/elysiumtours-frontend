@@ -77,13 +77,13 @@ const BlogPostPage = React.forwardRef(({ className, ...props }, ref) => {
       />
 
       <article className="w-full bg-primary-light-default">
-        <div className="mx-auto max-w-[1728px] py-[80px]">
+        <div className="mx-auto max-w-[1728px] py-10 lg:py-[80px]">
           <BlogPostBlocks blocks={contentBlocks} slug={slug} />
         </div>
       </article>
 
       <section className="w-full bg-primary-light-default">
-        <div className="mx-auto max-w-[1728px] px-[156px] pb-[80px]">
+        <div className="mx-auto max-w-[1728px] px-4 md:px-8 lg:px-[156px] pb-10 lg:pb-[80px]">
           <BlogPostReviewsSection reviews={passed?.reviews ?? DUMMY_BLOG_POST_REVIEWS} />
         </div>
       </section>

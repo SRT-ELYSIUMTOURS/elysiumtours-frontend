@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "./App.css";
 import TouristLayout from "./layout/touristLayout.jsx";
 import { AuthProvider } from "./context/AuthContext";
+import ScrollToTop from "./components/utils/ScrollToTop";
 
 const AdminApp = lazy(() => import("./admin/AdminApp"));
 import HomePage from "./pages/tourist/HomePage";
@@ -24,6 +25,7 @@ function App() {
   return (
     <AuthProvider>
     <BrowserRouter>
+      <ScrollToTop />
       <div id="toast-root" />
       <Routes>
         <Route

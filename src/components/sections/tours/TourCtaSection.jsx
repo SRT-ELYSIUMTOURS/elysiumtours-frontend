@@ -1,96 +1,90 @@
 import React from "react";
 import { classNames } from "../../../utils/classNames";
 
-// ── Figma asset imports ───────────────────────────────────────────────────────
 import blogCtaBg from "../../../assets/ElysiumAssets/blog-cta-bg.png";
-// Single SVG containing the full concentric dot-ring decoration (486×437, fill="#D6BEEB")
 import blogCtaDeco from "../../../assets/ElysiumAssets/blog-cta-deco.svg";
 
-// ── TourCtaSection ────────────────────────────────────────────────────────────
-// Figma: "Frame 103" node 1914-37707 — appears on HomePage, TourPage,
-// TourCountryPage, BlogCategoryPage, BlogPage
-//
-// Layout:
-//   section  bg-[#f2eaf9] overflow-hidden py-[41px]
-//     └─ decorative dot rings at top-right and bottom-left (partially clipped)
-//     └─ main card  mx-[156px] h-[578px] bg-[#f7f7f7] rounded-[20px]
-//          ├─ left: skewed photo  w-[757px] h-[487px]  skew-x-[5.41deg]
-//          └─ right: text card   w-[463px] h-[306px]  bg-[#f2eaf9] rounded-[10px]
+// Featured-blog teaser CTA used on Tour, TourCountry, BlogCategory, Blog, Home pages.
+// Mobile/tablet: stacked card — image on top, text below.
+// Desktop (lg+): original Figma layout — skewed photo left + text card right.
 const TourCtaSection = React.forwardRef(({ className, ...props }, ref) => {
   return (
     <section
       ref={ref}
       className={classNames(
-        "relative overflow-hidden bg-[#f2eaf9] py-[41px]",
+        "relative overflow-hidden bg-[#f2eaf9] py-10 lg:py-[41px]",
         className
       )}
       {...props}
     >
-      {/* ── Decorative corner rings ─────────────────────────────────────────── */}
-      {/* Top-right: Figma node 1914-37709 — top-[-137px] right-[-223px] */}
+      {/* Decorative dot rings */}
       <img
         src={blogCtaDeco}
         aria-hidden="true"
-        className="absolute pointer-events-none"
-        style={{ top: -137, right: -223, width: 486, height: 437 }}
+        className="absolute pointer-events-none w-[200px] md:w-[300px] lg:w-[486px] h-auto"
+        style={{ top: -80, right: -100 }}
         alt=""
       />
-      {/* Bottom-left: Figma node 1914-37745 — bottom-[-86px] left-[-26px] */}
       <img
         src={blogCtaDeco}
         aria-hidden="true"
-        className="absolute pointer-events-none"
-        style={{ bottom: -86, left: -26, width: 486, height: 437 }}
+        className="absolute pointer-events-none w-[200px] md:w-[300px] lg:w-[486px] h-auto"
+        style={{ bottom: -60, left: -40 }}
         alt=""
       />
 
-      {/* ── Main card ──────────────────────────────────────────────────────── */}
-      {/* Figma: left-[156px] w-[1416px] h-[578px] bg-[#f7f7f7] rounded-[20px]
-                shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)] overflow-clip */}
-      <div className="mx-[156px] h-[578px] bg-[#f7f7f7] rounded-[20px] overflow-clip shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)] relative">
+      {/* Mobile / tablet — stacked card */}
+      <div className="relative z-10 flex lg:hidden mx-4 md:mx-8 bg-[#f7f7f7] rounded-[20px] overflow-hidden shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)] flex-col">
+        <div className="relative w-full h-[200px] md:h-[320px]">
+          <img
+            src={blogCtaBg}
+            alt="Kakum canopy walkway, Ghana"
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-[rgba(0,0,0,0.4)]" />
+        </div>
+        <div className="bg-[#f2eaf9] flex flex-col gap-2 items-center justify-center px-5 py-6 md:py-8">
+          <p className="font-raleway font-bold text-[13px] leading-[18px] text-[#5c218f] text-center">
+            Writer: Davida Dzato
+          </p>
+          <p className="font-raleway font-bold text-[18px] md:text-[20px] leading-[28px] text-[#2d2d2d] text-center">
+            Jollof Rice, Explained
+          </p>
+          <p className="font-raleway font-medium text-[14px] md:text-[16px] leading-[24px] md:leading-[26px] text-[#2d2d2d] text-center max-w-[400px]">
+            Six unique dishes, six African countries to explore.
+          </p>
+        </div>
+      </div>
 
-        {/* Inner flex row — Figma: absolute left-[33px] top-[50%] -translate-y-1/2 flex items-center */}
+      {/* Desktop — original Figma layout */}
+      <div className="hidden lg:block mx-[156px] h-[578px] bg-[#f7f7f7] rounded-[20px] overflow-clip shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)] relative">
         <div className="absolute left-[33px] top-1/2 -translate-y-1/2 flex items-center">
-
-          {/* ── Left: skewed photo ──────────────────────────────────────────── */}
-          {/* Container: Figma w-[757px] h-[487px] flex items-center justify-center */}
+          {/* Skewed photo */}
           <div className="w-[757px] h-[487px] flex items-center justify-center shrink-0">
-            {/* Parallelogram skew — Figma skew-x-[5.41deg] */}
             <div className="skew-x-[5.41deg] flex-none">
-              {/* Photo card: Figma w-[710.845px] h-[455.676px] rounded-[20px] shadow */}
               <div
                 className="relative rounded-[20px] shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)]"
                 style={{ width: "710.845px", height: "455.676px" }}
               >
-                {/* Purple fallback bg */}
                 <div className="absolute inset-0 bg-[#7b2cbf] rounded-[20px]" />
-                {/* Photo — rounded applied directly since parent has no overflow-hidden
-                    (overflow-hidden + skew-x would clip in unexpected ways) */}
                 <img
                   src={blogCtaBg}
                   alt="Kakum canopy walkway, Ghana"
                   className="absolute max-w-none object-cover rounded-[20px] size-full"
                 />
-                {/* Dark overlay */}
                 <div className="absolute inset-0 bg-[rgba(0,0,0,0.4)] rounded-[20px]" />
               </div>
             </div>
           </div>
 
-          {/* ── Right: text card ────────────────────────────────────────────── */}
-          {/* Figma: w-[463px] h-[306px] bg-[#f2eaf9] rounded-[10px]
-                    shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)]
-                    flex flex-col gap-[10px] items-center justify-center p-[10px] */}
+          {/* Right text card */}
           <div className="w-[463px] h-[306px] bg-[#f2eaf9] rounded-[10px] shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)] flex flex-col gap-[10px] items-center justify-center p-[10px] shrink-0">
-            {/* Writer — Raleway Bold 13px/18px #5c218f text-center w-[298px] */}
             <p className="font-raleway font-bold text-[13px] leading-[18px] text-[#5c218f] text-center w-[298px] shrink-0">
               Writer: Davida Dzato
             </p>
-            {/* Title — Raleway Bold 20px/28px #2d2d2d */}
             <p className="font-raleway font-bold text-[20px] leading-[28px] text-[#2d2d2d] whitespace-nowrap shrink-0">
               Jollof Rice, Explained
             </p>
-            {/* Description — Raleway Medium 16px/26px #2d2d2d text-center w-[298px] */}
             <p className="font-raleway font-medium text-[16px] leading-[26px] text-[#2d2d2d] text-center w-[298px] shrink-0">
               Six unique dishes, six African countries to explore.
             </p>

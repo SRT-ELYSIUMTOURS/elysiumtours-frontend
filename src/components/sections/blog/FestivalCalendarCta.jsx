@@ -12,8 +12,8 @@ const FestivalCalendarCta = React.forwardRef(({ className, ...props }, ref) => {
       )}
       {...props}
     >
-      <div className="mx-[156px] px-[100px] py-5 bg-primary-normal-default h-[238px] rounded-xl overflow-hidden">
-        <div className="flex items-center gap-lg h-full ">
+      <div className="mx-4 md:mx-8 lg:mx-[156px] px-6 md:px-[60px] lg:px-[100px] py-8 lg:py-5 bg-primary-normal-default h-auto lg:h-[238px] rounded-xl overflow-hidden">
+        <div className="flex flex-col md:flex-row items-center gap-lg h-full">
           {/* Left — two overlapping rotated card images */}
           <div className="relative w-[247px] h-[198px] shrink-0">
             {/* Back card (purple placeholder) */}
@@ -36,12 +36,12 @@ const FestivalCalendarCta = React.forwardRef(({ className, ...props }, ref) => {
           </div>
 
           {/* Right — title + description + download button */}
-          <div className="flex flex-col gap-lg items-start justify-center w-[946px]">
+          <div className="flex flex-col gap-lg items-start justify-center w-full lg:w-[946px]">
             <div className="flex flex-col items-start w-full">
-              <h3 className="font-raleway font-bold text-[25px] leading-[34px] text-tertiary-normal-default">
+              <h3 className="font-raleway font-bold text-[18px] md:text-[25px] leading-[34px] text-tertiary-normal-default">
                 Your Year-Round Guide to Africa&apos;s Most Vibrant Festivals
               </h3>
-              <p className="font-raleway font-normal text-[16px] leading-[24px] text-tertiary-normal-default w-[913px] mt-[4px]">
+              <p className="font-raleway font-normal text-[14px] md:text-[16px] leading-[24px] text-tertiary-normal-default w-full mt-[4px]">
                 There&apos;s always something to celebrate! Explore Festival Calendar to find unique cultural events happening throughout the year. Whether you&apos;re drawn to the vibrant rhythms of a drum festival, the spiritual energy of a harvest celebration, or the color of a street carnival — there&apos;s always a new experience waiting.
               </p>
             </div>

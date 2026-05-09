@@ -327,7 +327,7 @@ const LocalGuidesSection = React.forwardRef(
               </div>
             </div>
           </div>
-          <div className="flex gap-[21px]">
+          <div className="flex gap-[21px] overflow-x-auto scrollbar-hide pb-4 -mx-6 px-6 md:-mx-0 md:px-0">
             {guides.map((guide) => (
               <div
                 key={guide.id}

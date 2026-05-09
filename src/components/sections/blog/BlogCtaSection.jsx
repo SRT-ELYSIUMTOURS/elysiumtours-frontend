@@ -4,69 +4,77 @@ import { classNames } from "../../../utils/classNames";
 import ctaGlowRight   from "../../../assets/ElysiumAssets/cta-glow-right.svg";
 import ctaGlowLeft    from "../../../assets/ElysiumAssets/cta-glow-left.svg";
 
-
-
-// ── BlogCtaSection ────────────────────────────────────────────────────────────
-// Figma: "Frame 103" node 1914-37707 — appears on HomePage, TourPage,
-// TourCountryPage, BlogCategoryPage, BlogPage
-//
-// Layout:
-//   section  bg-[#f2eaf9] overflow-hidden py-[41px]
-//     └─ decorative dot rings at top-right and bottom-left (partially clipped)
-//     └─ main card  mx-[156px] h-[578px] bg-[#f7f7f7] rounded-[20px]
-//          ├─ left: skewed photo  w-[757px] h-[487px]  skew-x-[5.41deg]
-//          └─ right: text card   w-[463px] h-[306px]  bg-[#f2eaf9] rounded-[10px]
 const BlogCtaSection = React.forwardRef(({ className, ...props }, ref) => {
   return (
     <section
       ref={ref}
       className={classNames(
-"relative w-full overflow-hidden bg-[#2b0f43]",
+        "relative w-full overflow-hidden bg-[#2b0f43] h-auto lg:h-[732px] py-12 lg:py-0",
         className
       )}
-      style={{ height: "732px", boxShadow: "0px 4px 4px 0px rgba(0,0,0,0.25)" }}
-
+      style={{ boxShadow: "0px 4px 4px 0px rgba(0,0,0,0.25)" }}
       {...props}
     >
-
-      {/* ── TOP-RIGHT GLOW (Figma 1903:25303) ───────────────────────────────
-          Exact Figma values (from devtools panel):
-            width=329.21px  height=818.12px  top=-387px  left=1303px  rotation=-30.2°
-          SVG viewBox covers full filter region so the feGaussianBlur bleed
-          from the path at y=-244 (above the original 0-450 viewport) is
-          captured inside the img bounds.                                     */}
-     <img
+      {/* Top-right glow */}
+      <img
         src={ctaGlowRight}
         alt=""
         aria-hidden="true"
-        className="absolute pointer-events-none"
-        style={{
-          right: "0px",
-          top: "-110px",
-          width: "380px",
-          height: "836px",
-        }}
+        className="absolute pointer-events-none right-0 top-[-110px] w-[200px] md:w-[300px] lg:w-[380px] h-auto"
       />
 
-      {/* ── BOTTOM-LEFT GLOW (Figma 1903:25293) ─────────────────────────────
-          Exact Figma values (from devtools panel):
-            width=329.21px  height=818.12px  top=294px  left=-265px  rotation=149.8°
-          The rotation + position places the blob centre at approx (70, 703)
-          inside the 1728×732 section, covering the lower-left corner area.  */}
+      {/* Bottom-left glow */}
       <img
         src={ctaGlowLeft}
         alt=""
         aria-hidden="true"
-        className="absolute pointer-events-none"
-        style={{
-          left: "0px",
-          bottom: "-104px",
-          width: "380px",
-          height: "836px",
-        }}
+        className="absolute pointer-events-none left-0 bottom-[-104px] w-[200px] md:w-[300px] lg:w-[380px] h-auto"
       />
-   
-        {/* Left image — Figma: left 156px, vertically centered, 711×559px, border-radius 40px */}
+
+      {/* Mobile/tablet stacked layout */}
+      <div className="relative z-10 flex flex-col lg:hidden items-center gap-8 px-4 md:px-8">
+        <div className="w-full max-w-[600px] rounded-[40px] overflow-hidden shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)]">
+          <img
+            src="https://picsum.photos/seed/ghana-promote/711/559"
+            alt="Promoting Ghana"
+            className="w-full h-[220px] md:h-[400px] object-cover"
+          />
+        </div>
+        <div className="flex flex-col items-center gap-4 w-full max-w-[600px]">
+          <h2 className="font-raleway font-bold text-[28px] md:text-[40px] leading-tight text-[#fefefe] text-center">
+            Promoting Ghana,<br />Inspiring the World
+          </h2>
+          <p className="font-raleway font-normal text-[14px] md:text-[16px] leading-[24px] text-[#fefefe] text-center">
+            We showcase the best of Ghana — its culture, people, and untold stories. From hidden
+            gems to iconic landmarks, we inspire travelers to explore and celebrate the beauty
+            that defines our nation.
+          </p>
+          <button
+            className="flex items-center justify-center gap-[16px] transition-all duration-300 ease-in"
+            style={{
+              background: "#fefefe",
+              border: "1px solid #7b2cbf",
+              height: "56px",
+              width: "169px",
+              borderRadius: "40px",
+              boxShadow: "0px 4px 4px 0px rgba(0,0,0,0.05)",
+              padding: "10px",
+              fontSize: "16px",
+              fontWeight: 600,
+              color: "#2b0f43",
+              fontFamily: "Raleway, sans-serif",
+              lineHeight: "22px",
+              cursor: "pointer",
+            }}
+          >
+            Partner With Us
+          </button>
+        </div>
+      </div>
+
+      {/* Desktop layout — original Figma absolute positioning */}
+      <div className="hidden lg:block">
+        {/* Left image */}
         <div
           className="absolute"
           style={{
@@ -87,7 +95,7 @@ const BlogCtaSection = React.forwardRef(({ className, ...props }, ref) => {
           />
         </div>
 
-        {/* Right text block — Figma: left 987px, vertically centered, width 581px */}
+        {/* Right text block */}
         <div
           className="absolute flex flex-col items-end gap-[16px]"
           style={{
@@ -97,7 +105,6 @@ const BlogCtaSection = React.forwardRef(({ className, ...props }, ref) => {
             width: "581px",
           }}
         >
-          {/* Title — 56px Bold white right-aligned */}
           <h2
             style={{
               fontSize: "56px",
@@ -112,7 +119,6 @@ const BlogCtaSection = React.forwardRef(({ className, ...props }, ref) => {
             Promoting Ghana,<br />Inspiring the World
           </h2>
 
-          {/* Body + button — gap 24px */}
           <div className="flex flex-col items-end gap-[24px]">
             <div style={{ paddingLeft: "10px", paddingRight: "1px", paddingTop: "10px", paddingBottom: "10px" }}>
               <p
@@ -132,7 +138,6 @@ const BlogCtaSection = React.forwardRef(({ className, ...props }, ref) => {
               </p>
             </div>
 
-            {/* Button — Figma: bg #fefefe, border 1px solid #7b2cbf, h 64px, w 169px, r 40px, text #2b0f43 */}
             <button
               className="flex items-center justify-center gap-[16px] transition-all duration-300 ease-in"
               style={{
@@ -155,7 +160,8 @@ const BlogCtaSection = React.forwardRef(({ className, ...props }, ref) => {
             </button>
           </div>
         </div>
-      </section>
+      </div>
+    </section>
   );
 });
 

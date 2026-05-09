@@ -7,6 +7,7 @@ import BlogContentCard from "../../cards/BlogContentCard";
 
 const TravelGuidesPreview = React.forwardRef(({ className, ...props }, ref) => {
   const navigate = useNavigate();
+  const go = (payload) => () => openBlogPost(navigate, payload);
   return (
     <section
       ref={ref}
@@ -16,7 +17,7 @@ const TravelGuidesPreview = React.forwardRef(({ className, ...props }, ref) => {
       )}
       {...props}
     >
-      <div className="mx-[156px]">
+      <div className="mx-4 md:mx-8 lg:mx-[156px]">
         <BlogSectionHeader
           label="TRAVEL GUIDE & TIPS"
           title="Travel Guides & Tips for Every Explorer"
@@ -24,56 +25,48 @@ const TravelGuidesPreview = React.forwardRef(({ className, ...props }, ref) => {
           onButtonClick={() => navigate("/blog/travel-guides")}
         />
 
-        {/* 2-column masonry grid — Figma layout */}
-        <div className="mt-[80px] flex flex-col gap-[15px]">
-          {/* Row 1: tall left + short right */}
-          <div className="flex gap-[15px]">
+        {/* Card grid — stacks on mobile, side-by-side on md+ */}
+        <div className="mt-10 lg:mt-[80px] flex flex-col gap-[15px]">
+          {/* Row 1 */}
+          <div className="flex flex-col md:flex-row gap-[15px]">
             <BlogContentCard
               title="8 ways to enjoy Ghana in fall"
               category="Leisure Tours"
               image="https://picsum.photos/seed/tg1/1028/371"
-              className="!w-[70%] !h-[371px]"
-              onClick={() =>
-                openBlogPost(navigate, {
-                  title: "8 ways to enjoy Ghana in fall",
-                  category: "Leisure Tours",
-                  image: "https://picsum.photos/seed/tg1/1028/371",
-                  uniqueKey: "tg1",
-                })
-              }
+              className="!w-full md:!w-[70%] !h-[220px] md:!h-[371px]"
+              onClick={go({
+                title: "8 ways to enjoy Ghana in fall",
+                category: "Leisure Tours",
+                image: "https://picsum.photos/seed/tg1/1028/371",
+                uniqueKey: "tg1",
+              })}
             />
             <BlogContentCard
               title="8 ways to enjoy"
               category="Leisure Tours"
               image="https://picsum.photos/seed/tg2/363/371"
-              className="!w-[30%] !h-[371px]"
-              onClick={() =>
-                openBlogPost(navigate, {
-                  title: "8 ways to enjoy",
-                  category: "Leisure Tours",
-                  image: "https://picsum.photos/seed/tg2/363/371",
-                  uniqueKey: "tg2",
-                })
-              }
+              className="!w-full md:!w-[30%] !h-[220px] md:!h-[371px]"
+              onClick={go({
+                title: "8 ways to enjoy",
+                category: "Leisure Tours",
+                image: "https://picsum.photos/seed/tg2/363/371",
+                uniqueKey: "tg2",
+              })}
             />
           </div>
-          {/* Row 2: wide card */}
-          <div className="flex gap-[15px]">
-            <BlogContentCard
-              title="8 ways to enjoy Ghana in fall"
-              category="Leisure Tours"
-              image="https://picsum.photos/seed/tg3/1028/415"
-              className="!w-full !h-[415px]"
-              onClick={() =>
-                openBlogPost(navigate, {
-                  title: "8 ways to enjoy Ghana in fall",
-                  category: "Leisure Tours",
-                  image: "https://picsum.photos/seed/tg3/1028/415",
-                  uniqueKey: "tg3",
-                })
-              }
-            />
-          </div>
+          {/* Row 2: full-width card */}
+          <BlogContentCard
+            title="8 ways to enjoy Ghana in fall"
+            category="Leisure Tours"
+            image="https://picsum.photos/seed/tg3/1028/415"
+            className="!w-full !h-[220px] md:!h-[415px]"
+            onClick={go({
+              title: "8 ways to enjoy Ghana in fall",
+              category: "Leisure Tours",
+              image: "https://picsum.photos/seed/tg3/1028/415",
+              uniqueKey: "tg3",
+            })}
+          />
         </div>
       </div>
     </section>

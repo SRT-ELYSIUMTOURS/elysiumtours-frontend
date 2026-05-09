@@ -38,7 +38,7 @@ const NewsletterInput = React.forwardRef(({
   return (
     <div
       ref={ref}
-      className={classNames("flex flex-col gap-[14px] w-[379px]", className)}
+      className={classNames("flex flex-col gap-[14px] w-full max-w-[379px]", className)}
       {...props}
     >
       {/* Label — [16px/600] #292929 */}
@@ -76,9 +76,9 @@ const NewsletterInput = React.forwardRef(({
         <button
           type="submit"
           className={classNames(
-            "h-[48px] px-6 my-[4px] mr-[4px] rounded-[var(--radius-md)]",
+            "h-[48px] px-4 md:px-6 my-[4px] mr-[4px] rounded-[var(--radius-md)]",
             "bg-secondary-normal-default",
-            "text-md-semibold text-primary-light-default",
+            "text-[13px] md:text-md-semibold text-primary-light-default whitespace-nowrap",
             "shrink-0 transition-all duration-300 ease-in",
             "hover:bg-secondary-normal-hover active:bg-secondary-normal-active"
           )}

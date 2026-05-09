@@ -28,10 +28,9 @@ const CtaSection = React.forwardRef(({ className, onPartnerClick, ...props }, re
     <section
       ref={ref}
       className={classNames(
-        "relative w-full overflow-hidden bg-[#2b0f43]",
+        "relative w-full overflow-hidden bg-[#2b0f43] py-12 lg:py-0 lg:h-[732px]",
         className
       )}
-      style={{ height: "732px" }}
       {...props}
     >
       {/* ── TOP-RIGHT GLOW (Figma 1903:25303) ───────────────────────────────
@@ -44,7 +43,7 @@ const CtaSection = React.forwardRef(({ className, onPartnerClick, ...props }, re
         src={ctaGlowRight}
         alt=""
         aria-hidden="true"
-        className="absolute pointer-events-none"
+        className="absolute pointer-events-none hidden lg:block"
         style={{
           right: "0px",
           top: "-110px",
@@ -62,7 +61,7 @@ const CtaSection = React.forwardRef(({ className, onPartnerClick, ...props }, re
         src={ctaGlowLeft}
         alt=""
         aria-hidden="true"
-        className="absolute pointer-events-none"
+        className="absolute pointer-events-none hidden lg:block"
         style={{
           left: "0px",
           bottom: "-104px",
@@ -71,25 +70,35 @@ const CtaSection = React.forwardRef(({ className, onPartnerClick, ...props }, re
         }}
       />
 
-      {/* ── IMAGE CARD ───────────────────────────────────────────────────────
-          Figma 1903:25292 — left=156px, vertically centered, 711×559px.
-          0.5px offset in top matches the Figma `top: calc(50%+0.5px)` output.
-          Shadow is intentionally very subtle (rgba 0,0,0,0.05).             */}
-      <div
-        className="absolute rounded-[40px] overflow-hidden shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)]"
-        style={{
-          left: "156px",
-          top: "calc(50% + 0.5px)",
-          transform: "translateY(-50%)",
-          width: "711px",
-          height: "559px",
-        }}
-      >
-        <img
-          src={ctaSafariImg}
-          alt="Safari vehicle with giraffe in the African wilderness"
-          className="w-full h-full object-cover"
-        />
+      {/* Mobile/Tablet flow wrapper — stacks image and text vertically */}
+      <div className="flex flex-col items-center gap-8 px-6 md:px-[30px] lg:hidden relative z-10">
+        {/* Image card — mobile */}
+        <div className="w-full max-w-[711px] h-[260px] md:h-[400px] rounded-[20px] overflow-hidden shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)]">
+          <img
+            src={ctaSafariImg}
+            alt="Safari vehicle with giraffe in the African wilderness"
+            className="w-full h-full object-cover"
+          />
+        </div>
+
+        {/* Text block — mobile */}
+        <div className="flex flex-col items-center gap-[20px] w-full max-w-[592px]">
+          <h2 className="font-raleway font-bold text-[28px] leading-[36px] md:text-[40px] md:leading-[48px] text-[#fefefe] text-center w-full">
+            Promoting Ghana, Inspiring the World
+          </h2>
+          <p className="font-raleway font-normal text-[14px] leading-[22px] md:text-[16px] md:leading-[24px] text-[#fefefe] text-center max-w-[483px]">
+            we showcase the best of Ghana — its culture, people, and untold
+            stories. From hidden gems to iconic landmarks, we inspire travelers
+            to explore and celebrate the beauty that defines our nation.
+          </p>
+          <button
+            type="button"
+            className="flex items-center justify-center bg-[#fefefe] border border-[#7b2cbf] rounded-[40px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.05)] font-raleway font-semibold text-[16px] leading-[22px] text-[#2b0f43] whitespace-nowrap cursor-pointer hover:bg-gray-50 transition-colors"
+            style={{ width: "169px", height: "56px", padding: "10px" }}
+          >
+            Partner With Us
+          </button>
+        </div>
       </div>
 
       {/* ── RIGHT TEXT BLOCK ─────────────────────────────────────────────────
@@ -127,9 +136,40 @@ const CtaSection = React.forwardRef(({ className, onPartnerClick, ...props }, re
           className="flex items-center justify-center bg-[#fefefe] border border-[#7b2cbf] rounded-[40px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.05)] font-raleway font-semibold text-[16px] leading-[22px] text-[#2b0f43] whitespace-nowrap cursor-pointer hover:bg-gray-50 transition-colors"
           style={{ width: "169px", height: "64px", padding: "10px" }}
         >
-          Partner With Us
-        </button>
-      </div>
+          <img
+            src={ctaSafariImg}
+            alt="Safari vehicle with giraffe in the African wilderness"
+            className="w-full h-full object-cover"
+          />
+          </button>
+        </div>
+
+        {/* RIGHT TEXT BLOCK */}
+        <div
+          className="absolute flex flex-col items-end gap-[20px]"
+          style={{
+            right: "156px",
+            top: "50%",
+            transform: "translateY(-50%)",
+            width: "592px",
+          }}
+        >
+          <h2 className="font-raleway font-bold text-[56px] leading-[66px] text-[#fefefe] text-right w-full">
+            Promoting Ghana, Inspiring the World
+          </h2>
+          <p className="font-raleway font-normal text-[16px] leading-[24px] text-[#fefefe] text-right max-w-[483px]">
+            we showcase the best of Ghana — its culture, people, and untold
+            stories. From hidden gems to iconic landmarks, we inspire travelers
+            to explore and celebrate the beauty that defines our nation.
+          </p>
+          <button
+            type="button"
+            className="flex items-center justify-center bg-[#fefefe] border border-[#7b2cbf] rounded-[40px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.05)] font-raleway font-semibold text-[16px] leading-[22px] text-[#2b0f43] whitespace-nowrap cursor-pointer hover:bg-gray-50 transition-colors"
+            style={{ width: "169px", height: "64px", padding: "10px" }}
+          >
+            Partner With Us
+          </button>
+        </div>
     </section>
   );
 });

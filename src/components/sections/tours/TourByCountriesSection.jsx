@@ -23,12 +23,12 @@ const TourByCountriesSection = React.forwardRef(({ className, ...props }, ref) =
   return (
     <section
       ref={ref}
-      className={classNames("w-full bg-white py-[80px]", className)}
+      className={classNames("w-full bg-white py-12 md:py-16 lg:py-[80px]", className)}
       {...props}
     >
-      <div className="px-[156px]">
+      <div className="px-6 md:px-[30px] lg:px-[156px]">
         {/* Section header */}
-        <div className="flex items-start justify-between w-full mb-[94px]">
+        <div className="flex flex-col lg:flex-row items-center lg:items-start justify-between w-full mb-10 lg:mb-[94px] gap-4">
           {/* Left — line + label */}
           <div className="flex items-center gap-[8px] shrink-0">
             <div className="w-[46px] h-[1px] bg-secondary-dark-darker" />
@@ -49,15 +49,13 @@ const TourByCountriesSection = React.forwardRef(({ className, ...props }, ref) =
           </div>
 
           {/* Right — heading */}
-          <div style={{ width: "795px" }}>
+          <div className="w-full lg:w-[795px]">
             <h2
+              className="text-center lg:text-right text-[22px] leading-[30px] lg:text-[25px] lg:leading-[34px]"
               style={{
                 fontFamily: "Raleway, sans-serif",
-                fontSize: "25px",
                 fontWeight: 700,
-                lineHeight: "34px",
                 color: "#2d2d2d",
-                textAlign: "right",
               }}
             >
               Journey Through the Heart of West Africa with Elysium Tours
@@ -65,8 +63,8 @@ const TourByCountriesSection = React.forwardRef(({ className, ...props }, ref) =
           </div>
         </div>
 
-        {/* 4×2 grid — gap-x: 32px, gap-y: 40px */}
-        <div className="grid grid-cols-4 gap-x-[32px] gap-y-[40px]">
+        {/* Responsive grid: 2 cols mobile, 3 tablet, 4 desktop */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 md:gap-x-6 lg:gap-x-[32px] gap-y-6 lg:gap-y-[40px]">
           {COUNTRIES.map((c) => (
             <CountryTourCard
               key={c.slug}

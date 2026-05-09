@@ -136,7 +136,7 @@ const TourCountryHero = React.forwardRef(({ country = "ghana", className, ...pro
     <div ref={ref} className={classNames("w-full", className)} {...props}>
 
       {/* ── HERO (Figma 1914:40901) — 1728×717px ──────────────────────────── */}
-      <section className="relative w-full h-[717px] overflow-hidden">
+      <section className="relative w-full h-[420px] md:h-[550px] lg:h-[717px] overflow-hidden">
 
         {/* Slide images + overlay */}
         {slides.map((slide, i) => (
@@ -154,58 +154,56 @@ const TourCountryHero = React.forwardRef(({ country = "ghana", className, ...pro
         ))}
 
         {/* ── Content block (1914:40906): flex-col gap-[12px] items-center ── */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-[12px] z-30">
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-[12px] z-30 px-6 md:px-10">
 
           {/* Title + Subtitle */}
-          <div className="flex flex-col items-center gap-[12px]">
+          <div className="flex flex-col items-center gap-[12px] w-full max-w-[957px]">
             {/* Title — Raleway Bold 56px/66px #fefefe (1914:40908) */}
             <h1
-              className="text-center"
+              className="text-center w-full"
               style={{
                 fontFamily: "Raleway, sans-serif",
-                fontSize:   "56px",
                 fontWeight: 700,
-                lineHeight: "66px",
                 color:      "#fefefe",
-                width:      "957px",
               }}
             >
-              {config.title}
+              <span className="block text-[28px] leading-[36px] md:text-[40px] md:leading-[50px] lg:text-[56px] lg:leading-[66px]">
+                {config.title}
+              </span>
             </h1>
 
             {/* Subtitle — Raleway Medium 16px/26px #fefefe (1914:40910) */}
-            <div style={{ width: "867px" }}>
+            <div className="w-full max-w-[867px]">
               <p
                 className="text-center"
                 style={{
                   fontFamily: "Raleway, sans-serif",
-                  fontSize:   "16px",
                   fontWeight: 500,
-                  lineHeight: "26px",
                   color:      "#fefefe",
-                  padding:    "0 8.5px",
                 }}
               >
-                {config.subtitle}
+                <span className="block text-[14px] leading-[22px] md:text-[16px] md:leading-[26px] px-2">
+                  {config.subtitle}
+                </span>
               </p>
             </div>
           </div>
 
           {/* ── Stats row (1942:30741) — gap-[24px], no dividers ─────────── */}
-          <div className="flex items-start gap-[24px]">
+          <div className="grid grid-cols-2 gap-4 md:flex md:items-start md:gap-[24px]">
             {[
               { value: config.stats.tours,   label: "Tours Available" },
               { value: config.stats.regions, label: "Regions Covered" },
               { value: config.stats.rating,  label: "Avg. Rating" },
               { value: config.stats.guides,  label: "Local Guides" },
             ].map((stat) => (
-              <div key={stat.label} className="flex flex-col items-center" style={{ width: "180px" }}>
-                {/* Number — Raleway Bold 56px/66px #ebdff5 */}
-                <span style={{ fontFamily: "Raleway, sans-serif", fontSize: "56px", fontWeight: 700, lineHeight: "66px", color: "#ebdff5" }}>
+              <div key={stat.label} className="flex flex-col items-center w-[120px] md:w-[180px]">
+                {/* Number — Raleway Bold #ebdff5 */}
+                <span className="text-[32px] leading-[40px] md:text-[44px] md:leading-[54px] lg:text-[56px] lg:leading-[66px]" style={{ fontFamily: "Raleway, sans-serif", fontWeight: 700, color: "#ebdff5" }}>
                   {stat.value}
                 </span>
-                {/* Label — Raleway Medium 16px/26px #ebdff5 */}
-                <span style={{ fontFamily: "Raleway, sans-serif", fontSize: "16px", fontWeight: 500, lineHeight: "26px", color: "#ebdff5" }}>
+                {/* Label — Raleway Medium #ebdff5 */}
+                <span className="text-[12px] leading-[18px] md:text-[14px] md:leading-[22px] lg:text-[16px] lg:leading-[26px]" style={{ fontFamily: "Raleway, sans-serif", fontWeight: 500, color: "#ebdff5" }}>
                   {stat.label}
                 </span>
               </div>
@@ -241,7 +239,7 @@ const TourCountryHero = React.forwardRef(({ country = "ghana", className, ...pro
       {/* Structure: 16px flag strip at top + 109px items row + 13px bottom  */}
       <div
         className="relative w-full overflow-hidden"
-        style={{ height: "138px", backgroundColor: "#2b0f43" }}
+        style={{ minHeight: "138px", backgroundColor: "#2b0f43" }}
       >
         {/* Flag strip — 16px, full width, country flag colours repeating */}
         <div
@@ -255,8 +253,8 @@ const TourCountryHero = React.forwardRef(({ country = "ghana", className, ...pro
         {/* Items row — centred horizontally, 109px tall, starts at y=16 */}
         {/* gap-[32px] with 1px dividers between each item (Figma 1942:31034 etc.) */}
         <div
-          className="absolute left-0 right-0 flex items-center justify-center gap-[32px]"
-          style={{ top: "16px", height: "109px", paddingLeft: "6px", paddingRight: "6px" }}
+          className="absolute left-0 right-0 flex items-center lg:justify-center gap-[20px] lg:gap-[32px] overflow-x-auto scrollbar-hide"
+          style={{ top: "16px", height: "109px", paddingLeft: "24px", paddingRight: "24px" }}
         >
           {INFO_BAR_ITEMS(config).map((item, idx, arr) => (
             <React.Fragment key={item.label}>

@@ -485,6 +485,7 @@ const Navbar = () => {
   const [authModal, setAuthModal] = useState({ open: false, view: "login" });
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [toast, setToast] = useState(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const navRef = useRef(null);
   const userMenuRef = useRef(null);
 
@@ -531,43 +532,24 @@ const Navbar = () => {
       role="navigation"
       aria-label="Main navigation"
       className="w-full bg-primary-light-default shadow-sm sticky top-0 z-50"
-      style={{ height: "112px" }}
     >
-      {/* Inner container — max-w-[1728px], mirrors Frame 4 layout */}
-      <div className="h-full mx-auto flex items-center justify-between px-[145px]">
-        {/* Logo — 115×76 IMAGE (Figma: Elysium cursive script) */}
+      {/* ── Desktop / Mobile top bar ─────────────────────────────────────── */}
+      <div className="h-[70px] lg:h-[112px] mx-auto flex items-center justify-between px-6 md:px-[30px] lg:px-[145px]">
+        {/* Logo */}
         <Link
           to="/"
-          onClick={() => setOpenDropdown(null)}
-          className="shrink-0 
-          
-          
-          flex items-center"
+          onClick={() => { setOpenDropdown(null); setMobileOpen(false); }}
+          className="shrink-0 flex items-center"
         >
           <ElysiumLogo />
         </Link>
 
-        {/* Nav links + CTA — right side with gap:284 from logo */}
-        <div
-          className="flex items-center 
-          
-          
-          "
-          style={{ marginLeft: "0" }}
-        >
-          {/* Links — HORIZONTAL gap:32 */}
-          <div className="flex " style={{ gap: "20px" }}>
-            {/* Home */}
+        {/* Desktop: Nav links */}
+        <div className="hidden lg:flex items-center" style={{ marginLeft: "0" }}>
+          <div className="flex" style={{ gap: "20px" }}>
             <Link to="/" onClick={() => setOpenDropdown(null)}>
-              <NavLink
-                label="Home"
-                isActive={location.pathname === "/"}
-                hasDropdown={false}
-                isOpen={false}
-              />
+              <NavLink label="Home" isActive={location.pathname === "/"} hasDropdown={false} isOpen={false} />
             </Link>
-
-            {/* Tour */}
             <div className="relative">
               <NavLink
                 label="Tour"
@@ -586,8 +568,6 @@ const Navbar = () => {
                 />
               )}
             </div>
-
-            {/* Tour Partners */}
             <div className="relative">
               <NavLink
                 label="Tour Partners"
@@ -609,40 +589,32 @@ const Navbar = () => {
                 />
               )}
             </div>
-
-            {/* Gallery */}
             <Link to="/gallery" onClick={() => setOpenDropdown(null)}>
-              <NavLink
-                label="Gallery"
-                isActive={isActivePath("/gallery")}
-                hasDropdown={false}
-                isOpen={false}
-              />
+              <NavLink label="Gallery" isActive={isActivePath("/gallery")} hasDropdown={false} isOpen={false} />
             </Link>
-
-            {/* Blogs */}
             <Link to="/blog" onClick={() => setOpenDropdown(null)}>
-              <NavLink
-                label="Blogs"
-                isActive={isActivePath("/blog")}
-                hasDropdown={false}
-                isOpen={false}
-              />
+              <NavLink label="Blogs" isActive={isActivePath("/blog")} hasDropdown={false} isOpen={false} />
             </Link>
-            {/* Contact Us */}
             <Link to="/contact" onClick={() => setOpenDropdown(null)}>
-              <NavLink
-                label="Contact Us"
-                isActive={isActivePath("/contact")}
-                hasDropdown={false}
-                isOpen={false}
-              />
+              <NavLink label="Contact Us" isActive={isActivePath("/contact")} hasDropdown={false} isOpen={false} />
             </Link>
           </div>
         </div>
-        <div
-          className="flex items-center gap-4"
+
+        {/* Mobile: hamburger button */}
+        <button
+          type="button"
+          className="lg:hidden flex flex-col justify-center items-center w-10 h-10 gap-[5px] shrink-0"
+          onClick={() => { setMobileOpen(v => !v); setOpenDropdown(null); }}
+          aria-label={mobileOpen ? "Close menu" : "Open menu"}
+          aria-expanded={mobileOpen}
         >
+          <span className={`block w-6 h-[2px] bg-secondary-dark-darker transition-all duration-300 ${mobileOpen ? "rotate-45 translate-y-[7px]" : ""}`} />
+          <span className={`block w-6 h-[2px] bg-secondary-dark-darker transition-all duration-300 ${mobileOpen ? "opacity-0" : ""}`} />
+          <span className={`block w-6 h-[2px] bg-secondary-dark-darker transition-all duration-300 ${mobileOpen ? "-rotate-45 -translate-y-[7px]" : ""}`} />
+        </button>
+        {/* Desktop: CTA buttons */}
+        <div className="hidden lg:flex items-center gap-4">
           {/* Language */}
           <Button
             className=" bg-transparent! px-0! shadow-none!"
@@ -735,6 +707,40 @@ const Navbar = () => {
           )}
         </div>
       </div>
+
+      {/* ── Mobile menu panel — slides down when mobileOpen ─────────────── */}
+      {mobileOpen && (
+        <div className="lg:hidden bg-primary-light-default border-t border-primary-normal-default px-6 py-4 flex flex-col gap-1 shadow-md">
+          {/* Simple link list */}
+          {[
+            { label: "Home", to: "/" },
+            { label: "Tours", to: "/tours" },
+            { label: "Tour Partners", to: "/tour-partners" },
+            { label: "Gallery", to: "/gallery" },
+            { label: "Blogs", to: "/blog" },
+            { label: "Contact Us", to: "/contact" },
+          ].map(({ label, to }) => (
+            <Link
+              key={label}
+              to={to}
+              onClick={() => setMobileOpen(false)}
+              className="py-3 border-b border-primary-normal-default last:border-b-0"
+            >
+              <span
+                className={`font-raleway text-[16px] font-medium ${location.pathname === to || (to !== "/" && location.pathname.startsWith(to)) ? "text-secondary-normal-default font-semibold" : "text-primary-dark-darker"}`}
+              >
+                {label}
+              </span>
+            </Link>
+          ))}
+          {/* Sign Up button */}
+          <div className="pt-3">
+            <Button variant="secondary" size="md" shape="pill" className="w-full">
+              <span>Sign Up</span>
+            </Button>
+          </div>
+        </div>
+      )}
     </nav>
 
     {/* Auth modal */}

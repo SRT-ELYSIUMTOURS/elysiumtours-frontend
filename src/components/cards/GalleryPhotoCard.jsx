@@ -54,14 +54,14 @@ const GalleryPhotoCard = React.forwardRef(({
           className={classNames(
             "absolute flex flex-col gap-[4px] items-start",
             isSmall
-              ? "bottom-[10px] left-[13px] w-[125px]"
-              : "bottom-[22px] left-[22px] right-[22px]"
+              ? "bottom-[10px] left-[13px] right-[13px]"
+              : "bottom-[16px] left-[16px] right-[16px] md:bottom-[22px] md:left-[22px] md:right-[22px]"
           )}
         >
           {title && (
             <p className={classNames(
-              "font-raleway font-bold text-primary-light-default leading-[1.2] truncate",
-              isSmall ? "text-[13px]" : "text-[25px]"
+              "font-raleway font-bold text-primary-light-default leading-[1.2] line-clamp-2 break-words",
+              isSmall ? "text-[13px]" : "text-[18px] md:text-[22px] lg:text-[25px]"
             )}>
               {title}
             </p>
@@ -69,7 +69,7 @@ const GalleryPhotoCard = React.forwardRef(({
           {count && (
             <p className={classNames(
               "font-raleway font-normal text-primary-light-default leading-[1.4]",
-              isSmall ? "text-[10px]" : "text-[16px]"
+              isSmall ? "text-[10px]" : "text-[13px] md:text-[16px]"
             )}>
               {count}
             </p>

@@ -48,9 +48,9 @@ const CountryStorySection = React.forwardRef(({ country = "ghana", className, ..
       className={classNames("w-full bg-secondary-light-default py-[80px]", className)}
       {...props}
     >
-      <div className="px-[156px]">
+      <div className="px-6 md:px-[30px] lg:px-[156px]">
         {/* Section header */}
-        <div className="flex items-start justify-between w-full mb-[60px]">
+        <div className="flex flex-col lg:flex-row items-center lg:items-start justify-between w-full mb-[32px] lg:mb-[60px] gap-4">
           <div className="flex items-center gap-[8px] shrink-0">
             <div className="w-[46px] h-[1px] bg-secondary-dark-darker" />
             <span className="font-raleway font-bold text-[13px] leading-[18px] text-secondary-dark-darker whitespace-nowrap tracking-[0.05em] uppercase">
@@ -58,20 +58,20 @@ const CountryStorySection = React.forwardRef(({ country = "ghana", className, ..
             </span>
           </div>
 
-          <div className="flex flex-col gap-md items-end w-[677px]">
-            <h2 className="font-raleway font-bold text-[25px] leading-[34px] text-tertiary-normal-default text-right pl-[80px]">
+          <div className="flex flex-col gap-md items-center lg:items-end w-full lg:max-w-[677px]">
+            <h2 className="font-raleway font-bold text-[25px] leading-[34px] text-tertiary-normal-default text-center lg:text-right lg:pl-[80px]">
               {config.title}
             </h2>
-            <p className="font-raleway font-normal text-[16px] leading-[24px] text-tertiary-normal-default text-right pl-[111px]">
+            <p className="font-raleway font-normal text-[16px] leading-[24px] text-tertiary-normal-default text-center lg:text-right lg:pl-[111px]">
               {config.subtitle}
             </p>
           </div>
         </div>
 
         {/* Split layout: image left + text right */}
-        <div className="flex items-stretch gap-[32px]">
+        <div className="flex flex-col lg:flex-row items-stretch gap-[24px] lg:gap-[32px]">
           {/* Left: large image with caption card */}
-          <div className="relative w-[711px] shrink-0 rounded-2xl overflow-hidden h-[559px]">
+          <div className="relative w-full lg:w-[711px] shrink-0 rounded-2xl overflow-hidden h-[280px] md:h-[400px] lg:h-[559px]">
             <img
               src={config.image}
               alt={config.title}

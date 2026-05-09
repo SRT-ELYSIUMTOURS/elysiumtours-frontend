@@ -27,11 +27,10 @@ const BlogFeatureSection = React.forwardRef(({ className, ...props }, ref) => {
       {...props}
     >
       {/* White card — Figma 134:1708 */}
-      {/* mx-[156px] = 1416px wide on 1728px artboard */}
-      <div className="mx-[156px] h-[238px] bg-[#f7f7f7] rounded-[20px] overflow-clip shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)] flex items-center justify-center">
+      <div className="mx-6 md:mx-[30px] lg:mx-[156px] min-h-[238px] bg-[#f7f7f7] rounded-[20px] overflow-clip shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)] flex items-center justify-center p-6 md:p-0">
 
-        {/* Content row — Figma 134:1709: flex gap-[24px] items-center */}
-        <div className="flex gap-[24px] items-center">
+        {/* Content row — stacked on mobile, side-by-side on desktop */}
+        <div className="flex flex-col md:flex-row gap-6 md:gap-[24px] items-center w-full">
 
           {/* ── Left: Stacked tilted photo cards — Figma 134:1710 ─────────── */}
           {/*
@@ -87,8 +86,7 @@ const BlogFeatureSection = React.forwardRef(({ className, ...props }, ref) => {
           {/* ── Right: Text content — Figma 134:1713 ─────────────────────── */}
           {/* flex-col gap-[24px] items-start justify-center w-[946px] */}
           <div
-            className="flex flex-col gap-[24px] items-start justify-center shrink-0"
-            style={{ width: "946px" }}
+            className="flex flex-col gap-[24px] items-start justify-center w-full min-w-0"
           >
             {/* Title + body text block */}
             <div className="flex flex-col items-start w-full">
@@ -103,7 +101,7 @@ const BlogFeatureSection = React.forwardRef(({ className, ...props }, ref) => {
               {/* Body — Figma 134:1718: Raleway Regular 16px #2d2d2d lh-24px */}
               <p
                 className="font-raleway font-normal text-[#2d2d2d] pl-[10px] pr-px py-[10px]"
-                style={{ fontSize: "16px", lineHeight: "24px", width: "913px" }}
+                style={{ fontSize: "16px", lineHeight: "24px" }}
               >
                 From the historic shores of Cape Coast to the laid-back beaches
                 of Busua, Ghana&#39;s coastline is a blend of beauty, history, and

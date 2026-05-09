@@ -41,7 +41,7 @@ const ExploreButton = ({ onClick }) => (
 // ─── Section header (eyebrow left + title/desc/button right) ─────────────────
 
 const SectionHeader = ({ label, title, description, onExplore }) => (
-  <div className="flex items-start justify-between w-full mb-[48px]">
+  <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between w-full mb-8 lg:mb-[48px] gap-4 lg:gap-0">
     {/* Left — eyebrow */}
     <div className="flex items-center gap-[8px] pt-[10px]">
       <div className="w-[46px] h-px shrink-0 bg-secondary-dark-darker" />
@@ -50,11 +50,11 @@ const SectionHeader = ({ label, title, description, onExplore }) => (
       </span>
     </div>
     {/* Right — title + description + button */}
-    <div className="flex flex-col gap-[16px] items-end w-[677px]">
-      <h2 className="font-raleway font-bold text-[25px] leading-[34px] text-[#2d2d2d] text-right w-[630px]">
+    <div className="flex flex-col gap-[16px] items-start lg:items-end w-full lg:w-[677px]">
+      <h2 className="font-raleway font-bold text-[20px] md:text-[25px] leading-[34px] text-[#2d2d2d] text-left lg:text-right w-full lg:w-[630px]">
         {title}
       </h2>
-      <p className="font-raleway font-normal text-[16px] leading-[24px] text-[#2d2d2d] text-right w-[565px]">
+      <p className="font-raleway font-normal text-[14px] md:text-[16px] leading-[24px] text-[#2d2d2d] text-left lg:text-right w-full lg:w-[565px]">
         {description}
       </p>
       <ExploreButton onClick={onExplore} />
@@ -73,11 +73,11 @@ const CATEGORY_DATA = {
     cards: [
       { id: 1, image: "https://picsum.photos/seed/dest-a/335/663", title: "Cape Coast", count: "42 Photos", size: "large" },
       { id: 2, image: "https://picsum.photos/seed/dest-b/338/568", title: "Kakum Park", count: "28 Photos", size: "medium" },
-      { id: 3, image: "https://picsum.photos/seed/dest-c/162/197", title: "Elmina", count: "19", size: "small" },
-      { id: 4, image: "https://picsum.photos/seed/dest-d/162/197", title: "Mole", count: "24", size: "small" },
+      { id: 3, image: "https://picsum.photos/seed/dest-c/162/197", title: "Elmina", count: "19 Photos", size: "small" },
+      { id: 4, image: "https://picsum.photos/seed/dest-d/162/197", title: "Mole", count: "24 Photos", size: "small" },
       { id: 5, image: "https://picsum.photos/seed/dest-e/335/663", title: "Accra", count: "56 Photos", size: "large" },
-      { id: 6, image: "https://picsum.photos/seed/dest-f/162/197", title: "Volta", count: "31", size: "small" },
-      { id: 7, image: "https://picsum.photos/seed/dest-g/162/197", title: "Kumasi", count: "37", size: "small" },
+      { id: 6, image: "https://picsum.photos/seed/dest-f/162/197", title: "Volta", count: "31 Photos", size: "small" },
+      { id: 7, image: "https://picsum.photos/seed/dest-g/162/197", title: "Kumasi", count: "37 Photos", size: "small" },
       { id: 8, image: "https://picsum.photos/seed/dest-h/338/568", title: "Ada Foah", count: "22 Photos", size: "medium" },
     ],
   },
@@ -180,18 +180,18 @@ const OVERVIEW_ORDER = [
 // ─── Videos section card row (3 equal flex-1 cards with play icons) ───────────
 
 const VideosSectionCards = ({ cards, navigate, catKey }) => (
-  <div className="flex gap-[15px] items-start w-full" style={{ marginTop: "0" }}>
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[15px] items-start w-full">
     {cards.map((card) => (
       <button
         key={card.id}
         className={classNames(
-          "relative overflow-hidden flex-1",
+          "relative overflow-hidden w-full",
           "border border-secondary-light-active",
           "rounded-[40px]",
           "shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)]",
           "cursor-pointer bg-[rgba(0,0,0,0.5)]"
         )}
-        style={{ height: "364px" }}
+        style={{ height: "264px" }}
         onClick={() => navigate(`/gallery/${catKey}/all`)}
       >
         {card.image && (
@@ -328,7 +328,7 @@ const DestinationsBentoGrid = ({ cards, navigate, catKey }) => {
           onClick={go}
         />
       </div>
-    </div>
+      </div>
   );
 };
 
@@ -825,8 +825,8 @@ const CategorySectionBlock = ({ catKey, navigate }) => {
   };
 
   return (
-    <section className={classNames("w-full py-[80px]", data.bg)}>
-      <div className="px-[156px]">
+    <section className={classNames("w-full py-10 lg:py-[80px]", data.bg)}>
+      <div className="px-4 md:px-8 lg:px-[156px]">
         <SectionHeader
           label={data.label}
           title={data.title}

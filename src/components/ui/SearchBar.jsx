@@ -50,9 +50,9 @@ const SearchBar = React.forwardRef(({
       {...props}
     >
       {/* LEFT — Frame 10: "Where to?" — stroke:#d6beeb on right side only */}
-      <div className="flex-1 flex flex-col gap-2 justify-center px-10 py-4 border-r border-secondary-light-active">
+      <div className="flex-1 flex flex-col justify-center px-4 md:px-6 py-3 md:py-4 border-r border-secondary-light-active min-w-0">
         {/* Label — [16px/600] #2d2d2d */}
-        <span className="text-md-semibold text-tertiary-normal-default leading-none ">
+        <span className="text-[14px] font-semibold md:text-md-semibold text-tertiary-normal-default leading-none mb-1">
           Where to?
         </span>
         {/* Input — [13px/500] #949494 */}
@@ -61,15 +61,15 @@ const SearchBar = React.forwardRef(({
           value={locationValue}
           onChange={e => onLocationChange?.(e.target.value)}
           placeholder={locationPlaceholder}
-          className="bg-transparent outline-none text-med-small-Medium text-primary-dark-default placeholder:text-primary-dark-hover"
+          className="bg-transparent outline-none text-[12px] md:text-med-small-Medium text-primary-dark-default placeholder:text-primary-dark-hover w-full"
         />
       </div>
 
       {/* RIGHT — Frame 11: "When?" */}
-      <div className="flex-1 flex items-center justify-between pl-10 pr-5.5 py-4">
-        <div className="flex flex-col  gap-2 justify-center">
+      <div className="flex-1 flex items-center justify-between px-4 md:px-6 py-3 md:py-4 min-w-0">
+        <div className="flex flex-col justify-center min-w-0">
           {/* Label — [16px/600] #2d2d2d */}
-          <span className="text-md-semibold text-tertiary-normal-default leading-none ">
+          <span className="text-[14px] font-semibold md:text-md-semibold text-tertiary-normal-default leading-none mb-1">
             When?
           </span>
           {/* Input — [13px/500] #949494 */}
@@ -78,15 +78,15 @@ const SearchBar = React.forwardRef(({
             value={dateValue}
             onChange={e => onDateChange?.(e.target.value)}
             placeholder={datePlaceholder}
-            className="bg-transparent outline-none text-med-small-Medium text-primary-dark-hover placeholder:text-primary-dark-hover"
+            className="bg-transparent outline-none text-[12px] md:text-med-small-Medium text-primary-dark-hover placeholder:text-primary-dark-hover w-full"
           />
         </div>
 
-        {/* Search button — Ellipse 54×54 fill:#7b2cbf */}
+        {/* Search button — Ellipse 54×54 fill:#7b2cbf, smaller on mobile */}
         <button
           onClick={onSearch}
           className={classNames(
-            "w-[54px] h-[54px] rounded-full shrink-0 cursor-pointer",
+            "w-[42px] h-[42px] md:w-[54px] md:h-[54px] rounded-full shrink-0 cursor-pointer",
             "bg-secondary-normal-default",
             "flex items-center justify-center",
             "transition-all duration-300 ease-in",

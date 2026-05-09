@@ -15,7 +15,7 @@ const BlogSearchInput = React.forwardRef(({
       ref={ref}
       className={classNames(
         "relative border border-solid border-primary-normal-active rounded-md overflow-hidden",
-        "h-[48px] w-[379px]",
+        "h-[48px] w-full lg:w-[379px]",
         className
       )}
       {...props}
