@@ -26,7 +26,7 @@ const PartnerHighlightCard = React.forwardRef(
   ) => {
     // Default: label flush to bottom; frosted strip uses a separate layer so text stays sharp
     const defaultLabelClass =
-      "absolute bottom-0 left-0 h-[122px] right-0 isolate z-[2] overflow-hidden rounded-b-[40px] px-6 flex flex-col justify-center  ";
+      "absolute bottom-0 left-0 h-[64px] md:h-[88px] lg:h-[122px] right-0 isolate z-[2] overflow-hidden rounded-b-[40px] px-4 md:px-6 flex flex-col justify-center";
 
     return (
       <div
@@ -61,8 +61,8 @@ const PartnerHighlightCard = React.forwardRef(
               className="partner-highlight-label-frost pointer-events-none absolute inset-0  rounded-b-[40px]"
             />
           )}
-          <div className="relative z-1 ">
-            <h3 className="text-semi-md-bold text-primary-light-default">
+          <div className="relative z-1">
+            <h3 className="font-raleway font-bold text-[16px] md:text-[20px] lg:text-[25px] leading-tight text-primary-light-default break-words">
               {category}
             </h3>
             {subtitle && (

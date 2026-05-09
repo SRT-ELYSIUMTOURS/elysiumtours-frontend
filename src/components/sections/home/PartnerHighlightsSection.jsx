@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { classNames } from "../../../utils/classNames";
 import PartnerHighlightCard from "../../cards/PartnerHighlightCard";
 import Button from "../../ui/button";
@@ -23,6 +24,8 @@ const PARTNERS = [
 
 const PartnerHighlightsSection = React.forwardRef(
   ({ className, ...props }, ref) => {
+    const navigate = useNavigate();
+    const slugify = (s) => s.toLowerCase().replace(/\s+/g, "-");
     return (
       <section
         ref={ref}
@@ -52,6 +55,7 @@ const PartnerHighlightsSection = React.forwardRef(
                 enriching, and fun — the perfect blend of comfort and discovery.
               </p>
               <Button
+                onClick={() => navigate("/tour-partners")}
                 endIcon={
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -81,7 +85,8 @@ const PartnerHighlightsSection = React.forwardRef(
                 key={partner.id}
                 image={partner.image}
                 category={partner.category}
-                className="h-[300px] md:h-[500px] w-full lg:h-[656px]"
+                className="h-[260px] md:h-[500px] w-full lg:h-[656px]"
+                onClick={() => navigate(`/tour-partners/${slugify(partner.category)}`)}
               />
             ))}
           </div>

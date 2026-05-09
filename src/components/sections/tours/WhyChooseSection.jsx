@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { classNames } from "../../../utils/classNames";
 import Button from "../../ui/button";
 import sectionLineImg from "../../../assets/ElysiumAssets/section-line.svg";
@@ -17,6 +18,7 @@ import whyChooseBg    from "../../../assets/ElysiumAssets/why-choose-bg.png";
 // that is preserved but not yet Figma-mapped in this task.
 
 const WhyChooseSection = React.forwardRef(({ className, ...props }, ref) => {
+  const navigate = useNavigate();
   return (
     <section
       ref={ref}
@@ -65,7 +67,7 @@ const WhyChooseSection = React.forwardRef(({ className, ...props }, ref) => {
               At Elysium Tours, we believe travel is more than visiting destinations — it's
               about experiencing the soul of a place. With expert local guides and
               personalized itineraries, every journey is seamless, stress-free, and
-              enriching. We create authentic cultural connections that let
+              enriching. We create authentic cultural connections that let you experience destinations from the inside out.
             </p>
           </div>
 
@@ -76,6 +78,7 @@ const WhyChooseSection = React.forwardRef(({ className, ...props }, ref) => {
                     gap-[9px] override controls spacing instead of the default ml-2 */}
           <Button
             variant="secondaryOutline"
+            onClick={() => navigate("/tours")}
             endIcon={
               <svg
                 xmlns="http://www.w3.org/2000/svg"
