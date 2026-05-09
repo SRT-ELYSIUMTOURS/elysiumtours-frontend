@@ -9,6 +9,7 @@ import Button from "../../ui/button";
 
 const PartnerCtaSection = React.forwardRef(({
   className = "",
+  onBecomePartnerClick,
   ...props
 }, ref) => {
   return (
@@ -62,7 +63,9 @@ const PartnerCtaSection = React.forwardRef(({
           <Button
             variant="white"
             shape="pill"
-            className="h-[56px] lg:h-[64px] px-[32px]! gap-md mt-2 lg:mt-[8px]"
+            className="h-[64px] px-[32px]! gap-md mt-[8px]"
+            type="button"
+            onClick={onBecomePartnerClick}
           >
             Become a Partner
           </Button>

@@ -1,14 +1,9 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { classNames } from "../../../utils/classNames";
+import { openBlogPost } from "../../../utils/blogPostRoute";
 import BlogSectionHeader from "./BlogSectionHeader";
 import BlogContentCard from "../../cards/BlogContentCard";
-
-const PLACEHOLDER_CARDS = [
-  { id: 1, title: "8 ways to enjoy Ghana in fall", category: "Leisure Tours", size: "wide" },
-  { id: 2, title: "8 ways to enjoy", category: "Leisure Tours", size: "small" },
-  { id: 3, title: "8 ways to enjoy Ghana in fall", category: "Leisure Tours", size: "wide" },
-];
 
 const TravelGuidesPreview = React.forwardRef(({ className, ...props }, ref) => {
   const navigate = useNavigate();
@@ -37,13 +32,54 @@ const TravelGuidesPreview = React.forwardRef(({ className, ...props }, ref) => {
               title="8 ways to enjoy Ghana in fall"
               category="Leisure Tours"
               image="https://picsum.photos/seed/tg1/1028/371"
+<<<<<<< HEAD
               className="!w-full !h-[220px] md:!h-[371px]"
+=======
+              className="!w-[70%] !h-[371px]"
+              onClick={() =>
+                openBlogPost(navigate, {
+                  title: "8 ways to enjoy Ghana in fall",
+                  category: "Leisure Tours",
+                  image: "https://picsum.photos/seed/tg1/1028/371",
+                  uniqueKey: "tg1",
+                })
+              }
+>>>>>>> 404b32fd78bf81291300a90563016ded1c14c196
             />
             <BlogContentCard
               title="8 ways to enjoy"
               category="Leisure Tours"
               image="https://picsum.photos/seed/tg2/363/371"
+<<<<<<< HEAD
               className="!w-full md:!w-[280px] lg:!w-[363px] !h-[220px] md:!h-[371px]"
+=======
+              className="!w-[30%] !h-[371px]"
+              onClick={() =>
+                openBlogPost(navigate, {
+                  title: "8 ways to enjoy",
+                  category: "Leisure Tours",
+                  image: "https://picsum.photos/seed/tg2/363/371",
+                  uniqueKey: "tg2",
+                })
+              }
+            />
+          </div>
+          {/* Row 2: wide card */}
+          <div className="flex gap-[15px]">
+            <BlogContentCard
+              title="8 ways to enjoy Ghana in fall"
+              category="Leisure Tours"
+              image="https://picsum.photos/seed/tg3/1028/415"
+              className="!w-full !h-[415px]"
+              onClick={() =>
+                openBlogPost(navigate, {
+                  title: "8 ways to enjoy Ghana in fall",
+                  category: "Leisure Tours",
+                  image: "https://picsum.photos/seed/tg3/1028/415",
+                  uniqueKey: "tg3",
+                })
+              }
+>>>>>>> 404b32fd78bf81291300a90563016ded1c14c196
             />
           </div>
           {/* Row 2: full-width card */}

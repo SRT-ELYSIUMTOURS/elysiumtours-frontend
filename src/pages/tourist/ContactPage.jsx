@@ -7,6 +7,10 @@ import FAQAccordion from "../../components/ui/FAQAccordion";
 import MapEmbed from "../../components/ui/MapEmbed";
 import { ToastItem } from "../../components/ui/toast";
 import BlogBreadcrumbBar from "../../components/sections/blog/BlogBreadcrumbBar";
+import PartnerPromoCtaSection from "../../components/sections/PartnerPromoCtaSection";
+import { partnerPromoBlogContact } from "../../data/partnerPromoCtaPresets.jsx";
+import PartnerWithUsModal from "../../components/ui/PartnerWithUsModal";
+
 
 // ─── Hero slides ─────────────────────────────────────────────────────────────
 const CONTACT_HERO_SLIDES = [
@@ -90,33 +94,34 @@ const SectionLabel = ({ text }) => (
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 const PhoneIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-    <path
-      d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1-9.4 0-17-7.6-17-17 0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z"
-      stroke="#7b2cbf" strokeWidth="1.5"
-    />
-  </svg>
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+  <path d="M4.76085 3.66187C4.8315 3.59123 4.86682 3.5559 4.89794 3.52731C5.6631 2.82423 6.83921 2.82423 7.60436 3.52731C7.63548 3.5559 7.67081 3.59123 7.74145 3.66187L9.19965 5.12007C10.0017 5.92212 10.2311 7.13336 9.77785 8.17314C9.32461 9.21293 9.554 10.4242 10.356 11.2262L12.7529 13.623C13.5549 14.4251 14.7661 14.6545 15.8059 14.2012C16.8457 13.748 18.057 13.9774 18.859 14.7794L20.3172 16.2376C20.3878 16.3083 20.4232 16.3436 20.4518 16.3747C21.1548 17.1399 21.1548 18.316 20.4518 19.0811C20.4232 19.1123 20.3878 19.1476 20.3172 19.2182L19.4309 20.1046C18.7091 20.8264 17.6685 21.1294 16.6721 20.9079C9.88248 19.3991 4.57995 14.0966 3.07115 7.307C2.84971 6.31054 3.15272 5.27001 3.87451 4.54821L4.76085 3.66187Z" stroke="#7B2CBF" stroke-width="1.5"/>
+</svg>
 );
 
 const LocationIcon = () => (
-  <svg width="16" height="21" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" stroke="#7b2cbf" strokeWidth="1.5" />
-    <circle cx="12" cy="9" r="2.5" stroke="#7b2cbf" strokeWidth="1.5" />
-  </svg>
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+  <path d="M14.7808 19.7005L14.1906 19.2377V19.2377L14.7808 19.7005ZM9.21921 19.7005L8.62903 20.1633L9.21921 19.7005ZM12 22.0055V21.2555V22.0055ZM20 9.6087H19.25C19.25 10.8352 18.6104 12.4764 17.6037 14.256C16.6137 16.0063 15.3342 17.7794 14.1906 19.2377L14.7808 19.7005L15.371 20.1633C16.5371 18.6762 17.8672 16.837 18.9094 14.9945C19.9349 13.1814 20.75 11.2494 20.75 9.6087H20ZM9.21921 19.7005L9.80938 19.2377C8.66578 17.7794 7.38628 16.0063 6.39625 14.256C5.38962 12.4764 4.75 10.8352 4.75 9.6087H4H3.25C3.25 11.2494 4.06511 13.1814 5.09064 14.9945C6.13277 16.837 7.46288 18.6762 8.62903 20.1633L9.21921 19.7005ZM4 9.6087H4.75C4.75 5.21571 8.04678 1.75 12 1.75V1V0.25C7.11666 0.25 3.25 4.49277 3.25 9.6087H4ZM12 1V1.75C15.9532 1.75 19.25 5.21571 19.25 9.6087H20H20.75C20.75 4.49277 16.8833 0.25 12 0.25V1ZM14.7808 19.7005L14.1906 19.2377C13.5717 20.027 13.1641 20.5426 12.7992 20.8741C12.4664 21.1764 12.2442 21.2555 12 21.2555V22.0055V22.7555C12.7291 22.7555 13.2948 22.4504 13.8078 21.9844C14.2886 21.5476 14.7849 20.9107 15.371 20.1633L14.7808 19.7005ZM9.21921 19.7005L8.62903 20.1633C9.21511 20.9107 9.71136 21.5476 10.1922 21.9844C10.7052 22.4504 11.2709 22.7555 12 22.7555V22.0055V21.2555C11.7558 21.2555 11.5336 21.1764 11.2008 20.8741C10.8359 20.5426 10.4283 20.027 9.80938 19.2377L9.21921 19.7005ZM9 10H8.25C8.25 12.0711 9.92893 13.75 12 13.75V13V12.25C10.7574 12.25 9.75 11.2426 9.75 10H9ZM12 13V13.75C14.0711 13.75 15.75 12.0711 15.75 10H15H14.25C14.25 11.2426 13.2426 12.25 12 12.25V13ZM15 10H15.75C15.75 7.92893 14.0711 6.25 12 6.25V7V7.75C13.2426 7.75 14.25 8.75736 14.25 10H15ZM12 7V6.25C9.92893 6.25 8.25 7.92893 8.25 10H9H9.75C9.75 8.75736 10.7574 7.75 12 7.75V7Z" fill="#7B2CBF"/>
+</svg>
 );
 
 const QuestionIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-    <path d="M9.5 9.5c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5c0 1.5-1.5 2-2.5 2.5" stroke="#7b2cbf" strokeWidth="1.5" strokeLinecap="round" />
-    <circle cx="12" cy="16.5" r="0.8" fill="#7b2cbf" />
-  </svg>
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+  <path d="M10.3665 16.3953C10.5316 16.3953 10.6899 16.4609 10.8066 16.5776C10.9234 16.6943 10.989 16.8527 10.989 17.0178V17.4328C10.989 17.5979 10.9234 17.7562 10.8066 17.873C10.6899 17.9897 10.5316 18.0553 10.3665 18.0553C10.2014 18.0553 10.043 17.9897 9.92629 17.873C9.80955 17.7562 9.74397 17.5979 9.74397 17.4328V17.0178C9.74397 16.8527 9.80955 16.6943 9.92629 16.5776C10.043 16.4609 10.2014 16.3953 10.3665 16.3953ZM13.6367 3.49863C14.553 4.32614 15.139 5.5504 15.139 7.12078C15.139 8.29108 14.8485 9.14599 14.3796 9.82245C13.9347 10.4657 13.3495 10.9139 12.8474 11.2974L12.82 11.3189C12.2896 11.724 11.8514 12.066 11.5268 12.5341C11.2172 12.9815 10.989 13.5824 10.989 14.5278C10.989 14.6929 10.9234 14.8512 10.8066 14.9679C10.6899 15.0847 10.5316 15.1503 10.3665 15.1503C10.2014 15.1503 10.043 15.0847 9.92629 14.9679C9.80955 14.8512 9.74397 14.6929 9.74397 14.5278C9.74397 13.3574 10.0345 12.5025 10.5034 11.8261C10.9483 11.1828 11.5335 10.7346 12.0356 10.3512L12.063 10.3296C12.5934 9.92454 13.0316 9.58257 13.3562 9.11445C13.6657 8.66625 13.894 8.06615 13.894 7.12078C13.894 5.88158 13.4425 5.00011 12.8025 4.42325C12.1518 3.83644 11.2687 3.53017 10.3665 3.53017C9.46425 3.53017 8.58113 3.83644 7.9304 4.42325C7.2913 5.00011 6.83894 5.88241 6.83894 7.12078C6.83894 7.28587 6.77336 7.44421 6.65662 7.56095C6.53987 7.67769 6.38154 7.74328 6.21644 7.74328C6.05134 7.74328 5.893 7.67769 5.77626 7.56095C5.65952 7.44421 5.59393 7.28587 5.59393 7.12078C5.59393 5.5504 6.17992 4.32614 7.09625 3.49863C8.00178 2.68107 9.19367 2.28516 10.3665 2.28516C11.5393 2.28516 12.7312 2.68107 13.6367 3.49863Z" fill="#7B2CBF"/>
+</svg>
 );
 
 const SearchBtnIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-    <circle cx="11" cy="11" r="8" stroke="#fefefe" strokeWidth="1.5" />
-    <path d="m21 21-4.35-4.35" stroke="#fefefe" strokeWidth="1.5" strokeLinecap="round" />
-  </svg>
+  <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 17 17" fill="none">
+  <g clip-path="url(#clip0_3936_8366)">
+    <path d="M13.5489 11.8015C13.256 11.5086 12.7811 11.5086 12.4882 11.8015C12.1953 12.0944 12.1953 12.5692 12.4882 12.8621L13.0186 12.3318L13.5489 11.8015ZM15.2289 15.6028C15.5218 15.8957 15.9967 15.8957 16.2895 15.6028C16.5824 15.31 16.5824 14.8351 16.2896 14.5422L15.7592 15.0725L15.2289 15.6028ZM6.43321 3.52209C6.84233 3.45729 7.12145 3.07311 7.05665 2.664C6.99185 2.25489 6.60767 1.97576 6.19856 2.04056L6.31589 2.78133L6.43321 3.52209ZM2.72731 5.51181C2.66251 5.92093 2.94163 6.30511 3.35075 6.36991C3.75986 6.4347 4.14404 6.15558 4.20884 5.74647L3.46807 5.62914L2.72731 5.51181ZM13.0186 12.3318L12.4882 12.8621L15.2289 15.6028L15.7592 15.0725L16.2896 14.5422L13.5489 11.8015L13.0186 12.3318ZM7.53703 13.0169V12.2669C4.54549 12.2669 2.12036 9.8418 2.12036 6.85026H1.37036H0.620361C0.620361 10.6702 3.71706 13.7669 7.53703 13.7669V13.0169ZM13.7037 6.85026H12.9537C12.9537 9.8418 10.5286 12.2669 7.53703 12.2669V13.0169V13.7669C11.357 13.7669 14.4537 10.6702 14.4537 6.85026H13.7037ZM7.53703 0.683594V1.43359C10.5286 1.43359 12.9537 3.85872 12.9537 6.85026H13.7037H14.4537C14.4537 3.03029 11.357 -0.0664062 7.53703 -0.0664062V0.683594ZM7.53703 0.683594V-0.0664062C3.71706 -0.0664062 0.620361 3.03029 0.620361 6.85026H1.37036H2.12036C2.12036 3.85872 4.54549 1.43359 7.53703 1.43359V0.683594ZM6.31589 2.78133L6.19856 2.04056C4.41171 2.32357 3.01031 3.72497 2.72731 5.51181L3.46807 5.62914L4.20884 5.74647C4.39019 4.60146 5.2882 3.70344 6.43321 3.52209L6.31589 2.78133Z" fill="#EBDFF5"/>
+  </g>
+  <defs>
+    <clipPath id="clip0_3936_8366">
+      <rect width="16.4444" height="16.4444" fill="white"/>
+    </clipPath>
+  </defs>
+</svg>
 );
 
 const ArrowRightIcon = () => (
@@ -130,6 +135,7 @@ const ContactPage = React.forwardRef(({ className, ...props }, ref) => {
   const [showToast, setShowToast] = useState(false);
   const [activeTab, setActiveTab] = useState("General FAQs");
   const [faqSearch, setFaqSearch] = useState("");
+  const [partnerModalOpen, setPartnerModalOpen] = useState(false);
 
   const handleFormSubmit = () => setShowToast(true);
   const dismissToast = () => setShowToast(false);
@@ -227,6 +233,8 @@ const ContactPage = React.forwardRef(({ className, ...props }, ref) => {
             />
             {/* Location pill — 313×57px */}
             <ContactInfoPill
+            href="https://maps.app.goo.gl/b8sTzKkNv3H19D8u8"
+            target="_blank"
               icon={<LocationIcon />}
               text="First Central Link -Adgringanor"
             />
@@ -263,11 +271,11 @@ const ContactPage = React.forwardRef(({ className, ...props }, ref) => {
           </div>
 
           {/* Content row: image (697px) + gap (~129px) + form (576px) = 1402px ≈ 1416px content */}
-          <div className="flex items-start gap-[129px] mt-[80px]">
-            {/* Left image collage — Figma: 697×746px, border-radius 40px */}
+          <div className="mt-[80px] flex items-stretch gap-[160px] justify-between">
+            {/* Left image collage — Figma: 697×746px; stretches to match form height (items-stretch) */}
             <div
-              className="relative shrink-0 rounded-[40px] overflow-hidden"
-              style={{ width: "697px", height: "746px", boxShadow: "0px 4px 20px 0px rgba(0,0,0,0.05)" }}
+              className="relative min-h-0 w-[697px] shrink-0 self-stretch overflow-hidden rounded-[40px]"
+              style={{ boxShadow: "0px 4px 20px 0px rgba(0,0,0,0.05)" }}
             >
               {/* Blurred background fill */}
               <img
@@ -338,12 +346,10 @@ const ContactPage = React.forwardRef(({ className, ...props }, ref) => {
         {/* Tab bar — full width, h-[80px], border top+bottom 0.5px #f2eaf9 baked into shadow/border */}
         {/* Figma: border top 0.5px solid #f2eaf9, border bottom 0.5px solid #f2eaf9, inner px left 20px */}
         <div
-          className="w-full mt-[40px]"
+          className="w-full flex items-center justify-between px-[156px] mx-auto mt-[40px]"
           style={{
             height: "80px",
-            borderTop: "0.5px solid #d6beeb",
-            borderBottom: "0.5px solid #d6beeb",
-            display: "flex",
+             display: "flex",
             alignItems: "center",
           }}
         >
@@ -374,10 +380,9 @@ const ContactPage = React.forwardRef(({ className, ...props }, ref) => {
               </button>
             ))}
           </div>
-        </div>
 
-        {/* Search row — Figma: search box 379×48px, right side, with purple circular button */}
-        <div className="px-[156px] mt-[24px] flex justify-end">
+           {/* Search row — Figma: search box 379×48px, right side, with purple circular button */}
+        <div className="  flex justify-end">
           <div
             className="flex items-center overflow-hidden"
             style={{
@@ -411,6 +416,9 @@ const ContactPage = React.forwardRef(({ className, ...props }, ref) => {
             </button>
           </div>
         </div>
+        </div>
+
+       
 
         {/* FAQ grid — Figma: left 158px, top 375px from section, 2 cols gap 21px, items gap 19px */}
         <div className="px-[156px] mt-[32px] pb-[80px]">
@@ -431,102 +439,18 @@ const ContactPage = React.forwardRef(({ className, ...props }, ref) => {
         </div>
       </section>
 
-      {/* ── 6. CTA — "Promoting Ghana, Inspiring the World" ─────────────────── */}
-      {/* Figma: bg #2b0f43, h 732px, shadow 0px 4px 4px rgba(0,0,0,0.25) */}
-      <section
-        className="relative w-full overflow-hidden bg-[#2b0f43]"
-        style={{ height: "732px", boxShadow: "0px 4px 4px 0px rgba(0,0,0,0.25)" }}
-      >
-        {/* Left image — Figma: left 156px, vertically centered, 711×559px, border-radius 40px */}
-        <div
-          className="absolute"
-          style={{
-            left: "156px",
-            top: "50%",
-            transform: "translateY(-50%)",
-            width: "711px",
-            height: "559px",
-            borderRadius: "40px",
-            overflow: "hidden",
-            boxShadow: "0px 4px 20px 0px rgba(0,0,0,0.05)",
-          }}
-        >
-          <img
-            src="https://picsum.photos/seed/ghana-promote/711/559"
-            alt="Promoting Ghana"
-            className="w-full h-full object-cover"
-          />
-        </div>
+      {/* ── 6. CTA — partner promo (shared with Blog) ─────────────────── */}
+      <PartnerPromoCtaSection
+        {...partnerPromoBlogContact}
+        onCtaClick={() => setPartnerModalOpen(true)}
+      />
 
-        {/* Right text block — Figma: left 987px, vertically centered, width 581px */}
-        <div
-          className="absolute flex flex-col items-end gap-[16px]"
-          style={{
-            left: "987px",
-            top: "50%",
-            transform: "translateY(-50%)",
-            width: "581px",
-          }}
-        >
-          {/* Title — 56px Bold white right-aligned */}
-          <h2
-            style={{
-              fontSize: "56px",
-              fontWeight: 700,
-              color: "#fefefe",
-              lineHeight: "66px",
-              fontFamily: "Raleway, sans-serif",
-              textAlign: "right",
-              width: "592px",
-            }}
-          >
-            Promoting Ghana,<br />Inspiring the World
-          </h2>
-
-          {/* Body + button — gap 24px */}
-          <div className="flex flex-col items-end gap-[24px]">
-            <div style={{ paddingLeft: "10px", paddingRight: "1px", paddingTop: "10px", paddingBottom: "10px" }}>
-              <p
-                style={{
-                  fontSize: "16px",
-                  fontWeight: 400,
-                  color: "#fefefe",
-                  lineHeight: "24px",
-                  fontFamily: "Raleway, sans-serif",
-                  textAlign: "right",
-                  width: "483px",
-                }}
-              >
-                We showcase the best of Ghana — its culture, people, and untold stories. From hidden
-                gems to iconic landmarks, we inspire travelers to explore and celebrate the beauty
-                that defines our nation.
-              </p>
-            </div>
-
-            {/* Button — Figma: bg #fefefe, border 1px solid #7b2cbf, h 64px, w 169px, r 40px, text #2b0f43 */}
-            <button
-              className="flex items-center justify-center gap-[16px] transition-all duration-300 ease-in"
-              style={{
-                background: "#fefefe",
-                border: "1px solid #7b2cbf",
-                height: "64px",
-                width: "169px",
-                borderRadius: "40px",
-                boxShadow: "0px 4px 4px 0px rgba(0,0,0,0.05)",
-                padding: "10px",
-                fontSize: "16px",
-                fontWeight: 600,
-                color: "#2b0f43",
-                fontFamily: "Raleway, sans-serif",
-                lineHeight: "22px",
-                cursor: "pointer",
-              }}
-            >
-              Partner With Us
-            </button>
-          </div>
-        </div>
-      </section>
+      {partnerModalOpen && (
+        <PartnerWithUsModal
+          onClose={() => setPartnerModalOpen(false)}
+          onSubmit={() => {}}
+        />
+      )}
 
       {/* ── TOAST OVERLAY ───────────────────────────────────────────────────── */}
       {showToast && (

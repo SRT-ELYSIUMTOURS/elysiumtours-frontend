@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { classNames } from "../../utils/classNames";
 import BlogHero from "../../components/sections/blog/BlogHero";
 import BlogBreadcrumbBar from "../../components/sections/blog/BlogBreadcrumbBar";
@@ -9,9 +9,18 @@ import LocalGuidesPreview from "../../components/sections/blog/LocalGuidesPrevie
 import TravelStoriesPreview from "../../components/sections/blog/TravelStoriesPreview";
 import FestivalCalendarCta from "../../components/sections/blog/FestivalCalendarCta";
 import PartnerSpotlightPreview from "../../components/sections/blog/PartnerSpotlightPreview";
-import BlogCtaSection from "../../components/sections/blog/BlogCtaSection";
+import PartnerPromoCtaSection from "../../components/sections/PartnerPromoCtaSection";
+import { partnerPromoBlogContact } from "../../data/partnerPromoCtaPresets.jsx";
+import PartnerWithUsModal from "../../components/ui/PartnerWithUsModal";
+
+function showBlogPreview(filter, slug) {
+  return filter === "all" || filter === slug;
+}
 
 const BlogPage = React.forwardRef(({ className, ...props }, ref) => {
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [partnerModalOpen, setPartnerModalOpen] = useState(false);
+
   return (
     <main ref={ref} className={classNames("font-raleway", className)} {...props}>
       <BlogBreadcrumbBar
@@ -21,14 +30,30 @@ const BlogPage = React.forwardRef(({ className, ...props }, ref) => {
         ]}
       />
       <BlogHero />
-      <BlogCategoryFilter />
-      <TravelGuidesPreview />
-      <DestinationHighlightsPreview />
-      <LocalGuidesPreview />
-      <TravelStoriesPreview />
-      <FestivalCalendarCta />
-      <PartnerSpotlightPreview />
-      <BlogCtaSection />
+      <BlogCategoryFilter
+        selectedCategory={categoryFilter}
+        onCategoryChange={setCategoryFilter}
+      />
+      {showBlogPreview(categoryFilter, "travel-guides") && <TravelGuidesPreview />}
+      {showBlogPreview(categoryFilter, "destination-highlights") && (
+        <DestinationHighlightsPreview />
+      )}
+      {showBlogPreview(categoryFilter, "local-guides") && <LocalGuidesPreview />}
+      {showBlogPreview(categoryFilter, "travel-stories") && <TravelStoriesPreview />}
+      {showBlogPreview(categoryFilter, "festival-calendar") && <FestivalCalendarCta />}
+      {showBlogPreview(categoryFilter, "partner-spotlight") && (
+        <PartnerSpotlightPreview />
+      )}
+      <PartnerPromoCtaSection
+        {...partnerPromoBlogContact}
+        onCtaClick={() => setPartnerModalOpen(true)}
+      />
+      {partnerModalOpen && (
+        <PartnerWithUsModal
+          onClose={() => setPartnerModalOpen(false)}
+          onSubmit={() => {}}
+        />
+      )}
     </main>
   );
 });

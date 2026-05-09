@@ -15,6 +15,9 @@ const CATEGORIES = [
 
 const BlogCategoryFilter = React.forwardRef(({
   onSearch,
+  /** When set with `onCategoryChange`, filters in place (e.g. main blog index) instead of routing. */
+  selectedCategory,
+  onCategoryChange,
   className = "",
   ...props
 }, ref) => {
@@ -22,10 +25,17 @@ const BlogCategoryFilter = React.forwardRef(({
   const { category } = useParams();
   const [searchValue, setSearchValue] = useState("");
 
-  // Derive active tab from current URL param; default to "all" on /blog
-  const selected = category ?? "all";
+  const urlSelected = category ?? "all";
+  const selected =
+    typeof onCategoryChange === "function"
+      ? (selectedCategory ?? "all")
+      : urlSelected;
 
   const handleSelect = (value) => {
+    if (typeof onCategoryChange === "function") {
+      onCategoryChange(value);
+      return;
+    }
     if (value === "all") {
       navigate("/blog");
     } else {

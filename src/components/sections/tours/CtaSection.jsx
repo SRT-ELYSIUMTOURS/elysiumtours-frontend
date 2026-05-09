@@ -23,7 +23,7 @@ import ctaGlowLeft    from "../../../assets/ElysiumAssets/cta-glow-left.svg";
 // Image card: left=156px, vertically centred, 711×559px, rounded-[40px]
 // Text block: right=156px, vertically centred, w=592px, flex-col items-end
 
-const CtaSection = React.forwardRef(({ className, ...props }, ref) => {
+const CtaSection = React.forwardRef(({ className, onPartnerClick, ...props }, ref) => {
   return (
     <section
       ref={ref}
@@ -101,24 +101,47 @@ const CtaSection = React.forwardRef(({ className, ...props }, ref) => {
         </div>
       </div>
 
-      {/* ── DESKTOP-ONLY: original absolute layout ──────────────────────── */}
-      <div className="hidden lg:block">
-        {/* IMAGE CARD — Figma 1903:25292 */}
-        <div
-          className="absolute rounded-[40px] overflow-hidden shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)]"
-          style={{
-            left: "156px",
-            top: "calc(50% + 0.5px)",
-            transform: "translateY(-50%)",
-            width: "711px",
-            height: "559px",
-          }}
+      {/* ── RIGHT TEXT BLOCK ─────────────────────────────────────────────────
+          right=156px mirrors the image's left=156px offset.
+          Title node (1903:25298) is 592px wide → block width=592px.
+          Description (1903:25301) is 483px → max-w-[483px] on the <p>.
+          Button (1903:25302): fixed 169×64px, white bg, #7b2cbf border.    */}
+      <div
+        className="absolute flex flex-col items-end gap-[20px]"
+        style={{
+          right: "156px",
+          top: "50%",
+          transform: "translateY(-50%)",
+          width: "592px",
+        }}
+      >
+        {/* Title — Raleway Bold 56px/66px #fefefe */}
+        <h2 className="font-raleway font-bold text-[56px] leading-[66px] text-[#fefefe] text-right w-full">
+          Promoting Ghana, Inspiring the World
+        </h2>
+
+        {/* Description — Raleway Regular 16px/24px #fefefe, max-w 483px */}
+        <p className="font-raleway font-normal text-[16px] leading-[24px] text-[#fefefe] text-right max-w-[483px]">
+          we showcase the best of Ghana — its culture, people, and untold
+          stories. From hidden gems to iconic landmarks, we inspire travelers
+          to explore and celebrate the beauty that defines our nation.
+        </p>
+
+        {/* Button — 169×64px, bg #fefefe, border 1px #7b2cbf, pill
+            Text: Raleway SemiBold 16px/22px #2b0f43
+            p-[10px] is the Figma padding; h-[64px] is the fixed frame height */}
+        <button
+          type="button"
+          onClick={onPartnerClick}
+          className="flex items-center justify-center bg-[#fefefe] border border-[#7b2cbf] rounded-[40px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.05)] font-raleway font-semibold text-[16px] leading-[22px] text-[#2b0f43] whitespace-nowrap cursor-pointer hover:bg-gray-50 transition-colors"
+          style={{ width: "169px", height: "64px", padding: "10px" }}
         >
           <img
             src={ctaSafariImg}
             alt="Safari vehicle with giraffe in the African wilderness"
             className="w-full h-full object-cover"
           />
+          </button>
         </div>
 
         {/* RIGHT TEXT BLOCK */}
@@ -147,7 +170,6 @@ const CtaSection = React.forwardRef(({ className, ...props }, ref) => {
             Partner With Us
           </button>
         </div>
-      </div>
     </section>
   );
 });

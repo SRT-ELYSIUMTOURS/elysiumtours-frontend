@@ -166,20 +166,15 @@ const CategorySectionBlock = ({ catKey, navigate }) => {
           </div>
         </div>
 
-        {/*
-          Cards:
-          Mobile: horizontal scroll row, each card fixed 260px wide, 380px tall
-          Tablet (sm): horizontal scroll row, 300px wide, 450px tall
-          Desktop (lg): 4-across flex row, h-[568px], rounded-[40px]
-        */}
-        <div className="flex gap-4 sm:gap-5 lg:gap-[24px] overflow-x-auto scrollbar-none touch-pan-x lg:overflow-visible">
-          {data.cards.map((card) => (
+        {/* 4 partner highlight cards */}
+        <div className="flex gap-[24px]">
+          {data.cards.map((card, index) => (
             <PartnerHighlightCard
               key={card.id}
               image={card.image}
               category={card.category}
               onClick={() => navigate(`/tour-partners/${catKey}/all`)}
-              className="flex-shrink-0 w-[260px] h-[380px] sm:w-[300px] sm:h-[450px] lg:flex-1 lg:w-auto lg:h-[568px] rounded-[20px] lg:rounded-[40px]"
+              className={` flex-1 h-[568px] ${index === 0 || index === 3 ? "lg:mt-[74px]" : ""}`}
             />
           ))}
         </div>

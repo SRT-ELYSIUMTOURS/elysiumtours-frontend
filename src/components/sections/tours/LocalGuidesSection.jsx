@@ -14,7 +14,7 @@ const GUIDES_BY_COUNTRY = {
       rating: 4.4,
       specialties: "City tours • History • Food experiences",
       languages: "English, Twi",
-      image: "https://picsum.photos/seed/guide-gh-1/499/800",
+      image: "/tourCountryAssets/guide1.png",
     },
     {
       id: 2,
@@ -23,7 +23,7 @@ const GUIDES_BY_COUNTRY = {
       rating: 4.4,
       specialties: "Heritage tours • Cultural storytelling",
       languages: "English, Fante",
-      image: "https://picsum.photos/seed/guide-gh-2/499/800",
+      image: "/tourCountryAssets/guide1.png",
     },
     {
       id: 3,
@@ -32,7 +32,7 @@ const GUIDES_BY_COUNTRY = {
       rating: 4.7,
       specialties: "City tours • History • Food experiences",
       languages: "English, Twi",
-      image: "https://picsum.photos/seed/guide-gh-3/499/800",
+      image: "/tourCountryAssets/guide1.png",
     },
     {
       id: 4,
@@ -41,7 +41,7 @@ const GUIDES_BY_COUNTRY = {
       rating: 4.5,
       specialties: "City tours • History • Food experiences",
       languages: "English, Twi, Ga",
-      image: "https://picsum.photos/seed/guide-gh-4/499/800",
+      image: "/tourCountryAssets/guide1.png",
     },
   ],
   nigeria: [
@@ -61,7 +61,7 @@ const GUIDES_BY_COUNTRY = {
       rating: 4.5,
       specialties: "Heritage tours • Northern history",
       languages: "English, Hausa",
-      image: "https://picsum.photos/seed/guide-ng-2/499/800",
+      image: "/tourCountryAssets/guide1.png",
     },
     {
       id: 3,
@@ -70,7 +70,7 @@ const GUIDES_BY_COUNTRY = {
       rating: 4.8,
       specialties: "Cultural immersion • Nature walks",
       languages: "English, Igbo",
-      image: "https://picsum.photos/seed/guide-ng-3/499/800",
+      image: "/tourCountryAssets/guide1.png",
     },
     {
       id: 4,
@@ -79,7 +79,7 @@ const GUIDES_BY_COUNTRY = {
       rating: 4.7,
       specialties: "City tours • Wildlife • Nature",
       languages: "English, Hausa, French",
-      image: "https://picsum.photos/seed/guide-ng-4/499/800",
+      image: "/tourCountryAssets/guide1.png",
     },
   ],
 };
@@ -91,83 +91,31 @@ const getGuides = (country) => {
 
 const GuideCard = ({ guide }) => (
   <div
-    className="relative overflow-clip rounded-[40px] border border-[#f2eaf9] shrink-0"
-    style={{
-      width: "335px",
-      height: "568px",
-      background: "linear-gradient(203deg, #2B0F43 14.88%, #6C26A9 122.89%)",
-      boxShadow: "0px 4px 20px 0px rgba(0, 0, 0, 0.05)",
-    }}
+    className={classNames(
+      "relative h-[568px] min-w-[335px] w-full shrink-0 overflow-clip rounded-md border border-secondary-light-default",
+      "bg-[linear-gradient(203deg,var(--color-secondary-dark-darker)_14.88%,rgb(108_38_169)_122.89%)]",
+      "shadow-[var(--shadow-card)]"
+    )}
   >
     <div
-      className="absolute pointer-events-none"
-      style={{
-        left: "-63.5px",
-        top: "267.5px",
-        width: "455px",
-        height: "324px",
-        background:
-          "radial-gradient(ellipse at center, rgba(108,38,169,0.75) 0%, rgba(108,38,169,0.3) 45%, transparent 70%)",
-        borderRadius: "50%",
-      }}
+      className="pointer-events-none absolute left-[-63.5px] top-[267.5px] h-[324px] w-[455px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(108,38,169,0.75)_0%,rgba(108,38,169,0.3)_45%,transparent_70%)]"
+      aria-hidden
     />
     <div className="relative z-0">
-      <div
-        className="w-[455px] h-[324px] absolute bg-secondary-light-default rounded-4xl z-0 top-[50%] left-[50%] translate-x-[-50%]"
-        style={{
-          filter: "blur(50px)",
-        }}
-      />
+      <div className="absolute left-1/2 top-1/2 z-0 h-[324px] w-[455px] -translate-x-1/2 bg-secondary-light-default blur-[50px] rounded-4xl" />
       <img
         src={guide.image}
         alt={guide.name}
-        className="relative z-10 w-full h-full object-cover object-top"
+        className="relative z-10 h-full w-full object-cover object-top"
       />
     </div>
-    <div
-      className="absolute"
-      style={{
-        width: "363px",
-        height: "182px",
-        left: "50%",
-        top: "385.5px",
-        transform: "translateX(-50%)",
-      }}
-    >
+    <div className="absolute left-1/2 top-[385.5px] h-[182px] w-full -translate-x-1/2">
       <div
         aria-hidden="true"
-        className="absolute bottom-0 left-0 right-0 pointer-events-none"
-        style={{
-          height: "100%", // only cover the lower part like Figma
-          backdropFilter: "blur(20px)",
-          WebkitBackdropFilter: "blur(20px)",
-          background: "rgba(153, 153, 153, 0.16)",
-          // This is the key — fade the top edge
-          maskImage: "linear-gradient(to bottom, transparent 0%, black 30%)",
-          WebkitMaskImage:
-            "linear-gradient(to bottom, transparent 0%, black 30%)",
-        }}
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-full w-full bg-[rgba(153,153,153,0.16)] backdrop-blur-[20px] [mask-image:linear-gradient(to_bottom,transparent_0%,black_30%)] [-webkit-mask-image:linear-gradient(to_bottom,transparent_0%,black_30%)]"
       />
-      <div
-        className="absolute"
-        style={{
-          left: "31px",
-          top: "calc(50% + 18px)",
-          transform: "translateY(-50%)",
-          width: "302px",
-          height: "86px",
-        }}
-      >
-        <p
-          style={{
-            fontFamily: "Raleway, sans-serif",
-            fontWeight: 700,
-            fontSize: "25px",
-            lineHeight: "34px",
-            color: "#f7f7f7",
-            margin: 0,
-          }}
-        >
+      <div className="absolute left-[31px] top-[calc(50%+18px)] h-[86px] w-full -translate-y-1/2">
+        <p className="m-0 text-High-md-bold leading-[34px] text-primary-normal-default">
           {guide.name}
         </p>
       </div>
@@ -176,112 +124,45 @@ const GuideCard = ({ guide }) => (
 );
 
 const GuideInfo = ({ guide }) => (
-  <div style={{ width: "340px" }}>
-    <div className="flex items-center" style={{ height: "38px" }}>
+  <div className="w-[340px]">
+    <div className="flex h-[38px] items-center">
       <img
         src={mapIcon}
         alt=""
         aria-hidden="true"
-        style={{ width: "24px", height: "24px", flexShrink: 0 }}
+        className="h-6 w-6 shrink-0"
       />
-      <span
-        className="p-2.5"
-        style={{
-          fontFamily: "Raleway, sans-serif",
-          fontWeight: 700,
-          fontSize: "13px",
-          lineHeight: "18px",
-          color: "#fefefe",
-          whiteSpace: "nowrap",
-          marginLeft: "2px",
-        }}
-      >
+      <span className="ml-0.5 whitespace-nowrap p-2.5 text-med-small-bold leading-[18px] text-primary-light-default">
         {guide.location}
       </span>
     </div>
-    <div className="flex items-center" style={{ height: "33px" }}>
-      <div
-        className="flex items-center justify-center shrink-0"
-        style={{ width: "26px", height: "28.108px" }}
-      >
-        <img
-          src={starIcon}
-          alt=""
-          aria-hidden="true"
-          style={{ width: "16px", height: "16px" }}
-        />
+    <div className="flex h-[33px] items-center">
+      <div className="flex h-[28.108px] w-[26px] shrink-0 items-center justify-center">
+        <img src={starIcon} alt="" aria-hidden="true" className="h-4 w-4" />
       </div>
-      <span
-        style={{
-          fontFamily: "Raleway, sans-serif",
-          fontWeight: 500,
-          fontSize: "16px",
-          lineHeight: "26px",
-          color: "#ebdff5",
-          whiteSpace: "nowrap",
-          marginLeft: "2px",
-        }}
-      >
+      <span className="ml-0.5 whitespace-nowrap text-md-Medium leading-[26px] text-secondary-light-hover">
         {guide.rating}
       </span>
     </div>
-    <div style={{ paddingRight: "10px", marginTop: "8px" }}>
-      <div className="flex items-center" style={{ height: "44px" }}>
-        <span
-          style={{
-            fontFamily: "Raleway, sans-serif",
-            fontWeight: 600,
-            fontSize: "20px",
-            lineHeight: "28px",
-            color: "#ebdff5",
-          }}
-        >
+    <div className="mt-2 pr-2.5">
+      <div className="flex h-11 items-center">
+        <span className="text-semi-md-semibold leading-7 text-secondary-light-hover">
           Specialties:
         </span>
       </div>
-      <div
-        className="flex items-end"
-        style={{ height: "29px", paddingBottom: "8px" }}
-      >
-        <span
-          style={{
-            fontFamily: "Raleway, sans-serif",
-            fontWeight: 600,
-            fontSize: "16px",
-            lineHeight: "22px",
-            color: "#d6beeb",
-          }}
-        >
+      <div className="flex h-[29px] items-end pb-2">
+        <span className="text-md-semibold leading-[22px] text-secondary-light-active">
           • {guide.specialties}
         </span>
       </div>
-      <div className="flex items-center gap-[8px]">
-        <div
-          className="flex items-center shrink-0"
-          style={{ width: "100px", height: "44px" }}
-        >
-          <span
-            style={{
-              fontFamily: "Raleway, sans-serif",
-              fontWeight: 600,
-              fontSize: "20px",
-              lineHeight: "28px",
-              color: "#ebdff5",
-            }}
-          >
+      <div className="flex items-center gap-2">
+        <div className="flex h-11 w-[100px] shrink-0 items-center">
+          <span className="text-semi-md-semibold leading-7 text-secondary-light-hover">
             Language:
           </span>
         </div>
-        <div className="flex items-center" style={{ height: "29px" }}>
-          <span
-            style={{
-              fontFamily: "Raleway, sans-serif",
-              fontWeight: 600,
-              fontSize: "16px",
-              lineHeight: "22px",
-              color: "#d6beeb",
-            }}
-          >
+        <div className="flex h-[29px] items-center">
+          <span className="text-md-semibold leading-[22px] text-secondary-light-active">
             {guide.languages}
           </span>
         </div>
@@ -296,12 +177,10 @@ const LocalGuidesSection = React.forwardRef(
     return (
       <section
         ref={ref}
-        className={classNames("relative w-full overflow-hidden", className)}
-        style={{
-          backgroundColor: "#2b0f43",
-          paddingTop: "80px",
-          paddingBottom: "80px",
-        }}
+        className={classNames(
+          "relative w-full overflow-hidden bg-secondary-dark-darker py-20",
+          className
+        )}
         {...props}
       >
         <svg
@@ -310,9 +189,8 @@ const LocalGuidesSection = React.forwardRef(
           viewBox="0 0 237 185"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
-          className="absolute pointer-events-none"
+          className="pointer-events-none absolute bottom-0 left-0"
           overflow="visible"
-          style={{ bottom: 0, left: 0 }}
         >
           <g opacity="0.7">
             <path
@@ -387,9 +265,8 @@ const LocalGuidesSection = React.forwardRef(
           viewBox="0 0 272 309"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
-          className="absolute pointer-events-none"
+          className="pointer-events-none absolute right-0 top-0"
           overflow="visible"
-          style={{ top: 0, right: 0 }}
         >
           <g opacity="0.22">
             <path
@@ -462,73 +339,20 @@ const LocalGuidesSection = React.forwardRef(
             />
           </g>
         </svg>
-        <div
-          style={{
-            paddingLeft: "156px",
-            paddingRight: "156px",
-            position: "relative",
-            zIndex: 1,
-          }}
-        >
-          <div
-            className="flex items-start justify-between w-full"
-            style={{ marginBottom: "20px" }}
-          >
-            <div className="flex items-center gap-[8px] shrink-0">
-              <div
-                style={{
-                  width: "46px",
-                  height: "1px",
-                  backgroundColor: "#ebdff5",
-                }}
-              />
-              <span
-                style={{
-                  fontFamily: "Raleway, sans-serif",
-                  fontWeight: 700,
-                  fontSize: "13px",
-                  lineHeight: "18px",
-                  color: "#ebdff5",
-                  whiteSpace: "nowrap",
-                }}
-              >
+        <div className="relative z-[1] px-[156px]">
+          <div className="mb-10 flex w-full items-start justify-between">
+            <div className="flex shrink-0 items-center gap-2">
+              <div className="h-px w-[46px] bg-secondary-light-hover" />
+              <span className="text-med-small-bold whitespace-nowrap text-secondary-light-hover">
                 Meet the Experts
               </span>
             </div>
-            <div
-              className="flex items-center justify-end"
-              style={{ width: "826px" }}
-            >
-              <div
-                className="flex flex-col items-end"
-                style={{ width: "677px", gap: "8px" }}
-              >
-                <h2
-                  style={{
-                    fontFamily: "Raleway, sans-serif",
-                    fontWeight: 700,
-                    fontSize: "25px",
-                    lineHeight: "34px",
-                    color: "#eaeaea",
-                    textAlign: "right",
-                    width: "581px",
-                    margin: 0,
-                  }}
-                >
+            <div className="flex w-[826px] items-center justify-end">
+              <div className="flex w-[565px] flex-col items-end gap-2">
+                <h2 className="text-High-md-bold m-0 w-[581px] text-right text-tertiary-light-default">
                   {country}&apos;s Local Guides
                 </h2>
-                <p
-                  style={{
-                    fontFamily: "Raleway, sans-serif",
-                    fontWeight: 400,
-                    fontSize: "16px",
-                    lineHeight: "24px",
-                    color: "#eaeaea",
-                    textAlign: "right",
-                    width: "565px",
-                    margin: 0,
-                  }}
-                >
+                <p className="text-md-regular m-0 w-[565px] text-right text-tertiary-light-default">
                   Every Elysium guide is certified, locally born, and deeply
                   connected to the history and culture they share. These
                   aren&apos;t tour scripts, they&apos;re lived stories.
@@ -540,8 +364,7 @@ const LocalGuidesSection = React.forwardRef(
             {guides.map((guide) => (
               <div
                 key={guide.id}
-                className="flex flex-col shrink-0"
-                style={{ width: "340px", gap: "22px" }}
+                className="flex flex-1 shrink-0 flex-col gap-[22px]"
               >
                 <GuideCard guide={guide} />
                 <GuideInfo guide={guide} />
