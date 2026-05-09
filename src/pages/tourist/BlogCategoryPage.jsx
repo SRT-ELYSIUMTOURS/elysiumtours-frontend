@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { classNames } from "../../utils/classNames";
 import { openBlogPost } from "../../utils/blogPostRoute";
@@ -101,18 +101,17 @@ function generateCards(layout, seed = "cat") {
 
 // Render the 2-column masonry grid
 function Masonry2ColGrid({ cards, navigate }) {
-  // Alternating rows: [wide + short], [full-width], repeat
   const rows = [];
   for (let i = 0; i < cards.length; i += 3) {
-    // Row A: wide left + short right
+    // Row A: wide + short — stacks on mobile
     if (cards[i]) {
       rows.push(
-        <div key={`row-a-${i}`} className="flex gap-[15px]">
+        <div key={`row-a-${i}`} className="flex flex-col md:flex-row gap-[15px]">
           <BlogContentCard
             title={cards[i].title}
             category={cards[i].category}
             image={cards[i].image}
-            className="!w-[70%] !h-[371px]"
+            className="!w-full md:!w-[70%] !h-[220px] md:!h-[371px]"
             onClick={() => navigate && openBlogPost(navigate, { ...cards[i], uniqueKey: cards[i].id })}
           />
           {cards[i + 1] && (
@@ -120,7 +119,7 @@ function Masonry2ColGrid({ cards, navigate }) {
               title={cards[i + 1].title}
               category={cards[i + 1].category}
               image={cards[i + 1].image}
-              className="!w-[30%] !h-[371px]"
+              className="!w-full md:!w-[30%] !h-[220px] md:!h-[371px]"
               onClick={() => navigate && openBlogPost(navigate, { ...cards[i + 1], uniqueKey: cards[i + 1].id })}
             />
           )}
@@ -135,7 +134,7 @@ function Masonry2ColGrid({ cards, navigate }) {
             title={cards[i + 2].title}
             category={cards[i + 2].category}
             image={cards[i + 2].image}
-            className="!w-full !h-[415px]"
+            className="!w-full !h-[220px] md:!h-[415px]"
             onClick={() => navigate && openBlogPost(navigate, { ...cards[i + 2], uniqueKey: cards[i + 2].id })}
           />
         </div>
@@ -145,107 +144,54 @@ function Masonry2ColGrid({ cards, navigate }) {
   return <div className="flex flex-col gap-[15px]">{rows}</div>;
 }
 
-// Destination highlights: 4-column staggered grid (Figma)
-// Cols a & d: tall cards (340×653), top-aligned. Cols b/c & e/f: stacked small cards, shifted down slightly.
+// Destination highlights: 4-col staggered grid on desktop, simple 2-col grid on mobile/tablet
 function Grid4Col({ cards, navigate }) {
-  const bands = [];
-  for (let i = 0; i < cards.length; i += 6) {
-    bands.push(cards.slice(i, i + 6));
-  }
-
   return (
-    <div className="mx-auto flex w-full max-w-[1416px] flex-col gap-[64px]">
-      {bands.map((band, bandIdx) => {
-        const [a, b, c, d, e, f] = band;
-        return (
-          <div
-            key={bandIdx}
-            className="flex w-full flex-col items-center justify-between gap-[15px] lg:flex-row lg:items-start"
-          >
-            {a ? (
-              <BlogContentCard
-                key={a.id}
-                title={a.title}
-                category={a.category}
-                image={a.image}
-                size="tall"
-                className="shrink-0 shadow-card"
-                onClick={() => navigate && openBlogPost(navigate, { ...a, uniqueKey: a.id })}
-              />
-            ) : null}
+    <>
+      {/* Mobile/tablet: clean 2-col grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-[15px] lg:hidden">
+        {cards.map((card) => (
+          <BlogContentCard
+            key={card.id}
+            title={card.title}
+            category={card.category}
+            image={card.image}
+            className="!w-full !h-[220px] shadow-card"
+            onClick={() => navigate && openBlogPost(navigate, { ...card, uniqueKey: card.id })}
+          />
+        ))}
+      </div>
 
-            <div className="flex w-full max-w-[341px] shrink-0 flex-col gap-[15px] lg:mt-[32px]">
-              {b ? (
-                <BlogContentCard
-                  key={b.id}
-                  title={b.title}
-                  category={b.category}
-                  image={b.image}
-                  size="small"
-                  className="shrink-0 self-stretch shadow-card"
-                  onClick={() => navigate && openBlogPost(navigate, { ...b, uniqueKey: b.id })}
-                />
-              ) : null}
-              {c ? (
-                <BlogContentCard
-                  key={c.id}
-                  title={c.title}
-                  category={c.category}
-                  image={c.image}
-                  size="small"
-                  className="shrink-0 self-stretch shadow-card"
-                  onClick={() => navigate && openBlogPost(navigate, { ...c, uniqueKey: c.id })}
-                />
-              ) : null}
-            </div>
-
-            {d ? (
-              <BlogContentCard
-                key={d.id}
-                title={d.title}
-                category={d.category}
-                image={d.image}
-                size="tall"
-                className="shrink-0 shadow-card"
-                onClick={() => navigate && openBlogPost(navigate, { ...d, uniqueKey: d.id })}
-              />
-            ) : null}
-
-            <div className="flex w-full max-w-[341px] shrink-0 flex-col gap-[15px] lg:mt-[32px]">
-              {e ? (
-                <BlogContentCard
-                  key={e.id}
-                  title={e.title}
-                  category={e.category}
-                  image={e.image}
-                  size="small"
-                  className="shrink-0 self-stretch shadow-card"
-                  onClick={() => navigate && openBlogPost(navigate, { ...e, uniqueKey: e.id })}
-                />
-              ) : null}
-              {f ? (
-                <BlogContentCard
-                  key={f.id}
-                  title={f.title}
-                  category={f.category}
-                  image={f.image}
-                  size="small"
-                  className="shrink-0 self-stretch shadow-card"
-                  onClick={() => navigate && openBlogPost(navigate, { ...f, uniqueKey: f.id })}
-                />
-              ) : null}
-            </div>
-          </div>
-        );
-      })}
-    </div>
+      {/* Desktop: original Figma staggered 4-col bento */}
+      <div className="hidden lg:flex mx-auto w-full max-w-[1416px] flex-col gap-[64px]">
+        {(() => {
+          const bands = [];
+          for (let i = 0; i < cards.length; i += 6) bands.push(cards.slice(i, i + 6));
+          return bands.map((band, bandIdx) => {
+            const [a, b, c, d, e, f] = band;
+            return (
+              <div key={bandIdx} className="flex w-full justify-between gap-[15px] items-start">
+                {a && <BlogContentCard key={a.id} title={a.title} category={a.category} image={a.image} size="tall" className="shrink-0 shadow-card" onClick={() => navigate && openBlogPost(navigate, { ...a, uniqueKey: a.id })} />}
+                <div className="flex max-w-[341px] shrink-0 flex-col gap-[15px] mt-[32px]">
+                  {b && <BlogContentCard key={b.id} title={b.title} category={b.category} image={b.image} size="small" className="shrink-0 self-stretch shadow-card" onClick={() => navigate && openBlogPost(navigate, { ...b, uniqueKey: b.id })} />}
+                  {c && <BlogContentCard key={c.id} title={c.title} category={c.category} image={c.image} size="small" className="shrink-0 self-stretch shadow-card" onClick={() => navigate && openBlogPost(navigate, { ...c, uniqueKey: c.id })} />}
+                </div>
+                {d && <BlogContentCard key={d.id} title={d.title} category={d.category} image={d.image} size="tall" className="shrink-0 shadow-card" onClick={() => navigate && openBlogPost(navigate, { ...d, uniqueKey: d.id })} />}
+                <div className="flex max-w-[341px] shrink-0 flex-col gap-[15px] mt-[32px]">
+                  {e && <BlogContentCard key={e.id} title={e.title} category={e.category} image={e.image} size="small" className="shrink-0 self-stretch shadow-card" onClick={() => navigate && openBlogPost(navigate, { ...e, uniqueKey: e.id })} />}
+                  {f && <BlogContentCard key={f.id} title={f.title} category={f.category} image={f.image} size="small" className="shrink-0 self-stretch shadow-card" onClick={() => navigate && openBlogPost(navigate, { ...f, uniqueKey: f.id })} />}
+                </div>
+              </div>
+            );
+          });
+        })()}
+      </div>
+    </>
   );
 }
 
-// Render 3-column masonry grid
+// Render 3-column masonry grid — desktop only; mobile/tablet uses simple grid
 function Masonry3ColGrid({ cards, navigate }) {
-  // Per-card heights (Figma). Cards go to col i % 3 — column totals must match or the shortest
-  // column “hangs” above the longest. Last column had indices 2,5,8,11 summing higher until 433→419 on 5 & 11.
   const heights = [419, 339, 734, 734, 814, 419, 419, 339, 734, 734, 814, 419];
   const cols = [[], [], []];
   cards.forEach((card, i) => {
@@ -253,49 +199,62 @@ function Masonry3ColGrid({ cards, navigate }) {
   });
 
   return (
-    <div className="flex  gap-[15px]">
-      {cols.map((col, ci) => {
-        const columnCards = ci === 1 ? [...col].reverse() : col;
-        return (
-          <div key={ci} className="flex flex-1  flex-col gap-[15px]">
-            {columnCards.map((card) => (
-              <BlogContentCard
-                key={card.id}
-                title={card.title}
-                category={card.category}
-                image={card.image}
-                className={`!w-[100%] rounded-[40px] !h-[${card.height}px]`}
-                style={{ width: "457px", height: `${card.height}px` }}
-                onClick={() => navigate && openBlogPost(navigate, { ...card, uniqueKey: card.id })}
-              />
-            ))}
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-// Render 3x3 equal grid
-function Grid3x3({ cards, navigate }) {
-  const rows = [];
-  for (let i = 0; i < cards.length; i += 3) {
-    rows.push(
-      <div key={i} className="flex gap-[15px]">
-        {cards.slice(i, i + 3).map((card) => (
+    <>
+      {/* Mobile/tablet: 2-col grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-[15px] lg:hidden">
+        {cards.map((card) => (
           <BlogContentCard
             key={card.id}
             title={card.title}
             category={card.category}
             image={card.image}
-            className="!w-auto !h-[364px] flex-1"
+            className="!w-full !h-[240px]"
             onClick={() => navigate && openBlogPost(navigate, { ...card, uniqueKey: card.id })}
           />
         ))}
       </div>
-    );
-  }
-  return <div className="flex flex-col gap-[15px]">{rows}</div>;
+
+      {/* Desktop: 3-col masonry */}
+      <div className="hidden lg:flex gap-[15px]">
+        {cols.map((col, ci) => {
+          const columnCards = ci === 1 ? [...col].reverse() : col;
+          return (
+            <div key={ci} className="flex flex-1 flex-col gap-[15px]">
+              {columnCards.map((card) => (
+                <BlogContentCard
+                  key={card.id}
+                  title={card.title}
+                  category={card.category}
+                  image={card.image}
+                  className="!w-full rounded-[40px]"
+                  style={{ height: `${card.height}px` }}
+                  onClick={() => navigate && openBlogPost(navigate, { ...card, uniqueKey: card.id })}
+                />
+              ))}
+            </div>
+          );
+        })}
+      </div>
+    </>
+  );
+}
+
+// Render 3x3 equal grid — 1 col on mobile, 2 on tablet, 3 on desktop
+function Grid3x3({ cards, navigate }) {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[15px]">
+      {cards.map((card) => (
+        <BlogContentCard
+          key={card.id}
+          title={card.title}
+          category={card.category}
+          image={card.image}
+          className="!w-full !h-[240px] md:!h-[300px] lg:!h-[364px]"
+          onClick={() => navigate && openBlogPost(navigate, { ...card, uniqueKey: card.id })}
+        />
+      ))}
+    </div>
+  );
 }
 
 // Render 3-column partner cards (PartnerHighlightCard needs explicit height — same as PartnerSpotlightPreview)
@@ -335,7 +294,9 @@ const BlogCategoryPage = React.forwardRef(({ className, ...props }, ref) => {
   const { category } = useParams();
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
+  const [batches, setBatches] = useState(1);
   const [partnerModalOpen, setPartnerModalOpen] = useState(false);
+  const gridTopRef = useRef(null);
 
   const config = CATEGORY_CONFIG[category];
 
@@ -361,7 +322,23 @@ const BlogCategoryPage = React.forwardRef(({ className, ...props }, ref) => {
     );
   }
 
-  const cards = generateCards(config.gridLayout, category);
+  // Generate one batch to learn its size, then cap total batches based on TOTAL_RESULTS
+  const TOTAL_RESULTS = 20;
+  const batchSize = generateCards(config.gridLayout, `${category}-0`).length;
+  const maxBatches = Math.max(1, Math.ceil(TOTAL_RESULTS / batchSize));
+
+  const cards = Array.from({ length: batches }, (_, b) =>
+    generateCards(config.gridLayout, `${category}-${b}`).map((c, idx) => ({
+      ...c,
+      id: b * 100 + idx + 1,
+    }))
+  )
+    .flat()
+    .slice(0, TOTAL_RESULTS);
+
+  const canLoadMore = batches < maxBatches;
+  const canShowLess = batches > 1;
+  const totalPages = Math.ceil(TOTAL_RESULTS / batchSize);
   const GridComponent = GRID_COMPONENTS[config.gridLayout];
 
   return (
@@ -377,8 +354,8 @@ const BlogCategoryPage = React.forwardRef(({ className, ...props }, ref) => {
       {/* <BlogCategoryFilter /> */}
 
       {/* Main content section */}
-      <section className={classNames("w-full py-[80px]", config.bg)}>
-        <div className="mx-[156px]">
+      <section className={classNames("w-full py-10 lg:py-[80px]", config.bg)}>
+        <div className="mx-4 md:mx-8 lg:mx-[156px]">
           <BlogSectionHeader
             label={config.label}
             title={config.title}
@@ -386,18 +363,24 @@ const BlogCategoryPage = React.forwardRef(({ className, ...props }, ref) => {
           />
 
           {/* Card grid */}
-          <div className="mt-[80px]">
+          <div ref={gridTopRef} className="mt-10 lg:mt-[80px] scroll-mt-24">
             {GridComponent && <GridComponent cards={cards} navigate={navigate} />}
           </div>
         </div>
 
         {/* Pagination */}
-        <div className="mt-[80px]">
+        <div className="mt-10 lg:mt-[80px]">
           <BlogPaginationBar
             currentPage={currentPage}
-            totalPages={20}
-            totalResults={200}
+            totalPages={totalPages}
+            totalResults={TOTAL_RESULTS}
+            visibleResults={cards.length}
             onPageChange={setCurrentPage}
+            onLoadMore={canLoadMore ? () => setBatches((b) => b + 1) : undefined}
+            onShowLess={canShowLess ? () => {
+              setBatches(1);
+              gridTopRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+            } : undefined}
           />
         </div>
       </section>

@@ -265,42 +265,18 @@ const TourCountryHero = React.forwardRef(({ country = "ghana", className, ...pro
                   {item.icon}
                 </div>
 
-                {/* Text block — w-[143px], flex-col gap-[4px] items-center */}
-                <div className="flex flex-col gap-[4px] items-center" style={{ width: "143px" }}>
-                  {/* Label — Raleway SemiBold 10px #d6beeb (Figma typo "VIST" kept) */}
+                {/* Text block — auto width, tighter on mobile */}
+                <div className="flex flex-col gap-[2px] items-center w-[160px] lg:w-[143px]">
                   <p
-                    className="w-full text-center"
-                    style={{
-                      fontFamily:    "Raleway, sans-serif",
-                      fontSize:      "10px",
-                      fontWeight:    600,
-                      lineHeight:    "normal",
-                      color:         "#d6beeb",
-                      textTransform: "uppercase",
-                    }}
+                    className="w-full text-center font-raleway font-semibold uppercase text-[10px] text-[#d6beeb]"
                   >
                     {item.label}
                   </p>
-
-                  {/* Value — h-[54px] wrapper to centre multi-line text (1942:31031) */}
-                  <div
-                    className="flex items-center justify-center w-full"
-                    style={{ height: "54px", padding: "10px" }}
+                  <p
+                    className="text-center font-raleway font-medium text-[13px] leading-[18px] text-[#c6c6c6] whitespace-pre-line"
                   >
-                    <p
-                      className="text-center"
-                      style={{
-                        fontFamily: "Raleway, sans-serif",
-                        fontSize:   "13px",
-                        fontWeight: 500,
-                        lineHeight: "22px",
-                        color:      "#c6c6c6",
-                        whiteSpace: "pre-line",
-                      }}
-                    >
-                      {item.value}
-                    </p>
-                  </div>
+                    {item.value}
+                  </p>
                 </div>
               </div>
 

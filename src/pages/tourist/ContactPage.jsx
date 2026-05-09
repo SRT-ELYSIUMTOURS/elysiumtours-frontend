@@ -239,9 +239,21 @@ const ContactPage = React.forwardRef(({ className, ...props }, ref) => {
 
           {/* Image + form — stacks on mobile, row on lg+ */}
           <div className="mt-10 lg:mt-[80px] flex flex-col lg:flex-row gap-8 lg:gap-[160px] lg:items-stretch lg:justify-between">
-            {/* Left image collage */}
+            {/* Mobile/tablet: single clean image */}
             <div
-              className="relative w-full lg:w-[697px] lg:shrink-0 lg:self-stretch overflow-hidden rounded-[24px] lg:rounded-[40px] h-[260px] sm:h-[380px] lg:h-auto"
+              className="relative w-full overflow-hidden rounded-[24px] h-[240px] sm:h-[360px] lg:hidden"
+              style={{ boxShadow: "0px 4px 20px 0px rgba(0,0,0,0.05)" }}
+            >
+              <img
+                src="https://picsum.photos/seed/contact-ghana/800/480"
+                alt="Ghana"
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+            </div>
+
+            {/* Desktop: original layered collage */}
+            <div
+              className="hidden lg:block relative w-[697px] shrink-0 self-stretch overflow-hidden rounded-[40px]"
               style={{ boxShadow: "0px 4px 20px 0px rgba(0,0,0,0.05)" }}
             >
               <img
@@ -254,7 +266,7 @@ const ContactPage = React.forwardRef(({ className, ...props }, ref) => {
               <div className="absolute inset-0" style={{ background: "rgba(0,0,0,0.4)" }} />
               <div className="absolute inset-0" style={{ background: "rgba(0,0,0,0.1)" }} />
               <div
-                className="absolute overflow-hidden bottom-0 right-0 w-[60%] h-[80%] lg:w-[439px] lg:h-[568px]"
+                className="absolute overflow-hidden bottom-0 right-0 w-[439px] h-[568px]"
                 style={{ borderRadius: "40px 40px 40px 0" }}
               >
                 <img

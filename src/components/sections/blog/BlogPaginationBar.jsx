@@ -13,13 +13,17 @@ const BlogPaginationBar = React.forwardRef(({
   totalPages = 20,
   totalResults = 200,
   resultsPerPage = 12,
+  visibleResults,
   onPageChange,
   onLoadMore,
+  onShowLess,
   className = "",
   ...props
 }, ref) => {
-  const startResult = (currentPage - 1) * resultsPerPage + 1;
-  const endResult = Math.min(currentPage * resultsPerPage, totalResults);
+  const startResult = 1;
+  const endResult = visibleResults != null
+    ? Math.min(visibleResults, totalResults)
+    : Math.min(currentPage * resultsPerPage, totalResults);
 
   const getVisiblePages = () => {
     const pages = [1];
@@ -38,16 +42,33 @@ const BlogPaginationBar = React.forwardRef(({
       className={classNames("flex flex-col items-center gap-md", className)}
       {...props}
     >
-      {/* Load More button */}
-      <Button
-        variant="secondaryOutline"
-        shape="pill"
-        size="small"
-        className="h-[40px] bg-primary-light-default! px-[24px]"
-        onClick={onLoadMore}
-      >
-        Load More
-      </Button>
+      {/* Load More / Show Less buttons */}
+      {(onLoadMore || onShowLess) && (
+        <div className="flex flex-wrap items-center justify-center gap-3">
+          {onShowLess && (
+            <Button
+              variant="secondaryOutline"
+              shape="pill"
+              size="small"
+              className="h-[40px] bg-primary-light-default! px-[24px]"
+              onClick={onShowLess}
+            >
+              Show Less
+            </Button>
+          )}
+          {onLoadMore && (
+            <Button
+              variant="secondaryOutline"
+              shape="pill"
+              size="small"
+              className="h-[40px] bg-primary-light-default! px-[24px]"
+              onClick={onLoadMore}
+            >
+              Load More
+            </Button>
+          )}
+        </div>
+      )}
 
       {/* Pagination */}
       <Pagination>

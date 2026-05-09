@@ -54,10 +54,10 @@ const Footer = ({
   return (
     <footer className={classNames("w-full overflow-hidden", className)}>
       {/* Main grid */}
-      <div className="w-full bg-primary-light-default px-6 md:px-16 pt-10 pb-5">
+      <div className="w-full bg-primary-light-default px-6 md:px-16 pt-8 md:pt-10 pb-5">
 
         {/* Mobile: stacked — Desktop: horizontal row */}
-        <div className="flex flex-col md:flex-row md:flex-wrap gap-8 md:items-start md:justify-between">
+        <div className="flex flex-col md:flex-row md:flex-wrap gap-5 md:gap-8 md:items-start md:justify-between">
 
           {/* Col 1 — Logo + tagline */}
           <div className="flex flex-col gap-4 max-w-[220px]">
@@ -70,12 +70,12 @@ const Footer = ({
           </div>
 
           {/* Cols 2+3 — Company & Support side by side on mobile */}
-          <div className="flex flex-row gap-12 md:gap-8 md:contents">
+          <div className="flex flex-row gap-8 md:gap-8 md:contents">
 
             {/* Col 2 — Company */}
             <div className="flex-1 md:flex-none md:shrink-0">
               <FooterColHeading>Company</FooterColHeading>
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-2 md:gap-4">
                 {(companyLinks.length ? companyLinks : [
                   { label: "Home",          href: "#" },
                   { label: "Tour",          href: "#" },
@@ -91,7 +91,7 @@ const Footer = ({
             {/* Col 3 — Support */}
             <div className="flex-1 md:flex-none md:shrink-0">
               <FooterColHeading>Support</FooterColHeading>
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-2 md:gap-3">
                 {(supportLinks.length ? supportLinks : [
                   { label: "Support Center",  href: "#" },
                   { label: "FAQS",            href: "#" },
@@ -108,7 +108,7 @@ const Footer = ({
           {/* Col 4 — Legal */}
           <div className="shrink-0">
             <FooterColHeading>Legal</FooterColHeading>
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-2 md:gap-3">
               {(legalLinks.length ? legalLinks : [
                 { label: "Privacy Policy",   href: "#" },
                 { label: "Terms of Service", href: "#" },

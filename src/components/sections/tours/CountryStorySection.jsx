@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { classNames } from "../../../utils/classNames";
 import Button from "../../ui/button";
 
@@ -39,8 +40,16 @@ const COUNTRY_STORIES = {
   },
 };
 
-const CountryStorySection = React.forwardRef(({ country = "ghana", className, ...props }, ref) => {
+const CountryStorySection = React.forwardRef(({ country = "ghana", onReadMore, className, ...props }, ref) => {
   const config = COUNTRY_STORIES[country?.toLowerCase()] || { ...COUNTRY_STORIES.default, title: `Discover ${country}` };
+  const navigate = useNavigate();
+  const handleReadMore = () => {
+    if (typeof onReadMore === "function") {
+      onReadMore();
+      return;
+    }
+    navigate(`/tours/${country?.toLowerCase() || "ghana"}`);
+  };
 
   return (
     <section
@@ -99,6 +108,7 @@ const CountryStorySection = React.forwardRef(({ country = "ghana", className, ..
             <Button
               variant="secondary"
               shape="pill"
+              onClick={handleReadMore}
               className="h-[56px] gap-md self-start"
               endIcon={<ArrowIcon />}
             >

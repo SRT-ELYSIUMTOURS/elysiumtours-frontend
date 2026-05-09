@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import { classNames } from "../../../utils/classNames";
 import Button from "../../ui/button";
+import blogHeroImage1 from "../../../assets/blogAssets/Image-1.webp";
 
 const SLIDES = [
   {
     id: 1,
-    image: "./src/assets/blogAssets/Image-1.webp",
+    image: blogHeroImage1,
     alt: "Ghana mountain landscape",
   },
   {
