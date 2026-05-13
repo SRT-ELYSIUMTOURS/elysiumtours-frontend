@@ -64,7 +64,7 @@ const GuideSpotlightCard = React.forwardRef(
             aria-hidden="true"
             className="pointer-events-none absolute inset-x-0 bottom-0 h-full w-full bg-[rgba(153,153,153,0.16)] backdrop-blur-[20px] [mask-image:linear-gradient(to_bottom,transparent_0%,black_30%)] [-webkit-mask-image:linear-gradient(to_bottom,transparent_0%,black_30%)]"
           />
-          <div className="absolute left-[31px] top-[calc(50%+18px)] h-[86px] w-full -translate-y-1/2">
+          <div className="absolute left-[31px] right-[31px] top-[calc(50%+18px)] h-[86px] -translate-y-1/2">
             <p className="m-0 text-High-md-bold leading-[34px] text-primary-normal-default">
               {title}
             </p>

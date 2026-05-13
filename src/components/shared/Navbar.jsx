@@ -534,19 +534,20 @@ const Navbar = () => {
       className="w-full bg-primary-light-default shadow-sm sticky top-0 z-50"
     >
       {/* ── Desktop / Mobile top bar ─────────────────────────────────────── */}
-      <div className="h-[70px] lg:h-[112px] mx-auto flex items-center justify-between px-6 md:px-[30px] lg:px-[145px]">
-        {/* Logo */}
-        <Link
-          to="/"
-          onClick={() => { setOpenDropdown(null); setMobileOpen(false); }}
-          className="shrink-0 flex items-center"
-        >
-          <ElysiumLogo />
-        </Link>
+      <div className="h-[70px] lg:h-[112px] mx-auto flex items-center justify-between px-6 md:px-[30px] lg:px-[60px] xl:px-[100px]">
+        {/* Left side: Logo + Nav links grouped together */}
+        <div className="flex items-center gap-6 xl:gap-10">
+          <Link
+            to="/"
+            onClick={() => { setOpenDropdown(null); setMobileOpen(false); }}
+            className="shrink-0 flex items-center"
+          >
+            <ElysiumLogo />
+          </Link>
 
-        {/* Desktop: Nav links */}
-        <div className="hidden lg:flex items-center" style={{ marginLeft: "0" }}>
-          <div className="flex" style={{ gap: "20px" }}>
+          {/* Desktop: Nav links */}
+          <div className="hidden lg:flex items-center">
+            <div className="flex" style={{ gap: "20px" }}>
             <Link to="/" onClick={() => setOpenDropdown(null)}>
               <NavLink label="Home" isActive={location.pathname === "/"} hasDropdown={false} isOpen={false} />
             </Link>
@@ -598,6 +599,7 @@ const Navbar = () => {
             <Link to="/contact" onClick={() => setOpenDropdown(null)}>
               <NavLink label="Contact Us" isActive={isActivePath("/contact")} hasDropdown={false} isOpen={false} />
             </Link>
+          </div>
           </div>
         </div>
 
@@ -733,12 +735,43 @@ const Navbar = () => {
               </span>
             </Link>
           ))}
-          {/* Sign Up button */}
-          <div className="pt-3">
-            <Button variant="secondary" size="md" shape="pill" className="w-full">
-              <span>Sign Up</span>
-            </Button>
-          </div>
+          {/* Sign Up / Login buttons (only when logged out) */}
+          {!user && (
+            <div className="pt-3 flex flex-col gap-2">
+              <Button
+                variant="outline"
+                size="md"
+                shape="pill"
+                className="w-full"
+                onClick={() => { setMobileOpen(false); openAuth("login"); }}
+              >
+                <span>Login</span>
+              </Button>
+              <Button
+                variant="secondary"
+                size="md"
+                shape="pill"
+                className="w-full"
+                onClick={() => { setMobileOpen(false); openAuth("signup"); }}
+              >
+                <span>Sign Up</span>
+              </Button>
+            </div>
+          )}
+          {/* Logout button (when logged in) */}
+          {user && (
+            <div className="pt-3">
+              <Button
+                variant="outline"
+                size="md"
+                shape="pill"
+                className="w-full"
+                onClick={() => { setMobileOpen(false); handleLogout(); }}
+              >
+                <span>Sign Out</span>
+              </Button>
+            </div>
+          )}
         </div>
       )}
     </nav>

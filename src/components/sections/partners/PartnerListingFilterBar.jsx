@@ -91,14 +91,15 @@ const PartnerListingFilterBar = React.forwardRef(({
         ref={ref}
         className={classNames(
           "w-full bg-primary-light-default border-b border-primary-normal-default",
-          "px-[80px] py-[16px]",
+          "px-4 md:px-8 lg:px-[80px] py-[16px]",
           className
         )}
         {...props}
       >
         <div className="flex items-center justify-between gap-[16px]">
-          {/* Left controls */}
-          <div className="flex items-center gap-[12px]">
+          {/* Left controls — horizontal scroll on mobile so all filter buttons
+              (Sort, Date, Filters) are reachable even on narrow screens */}
+          <div className="flex items-center gap-[12px] overflow-x-auto scrollbar-hide -mx-4 px-4 md:-mx-0 md:px-0 w-full md:w-auto">
             {/* Sort dropdown */}
             <div className="relative">
               <button
@@ -202,8 +203,8 @@ const PartnerListingFilterBar = React.forwardRef(({
               <span>Filters</span>
             </button>
 
-            {/* Divider */}
-            <div className="w-[2px] h-[42px] bg-primary-normal-default mx-[4px] shrink-0" />
+            {/* Divider — only shown on desktop where category pills appear on the right */}
+            <div className="hidden lg:block w-[2px] h-[42px] bg-primary-normal-default mx-[4px] shrink-0" />
           </div>
         </div>
       </div>

@@ -70,7 +70,7 @@ const WhyCountrySection = React.forwardRef(
         >
           {/* ── Header row ──────────────────────────────────────────────────── */}
           {/* Figma 1942:31920 — justify-between, full width */}
-          <div className="flex items-start justify-between w-full">
+          <div className="flex flex-col lg:flex-row items-center lg:items-start justify-between w-full gap-4 lg:gap-0">
             {/* Left — Figma 1942:31921: 46px line + "WHY GHANA" label */}
             <div className="flex items-center gap-[8px] shrink-0">
               <div
@@ -96,8 +96,8 @@ const WhyCountrySection = React.forwardRef(
 
             {/* Right — Figma 1942:31925: w=677px, flex-col gap-16px, items-end */}
             <div
-              className="flex flex-col items-end"
-              style={{ width: "677px", gap: "16px" }}
+              className="flex flex-col items-center lg:items-end w-full lg:w-[677px]"
+              style={{ gap: "16px" }}
             >
               {/* Title — Figma 1942:31927: Bold 25px #2d2d2d, text-right */}
               <h2
@@ -116,13 +116,13 @@ const WhyCountrySection = React.forwardRef(
 
               {/* Description + stats — Figma 1942:31928: flex-col gap-29px */}
               <div
-                className="flex flex-col items-end"
-                style={{ gap: "29px", width: "100%" }}
+                className="flex flex-col items-center lg:items-end w-full"
+                style={{ gap: "29px" }}
               >
                 {/* Body text — Figma 1942:31929: Regular 16px #2d2d2d, text-right, w=565px */}
                 <div
-                  className="flex flex-col"
-                  style={{ width: "565px", gap: "0px" }}
+                  className="flex flex-col w-full lg:w-[565px]"
+                  style={{ gap: "0px" }}
                 >
                   {data.paragraphs.map((p, i) => (
                     <p
@@ -134,7 +134,6 @@ const WhyCountrySection = React.forwardRef(
                         fontSize: "16px",
                         lineHeight: "24px",
                         color: "#2d2d2d",
-                        textAlign: "right",
                         margin:
                           i < data.paragraphs.length - 1 ? "0 0 16px 0" : 0,
                       }}

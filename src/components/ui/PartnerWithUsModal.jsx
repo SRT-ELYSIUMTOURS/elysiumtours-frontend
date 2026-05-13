@@ -165,7 +165,7 @@ function SectionHeading({ children }) {
   );
 }
 
-export default function PartnerWithUsModal({ onClose, onSubmit }) {
+export default function PartnerWithUsModal({ onClose, onSubmit, initialEmail = "" }) {
   const [form, setForm] = useState({
     partnerType: "",
     businessName: "",
@@ -177,7 +177,7 @@ export default function PartnerWithUsModal({ onClose, onSubmit }) {
     servicesDescription: "",
     firstName: "",
     lastName: "",
-    businessEmail: "",
+    businessEmail: initialEmail,
     phone: "",
     roleTitle: "",
     preferredContact: "",

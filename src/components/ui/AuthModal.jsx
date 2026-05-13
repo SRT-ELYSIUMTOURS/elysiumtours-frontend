@@ -427,10 +427,10 @@ function LoginView({ onSuccess, onForgot, onSignUp }) {
     <div className="flex flex-col flex-1 min-h-0">
       <ViewHeader>
         <div className="flex flex-col gap-[16px] items-center self-stretch">
-          <span className="self-stretch font-raleway text-[25px] font-bold leading-[27.5px] text-[#7b2cbf] text-center whitespace-nowrap">
+          <span className="self-stretch font-raleway text-[22px] md:text-[25px] font-bold leading-[27.5px] text-[#7b2cbf] text-center">
             Log In or Sign Up
           </span>
-          <span className="font-raleway text-[20px] font-medium leading-[28px] text-[#6b7280] text-left whitespace-nowrap">
+          <span className="font-raleway text-[14px] md:text-[20px] font-medium leading-[20px] md:leading-[28px] text-[#6b7280] text-center">
             Access your bookings, saved tours, and travel profile.
           </span>
         </div>
@@ -513,10 +513,10 @@ function SignupView({ onSuccess, onLogin }) {
     <div className="flex flex-col flex-1 min-h-0">
       <ViewHeader>
         <div className="flex flex-col gap-[16px] items-center self-stretch">
-          <span className="self-stretch font-raleway text-[25px] font-bold leading-[27.5px] text-[#7b2cbf] text-center whitespace-nowrap">
+          <span className="self-stretch font-raleway text-[22px] md:text-[25px] font-bold leading-[27.5px] text-[#7b2cbf] text-center">
             Create Your Account
           </span>
-          <span className="font-raleway text-[20px] font-medium leading-[28px] text-[#6b7280] whitespace-nowrap">
+          <span className="font-raleway text-[14px] md:text-[20px] font-medium leading-[20px] md:leading-[28px] text-[#6b7280] text-center">
             Join thousands of travelers exploring West Africa.
           </span>
         </div>
@@ -601,10 +601,10 @@ function ForgotView({ onBack, onOtp, onSignUp }) {
     <div className="flex flex-col flex-1 min-h-0">
       <ViewHeader>
         <div className="flex flex-col gap-[16px] items-center self-stretch">
-          <span className="self-stretch font-raleway text-[25px] font-bold leading-[27.5px] text-[#7b2cbf] text-center whitespace-nowrap">
+          <span className="self-stretch font-raleway text-[22px] md:text-[25px] font-bold leading-[27.5px] text-[#7b2cbf] text-center">
             Forgot your password?
           </span>
-          <span className="font-raleway text-[20px] font-medium leading-[28px] text-[#6b7280] text-center">
+          <span className="font-raleway text-[14px] md:text-[20px] font-medium leading-[20px] md:leading-[28px] text-[#6b7280] text-center">
             No worries. Enter your email and we'll send you a 6-digit verification code.
           </span>
         </div>
@@ -662,10 +662,10 @@ function OtpView({ email, onVerify, onChangeEmail, onSignUp }) {
         <div className="flex flex-col gap-[24px] items-center self-stretch">
           <PurpleIconBox icon={<MailBoxIcon />} />
           <div className="flex flex-col gap-[16px] items-center self-stretch">
-            <span className="self-stretch font-raleway text-[25px] font-bold leading-[27.5px] text-[#7b2cbf] text-center whitespace-nowrap">
+            <span className="self-stretch font-raleway text-[22px] md:text-[25px] font-bold leading-[27.5px] text-[#7b2cbf] text-center">
               Check your inbox
             </span>
-            <div className="self-stretch font-raleway text-[20px] font-medium leading-[28px] text-center">
+            <div className="self-stretch font-raleway text-[14px] md:text-[20px] font-medium leading-[20px] md:leading-[28px] text-center break-words">
               <span className="text-[#6b7280]">We sent a 6-digit code to </span>
               <span className="text-[#7b2cbf]">{email}</span>
             </div>
@@ -737,10 +737,10 @@ function NewPasswordView({ onSave, onBack, onSignUp }) {
         <div className="flex flex-col gap-[24px] items-center self-stretch">
           <PurpleIconBox icon={<LockBoxIcon />} />
           <div className="flex flex-col gap-[16px] items-center self-stretch">
-            <span className="self-stretch font-raleway text-[25px] font-bold leading-[27.5px] text-[#7b2cbf] text-center whitespace-nowrap">
+            <span className="self-stretch font-raleway text-[22px] md:text-[25px] font-bold leading-[27.5px] text-[#7b2cbf] text-center">
               Create New Password
             </span>
-            <span className="font-raleway text-[20px] font-medium leading-[28px] text-[#6b7280] text-center">
+            <span className="font-raleway text-[14px] md:text-[20px] font-medium leading-[20px] md:leading-[28px] text-[#6b7280] text-center">
               Your new password must be different from previous passwords.
             </span>
           </div>
@@ -772,10 +772,10 @@ function ResetSuccessView({ onLogin, onSignUp }) {
         <div className="flex flex-col gap-[24px] items-center self-stretch">
           <PurpleIconBox icon={<CheckBoxIcon />} />
           <div className="flex flex-col gap-[16px] items-center self-stretch">
-            <span className="self-stretch font-raleway text-[25px] font-bold leading-[27.5px] text-[#7b2cbf] text-center whitespace-nowrap">
+            <span className="self-stretch font-raleway text-[22px] md:text-[25px] font-bold leading-[27.5px] text-[#7b2cbf] text-center">
               Password Reset!
             </span>
-            <span className="font-raleway text-[20px] font-medium leading-[28px] text-[#6b7280] text-center">
+            <span className="font-raleway text-[14px] md:text-[20px] font-medium leading-[20px] md:leading-[28px] text-[#6b7280] text-center">
               Your password has been updated successfully.
               <br />You can now log in with your new password.
             </span>
@@ -832,7 +832,7 @@ export default function AuthModal({ isOpen, onClose, initialView = "login", onAu
     >
       {/* Card — flex column, fixed max-height, NO overflow on the card itself */}
       <div
-        className="relative bg-white rounded-[30px] w-full max-w-[648px] mx-4 flex flex-col"
+        className="relative bg-white rounded-[30px] w-full max-w-[648px] mx-3 md:mx-4 flex flex-col"
         style={{ maxHeight: "90vh", boxShadow: "0 10px 4px 0 rgba(0,0,0,0.15)" }}
       >
         {/* Close button — always visible, outside scroll */}
@@ -861,7 +861,7 @@ export default function AuthModal({ isOpen, onClose, initialView = "login", onAu
         />
 
         {/* View area — fills remaining height, inner scroll is per-view */}
-        <div className="flex flex-col flex-1 min-h-0 px-[52px] pb-[40px]">
+        <div className="flex flex-col flex-1 min-h-0 px-5 md:px-[52px] pb-6 md:pb-[40px]">
           {view === "login" && (
             <LoginView
               onSuccess={handleAuthSuccess}

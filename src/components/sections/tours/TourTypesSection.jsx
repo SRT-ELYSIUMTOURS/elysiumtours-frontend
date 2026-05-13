@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { classNames } from "../../../utils/classNames";
 import PartnerHighlightCard from "../../cards/PartnerHighlightCard";
 
@@ -23,6 +24,7 @@ const TOUR_TYPES = [
     subtitleColor: "#dedede",           // Figma: I1903:25391;98:234 — #dedede
     overlayColor: "rgba(0,0,0,0.7)",   // Figma: bg-[rgba(0,0,0,0.7)]
     image: leisureBg,
+    type: "leisure",
   },
   {
     id: 2,
@@ -31,6 +33,7 @@ const TOUR_TYPES = [
     subtitleColor: "#f7f7f7",           // Figma: I1903:25392;98:234 — #f7f7f7
     overlayColor: "rgba(0,0,0,0.7)",   // Figma: bg-[rgba(0,0,0,0.7)]
     image: businessBg,
+    type: "business",
   },
   {
     id: 3,
@@ -39,10 +42,12 @@ const TOUR_TYPES = [
     subtitleColor: "#fefefe",           // Figma: I1903:25393;98:234 — #fefefe (inherited)
     overlayColor: "rgba(0,0,0,0.5)",   // Figma: bg-[rgba(0,0,0,0.5)] — lighter than other two
     image: ekolureBg,
+    type: "ekolure",
   },
 ];
 
 const TourTypesSection = React.forwardRef(({ className, ...props }, ref) => {
+  const navigate = useNavigate();
   return (
     <section
       ref={ref}
@@ -105,11 +110,13 @@ const TourTypesSection = React.forwardRef(({ className, ...props }, ref) => {
               subtitleColor={t.subtitleColor}
               overlayColor={t.overlayColor}
               labelClassName="absolute left-4 bottom-4"
+              onClick={() => navigate(`/tours?type=${t.type}`)}
               className="
-                w-full 
-                md:w-[300px] lg:w-[451px] 
-                h-[400px] md:h-[500px] lg:h-[656px] 
+                w-full
+                md:w-[300px] lg:w-[451px]
+                h-[400px] md:h-[500px] lg:h-[656px]
                 shrink-0
+                cursor-pointer
               "
             />
           ))}

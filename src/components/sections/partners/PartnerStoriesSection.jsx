@@ -177,7 +177,7 @@ const PartnerStoriesSection = React.forwardRef(({ className = "", ...props }, re
       )}
       {...props}
     >
-      <div className="mx-auto max-w-[1728px] px-[156px]">
+      <div className="mx-auto max-w-[1728px] px-6 md:px-[30px] lg:px-[156px]">
         <PartnerSectionHeader
           className=""
           eyebrow="EXPLORE ALL PARTNER STORIES"
@@ -188,7 +188,37 @@ const PartnerStoriesSection = React.forwardRef(({ className = "", ...props }, re
         />
 
         <div className="relative z-[18] mx-auto mt-0 w-full">
-          <div className="overflow-x-auto overflow-y-visible pb-8 [-webkit-overflow-scrolling:touch] md:overflow-visible md:pb-0">
+          {/* Mobile: simple horizontal scroll of separate polaroid cards */}
+          <div className="md:hidden -mx-6 px-6 mt-8 flex gap-4 overflow-x-auto scrollbar-hide pb-6 snap-x snap-mandatory">
+            {STORIES.map((story) => (
+              <article
+                key={story.id}
+                role="button"
+                tabIndex={0}
+                className="shrink-0 snap-start w-[260px] flex flex-col bg-primary-light-default p-[10px] pb-[14px] shadow-[0_12px_40px_rgba(43,15,67,0.18),0_4px_12px_rgba(0,0,0,0.08)] border border-[rgba(214,190,235,0.35)] cursor-pointer"
+              >
+                <div className="relative h-[280px] noise overflow-hidden rounded-[4px] bg-primary-dark-default">
+                  <img src={story.image} alt="" className="h-full w-full object-cover" />
+                </div>
+                <div className="mt-[10px] flex flex-col items-center gap-[8px] px-[4px]">
+                  <h3 className="text-md-semibold text-center text-tertiary-normal-default line-clamp-3">
+                    {story.title}
+                  </h3>
+                  <Link
+                    to="/blog"
+                    className="inline-flex items-center gap-[6px] text-med-small-semibold text-secondary-normal-default hover:text-secondary-normal-hover transition-colors"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    Read More
+                    <ArrowRightIcon />
+                  </Link>
+                </div>
+              </article>
+            ))}
+          </div>
+
+          {/* Desktop: original Figma scattered/overlapping polaroid layout */}
+          <div className="hidden md:block overflow-y-visible md:overflow-visible md:pb-0">
             <div
               className="relative mx-auto min-h-[380px] translate-y-1/2 min-w-[1492px] overflow-visible"
               style={{ height: GALLERY_HEIGHT }}

@@ -28,8 +28,8 @@ const PartnerHero = React.forwardRef(({ onSearch, className = "", ...props }, re
 
   return (
     <div ref={ref} className={classNames("w-full", className)} {...props}>
-      {/* Hero container uses aspect ratio instead of fixed height */}
-      <section className="relative w-full overflow-hidden aspect-[16/9]">
+      {/* Hero container — taller aspect ratio on mobile so title + search fit comfortably */}
+      <section className="relative w-full overflow-hidden h-[500px] sm:h-[600px] md:aspect-[16/9] md:h-auto">
         {/* Slides */}
         {SLIDES.map((slide, i) => (
           <div
@@ -61,8 +61,10 @@ const PartnerHero = React.forwardRef(({ onSearch, className = "", ...props }, re
             </p>
           </div>
 
-          {/* Search bar */}
-          <div className="flex items-center w-full max-w-[798px] h-[60px] sm:h-[70px] md:h-[78px] lg:h-[88px] bg-white rounded-[100px] shadow-[0px_4px_20px_0px_rgba(0,0,0,0.12)] px-6">
+          {/* Search bar — pl-6 keeps text comfortable from left edge,
+              pr-1.5 keeps the round button flush against the right edge with
+              just a tiny gap (looks more natural than centered padding) */}
+          <div className="flex items-center w-full max-w-[798px] h-[60px] sm:h-[70px] md:h-[78px] lg:h-[88px] bg-white rounded-[100px] shadow-[0px_4px_20px_0px_rgba(0,0,0,0.12)] pl-6 pr-1.5">
             <input
               type="text"
               value={query}

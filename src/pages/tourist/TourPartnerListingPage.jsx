@@ -35,40 +35,32 @@ const TourPartnerListingPage = () => {
   return (
     <main className="w-full">
 
-      {/* Breadcrumb */}
-      <div className="px-4 md:px-8 lg:px-16">
-        <BlogBreadcrumbBar
-          items={[
-            { label: "Home", href: "/" },
-            { label: "Tour Partners", href: "/tour-partners" },
-            { label: categoryLabel, href: `/tour-partners/${category}` },
-            { label: "All" },
-          ]}
-        />
-      </div>
+      {/* Breadcrumb — full width, BlogBreadcrumbBar handles internal padding */}
+      <BlogBreadcrumbBar
+        items={[
+          { label: "Home", href: "/" },
+          { label: "Tour Partners", href: "/tour-partners" },
+          { label: categoryLabel, href: `/tour-partners/${category}` },
+          { label: "All" },
+        ]}
+      />
 
       {/* Category filter bar */}
-      <div className="px-4 md:px-8 lg:px-16 overflow-x-auto">
-        <PartnerCategoryFilterBar
-          activeCategory={category}
-          onCategoryChange={(cat) => {
-            if (cat === "all") navigate("/tour-partners");
-            else navigate(`/tour-partners/${cat}/all`);
-          }}
-        />
-      </div>
+      <PartnerCategoryFilterBar
+        activeCategory={category}
+        onCategoryChange={(cat) => {
+          if (cat === "all") navigate("/tour-partners");
+          else navigate(`/tour-partners/${cat}/all`);
+        }}
+      />
 
-      {/* Filters */}
-      <div className="px-4 md:px-8 lg:px-16">
-        <div className="flex flex-col md:flex-row gap-3">
-          <PartnerListingFilterBar
-            category={category}
-            showLocationFilter={isGuide}
-            onSortChange={setSort}
-            onFiltersApply={setFilters}
-          />
-        </div>
-      </div>
+      {/* Filters — filter bar handles its own responsive padding internally */}
+      <PartnerListingFilterBar
+        category={category}
+        showLocationFilter={isGuide}
+        onSortChange={setSort}
+        onFiltersApply={setFilters}
+      />
 
       {/* Heading */}
       <div className="px-4 md:px-8 lg:px-16 pt-6 md:pt-10 pb-2">
@@ -77,19 +69,12 @@ const TourPartnerListingPage = () => {
         </h1>
       </div>
 
-      {/* Grid */}
-      <div className="px-4 md:px-8 lg:px-16">
-        <PartnerListingGrid
-          category={category}
-          filters={filters}
-          sort={sort}
-        />
-      </div>
-
-      {/* CTA */}
-      <div className="px-4 md:px-8 lg:px-16 mt-8">
-        <PartnerCtaSection />
-      </div>
+      {/* Grid — PartnerListingGrid handles its own responsive padding */}
+      <PartnerListingGrid
+        category={category}
+        filters={filters}
+        sort={sort}
+      />
 
       <PartnerStoriesSection />
 

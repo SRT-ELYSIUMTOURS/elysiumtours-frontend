@@ -53,11 +53,15 @@ const CATEGORY_DATA = {
     title: "Guides Who Know the Way",
     description: "Explore with knowledgeable local guides who bring destinations to life through stories, history, and firsthand experience. Our trusted guides help you navigate each place with confidence, offering authentic insights and meaningful connections that make every tour memorable.",
     bg: "bg-primary-light-default",
+    // Pattern: male, female, male, female. Using guide1.png (real African
+    // local photo) for the first card and Dicebear "personas" illustrated
+    // avatars with dark skin tones for the others — guaranteed to look Black
+    // and visually distinct. Replace with real guide photos when available.
     cards: [
       { id: 1, image: "/tourCountryAssets/guide1.png", name: "Kwame Mensah" },
-      { id: 2, image: "/tourCountryAssets/guide2.png", name: "Ama Boateng" },
-      { id: 3, image: "/tourCountryAssets/guide1.png", name: "Kofi Asante" },
-      { id: 4, image: "/tourCountryAssets/guide2.png", name: "Yaa Serwaa" },
+      { id: 2, image: "/tourCountryAssets/second-female.jpg", name: "Ama Boateng" },
+      { id: 3, image: "/tourCountryAssets/second-male.jpg", name: "Kofi Asante" },
+      { id: 4, image: "/tourCountryAssets/agyeman-badu.jpg", name: "Agyeman Badu" },
     ],
   },
   restaurants: {
@@ -114,18 +118,19 @@ const CategorySectionBlock = ({ catKey, navigate }) => {
   if (!data) return null;
 
   return (
-    <section className={classNames("w-full py-[80px]", data.bg)}>
-      <div className="px-[156px]">
+    <section className={classNames("w-full py-12 md:py-16 lg:py-[80px]", data.bg)}>
+      <div className="px-6 md:px-[30px] lg:px-[156px]">
         <PartnerSectionHeader
-          className="mb-[48px]"
+          className="mb-8 lg:mb-[48px]"
           eyebrow={data.label}
           title={data.title}
           description={data.description}
           onExploreClick={() => navigate(`/tour-partners/${catKey}/all`)}
         />
 
-        {/* 4 cards — Guides use Meet-the-Experts (purple + lighting); others PartnerHighlightCard */}
-        <div className="flex gap-[24px]">
+        {/* 4 cards — Guides use Meet-the-Experts (purple + lighting); others PartnerHighlightCard
+            Mobile: horizontal scroll. Desktop: row of 4. */}
+        <div className="flex gap-[24px] overflow-x-auto scrollbar-hide -mx-6 px-6 md:-mx-[30px] md:px-[30px] lg:mx-0 lg:px-0 lg:overflow-visible pb-4 lg:pb-0">
           {data.cards.map((card, index) => {
             const stagger = index === 0 || index === 3 ? "lg:mt-[74px]" : "";
             const cardLayout = classNames(

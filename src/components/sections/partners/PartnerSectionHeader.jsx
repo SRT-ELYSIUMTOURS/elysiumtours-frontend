@@ -35,7 +35,7 @@ const PartnerSectionHeader = ({
     );
 
   return (
-    <div className={classNames("flex w-full items-start justify-between", className)}>
+    <div className={classNames("flex flex-col lg:flex-row w-full items-center lg:items-start justify-between gap-4 lg:gap-0", className)}>
       <div className="flex items-center gap-[8px] pt-[10px]">
         <div className="h-[1px] w-[46px] shrink-0 bg-secondary-dark-darker" />
         <span className="font-raleway font-bold text-[13px] leading-[18px] text-secondary-dark-darker uppercase tracking-[0.05em]">
@@ -43,14 +43,13 @@ const PartnerSectionHeader = ({
         </span>
       </div>
 
-      <div className="flex w-[597px] max-w-full shrink-0 flex-col items-end gap-[16px]">
-        <div className="flex w-full flex-wrap items-center justify-end gap-[12px]">
-          
-          <h2 className="max-w-[433px] text-right font-raleway font-bold text-[25px] leading-[34px] text-tertiary-normal-default">
+      <div className="flex w-full lg:w-[597px] lg:max-w-full lg:shrink-0 flex-col items-center lg:items-end gap-[16px]">
+        <div className="flex w-full flex-wrap items-center justify-center lg:justify-end gap-[12px]">
+          <h2 className="w-full lg:max-w-[433px] text-center lg:text-right font-raleway font-bold text-[22px] leading-[30px] lg:text-[25px] lg:leading-[34px] text-tertiary-normal-default">
             {title}
           </h2>
         </div>
-        <p className="w-[565px] max-w-full text-right font-raleway font-normal text-[16px] leading-[24px] text-tertiary-normal-default">
+        <p className="w-full lg:w-[565px] lg:max-w-full text-center lg:text-right font-raleway font-normal text-[14px] leading-[22px] lg:text-[16px] lg:leading-[24px] text-tertiary-normal-default">
           {description}
         </p>
         {exploreControl}

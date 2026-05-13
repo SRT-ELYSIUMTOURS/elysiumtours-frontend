@@ -7,10 +7,11 @@ import { classNames } from "../../../utils/classNames";
 // Guide name "Meet Yam Obeng: Your Guide Through Cape Coast History"
 
 const PartnerFeaturedGuide = React.forwardRef(({
-  guideName = "Yam Obeng",
-  guideTitle = "Meet Yam Obeng: Your Guide Through Cape Coast History",
-  guideDescription = "A certified heritage guide with over 12 years of experience leading tours through Cape Coast Castle, Elmina, and beyond. Yam brings history to life with firsthand accounts, community connections, and a deep passion for Ghana's story.",
-  guideImage = "https://picsum.photos/seed/guide-yam/200/200",
+  guideName = "Yaw Obeng",
+  guideTitle = "Meet Yaw Obeng: Your Guide Through Cape Coast History",
+  guideDescription = "A certified heritage guide with over 12 years of experience leading tours through Cape Coast Castle, Elmina, and beyond. Yaw brings history to life with firsthand accounts, community connections, and a deep passion for Ghana's story.",
+  // Black male portrait from Unsplash (free use, focused face, centered)
+  guideImage = "/tourCountryAssets/yaw-obeng.jpg",
   className = "",
   ...props
 }, ref) => {
@@ -34,32 +35,35 @@ const PartnerFeaturedGuide = React.forwardRef(({
             Mobile: reduced size, horizontal strip at top
             Desktop: left column, fixed width
           */}
-          <div className="relative shrink-0 w-full h-[140px] lg:w-[220px] lg:h-full flex items-center justify-center overflow-hidden">
-            {/* Back pill */}
-            <div
-              className="absolute w-[110px] h-[120px] lg:w-[144px] lg:h-[157px] rounded-[100px] bg-secondary-light-default shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)]"
-              style={{ transform: "rotate(-21deg)", top: "10px", left: "30px" }}
-            />
-            {/* Second pill */}
-            <div
-              className="absolute w-[110px] h-[120px] lg:w-[144px] lg:h-[157px] rounded-[100px] bg-secondary-light-default shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)]"
-              style={{ transform: "rotate(-21deg)", top: "50px", left: "50px" }}
-            />
-            {/* Front pill with guide image */}
-            <div
-              className="absolute w-[155px] h-[148px] lg:w-[203px] lg:h-[194px] rounded-[100px] overflow-hidden shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)]"
-              style={{ transform: "rotate(-21deg)", top: "20px", left: "5px" }}
-            >
-              <div className="absolute inset-0 bg-secondary-normal-default" />
-              <img
-                src={guideImage}
-                alt={guideName}
-                className="absolute inset-0 w-full h-full object-cover opacity-80"
-              />
-              <div className="absolute inset-0 bg-black/40" />
-            </div>
-          </div>
+          <div className="relative shrink-0 w-full h-[190px] lg:w-[220px] lg:h-full flex items-center justify-center overflow-visible">
+        {/* Back pill */}
+        <div
+          className="absolute w-[110px] h-[120px] lg:w-[144px] lg:h-[157px] rounded-[100px] bg-secondary-light-default shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)]"
+          style={{ transform: "rotate(-21deg)", top: "10px", left: "30px" }}
+        />
 
+        {/* Second pill */}
+        <div
+          className="absolute w-[110px] h-[120px] lg:w-[144px] lg:h-[157px] rounded-[100px] bg-secondary-light-default shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)]"
+          style={{ transform: "rotate(-21deg)", top: "50px", left: "50px" }}
+        />
+
+        {/* Front pill with guide image */}
+        <div
+          className="absolute w-[155px] h-[148px] lg:w-[203px] lg:h-[194px] rounded-[100px] overflow-hidden shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)]"
+          style={{ transform: "rotate(-21deg)", top: "35px", left: "5px" }}
+        >
+          <div className="absolute inset-0 bg-secondary-normal-default" />
+
+          <img
+            src={guideImage}
+            alt={guideName}
+            className="absolute inset-0 w-full h-full object-cover object-top opacity-80"
+          />
+
+          <div className="absolute inset-0 bg-black/40" />
+        </div>
+      </div>
           {/* Guide info */}
           <div className="flex flex-col gap-4 lg:gap-[20px] items-center flex-1 px-6 py-8 lg:px-[40px] lg:py-0">
             <h3 className="font-raleway font-bold text-[18px] sm:text-[22px] lg:text-[25px] leading-[28px] sm:leading-[32px] lg:leading-[34px] text-tertiary-normal-default text-center">

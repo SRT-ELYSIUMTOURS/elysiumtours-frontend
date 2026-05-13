@@ -89,15 +89,15 @@ const PartnerListingGrid = React.forwardRef(({
   return (
     <div
       ref={ref}
-      className={classNames("w-full px-[80px] py-[60px]", className)}
+      className={classNames("w-full px-4 md:px-10 lg:px-[80px] py-10 lg:py-[60px]", className)}
       {...props}
     >
       {items.length === 0 ? (
-        <div className="grid grid-cols-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           <EmptyState />
         </div>
       ) : (
-        <div className="grid grid-cols-3 gap-x-[24px] gap-y-[48px]">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-[24px] gap-y-8 lg:gap-y-[48px]">
           {items.map((partner) => (
             <PartnerListingCard
               key={partner.id}
