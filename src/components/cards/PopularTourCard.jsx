@@ -208,7 +208,7 @@ return (
           {/* Rating badge — bottom-right of image area
               Figma: left-[237px] top-[336px] h-[24px] bg-[#ebdff5] px-[10px] py-[8px] rounded-[16px]
                      Star 18×19px + "4.9" SemiBold 10px #7b2cbf + dot 2px + "231" Medium 10px #565656 60% */}
-          <div className="absolute left-[237px] top-[336px] h-[24px] bg-[#ebdff5] flex items-center justify-center px-[10px] rounded-[16px]">
+          <div className="absolute right-3 top-[336px] h-[24px] bg-[#ebdff5] flex items-center justify-center px-[10px] rounded-[16px]">
             <img
               src={starImg}
               alt="Rating"

@@ -1,6 +1,9 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import { classNames } from "../../utils/classNames";
+import { useAppDispatch } from "../../hooks/useAppDispatch";
+import { useAppSelector } from "../../hooks/useAppSelector";
+import { fetchBlogPostThunk, selectCurrentPost } from "../../store/slices/cmsSlice";
 import BlogBreadcrumbBar from "../../components/sections/blog/BlogBreadcrumbBar";
 import BlogArticleHero from "../../components/sections/blog/BlogArticleHero";
 import BlogPostMetaBar from "../../components/sections/blog/BlogPostMetaBar";
@@ -29,22 +32,33 @@ const BlogPostPage = React.forwardRef(({ className, ...props }, ref) => {
   const { slug } = useParams();
   const location = useLocation();
   const passed = location.state;
+  const dispatch = useAppDispatch();
+  const apiPost = useAppSelector(selectCurrentPost);
+
+  useEffect(() => {
+    if (slug) dispatch(fetchBlogPostThunk(slug));
+  }, [dispatch, slug]);
+
+  const post = apiPost?.slug === slug ? apiPost : null;
 
   const fallbackTitle = useMemo(() => slugToTitle(slug), [slug]);
-  const title = passed?.title ?? fallbackTitle;
+  const title = post?.title ?? passed?.title ?? fallbackTitle;
 
   const heroImage = useMemo(() => {
+    if (post?.coverImage || post?.heroImage) return post.coverImage || post.heroImage;
     if (passed?.heroImage) return passed.heroImage;
     return slug
       ? `https://picsum.photos/seed/blog-post-${slug}/1728/711`
       : "https://picsum.photos/seed/blog-post-default/1728/711";
-  }, [passed?.heroImage, slug]);
+  }, [post, passed?.heroImage, slug]);
 
-  const authorName = passed?.authorName ?? "Davida Dzato";
+  const authorName = post?.author?.name ?? passed?.authorName ?? "Davida Dzato";
   const authorImage =
-    passed?.authorImage ?? "https://picsum.photos/seed/blog-author/150/150";
-  const dateLabel = passed?.dateLabel ?? "Jun 2, 2025";
-  const readTimeLabel = passed?.readTimeLabel ?? "3 minutes read";
+    post?.author?.avatar ?? passed?.authorImage ?? "https://picsum.photos/seed/blog-author/150/150";
+  const dateLabel = post?.createdAt
+    ? new Date(post.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+    : passed?.dateLabel ?? "Jun 2, 2025";
+  const readTimeLabel = post?.readTime ?? passed?.readTimeLabel ?? "3 minutes read";
 
   const contentBlocks =
     passed?.contentBlocks?.length > 0 ? passed.contentBlocks : DUMMY_BLOG_POST_BLOCKS;

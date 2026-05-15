@@ -38,11 +38,19 @@ const generatePhotoItems = (catKey, count = 42) =>
     count: `${Math.floor(Math.random() * 40 + 10)} Photos`,
   }));
 
+/** Short CC0 clips so the viewer shows real playback (same layout as photo viewer). */
+const SAMPLE_VIDEO_URLS = [
+  "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
+  "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+  "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+];
+
 // Generate mock video items
 const generateVideoItems = (catKey, count = 9) =>
   Array.from({ length: count }, (_, i) => ({
     id: i + 1,
     image: `https://picsum.photos/seed/${catKey}-vid-${i}/600/400`,
+    video: SAMPLE_VIDEO_URLS[i % SAMPLE_VIDEO_URLS.length],
     title: `${CATEGORY_LABELS[catKey] ?? catKey} Video ${i + 1}`,
     count: `${Math.floor(Math.random() * 5 + 1)}:${String(Math.floor(Math.random() * 60)).padStart(2, "0")} min`,
   }));
@@ -123,9 +131,9 @@ const GalleryCategoryPage = () => {
       /> */}
 
       {/* Page content */}
-      <div className="px-4 md:px-8 lg:px-[156px] py-10 lg:py-[80px] bg-primary-light-default">
+      <div className="px-4  bg-secondary-light-default md:px-8 lg:px-[156px] py-10 lg:py-[80px] bg-primary-light-default">
         {/* Sort + Search — compact row, sort sized to content + search fills remaining */}
-        <div className="flex items-center justify-end gap-3 mb-8 lg:mb-[48px]">
+        <div className="flex items-center  justify-between gap-3 mb-8 lg:mb-[48px]">
           {/* Sort dropdown — auto width */}
           <button className="flex items-center justify-center gap-[6px] h-[40px] lg:h-[44px] px-4 border border-[#b9b9b9] rounded-[20px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.05)] bg-transparent cursor-pointer shrink-0">
             <span className="font-raleway font-medium text-[13px] leading-[22px] text-[#949494] whitespace-nowrap">Sort By</span>
@@ -147,7 +155,7 @@ const GalleryCategoryPage = () => {
         {/* Grid */}
         {isVideoCategory ? (
           // Video grid — 1-col on mobile, 2-col on md, 3-col on lg+
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-[24px]">
+          <div className="grid grid-cols-1 bg-secondary-light-default md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-[24px]">
             {items.map((item, i) => (
               <GalleryVideoCard
                 key={item.id}
@@ -198,6 +206,7 @@ const GalleryCategoryPage = () => {
         <VideoViewerModal
           isOpen={viewerOpen}
           onClose={() => setViewerOpen(false)}
+          video={items[viewerIndex]?.video}
           image={items[viewerIndex]?.image}
           title={items[viewerIndex]?.title}
           currentIndex={viewerIndex}

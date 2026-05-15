@@ -1,142 +1,159 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { classNames } from "../../utils/classNames";
+import {
+  PeekCard,
+  BlurBand,
+  ViewerMetadataBlock,
+  ViewerActionButtons,
+  ViewerThumbnailStrip,
+  ViewerPagination,
+  ViewerEdgeArrows,
+  PlayIcon,
+  PauseIcon,
+  CloseCircleIcon,
+  FullscreenIcon,
+  useBodyScrollLock,
+  useEscapeKey,
+} from "./viewer/ViewerCommon";
 
-// Video Viewer Modal — Figma nodes 772:10180 (playing) + 772:10332 (speed popup)
-// Full-screen video lightbox with:
-//   - Top bar (blur): title center, X close right (no shrink icon)
-//   - Large video area with left/right nav arrows
-//   - Controls bar: progress track + play + time + speed + fullscreen
-//   - Bottom bar (blur): location+description left, share+like buttons right
-//   - Thumbnail strip with active tile (172px) + inactive (120px, darkened)
-//   - Pagination row
-//   - Speed popup: bg-secondary-light-hover, 5 options [1x active, 1.2x, 1.5x, 1.7x, 2x]
-
-const THUMBNAIL_IMAGES = [
-  "https://picsum.photos/seed/vt1/120/175",
-  "https://picsum.photos/seed/vt2/120/175",
-  "https://picsum.photos/seed/vt3/120/175",
-  "https://picsum.photos/seed/vt4/172/175",
-  "https://picsum.photos/seed/vt5/120/175",
-  "https://picsum.photos/seed/vt6/120/175",
-  "https://picsum.photos/seed/vt7/120/175",
-  "https://picsum.photos/seed/vt8/120/175",
-  "https://picsum.photos/seed/vt9/120/175",
-  "https://picsum.photos/seed/vt10/120/175",
-  "https://picsum.photos/seed/vt11/120/175",
-  "https://picsum.photos/seed/vt12/120/175",
-  "https://picsum.photos/seed/vt13/120/175",
-  "https://picsum.photos/seed/vt14/120/175",
-];
+// Video Viewer Modal — Figma node 768:10050.
+//   Main video container 1567×988, rounded TOP corners only (flat bottom).
+//   Top bar (h≈12.146%): title left, close right (NO expand icon).
+//   Bottom playback controls overlaid INSIDE video at top=920/988 ≈ 93.117%, left=61/1567 ≈ 3.89%, w=1416/1567 ≈ 90.36%.
+//     Controls layout: progress bar; then row of [play + time | speed + fullscreen].
+//   SEPARATE metadata band BELOW the video (1567×146, rounded-[20px]) with the same
+//   blurred-gradient recipe as the image viewer's bottom bar.
 
 const SPEED_OPTIONS = ["1x", "1.2x", "1.5x", "1.7x", "2x"];
 
-// Play icon (triangle pointing right)
-const PlayIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-    <path d="M8 5.5L18.5 12L8 18.5V5.5Z" fill="#fefefe" />
-  </svg>
+const FALLBACK_THUMBS = Array.from({ length: 14 }, (_, i) =>
+  `https://picsum.photos/seed/vt${i + 1}/120/175`
 );
 
-// Pause icon (two vertical bars)
-const PauseIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-    <rect x="6" y="5" width="4" height="14" rx="1" fill="#fefefe" />
-    <rect x="14" y="5" width="4" height="14" rx="1" fill="#fefefe" />
-  </svg>
-);
-
-// Fullscreen icon
-const FullscreenIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-    <path d="M8 3H5a2 2 0 00-2 2v3M21 8V5a2 2 0 00-2-2h-3M3 16v3a2 2 0 002 2h3M16 21h3a2 2 0 002-2v-3" stroke="#fefefe" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-
-// Close circle icon
-const CloseIcon = () => (
-  <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-    <circle cx="20" cy="20" r="16" stroke="#fefefe" strokeWidth="1.5" />
-    <path d="M14 14l12 12M26 14L14 26" stroke="#fefefe" strokeWidth="1.5" strokeLinecap="round" />
-  </svg>
-);
-
-// Share icon
-const ShareIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-    <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" stroke="#fefefe" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-
-// Heart/like icon
-const HeartIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-    <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" stroke="#fefefe" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-
-// Left/right chevron (using Down arrow rotated)
-const ChevronLeft = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-    <path d="M15 18L9 12L15 6" stroke="#ebdff5" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-const ChevronRight = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-    <path d="M9 18L15 12L9 6" stroke="#ebdff5" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-
-// Ghana flag emoji
-const GhanaFlag = () => (
-  <span className="text-[16px]" role="img" aria-label="Ghana flag">🇬🇭</span>
-);
+function formatTime(sec) {
+  if (!Number.isFinite(sec) || sec < 0) return "0:00";
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
+  return `${m}:${String(s).padStart(2, "0")}`;
+}
 
 const VideoViewerModal = React.forwardRef(({
   isOpen = false,
   onClose,
   video,
-  image,          // poster/thumbnail for video
+  image,
   title = "Evergreen Sanctuary",
   location = "Ghana-Central Region, Cape Coast",
   description = "Description",
-  currentIndex = 3,
-  totalImages = 24,
-  thumbnails = THUMBNAIL_IMAGES,
+  currentIndex = 0,
+  totalImages,
+  thumbnails = FALLBACK_THUMBS,
   onPrev,
   onNext,
   onShare,
+  onLike,
+  flagSrc,
   className = "",
   ...props
 }, ref) => {
   const [currentThumb, setCurrentThumb] = useState(currentIndex);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [progress, setProgress] = useState(38); // % of video played (575/1492 ≈ 38%)
+  const [progressPct, setProgressPct] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
   const [showSpeedPopup, setShowSpeedPopup] = useState(false);
   const [speed, setSpeed] = useState("1x");
+  const containerRef = useRef(null);
+  const videoRef = useRef(null);
+  const total = totalImages ?? thumbnails.length;
+
+  useEffect(() => setCurrentThumb(currentIndex), [currentIndex]);
 
   useEffect(() => {
-    setCurrentThumb(currentIndex);
-  }, [currentIndex]);
-
-  // Lock body scroll when open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
+    if (!isOpen) {
+      setIsPlaying(false);
+      setShowSpeedPopup(false);
     }
-    return () => { document.body.style.overflow = ""; };
   }, [isOpen]);
+
+  useBodyScrollLock(isOpen);
+  useEscapeKey(isOpen, onClose);
+
+  const rate = parseFloat(speed.replace("x", "")) || 1;
+  useEffect(() => {
+    const el = videoRef.current;
+    if (el) el.playbackRate = rate;
+  }, [rate, video]);
+
+  useEffect(() => {
+    setProgressPct(0);
+    setCurrentTime(0);
+    setDuration(0);
+  }, [video]);
+
+  const tickProgress = useCallback(() => {
+    const el = videoRef.current;
+    if (!el || !Number.isFinite(el.duration) || el.duration <= 0) return;
+    setCurrentTime(el.currentTime);
+    setDuration(el.duration);
+    setProgressPct((el.currentTime / el.duration) * 100);
+  }, []);
+
+  useEffect(() => {
+    const el = videoRef.current;
+    if (!el || !video) return undefined;
+    const onTime = () => tickProgress();
+    const onLoaded = () => {
+      setDuration(el.duration || 0);
+      tickProgress();
+    };
+    const onPlay = () => setIsPlaying(true);
+    const onPause = () => setIsPlaying(false);
+    el.addEventListener("timeupdate", onTime);
+    el.addEventListener("loadedmetadata", onLoaded);
+    el.addEventListener("play", onPlay);
+    el.addEventListener("pause", onPause);
+    return () => {
+      el.removeEventListener("timeupdate", onTime);
+      el.removeEventListener("loadedmetadata", onLoaded);
+      el.removeEventListener("play", onPlay);
+      el.removeEventListener("pause", onPause);
+    };
+  }, [video, currentThumb, tickProgress]);
 
   if (!isOpen) return null;
 
-  const handlePrev = () => {
-    setCurrentThumb(p => Math.max(0, p - 1));
+  const goPrev = () => {
+    setCurrentThumb((p) => Math.max(0, p - 1));
     onPrev?.();
   };
-  const handleNext = () => {
-    setCurrentThumb(p => Math.min(totalImages - 1, p + 1));
+  const goNext = () => {
+    setCurrentThumb((p) => Math.min(total - 1, p + 1));
     onNext?.();
+  };
+
+  const togglePlay = () => {
+    const el = videoRef.current;
+    if (!el) return;
+    if (el.paused) el.play().catch(() => {});
+    else el.pause();
+  };
+
+  const seekPercent = (pct) => {
+    const el = videoRef.current;
+    if (!el || !Number.isFinite(el.duration)) return;
+    el.currentTime = (pct / 100) * el.duration;
+    setProgressPct(pct);
+  };
+
+  const enterFullscreen = () => {
+    const el = videoRef.current;
+    if (!el) return;
+    const fn =
+      el.requestFullscreen ||
+      el.webkitRequestFullscreen ||
+      el.msRequestFullscreen;
+    fn?.call(el);
   };
 
   const handleSpeedSelect = (s) => {
@@ -144,304 +161,240 @@ const VideoViewerModal = React.forwardRef(({
     setShowSpeedPopup(false);
   };
 
+  const prevSrc = thumbnails[Math.max(0, currentThumb - 1)];
+  const nextSrc = thumbnails[Math.min(total - 1, currentThumb + 1)];
+
   return (
     <div
-      className="fixed inset-0 z-[9999] flex flex-col items-center justify-start"
-      style={{ background: "rgba(0,0,0,0.15)" }}
+      className="fixed inset-0 z-[9999] flex flex-col items-center justify-start overflow-y-auto overflow-x-hidden font-raleway"
+      style={{ backgroundColor: "rgba(45,45,45,0.65)" }}
     >
-      {/* Main viewer container */}
       <div
         ref={ref}
         className={classNames(
-          "flex flex-col gap-[24px] items-center relative",
-          "w-full max-w-[1728px]",
+          "relative mx-auto flex w-full max-w-[min(1728px,100vw)] flex-col items-center gap-[24px] px-3 py-6 md:gap-8 md:px-6 lg:py-8",
           className
         )}
         {...props}
       >
-        {/* === MAIN VIDEO AREA === */}
-        <div
-          className="relative w-full overflow-hidden"
-          style={{
-            height: "calc(100vh - 271px)",
-            borderBottomLeftRadius: "20px",
-            borderBottomRightRadius: "20px",
-            borderTopRightRadius: "20px",
-            boxShadow: "0px 4px 20px 0px rgba(0,0,0,0.15)"
-          }}
-        >
-          {/* Background / Video */}
+        {/* Carousel: peek — main video — peek */}
+        <div className="relative flex w-full items-center justify-center gap-3 md:gap-6 lg:gap-8">
+          {currentThumb > 0 ? (
+            <PeekCard src={prevSrc} side="left" label="Previous video" onClick={goPrev} />
+          ) : (
+            <div className="hidden w-[clamp(100px,12vw,260px)] shrink-0 md:block" aria-hidden />
+          )}
+
           <div
-            className="absolute inset-0"
-            style={{ background: "#f7f7f7" }}
+            ref={containerRef}
+            className={classNames(
+              "relative z-10 min-h-[220px] min-w-0 flex-1 overflow-hidden rounded-tl-[20px] rounded-tr-[20px]",
+              "shadow-[0px_4px_20px_rgba(0,0,0,0.15)]",
+              "aspect-[1567/988] w-[min(960px,calc(100vw-32px))] max-h-[min(70vh,calc(100vh-360px))] md:w-[min(72vw,1567px)]"
+            )}
           >
-            {video ? (
-              <video
-                src={video}
-                poster={image}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              image && (
-                <img
-                  src={image}
-                  alt={title}
-                  className="w-full h-full object-cover"
+            {/* Video / fallback */}
+            <div className="absolute inset-0 bg-[#f7f7f7]">
+              {video ? (
+                <video
+                  ref={videoRef}
+                  key={video}
+                  src={video}
+                  poster={image}
+                  className="h-full w-full object-cover"
+                  playsInline
+                  onClick={togglePlay}
                 />
-              )
-            )}
-            {!video && !image && (
-              <img
-                src={`https://picsum.photos/seed/video-viewer-${currentThumb}/1728/900`}
-                alt={title}
-                className="w-full h-full object-cover"
-              />
-            )}
-            <div className="absolute inset-0 bg-black/10" />
-          </div>
-
-          {/* Top bar — blurred, title center + close right (no shrink icon) */}
-          <div
-            className="absolute top-0 left-0 right-0 h-[120px] overflow-hidden"
-            style={{ backdropFilter: "blur(25px)", mixBlendMode: "multiply" }}
-          >
-            <div
-              className="absolute inset-0 pointer-events-none"
-              style={{ background: "linear-gradient(175.477deg, rgba(255,255,255,0) 186.69%, rgba(153,153,153,0.5) 339.94%)" }}
-            />
-            <div className="absolute top-[46px] left-0 right-0 flex items-center justify-between px-[154px]">
-              {/* Title — left of center, but in design it's centered in the bar with CloseCircle right */}
-              <p className="font-raleway font-semibold text-[25px] leading-[normal] text-primary-light-default text-center w-[298px]">
-                {title}
-              </p>
-              {/* Close */}
-              <button className="cursor-pointer" onClick={onClose} aria-label="Close viewer">
-                <CloseIcon />
-              </button>
+              ) : image ? (
+                <img src={image} alt={title} className="h-full w-full object-cover" />
+              ) : thumbnails[currentThumb] ? (
+                <img src={thumbnails[currentThumb]} alt={title} className="h-full w-full object-cover" />
+              ) : null}
+              <div className="pointer-events-none absolute inset-0 bg-black/10" aria-hidden />
             </div>
-          </div>
 
-          {/* Left/right nav arrows */}
-          <button
-            className="absolute left-[13px] top-1/2 -translate-y-1/2 flex items-center justify-center size-[32px] cursor-pointer"
-            onClick={handlePrev}
-            aria-label="Previous video"
-          >
-            <ChevronLeft />
-          </button>
-          <button
-            className="absolute right-[13px] top-1/2 -translate-y-1/2 flex items-center justify-center size-[32px] cursor-pointer"
-            onClick={handleNext}
-            aria-label="Next video"
-          >
-            <ChevronRight />
-          </button>
-
-          {/* Controls bar — bottom-[35px], centered, w-[1492px] */}
-          <div
-            className="absolute bottom-[35px] left-1/2 -translate-x-1/2 flex flex-col gap-[2px] items-start"
-            style={{ width: "1492px" }}
-          >
-            {/* Progress track */}
-            <div className="relative w-full" style={{ height: "8px" }}>
-              {/* Track */}
+            {/* TOP BAR — Figma 768:10054. Title LEFT, close RIGHT (no expand icon). */}
+            <BlurBand position="top" className="absolute left-0 right-0 top-0 h-[12.146%] min-h-[64px]">
               <div
-                className="absolute inset-0 rounded-[10px]"
-                style={{ background: "#d6beeb" }}
-              />
-              {/* Fill */}
-              <div
-                className="absolute left-0 top-0 h-full rounded-[10px]"
+                className="absolute flex items-center justify-between"
                 style={{
-                  background: "#7b2cbf",
-                  width: `${progress}%`,
+                  top: "calc((46 / 120) * 100%)",
+                  left: "calc((73 / 1567) * 100%)",
+                  right: "calc((89 / 1567) * 100%)",
                 }}
-              />
-              {/* Clickable scrubber */}
-              <input
-                type="range"
-                min="0"
-                max="100"
-                value={progress}
-                onChange={(e) => setProgress(Number(e.target.value))}
-                className="absolute inset-0 w-full opacity-0 cursor-pointer"
-              />
-            </div>
-
-            {/* Controls row */}
-            <div className="flex items-center justify-between w-full">
-              {/* Left: play + time */}
-              <div className="flex items-center">
-                <button
-                  className="cursor-pointer"
-                  onClick={() => setIsPlaying(p => !p)}
-                  aria-label={isPlaying ? "Pause" : "Play"}
-                >
-                  {isPlaying ? <PauseIcon /> : <PlayIcon />}
-                </button>
-                <p className="font-raleway font-medium text-[16px] leading-[26px] text-primary-light-default text-center w-[94px]">
-                  0:01 / 1:25
+              >
+                {/* Title — w=298 text-center on 1567 design; SemiBold 25/normal #fefefe */}
+                <p className="w-[clamp(180px,20vw,298px)] text-left font-raleway text-[clamp(16px,2vw,25px)] font-semibold leading-tight text-primary-light-default">
+                  {title}
                 </p>
+                <button type="button" className="cursor-pointer" onClick={onClose} aria-label="Close viewer">
+                  <CloseCircleIcon size={40} />
+                </button>
+              </div>
+            </BlurBand>
+
+            {/* BOTTOM CONTROLS — Figma 772:10310 group, top=920/988 ≈ 93.117%, left=61/1567, w=1416/1567 */}
+            <div
+              className="absolute z-[3] flex flex-col items-stretch gap-[2px]"
+              style={{
+                top: "calc((920 / 988) * 100%)",
+                left: "calc((61 / 1567) * 100%)",
+                width: "calc((1416 / 1567) * 100%)",
+              }}
+            >
+              {/* Progress bar — 8px tall, bg #d6beeb (secondary-light-active), fill #7b2cbf (secondary-normal) */}
+              <div className="relative h-[6px] w-full md:h-[8px]">
+                <div className="absolute inset-0 rounded-[10px] bg-secondary-light-active" />
+                <div
+                  className="absolute left-0 top-0 h-full rounded-[10px] bg-secondary-normal-default transition-[width] duration-100"
+                  style={{ width: `${progressPct}%` }}
+                />
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  step="0.1"
+                  value={progressPct}
+                  onChange={(e) => seekPercent(Number(e.target.value))}
+                  className="absolute inset-0 w-full cursor-pointer opacity-0"
+                  aria-label="Seek video"
+                />
               </div>
 
-              {/* Right: speed + fullscreen */}
-              <div className="relative flex gap-[4px] items-center">
-                {/* Speed popup — appears above the speed button */}
-                {showSpeedPopup && (
-                  <div
-                    className="absolute bottom-full right-[28px] mb-[4px] flex items-center p-[4px] rounded-[5px] shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)]"
-                    style={{ background: "#ebdff5" }}
+              {/* Controls row */}
+              <div className="flex items-center justify-between">
+                {/* Left: play + time. Figma: items-center, no gap between play and time text */}
+                <div className="flex min-w-0 items-center">
+                  <button
+                    type="button"
+                    onClick={togglePlay}
+                    className="shrink-0 cursor-pointer"
+                    aria-label={isPlaying ? "Pause" : "Play"}
                   >
-                    {SPEED_OPTIONS.map((s) => (
-                      <button
-                        key={s}
-                        className={classNames(
-                          "flex h-[24px] items-center justify-center rounded-[5px] cursor-pointer w-[36px]",
-                          s === speed
-                            ? "bg-secondary-normal-default"
-                            : "bg-transparent"
-                        )}
-                        onClick={() => handleSpeedSelect(s)}
-                      >
-                        <span
+                    {isPlaying ? <PauseIcon size={24} /> : <PlayIcon size={24} />}
+                  </button>
+                  <p className="w-[94px] truncate text-center font-raleway text-[16px] font-medium leading-[26px] text-primary-light-default">
+                    {formatTime(currentTime)} / {formatTime(duration)}
+                  </p>
+                </div>
+
+                {/* Right: speed + fullscreen. Figma: gap=4, w=63 */}
+                <div className="relative flex shrink-0 items-center gap-[4px]">
+                  {/* Speed popup — design only shows the closed "1x"; popup is our own UX. */}
+                  {showSpeedPopup && (
+                    <div
+                      className="absolute bottom-full right-[28px] mb-2 flex items-center rounded-[5px] p-1 shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)]"
+                      style={{ background: "#ebdff5" }}
+                    >
+                      {SPEED_OPTIONS.map((s) => (
+                        <button
+                          key={s}
+                          type="button"
+                          onClick={() => handleSpeedSelect(s)}
                           className={classNames(
-                            "font-raleway text-center",
-                            s === speed
-                              ? "font-semibold text-[16px] leading-[22px] text-primary-light-default"
-                              : "font-normal text-[13px] leading-[20px] text-[#2d2d2d]"
+                            "flex h-[24px] w-[36px] cursor-pointer items-center justify-center rounded-[5px]",
+                            s === speed ? "bg-secondary-normal-default" : "bg-transparent"
                           )}
                         >
-                          {s}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                )}
+                          <span
+                            className={classNames(
+                              "font-raleway text-center",
+                              s === speed
+                                ? "text-[16px] font-semibold leading-[22px] text-primary-light-default"
+                                : "text-[13px] font-normal leading-[20px] text-tertiary-normal-default"
+                            )}
+                          >
+                            {s}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
 
-                {/* Speed button */}
-                <button
-                  className="flex items-center justify-center rounded-[5px] cursor-pointer"
-                  onClick={() => setShowSpeedPopup(p => !p)}
-                  aria-label="Playback speed"
-                >
-                  <span className="font-raleway text-primary-light-default text-center w-[36px] leading-[0]">
-                    <span className="text-[16px] leading-[22px]">{speed.replace("x", "")}</span>
-                    <span className="text-[13px] leading-[18px]">x</span>
-                  </span>
-                </button>
-
-                {/* Fullscreen button */}
-                <button
-                  className="relative size-[24px] cursor-pointer"
-                  aria-label="Fullscreen"
-                >
-                  <FullscreenIcon />
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* === BOTTOM INFO + THUMBNAIL STRIP + PAGINATION === */}
-        <div className="flex flex-col gap-[24px] items-center w-full px-[4px]">
-          {/* Blurred bottom bar — location + description + share/like */}
-          <div
-            className="relative w-full h-[146px] overflow-hidden rounded-[20px]"
-            style={{ backdropFilter: "blur(25px)", mixBlendMode: "multiply" }}
-          >
-            <div
-              className="absolute inset-0 pointer-events-none"
-              style={{ background: "linear-gradient(174.503deg, rgba(255,255,255,0) 186.69%, rgba(153,153,153,0.5) 339.94%)" }}
-            />
-            {/* Location + description */}
-            <div className="absolute top-1/2 -translate-y-1/2 left-[81px] flex flex-col gap-[7px] w-[298px]">
-              <div className="flex items-center gap-[7px]">
-                <div className="shrink-0 size-[26px] rounded-full overflow-hidden">
-                  <GhanaFlag />
-                </div>
-                <p className="font-raleway font-medium text-[16px] leading-[26px] text-primary-light-default whitespace-nowrap">
-                  {location}
-                </p>
-              </div>
-              <p className="font-raleway font-medium text-[16px] leading-[26px] text-primary-light-default">
-                {description}
-              </p>
-            </div>
-
-            {/* Share + like buttons */}
-            <div className="absolute top-[50px] right-[154px] flex items-center gap-[19px]">
-              {/* Share button */}
-              <button
-                className="relative size-[47px] flex items-center justify-center rounded-full border border-primary-light-default/30 cursor-pointer"
-                onClick={onShare}
-                aria-label="Share"
-              >
-                <ShareIcon />
-              </button>
-              {/* Like button */}
-              <button
-                className="relative size-[47px] flex items-center justify-center rounded-full bg-secondary-normal-default cursor-pointer"
-                aria-label="Like"
-              >
-                <HeartIcon />
-              </button>
-            </div>
-          </div>
-
-          {/* Divider */}
-          <div className="w-full h-px bg-primary-dark-default/20" />
-
-          {/* Thumbnail strip */}
-          <div className="flex items-center overflow-x-auto scrollbar-none w-full" style={{ height: "175px" }}>
-            {thumbnails.map((thumb, i) => {
-              const isActive = i === currentThumb;
-              const width = isActive ? 172 : 120;
-              return (
-                <button
-                  key={i}
-                  className="relative shrink-0 h-[175px] cursor-pointer"
-                  style={{ width: `${width}px` }}
-                  onClick={() => setCurrentThumb(i)}
-                  aria-label={`View video ${i + 1}`}
-                >
-                  <div
-                    className="absolute inset-0"
-                    style={{ background: "#d9d9d9" }}
+                  {/* Speed button — Figma: w=36 text-center, "1" 16/22 SemiBold + "x" 13/18 SemiBold, color #fefefe */}
+                  <button
+                    type="button"
+                    onClick={() => setShowSpeedPopup((p) => !p)}
+                    className="flex w-[36px] cursor-pointer items-center justify-center rounded-[5px]"
+                    aria-label="Playback speed"
                   >
-                    <img src={thumb} alt="" className="w-full h-full object-cover" />
-                    {!isActive && (
-                      <div className="absolute inset-0 bg-black/80" />
-                    )}
-                  </div>
-                </button>
-              );
-            })}
+                    <span className="text-center font-raleway text-primary-light-default">
+                      <span className="text-[16px] font-semibold leading-[22px]">{speed.replace("x", "")}</span>
+                      <span className="text-[13px] font-semibold leading-[18px]">x</span>
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={enterFullscreen}
+                    className="shrink-0 cursor-pointer"
+                    aria-label="Fullscreen"
+                  >
+                    <FullscreenIcon size={24} />
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* Pagination */}
-          <div className="flex items-center justify-between w-[1381px]">
-            <div className="flex gap-[4px] items-center">
-              <button
-                className="flex items-center p-[8px] rounded-[30px] cursor-pointer"
-                style={{ background: "rgba(235,223,245,0.5)" }}
-                onClick={handlePrev}
-                aria-label="Previous"
-              >
-                <ChevronLeft />
-              </button>
-              <button
-                className="flex items-center p-[8px] rounded-[30px] bg-secondary-light-hover cursor-pointer"
-                onClick={handleNext}
-                aria-label="Next"
-              >
-                <ChevronRight />
-              </button>
-            </div>
-            <p className="font-raleway font-medium text-[16px] leading-[26px] text-secondary-light-hover text-center whitespace-nowrap">
-              {currentThumb + 1} of {totalImages} images
-            </p>
-          </div>
+          {currentThumb < total - 1 ? (
+            <PeekCard src={nextSrc} side="right" label="Next video" onClick={goNext} />
+          ) : (
+            <div className="hidden w-[clamp(100px,12vw,260px)] shrink-0 md:block" aria-hidden />
+          )}
+
+          <ViewerEdgeArrows
+            onPrev={goPrev}
+            onNext={goNext}
+            canPrev={currentThumb > 0}
+            canNext={currentThumb < total - 1}
+          />
         </div>
+
+        {/* SEPARATE METADATA BAND — Figma 768:10126: 1567×146, rounded-[20px], same blur recipe as image viewer's bottom bar */}
+        <BlurBand
+          position="bottom"
+          rounded="rounded-[20px]"
+          className="relative w-[min(1567px,72vw)] max-w-[1567px]"
+          style={{ height: "clamp(120px, 9vw, 146px)" }}
+        >
+          {/* Left text block at left=81/1567, vertically centred */}
+          <div
+            className="absolute -translate-y-1/2"
+            style={{ top: "50%", left: "calc((81 / 1567) * 100%)" }}
+          >
+            <ViewerMetadataBlock location={location} description={description} flagSrc={flagSrc} />
+          </div>
+          {/* Right action buttons at top=50/146, right edge inset 90/1567 */}
+          <div
+            className="absolute"
+            style={{
+              top: "calc((50 / 146) * 100%)",
+              right: "calc((90 / 1567) * 100%)",
+            }}
+          >
+            <ViewerActionButtons onShare={onShare} onLike={onLike} />
+          </div>
+        </BlurBand>
+
+        {/* Divider */}
+        <div className="h-px w-full max-w-[1727px] bg-white/15" />
+
+        {/* Thumbnails */}
+        <ViewerThumbnailStrip
+          thumbnails={thumbnails}
+          currentIndex={currentThumb}
+          onSelect={(i) => setCurrentThumb(i)}
+        />
+
+        {/* Pagination */}
+        <ViewerPagination
+          currentIndex={currentThumb}
+          total={total}
+          onPrev={goPrev}
+          onNext={goNext}
+          label="videos"
+        />
       </div>
     </div>
   );

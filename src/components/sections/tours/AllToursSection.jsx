@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { classNames } from "../../../utils/classNames";
 import PopularTourCard from "../../cards/PopularTourCard";
+import PopularTourCardSkeleton from "../../cards/PopularTourCardSkeleton";
 
 // ── Figma: 1914:41067 — "All Tours" listing section (Tours country page)
 // Structure:
@@ -248,9 +249,54 @@ const GHANA_TOURS = [
 // ── AllToursSection ────────────────────────────────────────────────────────────
 // Figma 1914:41067 — full tours listing for a country page
 // bg: #fefefe, py-[80px], px-[148px]
-const AllToursSection = React.forwardRef(({ country = "Ghana", tourCount = 10, className, ...props }, ref) => {
+const AllToursSection = React.forwardRef(({ country = "Ghana", tourCount = 0, tours: toursProp, isLoading = false, className, ...props }, ref) => {
   const [sortOpen, setSortOpen] = useState(false);
   const [selectedSort, setSelectedSort] = useState(SORT_OPTIONS[0]);
+
+  const displayTours = toursProp && toursProp.length > 0
+    ? toursProp.map((t, i) => {
+        // Build duration from backend fields
+        const typeMap = { day_tour: "Day Tour", multi_day: "Multi-Day", express: "Express" };
+        const typeLabel = typeMap[t.tourType] || t.duration?.class || "Multi-Day";
+        const seats = t.remainingCapacity;
+        const durationClass = seats != null
+          ? `${typeLabel}: ${seats} Seat${seats !== 1 ? "s" : ""} Available`
+          : typeLabel;
+        const days = t.durationDays;
+        const durationSpan = days
+          ? (days === 1 ? "1 Day" : `${days} Days/${days - 1} Night${days - 1 !== 1 ? "s" : ""}`)
+          : (t.duration?.span || "3 Days");
+
+        // Price from cheapest pricing tier, fallback to basePrice
+        const tiers = t.pricingTiers;
+        const minPrice = tiers && tiers.length > 0
+          ? Math.min(...tiers.map((tier) => tier.pricePerPerson))
+          : t.basePrice;
+        const price = minPrice != null ? `Ghs.${Number(minPrice).toFixed(2)}` : t.price || "Contact us";
+
+        return {
+          id: t._id || t.id || i,
+          image: t.coverImage || t.image,
+          location: t.destination?.name
+            ? `${t.destination.name}/${t.country || "Ghana"}`
+            : (t.location || t.country || country),
+          rating: t.rating || 4.8,
+          title: t.title || t.name || "Tour",
+          availabilityBadge: t.availabilityBadge || "Available",
+          price,
+          tags: t.tags || [],
+          duration: { class: durationClass, span: durationSpan },
+          maxGroupSize: t.totalCapacity ?? t.maxGroupSize,
+          pickupIncluded: t.pickupIncluded ?? false,
+          featureType: t.featureType ?? null,
+          featureLabel: t.featureLabel ?? null,
+          statusBadge: t.statusBadge || null,
+          reviewCount: t.reviewCount || 0,
+          country: t.country || country.toLowerCase(),
+          slug: t.slug || t.tourSlug || String(t._id || t.id || i),
+        };
+      })
+    : [];
 
   return (
     <section
@@ -362,28 +408,33 @@ const AllToursSection = React.forwardRef(({ country = "Ghana", tourCount = 10, c
         </div>
 
         {/* ── Tour grid — 3 rows × 4 cols, gap-x-[8px] gap-y-[20px] ──────── */}
-        {/* Figma 1942:31179: cards 351×615, rows at y=0/635/1270, col spacing=359 */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-x-[8px] gap-y-6 md:gap-y-[20px]">
-          {GHANA_TOURS.map((tour) => (
-            <PopularTourCard
-              key={tour.id}
-              image={tour.image}
-              location={tour.location}
-              rating={tour.rating}
-              title={tour.title}
-              availabilityBadge={tour.availabilityBadge}
-              price={tour.price}
-              tags={tour.tags}
-              duration={tour.duration}
-              pickupIncluded={tour.pickupIncluded}
-              maxGroupSize={tour.maxGroupSize}
-              featureType={tour.featureType ?? null}
-              featureLabel={tour.featureLabel ?? null}
-              statusBadge={tour.statusBadge ?? null}
-              country={tour.country}
-              tourSlug={tour.slug}
-            />
-          ))}
+          {isLoading
+            ? Array.from({ length: 8 }).map((_, i) => (
+                <PopularTourCardSkeleton key={i} />
+              ))
+            : displayTours.map((tour) => (
+                <PopularTourCard
+                  key={tour.id}
+                  image={tour.image}
+                  location={tour.location}
+                  rating={tour.rating}
+                  title={tour.title}
+                  availabilityBadge={tour.availabilityBadge}
+                  price={tour.price}
+                  tags={tour.tags}
+                  duration={tour.duration}
+                  pickupIncluded={tour.pickupIncluded}
+                  maxGroupSize={tour.maxGroupSize}
+                  featureType={tour.featureType ?? null}
+                  featureLabel={tour.featureLabel ?? null}
+                  statusBadge={tour.statusBadge ?? null}
+                  reviewCount={tour.reviewCount}
+                  country={tour.country}
+                  tourSlug={tour.slug}
+                />
+              ))
+          }
         </div>
 
         {/* ── Load More button — Figma 1942:31174, centred ─────────────────── */}

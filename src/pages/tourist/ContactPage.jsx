@@ -1,5 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { classNames } from "../../utils/classNames";
+import { submitContactApi } from "../../api/contact.api";
+import { useAppDispatch } from "../../hooks/useAppDispatch";
+import { useAppSelector } from "../../hooks/useAppSelector";
+import { fetchFAQsThunk, selectFAQs } from "../../store/slices/cmsSlice";
 import HeroImageSlider from "../../components/ui/HeroImageSlider";
 import ContactForm from "../../components/ui/ContactForm";
 import ContactInfoPill from "../../components/ui/ContactInfoPill";
@@ -132,21 +136,44 @@ const ArrowRightIcon = () => (
 
 // ─── ContactPage ──────────────────────────────────────────────────────────────
 const ContactPage = React.forwardRef(({ className, ...props }, ref) => {
+  const dispatch = useAppDispatch();
+  const apiFaqs = useAppSelector(selectFAQs);
   const [showToast, setShowToast] = useState(false);
   const [activeTab, setActiveTab] = useState("General FAQs");
   const [faqSearch, setFaqSearch] = useState("");
   const [partnerModalOpen, setPartnerModalOpen] = useState(false);
 
-  const handleFormSubmit = () => setShowToast(true);
+  useEffect(() => {
+    dispatch(fetchFAQsThunk());
+  }, [dispatch]);
+
+  const handleFormSubmit = async (formData) => {
+    try {
+      await submitContactApi({
+        name: `${formData.firstName} ${formData.lastName}`.trim(),
+        email: formData.email,
+        phone: formData.phone ? `${formData.phoneCode} ${formData.phone}` : undefined,
+        subject: formData.subject,
+        message: formData.message,
+      });
+    } catch {
+      // Show toast regardless - message may have gone through
+    }
+    setShowToast(true);
+  };
   const dismissToast = () => setShowToast(false);
 
+  const faqSource = apiFaqs && apiFaqs.length > 0
+    ? apiFaqs.map((f) => ({ question: f.question, answer: f.answer }))
+    : FAQ_ITEMS;
+
   const visibleFaqs = faqSearch
-    ? FAQ_ITEMS.filter(
+    ? faqSource.filter(
         (f) =>
           f.question.toLowerCase().includes(faqSearch.toLowerCase()) ||
           f.answer.toLowerCase().includes(faqSearch.toLowerCase())
       )
-    : FAQ_ITEMS;
+    : faqSource;
 
   return (
     <div ref={ref} className={classNames("w-full", className)} {...props}>

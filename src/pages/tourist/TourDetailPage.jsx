@@ -1,9 +1,15 @@
 import React, { useState, useEffect, useCallback, Fragment, useMemo } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { useAppDispatch } from "../../hooks/useAppDispatch";
+import { useAppSelector } from "../../hooks/useAppSelector";
+import { fetchTourThunk, selectCurrentTour, clearCurrentTour } from "../../store/slices/toursSlice";
+import { createBookingThunk, selectCreateBookingStatus, selectBookingsError, clearBookingError } from "../../store/slices/bookingsSlice";
+import { selectIsAuthenticated } from "../../store/slices/authSlice";
+import { incrementTourViewApi } from "../../api/tours.api";
+import { listReviewsByTourApi } from "../../api/reviews.api";
 import { classNames } from "../../utils/classNames";
 import { formatTimeAgo } from "../../utils/formatTimeAgo";
 import BlogBreadcrumbBar from "../../components/sections/blog/BlogBreadcrumbBar";
-import PopularTourCard from "../../components/cards/PopularTourCard";
 import ImageGalleryModal from "../../components/ui/ImageGalleryModal";
 import ShareModal from "../../components/ui/ShareModal";
 import PartnerWithUsModal from "../../components/ui/PartnerWithUsModal";
@@ -16,9 +22,6 @@ import "leaflet/dist/leaflet.css";
 
 // Route: /tours/:country/:tour
 // e.g. /tours/ghana/elmina-heritage-coastal-journey
-
-// ─── Static tour data (replace with API call later) ───────────────────────────
-const msAgo = (ms) => new Date(Date.now() - ms).toISOString();
 
 /** Fallback map center if tour has no `meetingPoint` (WGS84). */
 const DEFAULT_MEETING_POINT = { lat: 5.6037, lng: -0.187 };
@@ -213,705 +216,6 @@ const MeetingPointMapFrame = ({
     </MapContainer>
   );
 };
-
-/**
- * Per-tour page content. Optional keys control “extended” detail layout:
- * - `tourHighlights` — cards under About the Tour (`{ title, description }[]`; legacy plain strings become title-only)
- * - `businessAmenities` — two-column checklist + optional `corporateBookingBenefits` or legacy `noteHtml`
- *   (`items` order: **left** column top-to-bottom, then **right** column, so the split matches Figma)
- * - `importantInformation` — `{ blocks[], footerNote? }` above the map (`block.label` or `block.title` + `body`; optional banner)
- * - `bookingAddOns` — optional extras in the sidebar (checkboxes + subtotal)
- * Omit a field or use [] / empty `items` / `blocks` to hide that block.
- */
-const TOUR_DATA = {
-  "elmina-heritage-coastal-journey": {
-    title: "Elmina Heritage & Coastal Journey",
-    country: "Ghana",
-    location: "Cape Coast, Ghana",
-    meetingPoint: { lat: 5.6037, lng: -0.187 },
-    meetingPointLabel: "Accra, Greater Accra Region",
-    /** Optional: omit or [] to hide “Tour Highlights” on this tour */
-    tourHighlights: [
-      {
-        title: "Elmina Castle & Atlantic heritage",
-        description:
-          "UNESCO World Heritage site with expert guides and space for reflection at the Door of No Return.",
-      },
-      {
-        title: "Cape Coast communities & markets",
-        description:
-          "Coastal fishing villages, open-air markets, and everyday life along Ghana's Central Region shore.",
-      },
-      {
-        title: "Cultural context & local voices",
-        description:
-          "Certified heritage storytelling that connects the past to the living culture around you.",
-      },
-      {
-        title: "Evening ocean & downtime",
-        description:
-          "Paced days with time by the coast—well suited to photography, conversation, and rest.",
-      },
-    ],
-    /** Optional: omit or empty items[] to hide “Business Amenities” */
-    businessAmenities: {
-      items: [
-        "High-Speed WiFi Throughout",
-        "4-Star Hotel (Executive Floor)",
-        "VAT Invoices Provided",
-        "Private Chauffeured Vehicle",
-        "Corporate Group Invoicing",
-        "24/7 Concierge Support",
-        "Airport Transfers (VIP)",
-        "Hotel pickup & drop-off",
-        "Meeting Room Access",
-      ],
-      corporateBookingBenefits: {
-        title: "Corporate Booking Benefits",
-        items: [
-          "Group bookings of 5+ receive 12% corporate discount",
-          "Consolidated invoices available for company expense reporting",
-          "Dedicated corporate account manager assigned for your trip",
-          "Custom itinerary modifications for conference integration",
-        ],
-      },
-    },
-    /** Optional — appears above the map in Location */
-    importantInformation: {
-      blocks: [
-        {
-          title: "Visa:",
-          body: "Most non-Ghanaian visitors need a visa or eligible VOA; check your nationality and apply early. eVisa is available for many countries.",
-        },
-        {
-          title: "Health:",
-          body:
-            "Yellow fever vaccination is required for entry. Malaria prophylaxis is strongly recommended. Confirm plans with your healthcare provider at least 6 weeks before travel.",
-        },
-        {
-          title: "Dress code:",
-          body: "Comfortable walking shoes and modest layers for heritage sites. Smart casual for evenings; bring sun protection and a light rain layer in the rainy season.",
-        },
-        {
-          title: "Power:",
-          body: "Ghana uses Type G outlets (230V). Bring a universal adaptor; a power bank is useful for long days.",
-        },
-        {
-          title: "Connectivity:",
-          body: "Local SIM cards with data are widely available (MTN, Vodafone, AirtelTigo). Your guide can help on arrival if needed.",
-        },
-      ],
-      footerNote:
-        "Free cancellation up to 48 hours before departure. Corporate and group bookings may have dedicated terms—contact your coordinator.",
-    },
-    /** Optional: omit or [] — optional extras + subtotal in the booking sidebar */
-    bookingAddOns: [
-      { id: "airport", label: "Airport pickup / drop-off (Accra)", priceGhc: 250 },
-      { id: "photo", label: "Half-day professional photography", priceGhc: 450 },
-    ],
-    rating: 4.9,
-    duration: "3 Days / 2 Nights",
-    price: "GHC 4,590",
-    description:
-      'Stand inside the same cells that held thousands of enslaved Africans before their crossing  Elmina Castle is not just a UNESCO World Heritage Site, it is a visceral entry into history that demands to be felt, not just seen. Your certified heritage guide will walk you through every corner, courtyard, and "Door of No Return" with a depth that no audio guide can replicate. <br /><br />Beyond the castle, this journey moves through the living cultures of Ghana\'s Central Region  fishing villages that celebrate dance, open-air markets crowded with dried fish and fresh cassava, and evenings by the ocean where coconuts are shared and waves echo the unspoken. This is Ghana unfiltered.',
-    images: Array.from(
-      { length: 24 },
-      (_, i) => `https://picsum.photos/seed/tour-detail-${i + 1}/856/717`
-    ),
-    heroMainImage: "https://picsum.photos/seed/tour-hero-main/856/717",
-    heroTopRight: "https://picsum.photos/seed/tour-hero-top/867/366",
-    heroBottomLeft: "https://picsum.photos/seed/tour-hero-bl/430/347",
-    heroBottomRight: "https://picsum.photos/seed/tour-hero-bottom/432/347",
-    bestFor: [
-      "Cultural Enthusiasts",
-      "Diaspora Travelers",
-      "International Tourists",
-      "Couples",
-    ],
-    included: [
-      { type: "check", text: "All inter-continental travels" },
-      { type: "check", text: "Expert certified heritage guides" },
-      { type: "check", text: "2 nights hotel accommodation" },
-      { type: "check", text: "4 meals (2x Lunch, 2x Breakfast)" },
-      { type: "check", text: "All entrance fees" },
-      { type: "check", text: "Hotel pickup & drop-off" },
-      { type: "cross", text: "International/domestic flights" },
-      { type: "cross", text: "Personal spending & tips" },
-      { type: "cross", text: "Travel insurance" },
-      { type: "cross", text: "Alcoholic beverages" },
-      { type: "cross", text: "Dinner meals (Day 1 & 2)" },
-    ],
-    itinerary: [
-      {
-        day: 1,
-        title: "Accra Departure → Cape Coast Arrival",
-        preview: "Lagos · Airport → Victoria Island · Meals: Welcome Dinner",
-        activities: [
-          {
-            time: "08:00 AM",
-            activity: "Early drive along the coastal highway",
-          },
-          {
-            time: "10:00 AM",
-            activity: "Orientation walk through Cape Coast town",
-            tag: "Business",
-          },
-          {
-            time: "12:00 PM",
-            activity: "Traditional cuisine walk at local market",
-          },
-        ],
-        localContext:
-          " Lagos is Africa's largest city by population, home to 21M+ people and a GDP that rivals many African nations. Victoria Island is the commercial and diplomatic heartbeat.",
-      },
-      {
-        day: 2,
-        title: "Coastal Exploration",
-        preview: "Lagos · Airport → Victoria Island · Meals: Welcome Dinner",
-
-        activities: [
-          {
-            time: "08:00 AM",
-            activity: "Fort Elmina & Cape Coast Castle visits",
-          },
-          {
-            time: "10:00 AM",
-            activity: "Kakum National Park canopy walk",
-            tag: "Business",
-          },
-          { time: "12:00 PM", activity: "Local fishing harbour market tour" },
-        ],
-        localContext:
-          " Lagos is Africa's largest city by population, home to 21M+ people and a GDP that rivals many African nations. Victoria Island is the commercial and diplomatic heartbeat.",
-      },
-      {
-        day: 3,
-        title: "Return to Accra",
-        preview: "Lagos · Airport → Victoria Island · Meals: Welcome Dinner",
-
-        activities: [
-          {
-            time: "08:00 AM",
-            activity: "W.E.B Du Bois Memorial Museum visit",
-            tag: "Business",
-          },
-          {
-            time: "10:00 AM",
-            activity: "Departure and transfer back to Accra",
-          },
-        ],
-        localContext:
-          " Lagos is Africa's largest city by population, home to 21M+ people and a GDP that rivals many African nations. Victoria Island is the commercial and diplomatic heartbeat.",
-      },
-    ],
-    guide: {
-      name: "Ailsa Mensah-Asante",
-      rating: 4.9,
-      reviews: 124,
-      speciality: "Heritage Guide",
-      yearsExp: 8,
-      languages: [
-        { code: "gb", name: "English" },
-        { code: "fr", name: "French" },
-        { code: "gh", name: "Twi" }, // Twi is Ghanaian → gh
-      ],
-      certifications: ["UNESCO Certified", "History MA"],
-      image: "/tourAssets/Image-1.png",
-      testimonials: [
-        {
-          quote:
-            "Ailsa's depth of knowledge brought the castle history to life in a way no textbook ever could. A truly transformative experience.",
-          reviewer: "Estella Sackey",
-          date: "2 weeks ago",
-        },
-        {
-          quote:
-            "Her passion for Ghana's heritage is infectious. Every stop felt personal and deeply meaningful — I'll never forget it.",
-          reviewer: "James O.",
-          date: "1 month ago",
-        },
-      ],
-    },
-    reviews: [
-      {
-        id: 1,
-        name: "Sarah M.",
-        avatar: "https://picsum.photos/seed/reviewer-1/40/40",
-        rating: 5,
-        date: msAgo(50 * 1000),
-        text: "Absolutely life-changing experience. Kwame's knowledge of the history was profound and deeply moving. The castle visits were emotional but necessary. Highly recommend to every person of African descent.",
-      },
-      {
-        id: 2,
-        name: "James O.",
-        avatar: "https://picsum.photos/seed/reviewer-2/40/40",
-        rating: 5,
-        date: msAgo(5 * 60 * 1000),
-        text: "A perfect blend of history, culture, and natural beauty. The canopy walk was exhilarating and the coastal views were stunning. Elysium Tours truly exceeded our expectations.",
-      },
-      {
-        id: 3,
-        name: "Priya K.",
-        avatar: "https://picsum.photos/seed/reviewer-3/40/40",
-        rating: 4,
-        date: msAgo(14 * 24 * 60 * 60 * 1000),
-        text: "Wonderful tour with excellent organisation. The accommodations were comfortable and the meals were delicious. Would love to return for the extended tour next time.",
-      },
-    ],
-    ratingBreakdown: { 5: 85, 4: 10, 3: 3, 2: 1, 1: 1 },
-    totalReviews: 3249,
-    categoryRatings: [
-      { label: "Guide Quality", score: 4.9 },
-      { label: "Value for Money", score: 4.8 },
-      { label: "Logistical Quality", score: 4.9 },
-      { label: "Transport", score: 4.5 },
-    ],
-    addOns: [
-      {
-        icon: (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 20 20"
-            fill="none"
-          >
-            <g clip-path="url(#clip0_3749_56820)">
-              <path
-                d="M7.19104 2.49449L6.69277 1.93394L6.69277 1.93394L7.19104 2.49449ZM12.8037 2.49449L13.302 1.93394V1.93394L12.8037 2.49449ZM12.624 2.33468L12.1257 2.89523V2.89523L12.624 2.33468ZM7.37084 2.33467L7.86911 2.89523V2.89523L7.37084 2.33467ZM3.38162 17.5375L3.82246 16.9308L3.38162 17.5375ZM2.45982 16.6157L3.06659 16.1749L2.45982 16.6157ZM17.535 16.6157L16.9282 16.1749L17.535 16.6157ZM16.6132 17.5375L16.1723 16.9308L16.6132 17.5375ZM18.3307 6.65407H17.5807V10.8333H18.3307H19.0807V6.65407H18.3307ZM10.8307 18.3333V17.5833H9.16406V18.3333V19.0833H10.8307V18.3333ZM1.66406 10.8333H2.41406V6.65407H1.66406H0.914062V10.8333H1.66406ZM12.624 2.33468L12.1257 2.89523L12.3055 3.05505L12.8037 2.49449L13.302 1.93394L13.1222 1.77412L12.624 2.33468ZM7.19104 2.49449L7.68932 3.05505L7.86911 2.89523L7.37084 2.33467L6.87257 1.77412L6.69277 1.93394L7.19104 2.49449ZM4.98484 3.33329V4.08329C5.98183 4.08329 6.94416 3.71741 7.68932 3.05505L7.19104 2.49449L6.69277 1.93394C6.22219 2.35223 5.61446 2.58329 4.98484 2.58329V3.33329ZM12.8037 2.49449L12.3055 3.05505C13.0506 3.71741 14.013 4.08329 15.01 4.08329V3.33329V2.58329C14.3803 2.58329 13.7726 2.35223 13.302 1.93394L12.8037 2.49449ZM12.624 2.33468L13.1222 1.77412C11.3401 0.19004 8.65465 0.19004 6.87257 1.77412L7.37084 2.33467L7.86911 2.89523C9.08287 1.81634 10.9119 1.81634 12.1257 2.89523L12.624 2.33468ZM9.16406 18.3333V17.5833C7.58497 17.5833 6.46089 17.5823 5.59256 17.4882C4.73827 17.3956 4.22094 17.2203 3.82246 16.9308L3.38162 17.5375L2.94079 18.1443C3.63758 18.6505 4.44908 18.8731 5.43099 18.9795C6.39887 19.0843 7.61838 19.0833 9.16406 19.0833V18.3333ZM1.66406 10.8333H0.914062C0.914062 12.379 0.913033 13.5985 1.0179 14.5664C1.12428 15.5483 1.34681 16.3598 1.85306 17.0566L2.45982 16.6157L3.06659 16.1749C2.77708 15.7764 2.60173 15.2591 2.50917 14.4048C2.41509 13.5365 2.41406 12.4124 2.41406 10.8333H1.66406ZM3.38162 17.5375L3.82246 16.9308C3.53241 16.72 3.27733 16.4649 3.06659 16.1749L2.45982 16.6157L1.85306 17.0566C2.15632 17.474 2.52339 17.841 2.94079 18.1443L3.38162 17.5375ZM18.3307 10.8333H17.5807C17.5807 12.4124 17.5797 13.5365 17.4856 14.4048C17.3931 15.2591 17.2177 15.7764 16.9282 16.1749L17.535 16.6157L18.1417 17.0566C18.648 16.3598 18.8705 15.5483 18.9769 14.5664C19.0818 13.5985 19.0807 12.379 19.0807 10.8333H18.3307ZM10.8307 18.3333V19.0833C12.3764 19.0833 13.5959 19.0843 14.5638 18.9795C15.5457 18.8731 16.3572 18.6505 17.054 18.1443L16.6132 17.5375L16.1723 16.9308C15.7739 17.2203 15.2565 17.3956 14.4022 17.4882C13.5339 17.5823 12.4098 17.5833 10.8307 17.5833V18.3333ZM17.535 16.6157L16.9282 16.1749C16.7175 16.4649 16.4624 16.72 16.1723 16.9308L16.6132 17.5375L17.054 18.1443C17.4714 17.841 17.8385 17.474 18.1417 17.0566L17.535 16.6157ZM18.3307 6.65407H19.0807C19.0807 4.40584 17.2582 2.58329 15.01 2.58329V3.33329V4.08329C16.4298 4.08329 17.5807 5.23427 17.5807 6.65407H18.3307ZM1.66406 6.65407H2.41406C2.41406 5.23427 3.56504 4.08329 4.98484 4.08329V3.33329V2.58329C2.73661 2.58329 0.914062 4.40584 0.914062 6.65407H1.66406ZM6.66406 10.8333H5.91406C5.91406 13.0885 7.74223 14.9166 9.9974 14.9166V14.1666V13.4166C8.57066 13.4166 7.41406 12.26 7.41406 10.8333H6.66406ZM9.9974 14.1666V14.9166C12.2526 14.9166 14.0807 13.0885 14.0807 10.8333H13.3307H12.5807C12.5807 12.26 11.4241 13.4166 9.9974 13.4166V14.1666ZM13.3307 10.8333H14.0807C14.0807 8.57813 12.2526 6.74996 9.9974 6.74996V7.49996V8.24996C11.4241 8.24996 12.5807 9.40655 12.5807 10.8333H13.3307ZM9.9974 7.49996V6.74996C7.74223 6.74996 5.91406 8.57813 5.91406 10.8333H6.66406H7.41406C7.41406 9.40655 8.57066 8.24996 9.9974 8.24996V7.49996Z"
-                fill="#7B2CBF"
-              />
-              <path
-                d="M14.1641 6.66671C14.1641 7.12694 14.5372 7.50004 14.9974 7.50004C15.4576 7.50004 15.8307 7.12694 15.8307 6.66671C15.8307 6.20647 15.4576 5.83337 14.9974 5.83337C14.5372 5.83337 14.1641 6.20647 14.1641 6.66671Z"
-                fill="#7B2CBF"
-              />
-            </g>
-            <defs>
-              <clipPath id="clip0_3749_56820">
-                <rect width="20" height="20" fill="white" />
-              </clipPath>
-            </defs>
-          </svg>
-        ),
-        name: "Professional Photo Package",
-
-        desc: "High-resolution photos & edited highlights reel",
-        price: "GH₵ 850",
-      },
-      {
-        icon: (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="21"
-            height="20"
-            viewBox="0 0 21 20"
-            fill="none"
-          >
-            <path
-              d="M3.33594 10L5.0026 10.8333"
-              stroke="#7B2CBF"
-              stroke-width="1.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-            <path
-              d="M19.1667 10.4165L17.5 10.8332"
-              stroke="#7B2CBF"
-              stroke-width="1.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-            <path
-              d="M7.91406 14.5833L8.11879 14.0715C8.42324 13.3104 8.57546 12.9298 8.8929 12.7149C9.21034 12.5 9.62023 12.5 10.44 12.5H12.0548C12.8746 12.5 13.2845 12.5 13.6019 12.7149C13.9193 12.9298 14.0716 13.3104 14.376 14.0715L14.5807 14.5833"
-              stroke="#7B2CBF"
-              stroke-width="1.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-            <path
-              d="M2.91406 14.1665V16.5682C2.91406 16.8838 3.11469 17.1723 3.4323 17.3135C3.63838 17.4051 3.83521 17.4998 4.07288 17.4998H5.50525C5.74291 17.4998 5.93975 17.4051 6.14583 17.3135C6.46344 17.1723 6.66406 16.8838 6.66406 16.5682V14.9998"
-              stroke="#7B2CBF"
-              stroke-width="1.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-            <path
-              d="M15.8359 14.9998V16.5682C15.8359 16.8838 16.0366 17.1723 16.3542 17.3135C16.5603 17.4051 16.7571 17.4998 16.9948 17.4998H18.4271C18.6648 17.4998 18.8616 17.4051 19.0677 17.3135C19.3853 17.1723 19.5859 16.8838 19.5859 16.5682V14.1665"
-              stroke="#7B2CBF"
-              stroke-width="1.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-            <path
-              d="M17.9141 7.08317L18.7474 6.6665"
-              stroke="#7B2CBF"
-              stroke-width="1.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-            <path
-              d="M4.58333 7.08317L3.75 6.6665"
-              stroke="#7B2CBF"
-              stroke-width="1.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-            <path
-              d="M5 7.5L5.90692 4.77924C6.2736 3.67921 6.45693 3.12919 6.89342 2.8146C7.32989 2.5 7.90966 2.5 9.0692 2.5H13.4308C14.5903 2.5 15.1701 2.5 15.6066 2.8146C16.0431 3.12919 16.2264 3.67921 16.5931 4.77924L17.5 7.5"
-              stroke="#7B2CBF"
-              stroke-width="1.5"
-              stroke-linejoin="round"
-            />
-            <path
-              d="M4.9974 7.5H17.4974C18.2951 8.34458 19.5807 9.52075 19.5807 10.833V13.7252C19.5807 14.2006 19.2645 14.6007 18.8447 14.6562L16.2474 15H6.2474L3.65003 14.6562C3.23035 14.6007 2.91406 14.2006 2.91406 13.7252V10.833C2.91406 9.52075 4.19972 8.34458 4.9974 7.5Z"
-              stroke="#7B2CBF"
-              stroke-width="1.5"
-              stroke-linejoin="round"
-            />
-          </svg>
-        ),
-        name: "Private Vehicle Upgrade",
-        desc: "Exclusive private transfer throughout the tour",
-        price: "GH₵ 850",
-      },
-      {
-        icon: (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 20 20"
-            fill="none"
-          >
-            <path
-              d="M8.035 1.43875C8.385 0.73875 9.01625 0 10 0C10.9837 0 11.615 0.74 11.965 1.43875C12.3262 2.1625 12.5 3.03875 12.5 3.75V8.36375L18.9625 11.595C19.2742 11.7506 19.5364 11.99 19.7197 12.2863C19.9029 12.5826 20 12.9241 20 13.2725V15C20 15.0907 19.9802 15.1804 19.942 15.2627C19.9038 15.345 19.8482 15.418 19.779 15.4766C19.7097 15.5352 19.6286 15.5781 19.5411 15.6022C19.4537 15.6263 19.362 15.6311 19.2725 15.6162L12.3887 14.4687L11.92 17.285L13.5675 18.9325C13.6551 19.0199 13.7148 19.1314 13.739 19.2528C13.7633 19.3741 13.7509 19.5 13.7035 19.6143C13.6561 19.7287 13.5758 19.8264 13.4728 19.895C13.3698 19.9637 13.2488 20.0002 13.125 20H6.875C6.75122 20.0002 6.63017 19.9637 6.52718 19.895C6.4242 19.8264 6.34392 19.7287 6.29652 19.6143C6.24912 19.5 6.23674 19.3741 6.26095 19.2528C6.28516 19.1314 6.34487 19.0199 6.4325 18.9325L8.08125 17.285L7.61125 14.4687L0.7275 15.6162C0.638004 15.6311 0.546341 15.6263 0.45888 15.6022C0.371418 15.5781 0.290255 15.5352 0.221029 15.4766C0.151803 15.418 0.0961726 15.345 0.0580036 15.2627C0.0198346 15.1804 4.17625e-05 15.0907 0 15L0 13.2725C1.17688e-05 12.9241 0.0970907 12.5826 0.280348 12.2863C0.463605 11.99 0.725792 11.7506 1.0375 11.595L7.5 8.36375L7.5 3.75C7.5 3.04 7.675 2.16125 8.035 1.43875ZM9.1525 1.99875C8.88875 2.525 8.75 3.21125 8.75 3.75V8.75C8.75 8.86597 8.71772 8.97966 8.65679 9.07834C8.59587 9.17701 8.50868 9.25679 8.405 9.30875L1.595 12.7137C1.49132 12.7657 1.40413 12.8455 1.3432 12.9442C1.28228 13.0428 1.25 13.1565 1.25 13.2725L1.25 14.2625L8.0225 13.1337C8.18574 13.1066 8.35309 13.1453 8.48783 13.2414C8.62256 13.3375 8.7137 13.4831 8.74125 13.6462L9.36625 17.3962C9.38281 17.4947 9.37556 17.5956 9.34511 17.6906C9.31467 17.7857 9.26191 17.872 9.19125 17.9425L8.385 18.75H11.6175L10.8087 17.9425C10.7383 17.8722 10.6856 17.786 10.6552 17.6912C10.6248 17.5964 10.6174 17.4957 10.6337 17.3975L11.2587 13.6475C11.2722 13.5665 11.3016 13.4889 11.3451 13.4192C11.3886 13.3495 11.4454 13.2891 11.5122 13.2414C11.5791 13.1936 11.6547 13.1596 11.7348 13.1411C11.8148 13.1227 11.8977 13.1201 11.9787 13.1337L18.75 14.2625V13.2725C18.75 13.1565 18.7177 13.0428 18.6568 12.9442C18.5959 12.8455 18.5087 12.7657 18.405 12.7137L11.595 9.30875C11.4913 9.25679 11.4041 9.17701 11.3432 9.07834C11.2823 8.97966 11.25 8.86597 11.25 8.75V3.75C11.25 3.21 11.1125 2.52625 10.8475 1.99875C10.5725 1.44875 10.2662 1.25 10 1.25C9.73375 1.25 9.4275 1.4475 9.1525 1.99875Z"
-              fill="#7B2CBF"
-            />
-          </svg>
-        ),
-        name: "Elmwood International Flights",
-        desc: "Return flights from your home country",
-        price: "GH₵ 850",
-      },
-      {
-        icon: (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 20 20"
-            fill="none"
-          >
-            <path
-              d="M8.035 1.43875C8.385 0.73875 9.01625 0 10 0C10.9837 0 11.615 0.74 11.965 1.43875C12.3262 2.1625 12.5 3.03875 12.5 3.75V8.36375L18.9625 11.595C19.2742 11.7506 19.5364 11.99 19.7197 12.2863C19.9029 12.5826 20 12.9241 20 13.2725V15C20 15.0907 19.9802 15.1804 19.942 15.2627C19.9038 15.345 19.8482 15.418 19.779 15.4766C19.7097 15.5352 19.6286 15.5781 19.5411 15.6022C19.4537 15.6263 19.362 15.6311 19.2725 15.6162L12.3887 14.4687L11.92 17.285L13.5675 18.9325C13.6551 19.0199 13.7148 19.1314 13.739 19.2528C13.7633 19.3741 13.7509 19.5 13.7035 19.6143C13.6561 19.7287 13.5758 19.8264 13.4728 19.895C13.3698 19.9637 13.2488 20.0002 13.125 20H6.875C6.75122 20.0002 6.63017 19.9637 6.52718 19.895C6.4242 19.8264 6.34392 19.7287 6.29652 19.6143C6.24912 19.5 6.23674 19.3741 6.26095 19.2528C6.28516 19.1314 6.34487 19.0199 6.4325 18.9325L8.08125 17.285L7.61125 14.4687L0.7275 15.6162C0.638004 15.6311 0.546341 15.6263 0.45888 15.6022C0.371418 15.5781 0.290255 15.5352 0.221029 15.4766C0.151803 15.418 0.0961726 15.345 0.0580036 15.2627C0.0198346 15.1804 4.17625e-05 15.0907 0 15L0 13.2725C1.17688e-05 12.9241 0.0970907 12.5826 0.280348 12.2863C0.463605 11.99 0.725792 11.7506 1.0375 11.595L7.5 8.36375L7.5 3.75C7.5 3.04 7.675 2.16125 8.035 1.43875ZM9.1525 1.99875C8.88875 2.525 8.75 3.21125 8.75 3.75V8.75C8.75 8.86597 8.71772 8.97966 8.65679 9.07834C8.59587 9.17701 8.50868 9.25679 8.405 9.30875L1.595 12.7137C1.49132 12.7657 1.40413 12.8455 1.3432 12.9442C1.28228 13.0428 1.25 13.1565 1.25 13.2725L1.25 14.2625L8.0225 13.1337C8.18574 13.1066 8.35309 13.1453 8.48783 13.2414C8.62256 13.3375 8.7137 13.4831 8.74125 13.6462L9.36625 17.3962C9.38281 17.4947 9.37556 17.5956 9.34511 17.6906C9.31467 17.7857 9.26191 17.872 9.19125 17.9425L8.385 18.75H11.6175L10.8087 17.9425C10.7383 17.8722 10.6856 17.786 10.6552 17.6912C10.6248 17.5964 10.6174 17.4957 10.6337 17.3975L11.2587 13.6475C11.2722 13.5665 11.3016 13.4889 11.3451 13.4192C11.3886 13.3495 11.4454 13.2891 11.5122 13.2414C11.5791 13.1936 11.6547 13.1596 11.7348 13.1411C11.8148 13.1227 11.8977 13.1201 11.9787 13.1337L18.75 14.2625V13.2725C18.75 13.1565 18.7177 13.0428 18.6568 12.9442C18.5959 12.8455 18.5087 12.7657 18.405 12.7137L11.595 9.30875C11.4913 9.25679 11.4041 9.17701 11.3432 9.07834C11.2823 8.97966 11.25 8.86597 11.25 8.75V3.75C11.25 3.21 11.1125 2.52625 10.8475 1.99875C10.5725 1.44875 10.2662 1.25 10 1.25C9.73375 1.25 9.4275 1.4475 9.1525 1.99875Z"
-              fill="#7B2CBF"
-            />
-          </svg>
-        ),
-        name: "Souvenir Bundle",
-        desc: "Curated Ghanaian artisan souvenirs and gifts",
-        price: "GH₵ 850",
-      },
-    ],
-  },
-};
-
-// ─── Templated tour data (fallback) ────────────────────────────────────────
-// For tour slugs that don't have rich curated data in TOUR_DATA above, we
-// build per-tour entries by merging a shared TOUR_TEMPLATE with slug-specific
-// overrides (title, location, price, duration, description, country).
-// This way every tour link in the app routes to a detail page with at least
-// the right title and basic info, instead of falling back to Elmina.
-const TOUR_TEMPLATE = {
-  rating: 4.8,
-  reviewCount: 24,
-  maxGuests: 12,
-  languages: "English, Twi, French",
-  cancellation: "Cancellation available",
-  images: Array.from({ length: 24 }, (_, i) => `https://picsum.photos/seed/tour-detail-${i + 1}/856/717`),
-  heroMainImage: "https://picsum.photos/seed/tour-hero-main/856/717",
-  heroTopRight: "https://picsum.photos/seed/tour-hero-top/867/366",
-  heroBottomLeft: "https://picsum.photos/seed/tour-hero-bl/430/347",
-  heroBottomRight: "https://picsum.photos/seed/tour-hero-bottom/432/347",
-  bestFor: ["Cultural Enthusiasts", "Diaspora Travelers", "International Tourists", "Couples"],
-  included: [
-    { type: "check", text: "Expert certified local guides" },
-    { type: "check", text: "Hotel accommodation (where applicable)" },
-    { type: "check", text: "Daily meals as per itinerary" },
-    { type: "check", text: "All entrance fees" },
-    { type: "check", text: "Hotel pickup & drop-off" },
-    { type: "check", text: "Private comfortable transport" },
-    { type: "cross", text: "International/domestic flights" },
-    { type: "cross", text: "Personal spending & tips" },
-    { type: "cross", text: "Travel insurance" },
-    { type: "cross", text: "Alcoholic beverages" },
-  ],
-  itinerary: [
-    {
-      day: 1,
-      title: "Departure & Arrival",
-      activities: ["Hotel pickup and orientation", "Scenic transit to destination", "Traditional welcome dinner"],
-    },
-    {
-      day: 2,
-      title: "Main Exploration Day",
-      activities: ["Guided tour of key sights", "Cultural immersion experience", "Local cuisine tasting"],
-    },
-    {
-      day: 3,
-      title: "Return Journey",
-      activities: ["Optional morning excursion", "Souvenir shopping", "Departure and transfer back"],
-    },
-  ],
-  guide: {
-    name: "Ailsa Mensah-Asante",
-    rating: 4.9,
-    reviews: 124,
-    speciality: "Heritage Guide",
-    yearsExp: 8,
-    languages: [
-      { code: "gb", name: "English" },
-      { code: "fr", name: "French" },
-      { code: "gh", name: "Twi" },
-    ],
-    certifications: ["UNESCO Certified", "History MA"],
-    image: "https://picsum.photos/seed/guide-ailsa/296/393",
-    testimonials: [
-      { quote: "Ailsa's depth of knowledge brought the history to life in a way no textbook ever could.", reviewer: "Estella Sackey", date: "2 weeks ago" },
-      { quote: "Her passion for Ghana's heritage is infectious. Every stop felt personal and deeply meaningful.", reviewer: "James O.", date: "1 month ago" },
-    ],
-  },
-  reviews: [
-    { id: 1, name: "Sarah M.", avatar: "https://picsum.photos/seed/reviewer-1/40/40", rating: 5, date: "January 2025", text: "Absolutely life-changing experience. The guide's knowledge was profound and deeply moving. Highly recommend." },
-    { id: 2, name: "James O.", avatar: "https://picsum.photos/seed/reviewer-2/40/40", rating: 5, date: "December 2024", text: "A perfect blend of history, culture, and natural beauty. Elysium Tours truly exceeded our expectations." },
-    { id: 3, name: "Priya K.", avatar: "https://picsum.photos/seed/reviewer-3/40/40", rating: 4, date: "November 2024", text: "Wonderful tour with excellent organisation. Comfortable accommodations and delicious meals." },
-  ],
-  ratingBreakdown: { 5: 85, 4: 10, 3: 3, 2: 1, 1: 1 },
-  totalReviews: 3249,
-  categoryRatings: [
-    { label: "Guide Quality", score: 4.9 },
-    { label: "Value for Money", score: 4.8 },
-    { label: "Logistical Quality", score: 4.9 },
-    { label: "Transport", score: 4.5 },
-  ],
-  addOns: [
-    { name: "Professional Photo Package", desc: "High-resolution photos & edited highlights reel", price: "GH₵ 850" },
-    { name: "Private Vehicle Upgrade", desc: "Exclusive private transfer throughout the tour", price: "GH₵ 850" },
-    { name: "International Flights", desc: "Return flights from your home country", price: "GH₵ 850" },
-    { name: "Souvenir Bundle", desc: "Curated artisan souvenirs and gifts", price: "GH₵ 850" },
-  ],
-};
-
-// Per-tour overrides — only the fields that should be unique per tour.
-// Anything not specified falls back to TOUR_TEMPLATE.
-const TOUR_OVERRIDES = {
-  // ── Featured tours (TourPage's TourFeaturedSection) ──────────────────
-  "mole-national-park-safari": {
-    title: "Mole National Park Safari",
-    country: "Ghana",
-    location: "Northern Region, Ghana",
-    rating: 4.8,
-    duration: "3 Days / 2 Nights",
-    price: "GHC 5,500",
-    description: "Experience Ghana's largest wildlife sanctuary on this immersive safari adventure. Spot elephants, antelopes, baboons, and over 300 bird species across 4,840 km² of pristine savannah. Take guided walking safaris with armed rangers, swim in the lodge's pool overlooking the watering hole, and learn about traditional northern Ghanaian culture. An eco-certified experience that supports local conservation.",
-  },
-  "accra-arts-culture-food-day": {
-    title: "Accra Arts, Culture & Food Day",
-    country: "Ghana",
-    location: "Accra, Greater Accra",
-    rating: 4.7,
-    duration: "1 Day (8 hours)",
-    price: "GHC 2,500",
-    description: "A vibrant single-day immersion into Ghana's capital. Explore the Centre for National Culture for traditional crafts, visit the Kwame Nkrumah Memorial Park, sample street food at Makola Market, and enjoy a curated lunch at a local fusion restaurant. Perfect for first-time visitors looking to capture the essence of Accra in a single, memorable day.",
-  },
-  "dakar-business-immersion": {
-    title: "Dakar Business & Immersion",
-    country: "Senegal",
-    location: "Dakar, Senegal",
-    rating: 4.9,
-    duration: "3 Days / 2 Nights",
-    price: "GHC 6,500",
-    description: "A premium business-class tour of West Africa's francophone hub. Combine networking opportunities with cultural immersion: visit the historic Île de Gorée (UNESCO World Heritage Site), explore the bustling Sandaga Market, dine at Senegal's finest restaurants, and experience the warmth of Teranga hospitality.",
-  },
-
-  // ── HomePage FeaturedToursSection ────────────────────────────────────
-  "accra-bustling-city-market-tour": {
-    title: "Accra Bustling City & Market Tour",
-    country: "Ghana",
-    location: "Accra, Greater Accra",
-    rating: 4.8,
-    duration: "3 Days / 2 Nights",
-    price: "GHC 3,500",
-    description: "Dive into the energetic heart of Accra with this multi-day exploration. Wander through Makola, Kantamanto, and Madina markets to experience daily Ghanaian life. Visit Jamestown's lighthouse, the W.E.B. Du Bois Memorial Centre, and Independence Square.",
-  },
-  "kumasi-heritage-market-discovery": {
-    title: "Kumasi Heritage & Market Discovery",
-    country: "Ghana",
-    location: "Kumasi, Ashanti Region",
-    rating: 4.7,
-    duration: "2 Days / 1 Night",
-    price: "GHC 5,000",
-    description: "Experience the cultural heart of the Ashanti Kingdom. Visit the Manhyia Palace Museum, Kejetia Market (one of West Africa's largest open-air markets), and the National Cultural Centre. Watch master craftsmen weave authentic kente cloth in Bonwire village, and learn the history of the Golden Stool — sacred symbol of the Ashanti people.",
-  },
-  "wli-waterfalls-nature-exploration": {
-    title: "Wli Waterfalls & Nature Exploration",
-    country: "Ghana",
-    location: "Volta Region, Ghana",
-    rating: 4.9,
-    duration: "1 Day",
-    price: "GHC 4,500",
-    description: "Trek to West Africa's highest waterfall in the lush mountains of the Volta Region. The hike through the Agumatsa Wildlife Sanctuary takes you past tropical butterflies, fruit bats, and dense rainforest before revealing the spectacular 80-metre Wli Falls.",
-  },
-
-  // ── Country page tours ──────────────────────────────────────────────
-  "homecoming-kakum-national-park": {
-    title: "The Homecoming Experience to Kakum National Park",
-    country: "Ghana",
-    location: "Cape Coast, Ghana",
-    rating: 4.8,
-    duration: "5 Days / 4 Nights",
-    price: "GHC 4,000",
-    description: "A specially curated diaspora homecoming experience combining heritage with adventure. Walk through the Cape Coast and Elmina Castles, traverse Kakum's iconic canopy walkway high above the rainforest, and join in a naming ceremony at a traditional Akan village.",
-  },
-  "accra-city-culture-tour": {
-    title: "Accra City & Culture Full-Day Tour",
-    country: "Ghana",
-    location: "Accra, Greater Accra",
-    rating: 4.8,
-    duration: "1 Day",
-    price: "GHC 250",
-    description: "The definitive single-day introduction to Accra. From Independence Square to the National Museum, from Jamestown fishing harbour to the Arts Centre, this tour packs the highlights of Ghana's capital into one carefully-paced day.",
-  },
-  "canopy-bridges-kakum": {
-    title: "Canopy Bridges & Adventure at Kakum",
-    country: "Ghana",
-    location: "Central Region, Ghana",
-    rating: 4.6,
-    duration: "1 Day",
-    price: "GHC 350",
-    description: "An adrenaline-filled day at Kakum National Park's famous canopy walkway. Suspended 30 metres above the rainforest floor across seven swaying bridges, this is one of only three such walkways in Africa.",
-  },
-  "legacy-return-diaspora-experience": {
-    title: "Legacy & Return — Diaspora Experience",
-    country: "Ghana",
-    location: "Cape Coast, Ghana",
-    rating: 5.0,
-    duration: "4 Days / 3 Nights",
-    price: "GHC 7,500",
-    description: "An emotionally profound diaspora journey designed for travelers tracing their African roots. Visit Cape Coast and Elmina Castles with specialised heritage guides, participate in libation and naming ceremonies, meet with traditional chiefs, and explore W.E.B. Du Bois's legacy.",
-  },
-  "boti-falls-umbrella-rock": {
-    title: "Boti Falls & Umbrella Rock Day Trip",
-    country: "Ghana",
-    location: "Eastern Region, Ghana",
-    rating: 4.7,
-    duration: "1 Day",
-    price: "GHC 300",
-    description: "Discover the natural wonders of Ghana's Eastern Region. The twin Boti Falls plunge 30 metres into a serene pool — locals affectionately call them the 'male and female' falls. A short hike away, marvel at the gravity-defying Umbrella Rock and the mysterious 'three-headed' palm tree.",
-  },
-  "premium-accra-heritage-business": {
-    title: "Premium Accra Heritage & Business Tour",
-    country: "Ghana",
-    location: "Greater Accra, Ghana",
-    rating: 4.8,
-    duration: "2 Days / 1 Night",
-    price: "GHC 6,000",
-    description: "A business-class tour designed for executives visiting Accra. Combines high-quality cultural sites (Du Bois Centre, Nkrumah Mausoleum, Jamestown) with networking opportunities at Accra's premier business venues.",
-  },
-  "bolgatanga-arts-crafts-paga-crocodile": {
-    title: "Bolgatanga Arts, Crafts & Paga Crocodile",
-    country: "Ghana",
-    location: "Upper East, Ghana",
-    rating: 4.6,
-    duration: "5 Days / 4 Nights",
-    price: "GHC 8,500",
-    description: "Travel to Ghana's far north for a deep cultural immersion. Visit the famous Bolgatanga craft market for handmade leather and basketry, see the legendary Paga Crocodile Pond where sacred crocodiles coexist peacefully with humans.",
-  },
-  "bolgatanga-arts-crafts-paga": {
-    title: "Bolgatanga Arts, Crafts & Paga Crocodile",
-    country: "Ghana",
-    location: "Upper East, Ghana",
-    rating: 4.6,
-    duration: "5 Days / 4 Nights",
-    price: "GHC 8,500",
-    description: "Travel to Ghana's far north for a deep cultural immersion. Visit the famous Bolgatanga craft market for handmade leather and basketry, see the legendary Paga Crocodile Pond where sacred crocodiles coexist peacefully with humans.",
-  },
-  "kintampo-falls-rock-village": {
-    title: "Kintampo Falls & Rock Village Tour",
-    country: "Ghana",
-    location: "Brong-Ahafo, Ghana",
-    rating: 4.8,
-    duration: "1 Day",
-    price: "GHC 320",
-    description: "Visit the breathtaking Kintampo Falls — three cascading falls plunging into deep emerald pools surrounded by tropical forest. Continue to the unique Rock Village (Tongo Rocks) where traditional shrines are built into the natural rock formations.",
-  },
-  "cape-three-points-coastal-heritage": {
-    title: "Cape Three Points & Coastal Heritage",
-    country: "Ghana",
-    location: "Western Region, Ghana",
-    rating: 4.9,
-    duration: "3 Days / 2 Nights",
-    price: "GHC 5,500",
-    description: "Visit the southernmost tip of Ghana — Cape Three Points — where three coastal points meet the Atlantic. Explore the historic Fort Apollonia, walk the pristine beaches of Princes Town, and experience the slower pace of Ghana's lesser-known western coast.",
-  },
-};
-
-// Build templated tour data by merging TOUR_TEMPLATE + per-tour overrides.
-// Used as fallback for tour slugs that don't have rich curated data in TOUR_DATA above.
-const TEMPLATED_TOURS = Object.fromEntries(
-  Object.entries(TOUR_OVERRIDES).map(([slug, overrides]) => [
-    slug,
-    { ...TOUR_TEMPLATE, ...overrides },
-  ])
-);
-
-const RELATED_TOURS = [
-  {
-    id: 1,
-    image: "https://picsum.photos/seed/related-1/351/373",
-    location: "Accra/Ghana",
-    duration: { class: "Multi-Day", span: "5 Days/4 Nights" },
-    maxGroupSize: 15,
-    pickupIncluded: false,
-    tags: ["Cultural", "Diaspora"],
-    rating: 4.8,
-    title: "The Homecoming Experience to Kakum National Park",
-    availabilityBadge: "Opened Daily",
-    price: "Ghs.400.00",
-    country: "ghana",
-    slug: "homecoming-kakum-national-park",
-  },
-  {
-    id: 2,
-    image: "https://picsum.photos/seed/related-2/351/373",
-    location: "Kumasi/Ghana",
-    duration: { class: "Multi-Day", span: "4 Days/3 Nights" },
-    maxGroupSize: 10,
-    pickupIncluded: true,
-    tags: ["Heritage", "Culture"],
-    rating: 4.9,
-    title: "Kumasi Heritage & Market Discovery",
-    availabilityBadge: "Opened Daily",
-    price: "Ghs.500.00",
-    country: "ghana",
-    slug: "kumasi-heritage-market-discovery",
-  },
-  {
-    id: 3,
-    image: "https://picsum.photos/seed/related-3/351/373",
-    location: "Volta Region/Ghana",
-    duration: { class: "Day Tour", span: "1 Day" },
-    maxGroupSize: 8,
-    pickupIncluded: false,
-    tags: ["Nature", "Scenic"],
-    rating: 4.7,
-    title: "Wli Waterfalls & Nature Exploration",
-    availabilityBadge: "Opened Daily",
-    price: "Ghs.450.00",
-    country: "ghana",
-    slug: "wli-waterfalls-nature-exploration",
-  },
-];
 
 /** Figma: left column first (5 of 9), right column second — split at ceil(n/2). */
 function splitBusinessAmenityColumns(items) {
@@ -1255,49 +559,50 @@ const TourHeroSection = React.forwardRef(({ tourData, onOpenGallery }, ref) => {
             <div className="flex min-h-0 min-w-0 flex-col gap-1">
               <div
                 className="relative h-[366px] min-h-0 shrink-0 cursor-pointer overflow-hidden"
-                onClick={() => onOpenGallery(1)}
+                onClick={() => tourData.heroTopRight && onOpenGallery(1)}
                 role="presentation"
               >
-                <img
-                  src={tourData.heroTopRight}
-                  alt=""
-                  className="absolute inset-0 h-full w-full object-cover"
-                />
-                <div
-                  className="pointer-events-none absolute inset-0 bg-black/30"
-                  aria-hidden
-                />
+                {tourData.heroTopRight ? (
+                  <>
+                    <img
+                      src={tourData.heroTopRight}
+                      alt=""
+                      className="absolute inset-0 h-full w-full object-cover"
+                    />
+                    <div className="pointer-events-none absolute inset-0 bg-black/30" aria-hidden />
+                  </>
+                ) : (
+                  <div className="absolute inset-0 bg-secondary-light-hover" aria-hidden />
+                )}
               </div>
               <div className="flex h-[347px] gap-1">
                 <div
                   className="relative w-[430px] min-w-0 shrink-0 cursor-pointer overflow-hidden"
-                  onClick={() => onOpenGallery(2)}
+                  onClick={() => tourData.heroBottomLeft && onOpenGallery(2)}
                   role="presentation"
                 >
-                  <img
-                    src={tourData.heroBottomLeft}
-                    alt=""
-                    className="absolute inset-0 h-full w-full object-cover"
-                  />
-                  <div
-                    className="pointer-events-none absolute inset-0 bg-black/30"
-                    aria-hidden
-                  />
+                  {tourData.heroBottomLeft ? (
+                    <>
+                      <img src={tourData.heroBottomLeft} alt="" className="absolute inset-0 h-full w-full object-cover" />
+                      <div className="pointer-events-none absolute inset-0 bg-black/30" aria-hidden />
+                    </>
+                  ) : (
+                    <div className="absolute inset-0 bg-secondary-light-hover" aria-hidden />
+                  )}
                 </div>
                 <div
                   className="relative min-w-0 flex-1 cursor-pointer overflow-hidden"
-                  onClick={() => onOpenGallery(3)}
+                  onClick={() => tourData.heroBottomRight && onOpenGallery(3)}
                   role="presentation"
                 >
-                  <img
-                    src={tourData.heroBottomRight}
-                    alt=""
-                    className="absolute inset-0 h-full w-full object-cover"
-                  />
-                  <div
-                    className="pointer-events-none absolute inset-0 bg-black/30"
-                    aria-hidden
-                  />
+                  {tourData.heroBottomRight ? (
+                    <>
+                      <img src={tourData.heroBottomRight} alt="" className="absolute inset-0 h-full w-full object-cover" />
+                      <div className="pointer-events-none absolute inset-0 bg-black/30" aria-hidden />
+                    </>
+                  ) : (
+                    <div className="absolute inset-0 bg-secondary-light-hover" aria-hidden />
+                  )}
                   <button
                     type="button"
                     onClick={(e) => {
@@ -1347,7 +652,7 @@ const DETAIL_TABS = [
 
 const TourDetailNavBar = ({ activeSection, onTabClick }) => (
   <div
-    className="w-full bg-[#fefefe] sticky z-40 top-[70px] lg:top-[112px]"
+    className="w-full bg-[#fefefe] sticky z-40 top-0"
     style={{ height: "64px", borderBottom: "2px solid #d6beeb" }}
   >
     <div className="h-full flex items-center px-6 md:px-[30px] lg:px-[156px] overflow-x-auto scrollbar-hide">
@@ -1700,17 +1005,59 @@ const GuideCard = ({ guide }) => (
 
 // ─── ReviewsSection ───────────────────────────────────────────────────────────
 // Figma 3123:42908 — 4.9 score + category bars + filter tabs + 4 review cards
-const REVIEW_FILTER_TABS = [
-  "All",
-  "Cultural Interests",
-  "Cleanness",
-  "International",
-  "Business",
-  "Groups",
-];
+const STAR_FILTERS = ["All", 5, 4, 3, 2, 1];
 
-const ReviewsSection = ({ tourData }) => {
+const normalizeReview = (r, i) => ({
+  id:     r._id || r.id || i,
+  name:   r.author?.name || r.reviewerName || r.name || "Traveler",
+  avatar: r.author?.avatar || r.avatar || null,
+  rating: r.rating || 5,
+  date:   r.createdAt || r.date || new Date().toISOString(),
+  text:   r.body || r.text || r.comment || "",
+});
+
+const ReviewsSection = ({ tourData, apiReviews, apiStats, tourId }) => {
   const [activeFilter, setActiveFilter] = useState("All");
+  const [extraReviews, setExtraReviews]  = useState([]);
+  const [nextPage, setNextPage]          = useState(2);
+  const [loadingMore, setLoadingMore]    = useState(false);
+
+  const baseReviews = useMemo(
+    () => (apiReviews && apiReviews.length > 0 ? apiReviews.map(normalizeReview) : tourData.reviews),
+    [apiReviews, tourData.reviews]
+  );
+
+  const allReviews = useMemo(
+    () => [...baseReviews, ...extraReviews],
+    [baseReviews, extraReviews]
+  );
+
+  const displayReviews = activeFilter === "All"
+    ? allReviews
+    : allReviews.filter((r) => r.rating === activeFilter);
+
+  const totalReviews = apiStats?.totalReviews ?? 0;
+  const hasMore = activeFilter === "All" && allReviews.length < totalReviews;
+
+  const handleLoadMore = async () => {
+    if (!tourId || loadingMore) return;
+    setLoadingMore(true);
+    try {
+      const data = await listReviewsByTourApi(tourId, { page: nextPage, pageSize: 10 });
+      const rows = Array.isArray(data?.reviews) ? data.reviews : [];
+      setExtraReviews((prev) => [...prev, ...rows.map(normalizeReview)]);
+      setNextPage((p) => p + 1);
+    } catch {
+      // silently ignore
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
+  const displayRating = apiStats?.weightedAverageRating ?? apiStats?.averageRating ?? tourData.rating;
+  const displayTotal  = apiStats?.totalReviews ?? tourData.totalReviews ?? 0;
+  const displayBreakdown = apiStats?.ratingBreakdown ?? tourData.ratingBreakdown;
+
   return (
     <div>
       {/* Rating overview */}
@@ -1723,101 +1070,130 @@ const ReviewsSection = ({ tourData }) => {
         >
           <span
           className="text-Display-md-small-semibold mb-[2.5px] text-secondary-normal-default"
-          
+
           >
-            {tourData.rating}
+            {displayRating || "—"}
           </span>
-          <ReviewStars rating={tourData.rating} size={18} />
+          <ReviewStars rating={displayRating} size={18} />
           <span
           className="text-med-small-Medium mt-2.5 text-[#4a5565]"
-            
+
           >
-            {(tourData.totalReviews || 3249).toLocaleString()} reviews
+            {displayTotal.toLocaleString()} reviews
           </span>
         </div>
         {/* Category rating bars */}
         <div
           className="flex-1 gap-4.5 pt-2 flex flex-col"
         >
-          {(tourData.categoryRatings || []).map(({ label, score }) => (
-            <div
-              key={label}
-              className="flex items-center gap-3"
-            >
-              <span
-                style={{
-                  fontFamily: "Raleway, sans-serif",
-                  fontWeight: 500,
-                  fontSize: "13px",
-                  lineHeight: "20px",
-                  color: "#364153",
-                  width: "140px",
-                  flexShrink: 0,
-                }}
-                className="text-med-small-Medium text-tertiary-normal-default"
-              >
-                {label}
-              </span>
-              <div
-                className="flex-1 h-2 rounded-lg bg-secondary-light-hover overflow-hidden"
-                
-              >
-                <div
-                className="h-full bg-secondary-normal-default rounded-lg"
-                  style={{
-                    width: `${(score / 5) * 100}%`,
-                  
-                  }}
-                />
-              </div>
-              <span
-              className="text-[14px]  text-tertiary-normal-default  text-right flex-shrink-0"
-              
-              >
-                {score}
-              </span>
-            </div>
-          ))}
+          {displayBreakdown
+            ? [5, 4, 3, 2, 1].map((star) => {
+                const count = displayBreakdown[star] || 0;
+                const pct = displayTotal > 0 ? (count / displayTotal) * 100 : 0;
+                return (
+                  <div key={star} className="flex items-center gap-3">
+                    <span
+                      style={{ fontFamily: "Raleway, sans-serif", fontWeight: 500, fontSize: "13px", lineHeight: "20px", color: "#364153", width: "60px", flexShrink: 0 }}
+                    >
+                      {star} star{star !== 1 ? "s" : ""}
+                    </span>
+                    <div className="flex-1 h-2 rounded-lg bg-secondary-light-hover overflow-hidden">
+                      <div className="h-full bg-secondary-normal-default rounded-lg" style={{ width: `${pct}%` }} />
+                    </div>
+                    <span className="text-[14px] text-tertiary-normal-default text-right flex-shrink-0 w-8">
+                      {count}
+                    </span>
+                  </div>
+                );
+              })
+            : (tourData.categoryRatings || []).map(({ label, score }) => (
+                <div key={label} className="flex items-center gap-3">
+                  <span
+                    style={{ fontFamily: "Raleway, sans-serif", fontWeight: 500, fontSize: "13px", lineHeight: "20px", color: "#364153", width: "140px", flexShrink: 0 }}
+                    className="text-med-small-Medium text-tertiary-normal-default"
+                  >
+                    {label}
+                  </span>
+                  <div className="flex-1 h-2 rounded-lg bg-secondary-light-hover overflow-hidden">
+                    <div className="h-full bg-secondary-normal-default rounded-lg" style={{ width: `${(score / 5) * 100}%` }} />
+                  </div>
+                  <span className="text-[14px] text-tertiary-normal-default text-right flex-shrink-0">
+                    {score}
+                  </span>
+                </div>
+              ))
+          }
         </div>
       </div>
 
-      {/* Filter tabs */}
-      <div
-        className="flex items-center gap-2 mb-7 flex-wrap"
-      >
-        {REVIEW_FILTER_TABS.map((tab) => {
-          const isActive = activeFilter === tab;
-          return (
-            <button
-              key={tab}
-              type="button"
-              onClick={() => setActiveFilter(tab)}
-              className={`text-med-small-Medium py-[9px] rounded-[40px] px-4 transition-colors cursor-pointer ${isActive? `text-white bg-secondary-normal-default` : `text-primary-dark-darker bg-secondary-light-hover`} `}
-              
-            >
-              {tab}
-            </button>
-          );
-        })}
-      </div>
+      {/* Star rating filters — only shown when reviews exist */}
+      {allReviews.length > 0 && (
+        <div className="flex items-center gap-2 mb-7 flex-wrap">
+          {STAR_FILTERS.map((f) => {
+            const isActive = activeFilter === f;
+            const count = f === "All" ? allReviews.length : allReviews.filter((r) => r.rating === f).length;
+            return (
+              <button
+                key={f}
+                type="button"
+                onClick={() => setActiveFilter(f)}
+                className={`flex items-center gap-1.5 text-med-small-Medium py-[9px] rounded-[40px] px-4 transition-colors cursor-pointer ${isActive ? "text-white bg-secondary-normal-default" : "text-primary-dark-darker bg-secondary-light-hover"}`}
+              >
+                {f === "All" ? (
+                  <span>All ({count})</span>
+                ) : (
+                  <>
+                    <span>{f}</span>
+                    <StarIcon filled size={13} />
+                    <span className={isActive ? "text-white/70" : "text-[#888]"}>({count})</span>
+                  </>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {/* Review cards */}
       <div className="flex flex-col gap-4">
-        {tourData.reviews.map((review) => (
+        {allReviews.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-14 px-6 rounded-[20px] bg-primary-light-default/60 border border-secondary-light-hover gap-4">
+            <svg width="48" height="48" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+              <circle cx="24" cy="24" r="23" stroke="#D6BEEB" strokeWidth="2" />
+              <path d="M15 20h18M15 27h12" stroke="#D6BEEB" strokeWidth="2" strokeLinecap="round" />
+              <circle cx="33" cy="27" r="1.5" fill="#D6BEEB" />
+            </svg>
+            <p className="font-raleway font-semibold text-[15px] text-secondary-normal-default">No reviews yet</p>
+            <p className="font-raleway text-[13px] text-[#4a5565] text-center max-w-[280px]">
+              Be the first to share your experience on this tour.
+            </p>
+          </div>
+        ) : displayReviews.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-10 px-6 rounded-[20px] bg-primary-light-default/60 border border-secondary-light-hover gap-3">
+            <p className="font-raleway font-semibold text-[14px] text-secondary-normal-default">No {activeFilter}★ reviews</p>
+            <p className="font-raleway text-[13px] text-[#4a5565]">Try a different star filter.</p>
+          </div>
+        ) : displayReviews.map((review) => (
           <div
             key={review.id}
             className="px-5 py-7 rounded-[20px] bg-primary-light-default/60 border border-secondary-light-hover "
           >
             <div className="flex items-start gap-4" >
               <div
-              className="size-[60px] rounded-full overflow-hidden flex-shrink-0"
-               
+              className="size-[60px] rounded-full overflow-hidden flex-shrink-0 bg-secondary-light-hover flex items-center justify-center"
+
               >
-                <img
-                  src={review.avatar}
-                  alt={review.name}
-                  className="w-full h-full object-cover"
-                />
+                {review.avatar ? (
+                  <img
+                    src={review.avatar}
+                    alt={review.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="text-secondary-normal-default font-raleway font-bold text-lg select-none">
+                    {review.name ? review.name.charAt(0).toUpperCase() : "?"}
+                  </span>
+                )}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-2">
@@ -1850,18 +1226,24 @@ const ReviewsSection = ({ tourData }) => {
         ))}
       </div>
 
-      {/* See all reviews — light lavender fill, purple outline — Figma spacing 24px above */}
-      <div className="flex justify-center mt-6">
-        <Button
-          type="button"
-          variant="secondaryOutline"
-          shape="pill"
-          style={{ fontFamily: "Raleway, sans-serif" }}
-          className="!bg-secondary-light-default hover:!bg-secondary-light-hover active:!bg-secondary-light-active shadow-none min-h-14 h-14 px-8 rounded-full border-[1.5px] border-secondary-normal-default text-secondary-normal-default text-[15px] font-semibold"
-        >
-          {`see All ${(tourData.totalReviews || 3249).toLocaleString()} Reviews →`}
-        </Button>
-      </div>
+      {/* Load more — only when there are more reviews on the server */}
+      {hasMore && (
+        <div className="flex justify-center mt-6">
+          <Button
+            type="button"
+            variant="secondaryOutline"
+            shape="pill"
+            onClick={handleLoadMore}
+            disabled={loadingMore}
+            style={{ fontFamily: "Raleway, sans-serif" }}
+            className="!bg-secondary-light-default hover:!bg-secondary-light-hover active:!bg-secondary-light-active shadow-none min-h-14 h-14 px-8 rounded-full border-[1.5px] border-secondary-normal-default text-secondary-normal-default text-[15px] font-semibold disabled:opacity-50"
+          >
+            {loadingMore
+              ? "Loading..."
+              : `See All ${totalReviews.toLocaleString()} Reviews →`}
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
@@ -1889,6 +1271,9 @@ const BookingWidget = ({
   setBookmarked,
   bookingStep: bookingStepProp,
   onBookingStepChange,
+  onBook,
+  bookingStatus,
+  bookingError,
 }) => {
   const [bookingStepInternal, setBookingStepInternal] = useState(1);
   const activeStep =
@@ -2125,15 +1510,22 @@ const BookingWidget = ({
       )}
 
       {/* CTA ACTIONS */}
+      {bookingError && (
+        <p className="mx-[22px] mt-1 rounded-sm bg-red-50 px-3 py-2 text-sm text-red-600">
+          {bookingError}
+        </p>
+      )}
       <div className="flex flex-col gap-2">
         <Button
           type="button"
           variant="secondary"
           shape="pill"
           fullWidth
-          className="h-[46px] min-h-0! rounded-full border-0 font-raleway text-[15px] font-semibold leading-[22px] text-secondary-light-default! shadow-[0_4px_4px_rgba(0,0,0,0.05)]"
+          disabled={bookingStatus === "loading"}
+          onClick={onBook}
+          className="h-[46px] min-h-0! rounded-full border-0 font-raleway text-[15px] font-semibold leading-[22px] text-secondary-light-default! shadow-[0_4px_4px_rgba(0,0,0,0.05)] disabled:opacity-60"
         >
-          Reserve This Tour
+          {bookingStatus === "loading" ? "Booking…" : "Reserve This Tour"}
         </Button>
         <Button
           type="button"
@@ -2197,6 +1589,12 @@ const BookingWidget = ({
 // ─── TourDetailPage ────────────────────────────────────────────────────────────
 const TourDetailPage = () => {
   const { country, tour } = useParams();
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const apiTour = useAppSelector(selectCurrentTour);
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
+  const bookingStatus = useAppSelector(selectCreateBookingStatus);
+  const bookingError = useAppSelector(selectBookingsError);
   // activeSection drives the sticky nav bar tabs
   const [activeSection, setActiveSection] = useState("overview");
   const [galleryOpen, setGalleryOpen] = useState(false);
@@ -2208,38 +1606,156 @@ const TourDetailPage = () => {
   const [children, setChildren] = useState(2);
   const [departureDate, setDepartureDate] = useState("");
   const [returnDate, setReturnDate] = useState("");
+  const [apiReviews, setApiReviews] = useState(null);
+  const [apiReviewStats, setApiReviewStats] = useState(null);
 
-  // Lookup priority:
-  //   1. Rich curated data in TOUR_DATA (elmina-heritage-coastal-journey, accra-corporate-executive-tour)
-  //   2. Templated data in TEMPLATED_TOURS (per-tour title/location/price overrides on TOUR_TEMPLATE)
-  //   3. Fallback to elmina-heritage-coastal-journey
-  // Merge with TOUR_TEMPLATE so basic fields (maxGuests, languages, cancellation,
-  // images, etc.) are always present even when rich curated data omits them.
   const tourData = useMemo(() => {
-    const rich = TOUR_DATA[tour];
-    const templated = TEMPLATED_TOURS[tour];
-    const fallback = TOUR_DATA["elmina-heritage-coastal-journey"];
-    const baseData = rich || templated || fallback;
-    return { ...TOUR_TEMPLATE, ...baseData };
-  }, [tour]);
-  const importantInfo = tourData.importantInformation;
+    if (!apiTour) return null;
+
+    const days = apiTour.durationDays || 1;
+    const durationStr = days === 1
+      ? "1 Day"
+      : `${days} Days / ${days - 1} Night${days - 1 !== 1 ? "s" : ""}`;
+
+    const tiers = apiTour.pricingTiers || [];
+    const minPrice = tiers.length > 0
+      ? Math.min(...tiers.map((t) => t.pricePerPerson))
+      : apiTour.basePrice;
+
+    const locationStr = apiTour.destination?.name
+      ? `${apiTour.destination.name}, ${apiTour.country ? (apiTour.country.charAt(0).toUpperCase() + apiTour.country.slice(1)) : "Ghana"}`
+      : apiTour.country ? (apiTour.country.charAt(0).toUpperCase() + apiTour.country.slice(1)) : null;
+
+    const included = [
+      ...(apiTour.inclusions || []).map((text) => ({ type: "check", text })),
+      ...(apiTour.exclusions || []).map((text) => ({ type: "cross", text })),
+    ];
+
+    // Build a deduplicated pool of all available images for hero slots + gallery
+    const rawImgs   = apiTour.images      || [];
+    const heroImgs  = apiTour.heroImages  || [];
+    const pool = [...new Set([
+      apiTour.heroMainImage,
+      apiTour.heroTopRight,
+      apiTour.heroBottomLeft,
+      apiTour.heroBottomRight,
+      ...heroImgs,
+      ...rawImgs,
+    ].filter(Boolean))];
+
+    // Fill hero slots from pool; remaining pool entries go into gallery
+    const heroMainImage   = pool[0] || null;
+    const heroTopRight    = pool[1] || null;
+    const heroBottomLeft  = pool[2] || null;
+    const heroBottomRight = pool[3] || null;
+    // Gallery = full pool (includes hero images so modal always shows everything)
+    const allImages = pool.length > 0 ? pool : rawImgs;
+
+    return {
+      title:               apiTour.title        || "",
+      description:         apiTour.description  || "",
+      location:            locationStr,
+      duration:            durationStr,
+      maxGuests:           apiTour.totalCapacity ?? null,
+      languages:           apiTour.languages || [],
+      cancellation:        apiTour.cancellationPolicy || null,
+      bestFor:             apiTour.bestFor || [],
+      availabilityBadge:   apiTour.availabilityBadge || null,
+      statusBadge:         apiTour.statusBadge || null,
+      rating:              apiTour.rating || 0,
+      reviewCount:         apiTour.reviewCount || 0,
+      categoryRatings:     apiTour.categoryRatings || [],
+      heroMainImage,
+      heroTopRight,
+      heroBottomLeft,
+      heroBottomRight,
+      images:              allImages,
+      tourHighlights:      apiTour.tourHighlights || [],
+      itinerary:           apiTour.itinerary || [],
+      included,
+      bookingAddOns:       (apiTour.bookingAddOns || []).map(a => ({
+        id:    a.id || a._id,
+        label: a.label,
+        price: `GHS ${Number(a.priceGhc || 0).toLocaleString()}`,
+        priceGhc: a.priceGhc || 0,
+      })),
+      importantInformation: apiTour.importantInformation || null,
+      businessAmenities:   apiTour.businessAmenities?.items?.length ? apiTour.businessAmenities : null,
+      meetingPoint:        apiTour.meetingPoint || null,
+      meetingPointLabel:   apiTour.meetingPointLabel || null,
+      price:               minPrice != null ? `GHS ${Number(minPrice).toLocaleString()}` : null,
+      pricingTiers:        tiers,
+      guide:               null, // no TourGuide service yet
+      reviews:             [],   // real reviews come via apiReviews state
+      ratingBreakdown:     null,
+      totalReviews:        0,
+      addOns:              [],   // legacy static add-ons removed; use bookingAddOns
+    };
+  }, [apiTour]);
+
+  const importantInfo = tourData?.importantInformation;
   const importantInfoRows = importantInfo?.blocks ?? [];
   const importantInfoFooter = importantInfo?.footerNote;
-  const showImportantInformation =
-    importantInfoRows.length > 0 || !!importantInfoFooter;
-  const [meetingPin, setMeetingPin] = useState(
-    () => tourData.meetingPoint ?? DEFAULT_MEETING_POINT
-  );
+  const showImportantInformation = importantInfoRows.length > 0 || !!importantInfoFooter;
+  const [meetingPin, setMeetingPin] = useState(() => DEFAULT_MEETING_POINT);
 
   useEffect(() => {
-    const data = TOUR_DATA[tour] || TEMPLATED_TOURS[tour] || TOUR_DATA["elmina-heritage-coastal-journey"];
-    setMeetingPin(data.meetingPoint ?? DEFAULT_MEETING_POINT);
-  }, [tour]);
+    setMeetingPin(tourData?.meetingPoint ?? DEFAULT_MEETING_POINT);
+  }, [tourData?.meetingPoint]);
+
+  // Fetch tour by slug from API; clear stale data on tour change
+  useEffect(() => {
+    dispatch(clearCurrentTour());
+    setApiReviews(null);
+    setApiReviewStats(null);
+    if (tour) {
+      dispatch(fetchTourThunk(tour)).then((action) => {
+        const tourId = action.payload?._id;
+        if (tourId) {
+          incrementTourViewApi(tourId).catch(() => null);
+          listReviewsByTourApi(tourId)
+            .then((data) => {
+              const rows = Array.isArray(data?.reviews) ? data.reviews : (Array.isArray(data) ? data : []);
+              if (rows.length > 0) setApiReviews(rows);
+              if (data && !Array.isArray(data)) setApiReviewStats(data);
+            })
+            .catch(() => null);
+        }
+      });
+    }
+  }, [dispatch, tour]);
 
   // Reset scroll to top whenever the user navigates to a different tour
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [tour]);
+
+  const handleBook = useCallback(async () => {
+    if (!isAuthenticated) {
+      navigate("/", { state: { openAuthModal: true, from: `/${country}/${tour}` } });
+      return;
+    }
+    if (!departureDate) {
+      alert("Please select a departure date.");
+      return;
+    }
+    const tourPackageId = apiTour?._id;
+    if (!tourPackageId) {
+      alert("Tour details are still loading. Please try again.");
+      return;
+    }
+    dispatch(clearBookingError());
+    const result = await dispatch(
+      createBookingThunk({
+        packageId: tourPackageId,
+        groupSize: adults + children,
+        tourDate: departureDate,
+      })
+    );
+    if (createBookingThunk.fulfilled.match(result)) {
+      navigate("/account/bookings");
+    }
+  }, [isAuthenticated, apiTour, adults, children, departureDate, dispatch, navigate, country, tour]);
 
   const countryDisplay = country
     ? country.charAt(0).toUpperCase() + country.slice(1)
@@ -2282,6 +1798,17 @@ const TourDetailPage = () => {
     });
     return () => observer.disconnect();
   }, []);
+
+  if (!tourData) {
+    return (
+      <main className="w-full bg-secondary-light-default min-h-screen" style={{ fontFamily: "Raleway, sans-serif" }}>
+        <BlogBreadcrumbBar items={[{ label: "Home", href: "/" }, { label: "Tours", href: "/tours" }]} />
+        <div className="flex items-center justify-center min-h-[50vh]">
+          <span className="text-secondary-normal-default font-raleway text-base">Loading tour details...</span>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main
@@ -2563,28 +2090,41 @@ const TourDetailPage = () => {
               </div>
             </div>
 
-            {/* ④ OPTIONAL ADD-ONS */}
-            <div className="bg-white mb-6 pl-5 pr-2 pt-7.5 pb-12 flex flex-col gap-4 rounded-xl border border-secondary-light-hover">
-              <h2 className="text-semi-md-bold text-secondary-dark-hover">
-                + Optional Add-ons
-              </h2>
-              <div className="flex mb-6 flex-col gap-4">
-                {tourData.addOns.map((addon, i) => (
-                  <AddOnRow key={i} addon={addon} />
-                ))}
+            {/* ④ OPTIONAL ADD-ONS — only shown when the API provides bookingAddOns */}
+            {tourData.bookingAddOns.length > 0 && (
+              <div className="bg-white mb-6 pl-5 pr-2 pt-7.5 pb-12 flex flex-col gap-4 rounded-xl border border-secondary-light-hover">
+                <h2 className="text-semi-md-bold text-secondary-dark-hover">
+                  + Optional Add-ons
+                </h2>
+                <div className="flex mb-6 flex-col gap-4">
+                  {tourData.bookingAddOns.map((addon, i) => (
+                    <div key={addon.id || i} className="flex items-center pl-1.5 pr-3 md:pr-6 justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[15px] font-semibold leading-[20px] md:text-semi-md-semibold text-tertiary-normal-default">
+                          {addon.label}
+                        </p>
+                      </div>
+                      <span style={{ fontFamily: "Raleway, sans-serif", fontWeight: 600, fontSize: "14px", color: "#7b2cbf", whiteSpace: "nowrap" }}>
+                        + {addon.price}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* ⑤ MEET YOUR TOUR GUIDE ─ id=section-tour-guide */}
-            <div
-              id="section-tour-guide"
-              className="pb-[50px] border-b border-secondary-light-hover"
-            >
-              <h2 className="text-semi-md-semibold text-secondary-dark-hover mb-5 ml-5">
-                Meet Your Tour Guide
-              </h2>
-              <GuideCard guide={tourData.guide} />
-            </div>
+            {tourData.guide && (
+              <div
+                id="section-tour-guide"
+                className="pb-[50px] border-b border-secondary-light-hover"
+              >
+                <h2 className="text-semi-md-semibold text-secondary-dark-hover mb-5 ml-5">
+                  Meet Your Tour Guide
+                </h2>
+                <GuideCard guide={tourData.guide} />
+              </div>
+            )}
 
             {/* ⑥ WHAT OUR TRAVELERS SAY ─ id=section-reviews */}
             <div
@@ -2595,7 +2135,7 @@ const TourDetailPage = () => {
 
                 What Our Travelers Say
               </h2>
-              <ReviewsSection tourData={tourData} />
+              <ReviewsSection tourData={tourData} apiReviews={apiReviews} apiStats={apiReviewStats} tourId={apiTour?._id} />
             </div>
 
             {/* ⑦ IMPORTANT INFO + MEETING POINT & LOCATION ─ id=section-location */}
@@ -2725,43 +2265,19 @@ const TourDetailPage = () => {
               </div>
             </div>
 
-            {/* ⑨ YOU MIGHT ALSO LOVE — flex-wrap: 351px cards × 3 exceeds 928px col; avoid overflow under sidebar */}
-            <div className="pt-10 w-full min-w-0">
-            <h2 className="text-semi-md-semibold text-secondary-dark-hover mb-5.5 ml-5">
-
-                You Might Also Love
-              </h2>
-              <div className="flex w-full min-w-0 flex-wrap justify-start gap-5">
-                {RELATED_TOURS.map((t) => (
-                  <PopularTourCard
-                    key={t.id}
-                    image={t.image}
-                    location={t.location}
-                    rating={t.rating}
-                    title={t.title}
-                    availabilityBadge={t.availabilityBadge}
-                    price={t.price}
-                    tags={t.tags}
-                    duration={t.duration}
-                    pickupIncluded={t.pickupIncluded}
-                    maxGroupSize={t.maxGroupSize}
-                    country={t.country}
-                    tourSlug={t.slug}
-                  />
-                ))}
-              </div>
-            </div>
+            {/* ⑨ YOU MIGHT ALSO LOVE — rendered when related tours are available from the API */}
+            {/* No static related tours; this section will be populated via API in a future iteration */}
 
             
           </div>
 
           {/* ── RIGHT: Booking Widget — Figma 3156:45940 ─────────────────── */}
           {/* Mobile: full width, below content. Desktop: sticky 457px right column
-              sticky top = 112px navbar + 64px detail nav + 12px buffer = 188px   */}
+              sticky top = 64px detail nav + 12px buffer = 76px   */}
           <div
             className="z-10 lg:min-w-[457px] max-w-full flex-shrink-0 sticky"
             style={{
-              top: "188px",
+              top: "76px",
               maxHeight: "calc(100vh - 200px)",
               overflowY: "auto",
               scrollbarWidth: "none",   /* Firefox */
@@ -2780,6 +2296,9 @@ const TourDetailPage = () => {
               setReturnDate={setReturnDate}
               bookmarked={bookmarked}
               setBookmarked={setBookmarked}
+              onBook={handleBook}
+              bookingStatus={bookingStatus}
+              bookingError={bookingError}
             />
           </div>
           
@@ -2818,8 +2337,8 @@ const TourDetailPage = () => {
             url: typeof window !== "undefined" ? window.location.href : "",
             locationTag: "Ghana",
             author: {
-              name: "Danielle Cousin",
-              avatar: "https://picsum.photos/seed/author-avatar/48/48",
+              name: "Elysium Tours",
+              avatar: null,
               subtitle: tourData.title,
             },
           }}
