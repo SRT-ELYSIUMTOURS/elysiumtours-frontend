@@ -6,6 +6,12 @@ import starIcon from "../../../assets/ElysiumAssets/star.svg";
 
 // Figma: 1942:31180
 
+// Placeholder portraits — Unsplash photos of Black/African people to match
+// the Ghanaian/Nigerian guide names. Replace with real guide photos when available.
+// All URLs use ?w=499&h=800&fit=crop&crop=faces so the portrait fits the card.
+const guideImage = (unsplashId) =>
+  `https://images.unsplash.com/photo-${unsplashId}?w=499&h=800&fit=crop&crop=faces`;
+
 const GUIDES_BY_COUNTRY = {
   ghana: [
     {
@@ -24,7 +30,7 @@ const GUIDES_BY_COUNTRY = {
       rating: 4.4,
       specialties: "Heritage tours • Cultural storytelling",
       languages: "English, Fante",
-      image: "/tourCountryAssets/guide1.png",
+      image: "/tourCountryAssets/second-female.jpg", // Verified Black woman portrait
     },
     {
       id: 3,
@@ -33,16 +39,16 @@ const GUIDES_BY_COUNTRY = {
       rating: 4.7,
       specialties: "City tours • History • Food experiences",
       languages: "English, Twi",
-      image: "/tourCountryAssets/guide1.png",
+      image: "/tourCountryAssets/second-male.jpg", // Verified Black man portrait
     },
     {
       id: 4,
-      name: "Abena Osei",
+      name: "Agyeman Badu",
       location: "Greater Accra · Ghana",
       rating: 4.5,
       specialties: "City tours • History • Food experiences",
       languages: "English, Twi, Ga",
-      image: "/tourCountryAssets/guide1.png",
+      image: "/tourCountryAssets/agyeman-badu.jpg", // Verified Black man portrait
     },
   ],
   nigeria: [
@@ -53,7 +59,7 @@ const GUIDES_BY_COUNTRY = {
       rating: 4.6,
       specialties: "Urban tours • Culture • Music",
       languages: "English, Yoruba",
-      image: "/tourCountryAssets/guide1.png",
+      image: "/tourCountryAssets/yaw-obeng.jpg", // Verified Black man portrait
     },
     {
       id: 2,
@@ -62,7 +68,7 @@ const GUIDES_BY_COUNTRY = {
       rating: 4.5,
       specialties: "Heritage tours • Northern history",
       languages: "English, Hausa",
-      image: "/tourCountryAssets/guide1.png",
+      image: "/tourCountryAssets/second-female.jpg", // Verified Black woman portrait
     },
     {
       id: 3,
@@ -71,7 +77,7 @@ const GUIDES_BY_COUNTRY = {
       rating: 4.8,
       specialties: "Cultural immersion • Nature walks",
       languages: "English, Igbo",
-      image: "/tourCountryAssets/guide1.png",
+      image: "/tourCountryAssets/second-male.jpg", // Verified Black man portrait
     },
     {
       id: 4,
@@ -80,7 +86,8 @@ const GUIDES_BY_COUNTRY = {
       rating: 4.7,
       specialties: "City tours • Wildlife • Nature",
       languages: "English, Hausa, French",
-      image: "/tourCountryAssets/guide1.png",
+      // Dicebear illustrated avatar — only one real female photo available
+      image: "https://api.dicebear.com/9.x/personas/svg?seed=AminaYakubu&backgroundColor=ebdff5&skinColor=623d36&hair=bunUndercut&body=squared",
     },
   ],
 };
@@ -91,7 +98,7 @@ const getGuides = (country) => {
 };
 
 const GuideInfo = ({ guide }) => (
-  <div className="w-[340px]">
+  <div className="w-full max-w-[340px]">
     <div className="flex h-[38px] items-center">
       <img
         src={mapIcon}
@@ -306,20 +313,20 @@ const LocalGuidesSection = React.forwardRef(
             />
           </g>
         </svg>
-        <div className="relative z-[1] px-[156px]">
-          <div className="mb-10 flex w-full items-start justify-between">
+        <div className="relative z-[1] px-6 md:px-[30px] lg:px-[156px]">
+          <div className="mb-10 flex flex-col lg:flex-row w-full items-center lg:items-start justify-between gap-4">
             <div className="flex shrink-0 items-center gap-2">
               <div className="h-px w-[46px] bg-secondary-light-hover" />
               <span className="text-med-small-bold whitespace-nowrap text-secondary-light-hover">
                 Meet the Experts
               </span>
             </div>
-            <div className="flex w-[826px] items-center justify-end">
-              <div className="flex w-[565px] flex-col items-end gap-2">
-                <h2 className="text-High-md-bold m-0 w-[581px] text-right text-tertiary-light-default">
+            <div className="flex w-full lg:w-[826px] items-center justify-center lg:justify-end">
+              <div className="flex w-full lg:w-[565px] flex-col items-center lg:items-end gap-2">
+                <h2 className="text-High-md-bold m-0 w-full lg:w-[581px] text-center lg:text-right text-tertiary-light-default">
                   {country}&apos;s Local Guides
                 </h2>
-                <p className="text-md-regular m-0 w-[565px] text-right text-tertiary-light-default">
+                <p className="text-md-regular m-0 w-full lg:w-[565px] text-center lg:text-right text-tertiary-light-default">
                   Every Elysium guide is certified, locally born, and deeply
                   connected to the history and culture they share. These
                   aren&apos;t tour scripts, they&apos;re lived stories.

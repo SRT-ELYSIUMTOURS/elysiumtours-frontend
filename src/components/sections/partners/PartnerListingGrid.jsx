@@ -131,7 +131,7 @@ const ChevronRightNav = () => (
 );
 
 const EmptyState = () => (
-  <div className="flex flex-col items-center justify-center py-[120px] gap-[16px] col-span-full">
+  <div className="flex flex-col items-center justify-center py-[120px] gap-[16px] col-span-3">
     <div className="w-[64px] h-[64px] rounded-full bg-secondary-light-default flex items-center justify-center">
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
         <circle cx="11" cy="11" r="8" stroke="#7b2cbf" strokeWidth="1.5" />
@@ -212,7 +212,7 @@ const PartnerListingGrid = React.forwardRef(({
   const emptyDataset = filteredItems.length === 0 && allItems.length === 0;
 
   return (
-    <div ref={ref} className={classNames("w-full", className)} {...props}>
+    <div ref={ref} className={classNames("w-full px-4 md:px-10 lg:px-[80px] py-10 lg:py-[60px] ", className)} {...props}>
       {zeroFilterResults ? (
         <div className="grid grid-cols-1 lg:grid-cols-4">
           <div className="col-span-full flex justify-center py-[120px]">
@@ -220,12 +220,12 @@ const PartnerListingGrid = React.forwardRef(({
           </div>
         </div>
       ) : emptyDataset ? (
-        <div className="grid grid-cols-1 lg:grid-cols-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 ">
           <EmptyState />
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-x-[24px] gap-y-[48px]">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-x-[24px] gap-y-8 lg:gap-y-[48px]">
             {visibleItems.map((partner, index) => {
               
               const cardLayout = classNames(

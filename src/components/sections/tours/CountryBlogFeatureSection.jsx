@@ -62,9 +62,38 @@ const CountryBlogFeatureSection = React.forwardRef(
           alt=""
         />
 
-        {/* ── Main card ─────────────────────────────────────────────────────── */}
-        {/* Figma 1914:41190: mx-156px h-578px bg-#f7f7f7 rounded-20px overflow-clip */}
-        <div className="mx-[156px] h-[578px] bg-[#f7f7f7] rounded-[20px] overflow-clip shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)] relative">
+        {/* ── Mobile/tablet layout: simple stacked card ────────────────────── */}
+        <div className="lg:hidden mx-6 md:mx-[30px] bg-[#f7f7f7] rounded-[20px] overflow-clip shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)] flex flex-col">
+          <div className="relative w-full h-[200px] md:h-[280px]">
+            <img
+              src={data.imageLarge}
+              alt=""
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+          </div>
+          <div className="flex flex-col items-center gap-3 p-6 md:p-8 text-center">
+            <span className="font-raleway text-[13px] font-semibold uppercase tracking-wide text-secondary-normal-default">
+              Travel Stories
+            </span>
+            <h2 className="font-raleway text-[20px] md:text-[24px] font-bold text-tertiary-normal-default leading-tight">
+              {data.title}
+            </h2>
+            <p className="font-raleway text-[14px] md:text-[15px] text-primary-dark-active leading-[22px]">
+              {data.subtitle}
+            </p>
+            {data.buttonText && (
+              <button
+                type="button"
+                className="mt-2 inline-flex items-center gap-2 rounded-full border border-secondary-normal-default bg-white px-6 py-2 font-raleway text-[14px] font-semibold text-secondary-normal-default hover:bg-[#f9f4fb] transition-colors"
+              >
+                {data.buttonText}
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* ── Desktop layout: original Figma pill-shaped pixel-perfect design ─ */}
+        <div className="hidden lg:block mx-[156px] h-[578px] bg-[#f7f7f7] rounded-[20px] overflow-clip shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)] relative">
 
           {/* Inner flex row — centered both axes */}
           {/* Figma: absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex gap-8px items-center */}

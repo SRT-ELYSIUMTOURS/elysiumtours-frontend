@@ -1,7 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import { classNames } from "../../utils/classNames";
 import Button from "./button";
 import NewsletterInput from "./NewsletterInput";
+import PartnerWithUsModal from "./PartnerWithUsModal";
+import Toast from "./toast";
 import ElysiumLogo from "../../assets/Elysium-logo.svg";
 
 // From Figma: Footer — Frame 75 (1728×399, padding:16 all sides)
@@ -50,6 +52,31 @@ const Footer = ({
   className = "",
 }) => {
   const year = new Date().getFullYear();
+  const [partnerModalOpen, setPartnerModalOpen] = useState(false);
+  const [prefillEmail, setPrefillEmail] = useState("");
+  const [toast, setToast] = useState(null);
+
+  // Default newsletter handler: open Partner With Us modal so the button does
+  // something instead of being a dead form. The typed email is forwarded so the
+  // modal's email field is pre-filled — the user doesn't have to type it again.
+  // Pages can still override with their own onSubscribe prop.
+  const handleNewsletterSubmit = (email) => {
+    if (onSubscribe) {
+      onSubscribe(email);
+      return;
+    }
+    setPrefillEmail(email || "");
+    setPartnerModalOpen(true);
+  };
+
+  const handlePartnerSubmit = () => {
+    setPartnerModalOpen(false);
+    setToast({
+      variant: "success",
+      Heading: "Application received",
+      text: "Thanks! We'll reach out within 48 hours.",
+    });
+  };
 
   return (
     <footer className={classNames("w-full overflow-hidden", className)}>
@@ -122,7 +149,7 @@ const Footer = ({
           {/* Col 5 — Newsletter */}
           <div className="w-full md:w-auto md:max-w-[379px]">
             <NewsletterInput
-              onSubmit={onSubscribe}
+              onSubmit={handleNewsletterSubmit}
               buttonText="Partner With Us"
               className="w-full"
             />
@@ -143,6 +170,28 @@ const Footer = ({
           </div>
         </div>
       </div>
+
+      {/* Partner With Us modal — opened by the newsletter "Partner With Us" button.
+          The email typed in the newsletter input is forwarded as `initialEmail`
+          so the modal opens with the email field already filled. */}
+      {partnerModalOpen && (
+        <PartnerWithUsModal
+          onClose={() => setPartnerModalOpen(false)}
+          onSubmit={handlePartnerSubmit}
+          initialEmail={prefillEmail}
+        />
+      )}
+
+      {/* Toast notification */}
+      {toast && (
+        <Toast
+          variant={toast.variant}
+          Heading={toast.Heading}
+          text={toast.text}
+          onCancel={() => setToast(null)}
+          duration={4000}
+        />
+      )}
     </footer>
   );
 };

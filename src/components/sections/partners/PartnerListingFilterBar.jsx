@@ -132,15 +132,53 @@ const PartnerListingFilterBar = React.forwardRef(({
       <div
         ref={ref}
         className={classNames(
-          "relative mx-auto w-full  px-4 lg:px-[156px]",
+          "w-full bg-primary-light-default border-b border-primary-normal-default",
+          "px-4 md:px-8 lg:px-[80px] py-[16px]",
           className
         )}
         {...props}
       >
-        <div className="relative mt-[40px] overflow-hidden border-y-[0.5px] border-solid border-secondary-light-default">
-          <div className="flex min-h-[80px] flex-wrap items-center gap-x-[12px] gap-y-4 py-[18px]">
-            {/* Left controls */}
-            <div className="flex min-w-0 flex-wrap items-center gap-[12px]">
+        <div className="flex items-center justify-between gap-[16px]">
+          {/* Left controls — horizontal scroll on mobile so all filter buttons
+              (Sort, Date, Filters) are reachable even on narrow screens */}
+          <div className="flex items-center gap-[12px] overflow-x-auto scrollbar-hide -mx-4 px-4 md:-mx-0 md:px-0 w-full md:w-auto">
+            {/* Sort dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => { setSortOpen((v) => !v); setLocationOpen(false); }}
+                className={classNames(
+                  "flex items-center gap-[8px] px-[14px] h-[42px] rounded-[8px]",
+                  "border border-primary-dark-default bg-primary-light-default",
+                  "font-raleway font-medium text-[14px] leading-[20px] text-tertiary-normal-default",
+                  "hover:border-secondary-normal-default transition-all duration-300 ease-in cursor-pointer",
+                  "min-w-[129px]"
+                )}
+              >
+                <span className="flex-1 text-left">{currentSortLabel}</span>
+                <ChevronDownIcon />
+              </button>
+              {sortOpen && (
+                <div className="absolute top-full left-0 mt-[4px] w-[200px] bg-primary-light-default border border-primary-normal-default rounded-[10px] shadow-[0px_4px_20px_0px_rgba(0,0,0,0.08)] z-20 overflow-hidden">
+                  {SORT_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.value}
+                      onClick={() => handleSort(opt.value)}
+                      className={classNames(
+                        "w-full px-[16px] py-[10px] text-left",
+                        "font-raleway font-medium text-[14px] leading-[20px]",
+                        "hover:bg-secondary-light-default transition-all duration-300 ease-in cursor-pointer",
+                        sort === opt.value ? "text-secondary-normal-default font-semibold bg-secondary-light-default" : "text-tertiary-normal-default"
+                      )}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Location filter — Tour Guides only */}
+            {showLocationFilter && (
               <div className="relative">
                 <button
                   type="button"
@@ -252,7 +290,7 @@ const PartnerListingFilterBar = React.forwardRef(({
               </div>
             </div>
 
-            <div className="hidden h-[42px] w-[2px] shrink-0 rounded-[10px] bg-[#ebdff5] sm:block" aria-hidden />
+            <div className="hidden lg:block h-[42px] w-[2px] shrink-0 rounded-[10px] bg-[#ebdff5] bg-primary-normal-default mx-[4px]" aria-hidden />
 
             {/* Tag pills */}
             <div className="flex min-w-0 flex-1 flex-wrap items-center gap-[16px] lg:flex-nowrap lg:overflow-x-auto">
