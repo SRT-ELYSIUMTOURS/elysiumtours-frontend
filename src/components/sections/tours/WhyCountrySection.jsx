@@ -45,12 +45,28 @@ const COUNTRY_DATA = {
 };
 
 const WhyCountrySection = React.forwardRef(
-  ({ country = "ghana", className, ...props }, ref) => {
-    const key = country?.toLowerCase();
+  ({ country = "ghana", countryDestinations, className, ...props }, ref) => {
+    const key = country?.toLowerCase().replace(/-/g, " ");
+    const displayName = country
+      ? country.split("-").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")
+      : "Country";
+
+    const firstDest = countryDestinations && countryDestinations[0];
+
     const data = COUNTRY_DATA[key] || {
-      ...COUNTRY_DATA.ghana,
-      label: `WHY ${country?.toUpperCase()}`,
-      title: `Discover ${country}`,
+      label: `WHY ${displayName.toUpperCase()}`,
+      title: firstDest ? `Discover ${displayName}` : `Explore ${displayName}`,
+      paragraphs: firstDest
+        ? [
+            firstDest.description ||
+              `${displayName} offers extraordinary travel experiences with Elysium Tours.`,
+            firstDest.aboutText || "",
+          ].filter(Boolean)
+        : [`${displayName} offers extraordinary travel experiences with Elysium Tours.`],
+      stats: [],
+      image: firstDest?.coverImage || (firstDest?.images && firstDest.images[0]) || "/tourCountryAssets/Image-1.webp",
+      imageTitle: firstDest?.name || displayName,
+      imageSubtitle: firstDest?.subtitle || firstDest?.bestTimeToVisit ? `Best time to visit: ${firstDest?.bestTimeToVisit}` : "",
     };
 
     return (

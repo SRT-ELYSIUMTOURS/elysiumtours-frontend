@@ -58,35 +58,74 @@ const NIGERIA_SLIDES = [
 ];
 
 // ── Country config ─────────────────────────────────────────────────────────────
-// Info bar fields match Figma 1942:30898 exactly (incl. "VIST" typo on label)
+// Stable country-level facts (currency, language, entry, timezone, flag colours).
+// Hero images (slides) are overridden at runtime from DB destination cover images.
+// Add a new entry here whenever a new country is added to the platform.
 const COUNTRY_CONFIG = {
   ghana: {
     title:     "Discover Ghana Where History Breathes",
     subtitle:  "From the Door of No Return to the canopies of Kakum, Ghana holds centuries of culture, resilience, and natural wonder. Every tour is crafted to go beyond the surface.",
     slides:    GHANA_SLIDES,
     stats:     { tours: "18", regions: "06", rating: "4.8", guides: "5" },
-    bestTime:  "Nov-Mar(Dry Season)\n& Dec-Jan",
-    currency:  "Ghanaian Cedi\n(Ghs.)",
+    bestTime:  "Nov-Mar (Dry Season)",
+    currency:  "Ghanaian Cedi\n(GHS)",
     languages: "English, Twi, Ga,\nHausa, Ewe",
     mainEntry: "Kotoka International\nAirport",
-    timeZone:  "GMT+0(No daylight\nSaving)",
-    climate:   "Tropical, 24-32c\navg",
-    // Official Ghana flag colours (red / gold / green)
+    timeZone:  "GMT+0 (No daylight\nSaving)",
+    climate:   "Tropical, 24–32°C avg",
     flagColors: ["#CE1126", "#FCD116", "#006B3F"],
   },
   nigeria: {
-    title:     "Nigeria: Bold Beautiful & Boundless",
+    title:     "Nigeria: Bold, Beautiful & Boundless",
     subtitle:  "From the bustling markets of Lagos to the ancient city of Kano, Nigeria is a mosaic of over 250 ethnic groups, rich traditions, and breathtaking landscapes.",
     slides:    NIGERIA_SLIDES,
     stats:     { tours: "24", regions: "08", rating: "4.7", guides: "8" },
-    bestTime:  "Nov-Feb (Dry\nSeason)",
+    bestTime:  "Nov–Feb (Dry Season)",
     currency:  "Nigerian Naira\n(NGN)",
     languages: "English, Yoruba,\nHausa, Igbo",
     mainEntry: "Murtala Muhammed\nInt'l Airport",
     timeZone:  "WAT (UTC+1)",
-    climate:   "Tropical, 25-35c\navg",
-    // Official Nigeria flag colours (green / white / green)
+    climate:   "Tropical, 25–35°C avg",
     flagColors: ["#008751", "#FFFFFF", "#008751"],
+  },
+  togo: {
+    title:     "Togo: Small Country, Big Spirit",
+    subtitle:  "From the beaches of Lomé to the misty highlands of Kpalimé, Togo packs extraordinary natural beauty and rich Ewe culture into one of West Africa's most underrated destinations.",
+    slides:    [],
+    stats:     { tours: "0", regions: "02", rating: "4.8", guides: "2" },
+    bestTime:  "Nov–Feb (Dry Season)",
+    currency:  "West African CFA\nFranc (XOF)",
+    languages: "French, Ewe,\nKabiyé",
+    mainEntry: "Gnassingbé Eyadéma\nInt'l Airport",
+    timeZone:  "GMT+0",
+    climate:   "Tropical, 26–30°C avg",
+    flagColors: ["#006A4E", "#FFCE00", "#D21034"],
+  },
+  "côte d'ivoire": {
+    title:     "Côte d'Ivoire: The Heartbeat of West Africa",
+    subtitle:  "Abidjan's skyline, the forests of the interior, and some of the finest cocoa and coffee on earth — Côte d'Ivoire rewards the curious traveller at every turn.",
+    slides:    [],
+    stats:     { tours: "0", regions: "01", rating: "4.8", guides: "2" },
+    bestTime:  "Dec–Mar (Dry Season)",
+    currency:  "West African CFA\nFranc (XOF)",
+    languages: "French, Dioula,\nBaoulé",
+    mainEntry: "Félix Houphouët-Boigny\nInt'l Airport",
+    timeZone:  "GMT+0",
+    climate:   "Tropical, 24–30°C avg",
+    flagColors: ["#F77F00", "#FFFFFF", "#009A44"],
+  },
+  senegal: {
+    title:     "Senegal: Where the Atlantic Meets Africa",
+    subtitle:  "Dakar's energy, the pink waters of Lac Rose, and the serene Casamance forest — Senegal is a sensory feast and a gateway to the soul of West Africa.",
+    slides:    [],
+    stats:     { tours: "0", regions: "01", rating: "4.8", guides: "2" },
+    bestTime:  "Nov–May (Dry Season)",
+    currency:  "West African CFA\nFranc (XOF)",
+    languages: "French, Wolof,\nPulaar, Serer",
+    mainEntry: "Blaise Diagne\nInt'l Airport",
+    timeZone:  "GMT+0",
+    climate:   "Sahel/Tropical,\n22–32°C avg",
+    flagColors: ["#00853F", "#FDEF42", "#E31B23"],
   },
 };
 
@@ -94,7 +133,7 @@ const DEFAULT_CONFIG = {
   title:      "Discover This Destination",
   subtitle:   "Explore the beauty and culture of this amazing destination with Elysium Tours.",
   slides:     GHANA_SLIDES,
-  stats:      { tours: "10", regions: "04", rating: "4.8", guides: "3" },
+  stats:      { tours: "0", regions: "01", rating: "4.8", guides: "0" },
   bestTime:   "Year-round",
   currency:   "Local Currency",
   languages:  "Local Languages",
@@ -107,24 +146,63 @@ const DEFAULT_CONFIG = {
 // ── TourCountryHero ────────────────────────────────────────────────────────────
 // Hero:     Figma 1914:40901 — 1728×717px
 // Info bar: Figma 1942:30897 — 1728×138px (incl. 16px flag strip at top)
-const TourCountryHero = React.forwardRef(({ country = "ghana", className, ...props }, ref) => {
+const TourCountryHero = React.forwardRef(({ country = "ghana", countryDestinations, tourCount, className, ...props }, ref) => {
   const [current, setCurrent] = useState(0);
   const intervalRef = useRef(null);
 
-  const config = COUNTRY_CONFIG[country?.toLowerCase()] || { ...DEFAULT_CONFIG, title: `Discover ${country}` };
-  const slides  = config.slides || GHANA_SLIDES;
+  const countryKey = country?.toLowerCase().replace(/-/g, " ");
+  const displayName = country
+    ? country.split("-").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")
+    : "Country";
+  const staticConfig = COUNTRY_CONFIG[countryKey] || { ...DEFAULT_CONFIG, title: `Discover ${displayName}` };
 
-  const startAutoPlay = () => {
+  // Build hero slides from destination cover images; fall back to static config slides
+  const slides = React.useMemo(() => {
+    if (countryDestinations && countryDestinations.length > 0) {
+      const built = countryDestinations
+        .filter((d) => d.coverImage)
+        .map((d, i) => ({ id: i + 1, image: d.coverImage, alt: d.name }))
+        .slice(0, 5);
+      if (built.length > 0) return built;
+    }
+    return staticConfig.slides || GHANA_SLIDES;
+  }, [countryDestinations, staticConfig.slides]);
+
+  // Derive stats from live data where available
+  const regionCount = React.useMemo(() => {
+    if (countryDestinations && countryDestinations.length > 0) {
+      return new Set(countryDestinations.map((d) => d.region).filter(Boolean)).size;
+    }
+    return null;
+  }, [countryDestinations]);
+
+  const firstDest = countryDestinations && countryDestinations[0];
+
+  const config = {
+    ...staticConfig,
+    stats: {
+      ...staticConfig.stats,
+      tours:   tourCount != null ? String(tourCount) : staticConfig.stats.tours,
+      regions: regionCount != null ? String(regionCount).padStart(2, "0") : staticConfig.stats.regions,
+    },
+    bestTime: firstDest?.bestTimeToVisit || staticConfig.bestTime,
+    climate:  firstDest?.weather?.avgTemp
+      ? `Tropical, ${firstDest.weather.avgTemp}°C avg`
+      : staticConfig.climate,
+  };
+
+  const startAutoPlay = React.useCallback(() => {
     clearInterval(intervalRef.current);
     intervalRef.current = setInterval(() => {
       setCurrent((prev) => (prev + 1) % slides.length);
     }, 5000);
-  };
+  }, [slides.length]);
 
   useEffect(() => {
+    setCurrent(0);
     startAutoPlay();
     return () => clearInterval(intervalRef.current);
-  }, []);
+  }, [slides, startAutoPlay]);
 
   const goTo = (index) => {
     clearInterval(intervalRef.current);

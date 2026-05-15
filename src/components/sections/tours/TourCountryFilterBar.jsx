@@ -341,8 +341,8 @@ const DEFAULT_REGION_CONFIG = {
 //     ?sort=&price=&duration=&type=) — keeping them separate avoids prop-soup
 //   • Country-specific region data that doesn't belong in a global filter
 const TourCountryFilterBar = React.forwardRef(
-  ({ country = "ghana", resultsCount = 0, className, ...props }, ref) => {
-    const config =
+  ({ country = "ghana", countryDestinations, resultsCount = 0, className, ...props }, ref) => {
+    const staticConfig =
       COUNTRY_REGION_CONFIG[country?.toLowerCase()] || {
         ...DEFAULT_REGION_CONFIG,
         displayName:
@@ -350,6 +350,19 @@ const TourCountryFilterBar = React.forwardRef(
             ? country.charAt(0).toUpperCase() + country.slice(1)
             : "Country",
       };
+
+    // Derive regions from live destination data; fall back to static config
+    const config = React.useMemo(() => {
+      if (countryDestinations && countryDestinations.length > 0) {
+        const liveRegions = [...new Set(
+          countryDestinations.map((d) => d.region).filter(Boolean)
+        )].sort();
+        if (liveRegions.length > 0) {
+          return { ...staticConfig, regions: liveRegions };
+        }
+      }
+      return staticConfig;
+    }, [countryDestinations, staticConfig]);
 
     const [selectedRegions, setSelectedRegions] = useState([]);
     const [type,            setType]            = useState("all");
