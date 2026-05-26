@@ -1,5 +1,6 @@
 import { Menu, usePermissions } from "react-admin";
 import DashboardIcon from "@mui/icons-material/Dashboard";
+import PublicIcon from "@mui/icons-material/Public";
 import RequestQuoteIcon from "@mui/icons-material/RequestQuote";
 import BarChartIcon from "@mui/icons-material/BarChart";
 import SpeedIcon from "@mui/icons-material/Speed";
@@ -36,6 +37,7 @@ const AdminMenu = () => {
       <SectionLabel label="Tour Management" />
       <Menu.ResourceItem name="tours" primaryText="Tour Packages" />
       <Menu.ResourceItem name="destinations" primaryText="Destinations" />
+      <Menu.ResourceItem name="countries" primaryText="Countries" />
 
       <Divider sx={{ my: 1 }} />
       <SectionLabel label="Operations" />

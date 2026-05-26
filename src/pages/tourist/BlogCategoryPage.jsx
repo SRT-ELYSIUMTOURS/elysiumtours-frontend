@@ -11,7 +11,7 @@ import PartnerPromoCtaSection from "../../components/sections/PartnerPromoCtaSec
 import { partnerPromoBlogContact } from "../../data/partnerPromoCtaPresets.jsx";
 import PartnerWithUsModal from "../../components/ui/PartnerWithUsModal";
 import BlogContentCard from "../../components/cards/BlogContentCard";
-import PartnerHighlightCard from "../../components/cards/PartnerHighlightCard";
+import HighlightCard from "../../components/cards/HighlightCard";
 
 // Category configuration — maps slug to page content
 const CATEGORY_CONFIG = {
@@ -257,12 +257,12 @@ function Grid3x3({ cards, navigate }) {
   );
 }
 
-// Render 3-column partner cards (PartnerHighlightCard needs explicit height — same as PartnerSpotlightPreview)
+// Render 3-column partner cards (HighlightCard needs explicit height — same as PartnerSpotlightPreview)
 function Partner3Col({ cards, navigate }) {
   return (
     <div className="mx-auto flex w-full flex-col gap-xl lg:flex-row lg:items-stretch">
       {cards.map((card) => (
-        <PartnerHighlightCard
+        <HighlightCard
           key={card.id}
           image={card.image}
           category={card.category}

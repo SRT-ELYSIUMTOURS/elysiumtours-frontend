@@ -155,7 +155,7 @@ const PartnerListingFilterBar = React.forwardRef(({
                 )}
               >
                 <span className="flex-1 text-left">{currentSortLabel}</span>
-                <ChevronDownIcon />
+                <ChevronDownSm />
               </button>
               {sortOpen && (
                 <div className="absolute top-full left-0 mt-[4px] w-[200px] bg-primary-light-default border border-primary-normal-default rounded-[10px] shadow-[0px_4px_20px_0px_rgba(0,0,0,0.08)] z-20 overflow-hidden">
@@ -179,45 +179,6 @@ const PartnerListingFilterBar = React.forwardRef(({
 
             {/* Location filter — Tour Guides only */}
             {showLocationFilter && (
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSortOpen((v) => !v);
-                    setLocationOpen(false);
-                    setDatesOpen(false);
-                    setFiltersOpen(false);
-                  }}
-                  className={classNames(
-                    "flex h-[44px] items-center gap-[8px] rounded-[20px] border border-solid border-[#949494] px-[10px] py-[10px]",
-                    "shadow-[0_4px_20px_0_rgba(0,0,0,0.05)]",
-                    "font-raleway text-[13px] font-semibold leading-[18px] text-[#949494]",
-                    "min-w-[129px] justify-center hover:text-primary-light-default focus:bg-secondary-normal-default hover:bg-secondary-normal-default focus:text-primary-light-default cursor-pointer"
-                  )}
-                >
-                  <span className="truncate">{currentSortLabel}</span>
-                  <ChevronDownSm />
-                </button>
-                {sortOpen && (
-                  <div className="absolute left-0 top-full z-30 mt-1 w-[220px] overflow-hidden rounded-[12px] border border-primary-normal-default bg-primary-light-default shadow-lg">
-                    {SORT_OPTIONS.map((opt) => (
-                      <button
-                        key={opt.value}
-                        type="button"
-                        onClick={() => handleSort(opt.value)}
-                        className={classNames(
-                          "block w-full px-4 py-2.5 text-left font-raleway text-[14px] hover:bg-secondary-light-default",
-                          sort === opt.value ? "font-semibold text-secondary-normal-default" : "text-tertiary-normal-default"
-                        )}
-                      >
-                        {opt.label}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {showLocationFilter && (
                 <div className="relative" ref={locationTriggerRef}>
                   <button
                     type="button"
@@ -242,52 +203,51 @@ const PartnerListingFilterBar = React.forwardRef(({
                 </div>
               )}
 
-              <div className="relative" ref={dateTriggerRef}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setDatesOpen((v) => !v);
-                    setSortOpen(false);
-                    setLocationOpen(false);
-                    setFiltersOpen(false);
-                  }}
-                  className={classNames(
-                    "flex h-[44px] min-w-[162px] items-center gap-[8px] rounded-[20px] border border-solid border-[#949494] px-[10px] py-[10px] focus:outline-secondary-normal-active",
-                    "shadow-[0_4px_20px_0_rgba(0,0,0,0.05)] font-raleway text-[13px] font-semibold text-primary-dark-hover",
-                    "cursor-pointer hover:bg-secondary-normal-default hover:text-primary-light-default focus:bg-secondary-normal-default focus:text-primary-light-default",
-                    datesOpen && "bg-secondary-normal-default text-primary-light-default"
-                  )}
-                  aria-expanded={datesOpen}
-                  aria-haspopup="dialog"
-                >
-                  <CalendarIcon />
-                  <span>Select Dates</span>
-                  <ChevronDownSm />
-                </button>
-              </div>
+            <div className="relative" ref={dateTriggerRef}>
+              <button
+                type="button"
+                onClick={() => {
+                  setDatesOpen((v) => !v);
+                  setSortOpen(false);
+                  setLocationOpen(false);
+                  setFiltersOpen(false);
+                }}
+                className={classNames(
+                  "flex h-[44px] min-w-[162px] items-center gap-[8px] rounded-[20px] border border-solid border-[#949494] px-[10px] py-[10px] focus:outline-secondary-normal-active",
+                  "shadow-[0_4px_20px_0_rgba(0,0,0,0.05)] font-raleway text-[13px] font-semibold text-primary-dark-hover",
+                  "cursor-pointer hover:bg-secondary-normal-default hover:text-primary-light-default focus:bg-secondary-normal-default focus:text-primary-light-default",
+                  datesOpen && "bg-secondary-normal-default text-primary-light-default"
+                )}
+                aria-expanded={datesOpen}
+                aria-haspopup="dialog"
+              >
+                <CalendarIcon />
+                <span>Select Dates</span>
+                <ChevronDownSm />
+              </button>
+            </div>
 
-              <div className="relative" ref={filterTriggerRef}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setFiltersOpen((v) => !v);
-                    setSortOpen(false);
-                    setLocationOpen(false);
-                    setDatesOpen(false);
-                  }}
-                  className={classNames(
-                    "flex h-[44px] min-w-[91px] items-center gap-[8px] rounded-[20px] border border-solid border-[#949494] px-[10px] py-[10px]",
-                    "shadow-[0_4px_20px_0_rgba(0,0,0,0.05)] font-raleway text-[13px] font-semibold text-[#949494]",
-                    "bg-primary-light-default cursor-pointer hover:bg-secondary-normal-default hover:text-primary-light-default focus:bg-secondary-normal-default focus:text-primary-light-default",
-                    filtersOpen && "bg-secondary-normal-default text-primary-light-default"
-                  )}
-                  aria-expanded={filtersOpen}
-                  aria-haspopup="dialog"
-                >
-                  <FilterIcon />
-                  <span>Filters</span>
-                </button>
-              </div>
+            <div className="relative" ref={filterTriggerRef}>
+              <button
+                type="button"
+                onClick={() => {
+                  setFiltersOpen((v) => !v);
+                  setSortOpen(false);
+                  setLocationOpen(false);
+                  setDatesOpen(false);
+                }}
+                className={classNames(
+                  "flex h-[44px] min-w-[91px] items-center gap-[8px] rounded-[20px] border border-solid border-[#949494] px-[10px] py-[10px]",
+                  "shadow-[0_4px_20px_0_rgba(0,0,0,0.05)] font-raleway text-[13px] font-semibold text-[#949494]",
+                  "bg-primary-light-default cursor-pointer hover:bg-secondary-normal-default hover:text-primary-light-default focus:bg-secondary-normal-default focus:text-primary-light-default",
+                  filtersOpen && "bg-secondary-normal-default text-primary-light-default"
+                )}
+                aria-expanded={filtersOpen}
+                aria-haspopup="dialog"
+              >
+                <FilterIcon />
+                <span>Filters</span>
+              </button>
             </div>
 
             <div className="hidden lg:block h-[42px] w-[2px] shrink-0 rounded-[10px] bg-[#ebdff5] bg-primary-normal-default mx-[4px]" aria-hidden />

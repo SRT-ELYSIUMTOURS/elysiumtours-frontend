@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { classNames } from "../../../utils/classNames";
-import PartnerHighlightCard from "../../cards/PartnerHighlightCard";
+import HighlightCard from "../../cards/HighlightCard";
 
 // Downloaded from Figma asset server
 import sectionLine    from "../../../assets/ElysiumAssets/section-line.svg";
@@ -106,7 +106,7 @@ const TourTypesSection = React.forwardRef(({ className, tours, ...props }, ref) 
         {/* Cards */}
         <div className="
           flex flex-col md:flex-row 
-          gap-6 md:gap-8 
+          gap-6 md:gap-8 md:justify-between
           overflow-x-auto md:overflow-visible
         ">
           {TOUR_TYPES.map((t) => {
@@ -117,7 +117,7 @@ const TourTypesSection = React.forwardRef(({ className, tours, ...props }, ref) 
               : t.label === "Business Tours" ? "24 curated programmes"
               : "12 eco & cultural immersion";
             return (
-              <PartnerHighlightCard
+              <HighlightCard
                 key={t.id}
                 image={t.image}
                 category={t.label}

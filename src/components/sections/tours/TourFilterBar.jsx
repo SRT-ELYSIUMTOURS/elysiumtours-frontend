@@ -501,7 +501,7 @@ const TourFilterBar = React.forwardRef(({ resultsCount = 48, onFilterChange, cla
         if (typeof ref === "function") ref(el);
         else if (ref) ref.current = el;
       }}
-      className={classNames("w-full bg-white", className)}
+      className={classNames("w-full bg-white flex items-center", className)}
       style={{
         minHeight: "147px",
         borderTop: "0.5px solid #f2eaf9",

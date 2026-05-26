@@ -16,7 +16,9 @@ export const fetchFeaturedToursThunk = createAsyncThunk(
   "tours/fetchFeatured",
   async (_, { rejectWithValue }) => {
     try {
-      return await listToursApi({ featured: true, limit: 4 });
+      // No limit — FeaturedToursSection slices to 4 cards on its own.
+      // FeaturedDestinationsSection needs tourHighlights from ALL featured tours.
+      return await listToursApi({ featured: true });
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || "Failed to load featured tours.");
     }

@@ -1,21 +1,26 @@
-import React, { useState, useEffect, useCallback, Fragment, useMemo } from "react";
+import React, { useState, useEffect, useLayoutEffect, useCallback, useRef, Fragment, useMemo } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useAppDispatch } from "../../hooks/useAppDispatch";
 import { useAppSelector } from "../../hooks/useAppSelector";
 import { fetchTourThunk, selectCurrentTour, clearCurrentTour } from "../../store/slices/toursSlice";
 import { createBookingThunk, selectCreateBookingStatus, selectBookingsError, clearBookingError } from "../../store/slices/bookingsSlice";
 import { selectIsAuthenticated } from "../../store/slices/authSlice";
-import { incrementTourViewApi } from "../../api/tours.api";
+import { incrementTourViewApi, listToursApi } from "../../api/tours.api";
 import { listReviewsByTourApi } from "../../api/reviews.api";
 import { classNames } from "../../utils/classNames";
 import { formatTimeAgo } from "../../utils/formatTimeAgo";
 import BlogBreadcrumbBar from "../../components/sections/blog/BlogBreadcrumbBar";
+import Dropdown from "../../components/ui/Dropdown";
+import logoCombo from "../../assets/Elysium+Achimota/LogoCombo.png";
+import ElysiumLogo from "../../assets/Elysium-logo.svg";
+import dividerLine from "../../assets/ElysiumAssets/divider-line.svg";
 import ImageGalleryModal from "../../components/ui/ImageGalleryModal";
 import ShareModal from "../../components/ui/ShareModal";
 import PartnerWithUsModal from "../../components/ui/PartnerWithUsModal";
 import Button from "../../components/ui/button";
 import PartnerPromoCtaSection from "../../components/sections/PartnerPromoCtaSection";
 import { partnerPromoTour } from "../../data/partnerPromoCtaPresets.jsx";
+import PopularTourCard from "../../components/cards/PopularTourCard";
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -198,8 +203,10 @@ const MeetingPointMapFrame = ({
       zoomControl
     >
       <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+        url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+        subdomains="abcd"
+        maxZoom={20}
       />
       <MapClickPlacePin onPlace={handleMove} />
       <Marker
@@ -261,9 +268,9 @@ const CheckIcon = () => (
     <path
       d="M4.16406 10.833L7.4974 14.1663L15.8307 5.83301"
       stroke="#7B2CBF"
-      stroke-width="1.66667"
-      stroke-linecap="round"
-      stroke-linejoin="round"
+      strokeWidth="1.66667"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
   </svg>
 );
@@ -279,9 +286,9 @@ const CrossIcon = () => (
     <path
       d="M5 15L15 5M5 5L15 15"
       stroke="#FF3B30"
-      stroke-width="1.66667"
-      stroke-linecap="round"
-      stroke-linejoin="round"
+      strokeWidth="1.66667"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
   </svg>
 );
@@ -358,8 +365,8 @@ const GlobeIcon = () => (
     <path
       d="M1.33594 8.00002C1.33594 8.70129 1.45624 9.37442 1.67735 10M1.67735 10H7.33594M1.67735 10C2.50102 12.3304 4.7235 14 7.33594 14C6.30648 14 5.45868 11.6666 5.34814 8.66669M8.6784 6H14.3369M14.3369 6C13.5133 3.66961 11.2908 2 8.6784 2C9.74567 2 10.6177 4.508 10.6753 7.66669M14.3369 6C14.5228 6.52578 14.6374 7.08522 14.6693 7.66669"
       stroke="#2D2D2D"
-      stroke-linecap="round"
-      stroke-linejoin="round"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
     <path
       d="M1.33594 3.53123C1.33594 2.79899 1.33594 2.43287 1.46086 2.14893C1.59334 1.84783 1.82168 1.60581 2.10578 1.46541C2.37368 1.33301 2.71912 1.33301 3.41001 1.33301H4.0026C5.25968 1.33301 5.88822 1.33301 6.27874 1.74691C6.66927 2.16081 6.66927 2.82697 6.66927 4.1593V5.66535C6.66927 6.24651 6.66927 6.53709 6.49322 6.63695C6.31718 6.73681 6.08905 6.57562 5.6328 6.25325L5.56329 6.20413C5.22984 5.96853 5.06312 5.85073 4.87417 5.79009C4.68522 5.72946 4.48484 5.72946 4.08409 5.72946H3.41001C2.71912 5.72946 2.37368 5.72946 2.10578 5.59706C1.82168 5.45665 1.59334 5.21464 1.46086 4.91353C1.33594 4.6296 1.33594 4.26348 1.33594 3.53123Z"
@@ -383,19 +390,19 @@ const CancelIcon = () => (
     <path
       d="M7.33333 1.33301C4.81917 1.33301 3.5621 1.33301 2.78105 2.0855C2 2.83799 2 4.04911 2 6.47136V11.9869C2 13.5241 2 14.2927 2.51523 14.5679C3.51298 15.1006 5.38453 13.3231 6.27333 12.7879C6.7888 12.4775 7.04653 12.3223 7.33333 12.3223C7.62013 12.3223 7.87787 12.4775 8.39333 12.7879C9.28213 13.3231 11.1537 15.1006 12.1515 14.5679C12.6667 14.2927 12.6667 13.5241 12.6667 11.9869V7.66634"
       stroke="#141B34"
-      stroke-linecap="round"
-      stroke-linejoin="round"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
     <path
       d="M2.33594 4.66699H7.33594"
       stroke="#141B34"
-      stroke-linecap="round"
+      strokeLinecap="round"
     />
     <path
       d="M14.0026 1.33301L9.33594 5.99937M14.0026 5.99967L9.33594 1.33331"
       stroke="#141B34"
-      stroke-linecap="round"
-      stroke-linejoin="round"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
   </svg>
 );
@@ -522,15 +529,17 @@ const TourHeroSection = React.forwardRef(({ tourData, onOpenGallery }, ref) => {
             className="absolute inset-0 h-full w-full object-cover"
           />
           <div className="pointer-events-none absolute inset-0 bg-black/30" aria-hidden />
-          <button
-            type="button"
-            onClick={(e) => { e.stopPropagation(); onOpenGallery(0); }}
-            className="absolute bottom-4 right-4 z-10 flex h-[38px] items-center gap-2 rounded-[10px] border border-secondary-light-default px-3 backdrop-blur-[7.45px]"
-            style={{ backgroundColor: "rgba(123, 44, 191, 0.5)", width: "160px" }}
-          >
-            <span className="font-sans text-sm font-semibold leading-5 tracking-[-0.15px] text-secondary-light-hover" aria-hidden>⋮⋮</span>
-            <span className="font-raleway text-med-small-semibold text-secondary-light-default">Show all photos</span>
-          </button>
+          {tourData.images.length > 1 && (
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); onOpenGallery(0); }}
+              className="absolute bottom-4 right-4 z-10 flex h-[38px] items-center gap-2 rounded-[10px] border border-secondary-light-default px-3 backdrop-blur-[7.45px]"
+              style={{ backgroundColor: "rgba(123, 44, 191, 0.5)", width: "160px" }}
+            >
+              <span className="font-sans text-sm font-semibold leading-5 tracking-[-0.15px] text-secondary-light-hover" aria-hidden>⋮⋮</span>
+              <span className="font-raleway text-med-small-semibold text-secondary-light-default">Show all photos</span>
+            </button>
+          )}
         </div>
 
         {/* Desktop: original 4-photo grid */}
@@ -577,7 +586,7 @@ const TourHeroSection = React.forwardRef(({ tourData, onOpenGallery }, ref) => {
               </div>
               <div className="flex h-[347px] gap-1">
                 <div
-                  className="relative w-[430px] min-w-0 shrink-0 cursor-pointer overflow-hidden"
+                  className="relative flex-1 min-w-0 min-w-0 shrink-0 cursor-pointer overflow-hidden"
                   onClick={() => tourData.heroBottomLeft && onOpenGallery(2)}
                   role="presentation"
                 >
@@ -603,28 +612,30 @@ const TourHeroSection = React.forwardRef(({ tourData, onOpenGallery }, ref) => {
                   ) : (
                     <div className="absolute inset-0 bg-secondary-light-hover" aria-hidden />
                   )}
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onOpenGallery(0);
-                    }}
-                    className="absolute bottom-[43px] right-8 z-10 flex h-[38px] items-center gap-2 rounded-[10px] border border-secondary-light-default px-3 backdrop-blur-[7.45px]"
-                    style={{
-                      backgroundColor: "rgba(123, 44, 191, 0.5)",
-                      width: "160px",
-                    }}
-                  >
-                    <span
-                      className="font-sans text-sm font-semibold leading-5 tracking-[-0.15px] text-secondary-light-hover"
-                      aria-hidden
+                  {tourData.images.length > 4 && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onOpenGallery(0);
+                      }}
+                      className="absolute bottom-[43px] right-8 z-10 flex h-[38px] items-center gap-2 rounded-[10px] border border-secondary-light-default px-3 backdrop-blur-[7.45px]"
+                      style={{
+                        backgroundColor: "rgba(123, 44, 191, 0.5)",
+                        width: "160px",
+                      }}
                     >
-                      ⋮⋮
-                    </span>
-                    <span className="font-raleway text-med-small-semibold text-secondary-light-default">
-                      Show all photos
-                    </span>
-                  </button>
+                      <span
+                        className="font-sans text-sm font-semibold leading-5 tracking-[-0.15px] text-secondary-light-hover"
+                        aria-hidden
+                      >
+                        ⋮⋮
+                      </span>
+                      <span className="font-raleway text-med-small-semibold text-secondary-light-default">
+                        Show all photos
+                      </span>
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -770,15 +781,17 @@ const ItineraryStep = ({ day, isFirst }) => {
       {open && (
         <div className="flex-1">
           <div className="flex flex-col gap-3.5">
-            {/* Locoal context */}
-            <div className="border-l-3 border-secondary-normal-default px-4.5 py-3 bg-[#F3E8FF80] rounded-r-sm ">
-              <span className="text-[14px] font-bold text-secondary-dark-hover">
-                Local Context:
-                <span className="text-[14px] font-medium ">
-                  {day.localContext}
+            {/* Local context — only shown when explicitly provided */}
+            {day.localContext && (
+              <div className="border-l-3 border-secondary-normal-default px-4.5 py-3 bg-[#F3E8FF80] rounded-r-sm ">
+                <span className="text-[14px] font-bold text-secondary-dark-hover">
+                  Local Context:
+                  <span className="text-[14px] font-medium ">
+                    {day.localContext}
+                  </span>
                 </span>
-              </span>
-            </div>
+              </div>
+            )}
 
             {/* Activities */}
             <div className="flex flex-col divide-y divide-[#F3E8FF]">
@@ -1249,13 +1262,51 @@ const ReviewsSection = ({ tourData, apiReviews, apiStats, tourId }) => {
 };
 
 // ─── BookingWidget ────────────────────────────────────────────────────────────
-// Figma 3156:45940 — 457×755px card; gradient header + 3-step stepper + date inputs
-// + traveler counters + Check Availability CTA + free cancellation notice
+// Two render modes (auto-detected from tourData):
+//
+//   hotel_selector  accommodationOptions[] populated
+//                   → Achimota-style: single/double dropdown, hotel dropdown,
+//                     single departure date, "Make Payment", logo combo footer
+//
+//   standard        base price only
+//                   → original layout: stepper, traveler counters, date range,
+//                     "Reserve This Tour"
+
 const BOOKING_STEPS = [
   { id: 1, label: "Dates" },
   { id: 2, label: "Review" },
   { id: 3, label: "Payment" },
 ];
+
+const ROOM_OPTIONS = [
+  { value: "single", label: "Single" },
+  { value: "double", label: "Double" },
+];
+
+const WishlistHeartIcon = ({ filled }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden>
+    <path
+      d="M6.61573 13.7362C7.75843 15.4212 10.241 15.4213 11.3837 13.7363L15.3052 7.9537C16.0346 6.87805 16.0742 5.47034 15.4143 4.35069C14.0961 2.11423 10.8298 2.14608 9.58663 4.42508C9.33322 4.88962 8.66617 4.88962 8.41277 4.42508C7.16957 2.14608 3.90334 2.11425 2.58514 4.3507C1.92521 5.47034 1.96481 6.87805 2.69426 7.95369L6.61573 13.7362Z"
+      stroke={filled ? "#7b2cbf" : "#2d2d2d"}
+      fill={filled ? "#7b2cbf" : "none"}
+      strokeWidth="1.2"
+    />
+  </svg>
+);
+
+const FreeCancelBadge = () => (
+  <div className="mx-5 mb-5 mt-2 flex h-9 items-center gap-2.5 rounded-sm border border-secondary-light-active bg-secondary-light-hover/50 px-[11px]">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden className="shrink-0">
+      <g clipPath="url(#clip-free-cancel)">
+        <path d="M8 0C3.58867 0 0 3.58867 0 8C0 12.4113 3.58867 16 8 16C12.4113 16 16 12.4113 16 8H14.2C14.2 11.4187 11.4187 14.2 8 14.2C4.58133 14.2 1.8 11.4187 1.8 8C1.8 4.58133 4.58133 1.8 8 1.8V0ZM12.9333 1.722L7.93 7.96933L5.592 6.05333L4.25733 7.67733L7.418 10.2693C7.52538 10.3579 7.64931 10.4242 7.78258 10.4644C7.91585 10.5046 8.05578 10.5178 8.19422 10.5034C8.33266 10.4889 8.46684 10.447 8.58893 10.3802C8.71102 10.3133 8.81857 10.2228 8.90533 10.114L14.5747 3.036L12.9333 1.722Z" className="fill-secondary-light-active" />
+      </g>
+      <defs><clipPath id="clip-free-cancel"><rect width="16" height="16" fill="white" /></clipPath></defs>
+    </svg>
+    <span className="whitespace-nowrap text-med-small-Medium text-secondary-normal-default">
+      Free cancellation up to 48 hours before departure
+    </span>
+  </div>
+);
 
 const BookingWidget = ({
   tourData,
@@ -1275,68 +1326,182 @@ const BookingWidget = ({
   bookingStatus,
   bookingError,
 }) => {
+  // ── Hotel-selector mode detection ──────────────────────────────────────────
+  const accomOptions = tourData.accommodationOptions ?? [];
+  const isHotelSelector = accomOptions.length > 0;
+
+  const [selectedHotelValue, setSelectedHotelValue] = useState(String(0));
+  const [selectedRoomType, setSelectedRoomType] = useState("single");
+
+  const selectedHotelOption = accomOptions[Number(selectedHotelValue)] ?? accomOptions[0] ?? null;
+
+  const hotelDropdownOptions = accomOptions.map((o, i) => ({
+    value: String(i),
+    label: o.label,
+  }));
+
+  const getPriceRaw = useCallback((opt, roomType) => {
+    if (!opt?.pricing) return null;
+    const entry = opt.pricing.find((p) => p.roomType === roomType);
+    return entry?.pricePerPerson ?? null;
+  }, []);
+
+  const fmtPrice = (raw) =>
+    raw != null ? `$${Number(raw).toLocaleString("en-US")}` : null;
+
+  const singleRaw = getPriceRaw(selectedHotelOption, "single");
+  const doubleRaw = getPriceRaw(selectedHotelOption, "double");
+
+  // Pre-populate departure from tour startDate
+  useEffect(() => {
+    if (tourData.startDate && !departureDate) {
+      setDepartureDate(new Date(tourData.startDate).toISOString().split("T")[0]);
+    }
+  }, [tourData.startDate]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Standard mode state ────────────────────────────────────────────────────
   const [bookingStepInternal, setBookingStepInternal] = useState(1);
-  const activeStep =
-    bookingStepProp !== undefined ? bookingStepProp : bookingStepInternal;
+  const activeStep = bookingStepProp !== undefined ? bookingStepProp : bookingStepInternal;
   const setActiveStep = onBookingStepChange ?? setBookingStepInternal;
 
   const [selectedBookingAddons, setSelectedBookingAddons] = useState({});
-  const bookingAddOns = tourData.bookingAddOns ?? [];
+  const bookingAddOns = useMemo(() => tourData.bookingAddOns ?? [], [tourData.bookingAddOns]);
   const addonsSubtotal = useMemo(
-    () =>
-      bookingAddOns.reduce(
-        (sum, a) => sum + (selectedBookingAddons[a.id] ? a.priceGhc : 0),
-        0
-      ),
+    () => bookingAddOns.reduce((sum, a) => sum + (selectedBookingAddons[a.id] ? a.priceGhc : 0), 0),
     [bookingAddOns, selectedBookingAddons]
   );
-
-  const toggleBookingAddon = (id) => {
+  const toggleBookingAddon = (id) =>
     setSelectedBookingAddons((prev) => ({ ...prev, [id]: !prev[id] }));
-  };
 
+  // ── HOTEL-SELECTOR RENDER ──────────────────────────────────────────────────
+  if (isHotelSelector) {
+    const hasMultipleOptions = accomOptions.length > 1;
+    const headerPriceText = [fmtPrice(singleRaw), fmtPrice(doubleRaw)]
+      .filter(Boolean)
+      .join(" / ");
+    // Subtitle: "single/ double" always; append hotel name only if 1 option
+    const headerSubtitle = hasMultipleOptions
+      ? "single/ double"
+      : `single/ double · ${selectedHotelOption?.label ?? ""}`;
+
+    return (
+      <div className="max-w-full overflow-hidden rounded-[24px] border border-secondary-light-active bg-white">
+        {/* Gradient header */}
+        <div className="flex flex-col gap-1.5 bg-linear-to-b from-secondary-normal-default to-[#391559] px-5 py-6">
+          <p className="font-raleway text-xs font-medium uppercase tracking-[0.06em] text-secondary-light-active">FROM</p>
+          <p className="font-raleway text-[28px] font-bold leading-[34px] text-white">
+            {headerPriceText || tourData.price || "Contact us"}
+          </p>
+          <p className="font-raleway text-[13px] font-medium text-secondary-light-hover">
+            {headerSubtitle}
+          </p>
+        </div>
+
+        {/* Form */}
+        <div className="flex flex-col gap-5 px-5 pt-6 pb-2">
+          {/* Single or Double Option */}
+          <div>
+            <p className="mb-2 font-raleway text-[13px] font-semibold text-secondary-dark-hover">
+              Single or Double Option
+            </p>
+            <Dropdown
+              options={ROOM_OPTIONS}
+              value={selectedRoomType}
+              onChange={setSelectedRoomType}
+              placeholder="Choose between a single or double option."
+            />
+          </div>
+
+          {/* Hotel Option — only when multiple options exist */}
+          {hasMultipleOptions && (
+            <div>
+              <p className="mb-2 font-raleway text-[13px] font-semibold text-secondary-dark-hover">
+                Choose Hotel Option
+              </p>
+              <Dropdown
+                options={hotelDropdownOptions}
+                value={selectedHotelValue}
+                onChange={setSelectedHotelValue}
+                placeholder="Package / hotel option"
+              />
+            </div>
+          )}
+
+          {/* Departure */}
+          <div>
+            <p className="mb-2 font-raleway text-[13px] font-semibold text-secondary-dark-hover">
+              Departure
+            </p>
+            <div className="relative">
+              <input
+                type="date"
+                value={departureDate}
+                onChange={(e) => setDepartureDate(e.target.value)}
+                className="box-border h-[46px] w-full rounded-[10px] border border-[#d1d5dc] px-4 font-raleway text-[14px] text-[#374151] outline-none focus:border-[#7b2cbf] focus:ring-2 focus:ring-[#7b2cbf]/20"
+              />
+            </div>
+          </div>
+
+          {/* Error */}
+          {bookingError && (
+            <p className="rounded-sm bg-red-50 px-3 py-2 text-sm text-red-600">{bookingError}</p>
+          )}
+
+          {/* Make Payment */}
+          <Button
+            type="button"
+            variant="secondary"
+            shape="pill"
+            fullWidth
+            disabled={bookingStatus === "loading"}
+            onClick={onBook}
+            className="h-[52px] min-h-0! rounded-full border-0 font-raleway text-[15px] font-semibold leading-[22px] text-secondary-light-default! shadow-[0_4px_4px_rgba(0,0,0,0.05)] disabled:opacity-60"
+          >
+            {bookingStatus === "loading" ? "Processing…" : "Make Payment"}
+          </Button>
+
+          {/* Save to Wishlist */}
+          <Button
+            type="button"
+            variant="link"
+            onClick={() => setBookmarked(!bookmarked)}
+            startIcon={<WishlistHeartIcon filled={bookmarked} />}
+            className="w-full justify-center !no-underline p-0! py-1 font-raleway text-[13px] font-medium text-tertiary-normal-default shadow-none"
+          >
+            Save to Wishlist
+          </Button>
+        </div>
+
+        <FreeCancelBadge />
+      </div>
+    );
+  }
+
+  // ── STANDARD RENDER ────────────────────────────────────────────────────────
   return (
-  <div className="max-w-full  overflow-hidden rounded-[24px] border border-secondary-light-active bg-white">
-    {/* ── Gradient header — condensed to 110px so widget fits viewport ── */}
-    <div className="flex  flex-col gap-2 bg-linear-to-b from-secondary-normal-default to-[#391559] pl-[18px] pr-6 py-6">
-      <p className=" text-sm-Medium text-secondary-light-active">
-        FROM
-      </p>
-      <p className=" text-Display-md-small-bold  text-white">
-        {tourData?.price ?? "GH₵ 4,590"}
-      </p>
-      <p className="text-med-small-Medium text-secondary-light-hover">
-        per person · USD ~$290 equivalent
-      </p>
+  <div className="max-w-full overflow-hidden rounded-[24px] border border-secondary-light-active bg-white">
+    {/* Gradient header */}
+    <div className="flex flex-col gap-2 bg-linear-to-b from-secondary-normal-default to-[#391559] pl-[18px] pr-6 py-6">
+      <p className="text-sm-Medium text-secondary-light-active">FROM</p>
+      <p className="text-Display-md-small-bold text-white">{tourData?.price ?? "Contact us"}</p>
+      <p className="text-med-small-Medium text-secondary-light-hover">per person</p>
     </div>
 
-    {/* ── 3-step stepper — active / completed / upcoming from `activeStep` ── */}
+    {/* 3-step stepper */}
     <div className="flex py-5 px-11 items-center justify-center border-b border-secondary-light-default">
       <div className="flex items-center justify-between w-full gap-3">
         {BOOKING_STEPS.map((step, index) => {
           const isActive = activeStep === step.id;
           const isComplete = activeStep > step.id;
           const isUpcoming = activeStep < step.id;
-
           const circleClass = classNames(
-            "flex items-center justify-center rounded-full font-raleway text-med-small-semibold  transition-colors",
-            isActive &&
-              "size-[40px] bg-secondary-normal-default text-white",
-            !isActive &&
-              isComplete &&
-              "size-[40px] bg-secondary-normal-default text-white",
-            !isActive &&
-              isUpcoming &&
-              "size-[40px] bg-secondary-light-default text-secondary-light-active"
+            "flex items-center justify-center rounded-full font-raleway text-med-small-semibold transition-colors size-[40px]",
+            (isActive || isComplete) ? "bg-secondary-normal-default text-white" : "bg-secondary-light-default text-secondary-light-active"
           );
-
           const labelClass = classNames(
             "font-raleway text-xs leading-4",
-            (isActive || isComplete) &&
-              "font-bold text-secondary-normal-default",
-            isUpcoming && "font-semibold text-secondary-light-active"
+            (isActive || isComplete) ? "font-bold text-secondary-normal-default" : "font-semibold text-secondary-light-active"
           );
-
           return (
             <Fragment key={step.id}>
               <button
@@ -1344,21 +1509,12 @@ const BookingWidget = ({
                 onClick={() => setActiveStep(step.id)}
                 className="flex w-[72px] flex-col items-center gap-1.5 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-secondary-normal-default focus-visible:ring-offset-2"
                 aria-current={isActive ? "step" : undefined}
-                aria-label={`${step.label}, step ${step.id} of ${BOOKING_STEPS.length}`}
               >
                 <span className={circleClass}>{step.id}</span>
                 <span className={labelClass}>{step.label}</span>
               </button>
               {index < BOOKING_STEPS.length - 1 && (
-                <div
-                  role="presentation"
-                  className={classNames(
-                    "h-0.5 w-10 rounded-lg",
-                    activeStep > step.id
-                      ? "bg-secondary-normal-default"
-                      : "bg-secondary-light-hover"
-                  )}
-                />
+                <div role="presentation" className={classNames("h-0.5 w-10 rounded-lg", activeStep > step.id ? "bg-secondary-normal-default" : "bg-secondary-light-hover")} />
               )}
             </Fragment>
           );
@@ -1366,225 +1522,248 @@ const BookingWidget = ({
       </div>
     </div>
 
-    {/* ── Content area — tightened spacing ────────────────────────────── */}
+    {/* Content */}
     <div className="flex flex-col gap-3 px-[30px] pt-6">
-      {/* CHOOSE YOUR DATE */}
+      {/* Date range */}
       <div className="w-full">
-        <p className="mb-3.5 text-med-small-bold text-secondary-dark-hover">
-          CHOOSE YOUR DATE
-        </p>
+        <p className="mb-3.5 text-med-small-bold text-secondary-dark-hover">CHOOSE YOUR DATE</p>
         <div className="flex gap-[70px] justify-between w-full">
           <div className="flex-1">
-            <p className="mb-2 font-[Inter,sans-serif] text-xs font-medium uppercase tracking-[0.04em] text-[#6a7282]">
-              DEPARTURE
-            </p>
-            <input
-              type="date"
-              value={departureDate}
-              onChange={(e) => setDepartureDate(e.target.value)}
-              className="box-border h-9 w-full rounded-sm border border-[#d1d5dc] px-3 py-2.5 font-[Inter,sans-serif] text-[13px] text-[#0A0A0A80] outline-none"
-            />
+            <p className="mb-2 font-[Inter,sans-serif] text-xs font-medium uppercase tracking-[0.04em] text-[#6a7282]">DEPARTURE</p>
+            <input type="date" value={departureDate} onChange={(e) => setDepartureDate(e.target.value)} className="box-border h-9 w-full rounded-sm border border-[#d1d5dc] px-3 py-2.5 font-[Inter,sans-serif] text-[13px] text-[#0A0A0A80] outline-none" />
           </div>
           <div className="flex-1">
-            <p className="mb-2 font-[Inter,sans-serif] text-xs font-medium uppercase tracking-[0.04em] text-[#6a7282]">
-              RETURN
-            </p>
-            <input
-              type="date"
-              value={returnDate}
-              onChange={(e) => setReturnDate(e.target.value)}
-              className="box-border h-9 w-full rounded-sm border border-[#d1d5dc] px-2.5 font-[Inter,sans-serif] text-[13px] text-[#0A0A0A80] outline-none"
-            />
+            <p className="mb-2 font-[Inter,sans-serif] text-xs font-medium uppercase tracking-[0.04em] text-[#6a7282]">RETURN</p>
+            <input type="date" value={returnDate} onChange={(e) => setReturnDate(e.target.value)} className="box-border h-9 w-full rounded-sm border border-[#d1d5dc] px-2.5 font-[Inter,sans-serif] text-[13px] text-[#0A0A0A80] outline-none" />
           </div>
         </div>
       </div>
 
-      {/* TRAVELERS */}
+      {/* Travelers */}
       <div>
-        <p className="mb-2 font-raleway text-med-small-bold text-secondary-dark-hover">
-          Travelers
-        </p>
+        <p className="mb-2 font-raleway text-med-small-bold text-secondary-dark-hover">Travelers</p>
         <div className="flex flex-col">
-          {/* Adults */}
-          <div className="flex items-center justify-between py-[7px]">
-            <div>
-              <p className="text-med-small-semibold text-tertiary-normal-default">
-                Adults
-              </p>
-              <p className="text-sm-Medium text-secondary-normal-default">
-                Age 13+
-              </p>
+          {[{ label: "Adults", sub: "Age 13+", val: adults, setVal: setAdults, min: 1 },
+            { label: "Children", sub: "Age 4–12", val: children, setVal: setChildren, min: 0 }].map(({ label, sub, val, setVal, min }) => (
+            <div key={label} className="flex items-center justify-between py-[7px]">
+              <div>
+                <p className="text-med-small-semibold text-tertiary-normal-default">{label}</p>
+                <p className="text-sm-Medium text-secondary-normal-default">{sub}</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <Button type="button" variant="secondaryOutline" onClick={() => setVal(Math.max(min, val - 1))} className="size-8! min-h-0! border-2! rounded-full! border-secondary-light-active! bg-transparent! p-0! text-lg! font-bold! leading-none text-secondary-normal-default shadow-none! hover:bg-secondary-light-default/40">−</Button>
+                <span className="w-8 text-center text-semi-md-semibold text-secondary-dark-hover">{val}</span>
+                <Button type="button" variant="secondaryOutline" onClick={() => setVal(val + 1)} className="size-8! min-h-0! rounded-full! border-2! border-secondary-light-active! bg-transparent! p-0! text-lg! font-bold! leading-none text-secondary-normal-default shadow-none! hover:bg-secondary-light-default/40">+</Button>
+              </div>
             </div>
-            <div className="flex items-center gap-3">
-              <Button
-                type="button"
-                variant="secondaryOutline"
-                onClick={() => setAdults(Math.max(1, adults - 1))}
-                className="size-8! min-h-0! border-2! rounded-full! border-secondary-light-active! bg-transparent! p-0! text-lg! font-bold! leading-none text-secondary-normal-default shadow-none! hover:bg-secondary-light-default/40"
-              >
-                −
-              </Button>
-              <span className="w-8 text-center text-semi-md-semibold text-secondary-dark-hover">
-                {adults}
-              </span>
-              <Button
-                type="button"
-                variant="secondaryOutline"
-                onClick={() => setAdults(adults + 1)}
-                className="size-8! min-h-0!  rounded-full! border-2! border-secondary-light-active! bg-transparent! p-0! text-lg! font-bold! leading-none text-secondary-normal-default shadow-none! hover:bg-secondary-light-default/40"
-              >
-                +
-              </Button>
-            </div>
-          </div>
-          {/* Children */}
-          <div className="flex items-center justify-between py-[7px]">
-            <div>
-              <p className="text-med-small-semibold text-tertiary-normal-default">
-                Children
-              </p>
-              <p className="text-sm-Medium text-secondary-normal-default">
-                Age 4–12
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
-              <Button
-                type="button"
-                variant="secondaryOutline"
-                onClick={() => setChildren(Math.max(0, children - 1))}
-                className="size-8! min-h-0!  rounded-full! border-2! border-secondary-light-active! bg-transparent! p-0! text-lg! font-bold! leading-none text-secondary-normal-default shadow-none! hover:bg-secondary-light-default/40"
-              >
-                −
-              </Button>
-              <span className="w-8 text-center  text-semi-md-semibold text-secondary-dark-hover">
-                {children}
-              </span>
-              <Button
-                type="button"
-                variant="secondaryOutline"
-                onClick={() => setChildren(children + 1)}
-                className="size-8! min-h-0!  rounded-full! border-2! border-secondary-light-active! bg-transparent! p-0! text-lg! font-bold! leading-none text-secondary-normal-default shadow-none! hover:bg-secondary-light-default/40"
-              >
-                +
-              </Button>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
 
       {bookingAddOns.length > 0 && (
         <div className="mt-3 border-t border-secondary-light-default pt-4">
-          <p className="mb-3 font-raleway text-med-small-bold text-secondary-dark-hover">
-            Optional extras
-          </p>
+          <p className="mb-3 font-raleway text-med-small-bold text-secondary-dark-hover">Optional extras</p>
           <div className="flex flex-col gap-2">
             {bookingAddOns.map((a) => (
-              <label
-                key={a.id}
-                className="flex cursor-pointer items-start gap-3 rounded-lg border border-secondary-light-hover bg-secondary-light-default/50 px-3 py-2.5 transition-colors hover:bg-secondary-light-default/80"
-              >
-                <input
-                  type="checkbox"
-                  checked={!!selectedBookingAddons[a.id]}
-                  onChange={() => toggleBookingAddon(a.id)}
-                  className="mt-0.5 size-4 shrink-0 accent-secondary-normal-default"
-                />
-                <span className="flex-1 text-med-small-Medium text-tertiary-normal-default">
-                  {a.label}
-                </span>
-                <span className="text-med-small-semibold text-secondary-normal-default whitespace-nowrap tabular-nums">
-                  GHC {a.priceGhc.toLocaleString()}
-                </span>
+              <label key={a.id} className="flex cursor-pointer items-start gap-3 rounded-lg border border-secondary-light-hover bg-secondary-light-default/50 px-3 py-2.5 transition-colors hover:bg-secondary-light-default/80">
+                <input type="checkbox" checked={!!selectedBookingAddons[a.id]} onChange={() => toggleBookingAddon(a.id)} className="mt-0.5 size-4 shrink-0 accent-secondary-normal-default" />
+                <span className="flex-1 text-med-small-Medium text-tertiary-normal-default">{a.label}</span>
+                <span className="text-med-small-semibold text-secondary-normal-default whitespace-nowrap tabular-nums">GHC {a.priceGhc.toLocaleString()}</span>
               </label>
             ))}
           </div>
           {addonsSubtotal > 0 && (
             <div className="mt-3 flex items-center justify-between border-t border-dashed border-secondary-light-active pt-3 text-med-small-semibold text-secondary-dark-hover">
               <span>Add-ons subtotal</span>
-              <span className="tabular-nums">
-                GHC {addonsSubtotal.toLocaleString()}
-              </span>
+              <span className="tabular-nums">GHC {addonsSubtotal.toLocaleString()}</span>
             </div>
           )}
         </div>
       )}
 
-      {/* CTA ACTIONS */}
-      {bookingError && (
-        <p className="mx-[22px] mt-1 rounded-sm bg-red-50 px-3 py-2 text-sm text-red-600">
-          {bookingError}
-        </p>
-      )}
+      {bookingError && <p className="rounded-sm bg-red-50 px-3 py-2 text-sm text-red-600">{bookingError}</p>}
+
       <div className="flex flex-col gap-2">
-        <Button
-          type="button"
-          variant="secondary"
-          shape="pill"
-          fullWidth
-          disabled={bookingStatus === "loading"}
-          onClick={onBook}
-          className="h-[46px] min-h-0! rounded-full border-0 font-raleway text-[15px] font-semibold leading-[22px] text-secondary-light-default! shadow-[0_4px_4px_rgba(0,0,0,0.05)] disabled:opacity-60"
-        >
+        <Button type="button" variant="secondary" shape="pill" fullWidth disabled={bookingStatus === "loading"} onClick={onBook} className="h-[46px] min-h-0! rounded-full border-0 font-raleway text-[15px] font-semibold leading-[22px] text-secondary-light-default! shadow-[0_4px_4px_rgba(0,0,0,0.05)] disabled:opacity-60">
           {bookingStatus === "loading" ? "Booking…" : "Reserve This Tour"}
         </Button>
-        <Button
-          type="button"
-          variant="link"
-          onClick={() => setBookmarked(!bookmarked)}
-          startIcon={
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="18"
-              height="18"
-              viewBox="0 0 18 18"
-              fill="none"
-              aria-hidden
-            >
-              <path
-                d="M6.61573 13.7362C7.75843 15.4212 10.241 15.4213 11.3837 13.7363L15.3052 7.9537C16.0346 6.87805 16.0742 5.47034 15.4143 4.35069C14.0961 2.11423 10.8298 2.14608 9.58663 4.42508C9.33322 4.88962 8.66617 4.88962 8.41277 4.42508C7.16957 2.14608 3.90334 2.11425 2.58514 4.3507C1.92521 5.47034 1.96481 6.87805 2.69426 7.95369L6.61573 13.7362Z"
-                stroke={bookmarked ? "#7b2cbf" : "#2d2d2d"}
-                fill={bookmarked ? "#7b2cbf" : "none"}
-                strokeWidth="1.2"
-              />
-            </svg>
-          }
-          className="w-full justify-center !no-underline  p-0! py-1 font-raleway text-[13px] font-medium text-tertiary-normal-default shadow-none "
-        >
+        <Button type="button" variant="link" onClick={() => setBookmarked(!bookmarked)} startIcon={<WishlistHeartIcon filled={bookmarked} />} className="w-full justify-center !no-underline p-0! py-1 font-raleway text-[13px] font-medium text-tertiary-normal-default shadow-none">
           Save to Wishlist
         </Button>
       </div>
     </div>
 
-    {/* Free cancellation notice */}
-    <div className="mx-[22px] mb-5 mt-2 flex h-9 items-center gap-2.5 rounded-sm border border-secondary-light-active bg-secondary-light-hover/50 px-[11px]">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="16"
-        height="16"
-        viewBox="0 0 16 16"
-        fill="none"
-        aria-hidden
-        className="shrink-0"
-      >
-        <g clipPath="url(#clip-booking-widget-free-cancel)">
-          <path
-            d="M8 0C3.58867 0 0 3.58867 0 8C0 12.4113 3.58867 16 8 16C12.4113 16 16 12.4113 16 8H14.2C14.2 11.4187 11.4187 14.2 8 14.2C4.58133 14.2 1.8 11.4187 1.8 8C1.8 4.58133 4.58133 1.8 8 1.8V0ZM12.9333 1.722L7.93 7.96933L5.592 6.05333L4.25733 7.67733L7.418 10.2693C7.52538 10.3579 7.64931 10.4242 7.78258 10.4644C7.91585 10.5046 8.05578 10.5178 8.19422 10.5034C8.33266 10.4889 8.46684 10.447 8.58893 10.3802C8.71102 10.3133 8.81857 10.2228 8.90533 10.114L14.5747 3.036L12.9333 1.722Z"
-            className="fill-secondary-light-active"
-          />
-        </g>
-        <defs>
-          <clipPath id="clip-booking-widget-free-cancel">
-            <rect width="16" height="16" fill="white" />
-          </clipPath>
-        </defs>
-      </svg>
-      <span className="whitespace-nowrap text-med-small-Medium text-secondary-normal-default">
-        Free cancellation up to 48 hours before departure
-      </span>
-    </div>
+    <FreeCancelBadge />
   </div>
   );
 };
+
+// ─── YouMightAlsoLoveSection ─────────────────────────────────────────────────
+// Fetches tours from the same country, filters out the current one,
+// prioritises shared tags (so Achimota tours surface together), shows 3 cards.
+const TOUR_TYPE_LABELS_YML = { day_tour: "Day Tour", multi_day: "Multi-Day", express: "Express" };
+
+function toRelatedCardProps(t, i) {
+  const typeLabel  = TOUR_TYPE_LABELS_YML[t.tourType] || "Multi-Day";
+  const days       = t.durationDays;
+  const durationSpan = days
+    ? (days === 1 ? "1 Day" : `${days} Days/${days - 1} Night${days - 1 !== 1 ? "s" : ""}`)
+    : "3 Days";
+
+  const accomOpts  = (t.accommodationOptions || []).filter((o) => o.isActive !== false);
+  const allSingles = accomOpts.flatMap((o) =>
+    (o.pricing || []).filter((p) => p.roomType === "single").map((p) => p.pricePerPerson)
+  ).filter((v) => v != null);
+  const minPrice = allSingles.length > 0 ? Math.min(...allSingles) : t.basePrice;
+  const currency = t.displayCurrency || "GHS";
+  const SYMBOLS  = { USD: "$", GHS: "GHS ", EUR: "€", GBP: "£" };
+  const sym      = SYMBOLS[currency] ?? `${currency} `;
+  const price    = minPrice != null
+    ? `${sym}${Number(minPrice).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
+    : "Contact us";
+
+  return {
+    id:                t._id || t.id || i,
+    image:             t.coverImage || t.tourHighlights?.[0]?.image,
+    location:          t.destination?.name
+      ? `${t.destination.name}, ${t.country || "Ghana"}`
+      : (t.country || "Ghana"),
+    rating:            t.rating || 0,
+    reviewCount:       t.reviewCount || 0,
+    title:             t.title || "Tour",
+    availabilityBadge: t.availabilityBadge || "Available",
+    startDate:         t.startDate || null,
+    price,
+    tags:              (t.tags || []).slice(0, 3),
+    duration:          { class: typeLabel, span: durationSpan },
+    maxGroupSize:      t.totalCapacity ?? 50,
+    pickupIncluded:    t.pickupIncluded ?? false,
+    featureType:       t.featureType ?? null,
+    featureLabel:      t.featureLabel ?? null,
+    statusBadge:       t.statusBadge || null,
+    country:           t.country || "ghana",
+    tourSlug:          t.slug || String(t._id || t.id || i),
+  };
+}
+
+const YouMightAlsoLoveSection = ({ currentSlug, currentTags = [], currentCountry = "ghana" }) => {
+  const [cards, setCards] = useState([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    listToursApi({ country: currentCountry, limit: 20 })
+      .then((payload) => {
+        if (cancelled) return;
+        const raw = Array.isArray(payload) ? payload : (payload.rows || payload.data || []);
+        const currentSeries = currentSlug.split("-")[0];
+        const scored = raw
+          .filter((t) => t.slug !== currentSlug)
+          .map((t) => {
+            const shared = (t.tags || []).filter((tag) => currentTags.includes(tag)).length;
+            // Tours from the same series (same slug prefix) always surface first
+            const seriesBonus = t.slug?.split("-")[0] === currentSeries ? 200 : 0;
+            return { t, score: shared * 10 + seriesBonus + (t.featured ? 5 : 0) + (t.rating || 0) };
+          })
+          .sort((a, b) => b.score - a.score)
+          .slice(0, 3)
+          .map(({ t }, i) => toRelatedCardProps(t, i));
+        setCards(scored);
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [currentSlug, currentCountry, currentTags]);
+
+  if (cards.length === 0) return null;
+
+  return (
+    <section className="w-full  py-12 ">
+      <h2 className="font-raleway text-xl font-bold text-secondary-dark-hover mb-6">
+        You Might Also Love
+      </h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {cards.map((card) => (
+          <PopularTourCard
+            key={card.id}
+            {...card}
+            showImageOverlays
+            className="w-full"
+          />
+        ))}
+      </div>
+    </section>
+  );
+};
+
+// ─── BookingAuthGateModal ──────────────────────────────────────────────────────
+// Shown when a logged-out user taps "Book" — introduces sign-in before redirecting.
+const BookingAuthGateModal = ({ tourName, onClose, onSignIn, onRegister }) => (
+  <div
+    className="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 px-4"
+    onClick={onClose}
+  >
+    <div
+      className="relative w-full max-w-[648px] rounded-[30px] bg-white shadow-[0_10px_4px_0_rgba(0,0,0,0.15)] overflow-hidden"
+      onClick={(e) => e.stopPropagation()}
+    >
+      {/* Close button */}
+      <button
+        type="button"
+        onClick={onClose}
+        aria-label="Close"
+        className="absolute top-6 right-6 flex items-center justify-center w-6 h-6 text-[#6b7280] hover:text-[#7b2cbf] transition-colors"
+      >
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M3 3L13 13M13 3L3 13" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
+        </svg>
+      </button>
+
+      <div className="flex flex-col items-center gap-8 px-8 pt-14 pb-10">
+        {/* Logo + divider */}
+        <div className="flex flex-col items-center gap-2 w-full">
+          <img src={ElysiumLogo} alt="Elysium Tours" className="h-[93px] w-auto object-contain" />
+          <img src={dividerLine} alt="" className="w-full max-w-[517px]" />
+        </div>
+
+        {/* Title + body */}
+        <div className="flex flex-col items-center gap-4 text-center max-w-[501px]">
+          <h2 className="font-raleway text-[25px] font-bold leading-[1.1] text-[#7b2cbf]">
+            Sign In to Reserve Your Place
+          </h2>
+          <p className="font-raleway text-[16px] font-medium leading-[26px] text-[#6b7280]">
+            To complete your booking
+            {tourName ? ` for the ${tourName}` : ""}, you'll need to sign in to
+            your Elysium account first. This allows us to securely record your
+            reservation.
+          </p>
+        </div>
+
+        {/* CTAs */}
+        <div className="flex flex-col gap-3 w-full max-w-[544px]">
+          <button
+            type="button"
+            onClick={onSignIn}
+            className="w-full h-[64px] rounded-[40px] bg-[#6f28ac] font-raleway text-[20px] font-semibold text-white shadow-[0_4px_4px_rgba(0,0,0,0.05)] hover:bg-[#5c1f96] transition-colors"
+          >
+            Sign In
+          </button>
+
+          <div className="flex justify-center border-b border-[#eeeeee] pb-6 pt-3">
+            <span className="font-raleway text-[16px] font-semibold text-[#6b7280]">
+              New to Elysium?{" "}
+            </span>
+            <button
+              type="button"
+              onClick={onRegister}
+              className="font-raleway text-[16px] font-semibold text-[#622399] hover:underline ml-1"
+            >
+              Create an account
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
 
 // ─── TourDetailPage ────────────────────────────────────────────────────────────
 const TourDetailPage = () => {
@@ -1592,11 +1771,15 @@ const TourDetailPage = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const apiTour = useAppSelector(selectCurrentTour);
+  const relatedTags = useMemo(() => apiTour?.tags || [], [apiTour?.tags]);
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const bookingStatus = useAppSelector(selectCreateBookingStatus);
   const bookingError = useAppSelector(selectBookingsError);
   // activeSection drives the sticky nav bar tabs
   const [activeSection, setActiveSection] = useState("overview");
+  const [descExpanded, setDescExpanded] = useState(false);
+  const [descClipped, setDescClipped] = useState(false);
+  const descRef = useRef(null);
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [galleryIndex, setGalleryIndex] = useState(0);
   const [shareOpen, setShareOpen] = useState(false);
@@ -1617,9 +1800,13 @@ const TourDetailPage = () => {
       ? "1 Day"
       : `${days} Days / ${days - 1} Night${days - 1 !== 1 ? "s" : ""}`;
 
-    const tiers = apiTour.pricingTiers || [];
-    const minPrice = tiers.length > 0
-      ? Math.min(...tiers.map((t) => t.pricePerPerson))
+    // Derive min price: accommodationOptions → lowest single price, else basePrice
+    const accomOpts = (apiTour.accommodationOptions || []).filter((o) => o.isActive !== false);
+    const allSinglePrices = accomOpts.flatMap((o) =>
+      (o.pricing || []).filter((p) => p.roomType === "single").map((p) => p.pricePerPerson)
+    ).filter((v) => v != null);
+    const minPrice = allSinglePrices.length > 0
+      ? Math.min(...allSinglePrices)
       : apiTour.basePrice;
 
     const locationStr = apiTour.destination?.name
@@ -1631,25 +1818,15 @@ const TourDetailPage = () => {
       ...(apiTour.exclusions || []).map((text) => ({ type: "cross", text })),
     ];
 
-    // Build a deduplicated pool of all available images for hero slots + gallery
-    const rawImgs   = apiTour.images      || [];
-    const heroImgs  = apiTour.heroImages  || [];
-    const pool = [...new Set([
-      apiTour.heroMainImage,
-      apiTour.heroTopRight,
-      apiTour.heroBottomLeft,
-      apiTour.heroBottomRight,
-      ...heroImgs,
-      ...rawImgs,
-    ].filter(Boolean))];
-
-    // Fill hero slots from pool; remaining pool entries go into gallery
+    // Highlights have hero priority; gallery images fill any remaining slots
+    const highlightImgs = (apiTour.tourHighlights || []).map(h => h.image).filter(Boolean);
+    const rawImgs = apiTour.images || [];
+    const pool = [...new Set([...highlightImgs, ...rawImgs].filter(Boolean))];
     const heroMainImage   = pool[0] || null;
     const heroTopRight    = pool[1] || null;
     const heroBottomLeft  = pool[2] || null;
     const heroBottomRight = pool[3] || null;
-    // Gallery = full pool (includes hero images so modal always shows everything)
-    const allImages = pool.length > 0 ? pool : rawImgs;
+    const allImages = pool;
 
     return {
       title:               apiTour.title        || "",
@@ -1658,8 +1835,12 @@ const TourDetailPage = () => {
       duration:            durationStr,
       maxGuests:           apiTour.totalCapacity ?? null,
       languages:           apiTour.languages || [],
-      cancellation:        apiTour.cancellationPolicy || null,
+      cancellable:         apiTour.cancellable ?? false,
+      cancellation:        apiTour.cancellable
+                             ? "Cancellation available"
+                             : "Cancellation not available",
       bestFor:             apiTour.bestFor || [],
+      route:               apiTour.route || null,
       availabilityBadge:   apiTour.availabilityBadge || null,
       statusBadge:         apiTour.statusBadge || null,
       rating:              apiTour.rating || 0,
@@ -1681,10 +1862,20 @@ const TourDetailPage = () => {
       })),
       importantInformation: apiTour.importantInformation || null,
       businessAmenities:   apiTour.businessAmenities?.items?.length ? apiTour.businessAmenities : null,
+      startDate:           apiTour.startDate || null,
+      category:            apiTour.category || "leisure",
+      highlights:          apiTour.highlights || [],
+      accommodationOptions: (apiTour.accommodationOptions || []).filter((o) => o.isActive !== false),
       meetingPoint:        apiTour.meetingPoint || null,
-      meetingPointLabel:   apiTour.meetingPointLabel || null,
-      price:               minPrice != null ? `GHS ${Number(minPrice).toLocaleString()}` : null,
-      pricingTiers:        tiers,
+      meetingPointLabel:   apiTour.meetingPointLabel || apiTour.pickupLocation || null,
+      pickupNote:          apiTour.pickupNote || null,
+      price:               (() => {
+        if (minPrice == null) return null;
+        const cur = apiTour.displayCurrency || "GHS";
+        const SYMBOLS = { USD: "$", GHS: "GHS ", EUR: "€", GBP: "£" };
+        const sym = SYMBOLS[cur] ?? `${cur} `;
+        return `${sym}${Number(minPrice).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+      })(),
       guide:               null, // no TourGuide service yet
       reviews:             [],   // real reviews come via apiReviews state
       ratingBreakdown:     null,
@@ -1692,6 +1883,11 @@ const TourDetailPage = () => {
       addOns:              [],   // legacy static add-ons removed; use bookingAddOns
     };
   }, [apiTour]);
+
+  useLayoutEffect(() => {
+    const el = descRef.current;
+    if (el) setDescClipped(el.scrollHeight > el.clientHeight);
+  }, [tourData?.description]);
 
   const importantInfo = tourData?.importantInformation;
   const importantInfoRows = importantInfo?.blocks ?? [];
@@ -1730,9 +1926,11 @@ const TourDetailPage = () => {
     window.scrollTo(0, 0);
   }, [tour]);
 
+  const [authGateOpen, setAuthGateOpen] = useState(false);
+
   const handleBook = useCallback(async () => {
     if (!isAuthenticated) {
-      navigate("/", { state: { openAuthModal: true, from: `/${country}/${tour}` } });
+      setAuthGateOpen(true);
       return;
     }
     if (!departureDate) {
@@ -1755,7 +1953,7 @@ const TourDetailPage = () => {
     if (createBookingThunk.fulfilled.match(result)) {
       navigate("/account/bookings");
     }
-  }, [isAuthenticated, apiTour, adults, children, departureDate, dispatch, navigate, country, tour]);
+  }, [isAuthenticated, apiTour, adults, children, departureDate, dispatch, navigate]);
 
   const countryDisplay = country
     ? country.charAt(0).toUpperCase() + country.slice(1)
@@ -1842,109 +2040,97 @@ const TourDetailPage = () => {
       {/* ── Main content — Figma Frame 1000006773 ────────────────────────────────
            Mobile: stacked (booking widget below content)
            Desktop: two-column (left content + sticky right widget)            */}
-      <div className="px-6 md:px-[30px] lg:px-[156px] pt-8 lg:pt-[56px] pb-12 lg:pb-[80px]">
+      <div className="px-6 md:px-[30px] lg:px-[156px] pt-8 lg:pt-[102px] pb-12 lg:pb-[80px]">
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-[32px] items-start">
           {/* ── LEFT CONTENT — full width on mobile, max-w-928px on desktop */}
           <div className="w-full lg:flex-1 lg:min-w-[70%] lg:max-w-[928px] min-w-0 flex flex-col">
-            {/* ① OVERVIEW: Tour Meta Bar + About The Tour ─ id=section-overview */}
+            {/* ── SHARED: Overview block (About + meta bar) ─ id=section-overview ─── */}
             <div id="section-overview" className="mb-6">
-              {/* Meta subtitle — "3-day tour hosted by Heritage Guides" */}
               <p className="text-semi-md-semibold text-secondary-dark-hover mb-3">
-                3-day tour hosted by Heritage Guides
+                {tourData.duration} guided tour
               </p>
-              {/* Info bar: Users · Duration · Languages · Cancellation */}
-              <div
-                className="flex items-center flex-wrap"
-                style={{ gap: "8px" }}
-              >
+              <div className="flex items-center flex-wrap" style={{ gap: "8px" }}>
                 <span className="flex items-center gap-2 text-med-small-semibold text-tertiary-normal-default">
                   <UsersIcon /> <span>Max {tourData.maxGuests} guests</span>
                 </span>
                 <span style={{ color: "#99a1af" }}>·</span>
-                <span className="flex items-center  gap-2 text-med-small-semibold text-tertiary-normal-default">
+                <span className="flex items-center gap-2 text-med-small-semibold text-tertiary-normal-default">
                   <ClockIcon /> <span>{tourData.duration}</span>
                 </span>
                 <span style={{ color: "#99a1af" }}>·</span>
-                <span className="flex items-center  gap-2 text-med-small-semibold text-tertiary-normal-default">
+                <span className="flex items-center gap-2 text-med-small-semibold text-tertiary-normal-default">
                   <GlobeIcon /> <span>{tourData.languages}</span>
                 </span>
                 <span style={{ color: "#99a1af" }}>·</span>
-                <span className="flex items-center  gap-2 text-med-small-semibold text-tertiary-normal-default">
+                <span className="flex items-center gap-2 text-med-small-semibold text-tertiary-normal-default">
                   <CancelIcon /> <span>{tourData.cancellation}</span>
                 </span>
               </div>
 
-              {/* Divider */}
               <div className="h-[1.5px] mt-[21px] mb-6 bg-secondary-light-hover" />
 
-              {/* About The Tour heading */}
-              <div className="bg-white p-5 flex flex-col gap-4 rounded-xl border border-secondary-light-hover ">
-                <h2 className="text-semi-md-semibold text-secondary-dark-hover">
-                  About The Tour
-                </h2>
-                {/* Description */}
-                <p
-                  dangerouslySetInnerHTML={{ __html: tourData.description }}
-                  className="text-md-regular text-[#364153]"
-                />
-
-                {/* Read More button */}
-                <Button href="/" variant="link" className="w-fit  " size="link">
-                  Read More
-                </Button>
-
-                {/* Best For tags */}
-                <div className="flex bg-[#EBDFF580] border  mb-4 border-secondary-light-active rounded-[10px] flex-wrap p-2.5 gap-1 items-center">
-                  <span className="text-med-small-semibold text-secondary-normal-default">
-                    Best For:
-                  </span>
-                  <div className="flex flex-wrap items-center gap-1">
-                    {tourData.bestFor.map((tag, i) => (
-                      <React.Fragment key={tag}>
-                        {i > 0 && (
-                          <span
-                            className="mx-1 inline-flex shrink-0 items-center justify-center select-none leading-none"
-                            aria-hidden="true"
-                          >
-                            <span className="block h-[2px] w-[2px] shrink-0 rounded-full bg-tertiary-normal-default" />
-                          </span>
-                        )}
-                        <span className="text-med-small-Medium text-tertiary-normal-default">
-                          {tag}
-                        </span>
-                      </React.Fragment>
-                    ))}
-                  </div>
+              <div className="bg-white p-5 flex flex-col gap-4 rounded-xl border border-secondary-light-hover">
+                <h2 className="text-semi-md-semibold text-secondary-dark-hover">About The Tour</h2>
+                <div>
+                  <p
+                    ref={descRef}
+                    dangerouslySetInnerHTML={{ __html: tourData.description }}
+                    className={classNames(
+                      "text-md-regular text-[#364153]",
+                      !descExpanded && "line-clamp-3"
+                    )}
+                  />
+                  {descClipped && !descExpanded && (
+                    <button
+                      type="button"
+                      onClick={() => setDescExpanded(true)}
+                      className="mt-1 font-raleway text-sm font-semibold text-[#7b2cbf] hover:underline focus-visible:outline-none"
+                    >
+                      Read More
+                    </button>
+                  )}
+                </div>
+                <div className="flex bg-[#EBDFF580] border mb-4 border-secondary-light-active rounded-[10px] flex-wrap p-2.5 gap-1 items-center">
+                  {tourData.route ? (
+                    <>
+                      <span className="text-med-small-semibold text-secondary-normal-default">Route:</span>
+                      <span className="text-med-small-Medium text-tertiary-normal-default">{tourData.route}</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-med-small-semibold text-secondary-normal-default">Best For:</span>
+                      <div className="flex flex-wrap items-center gap-1">
+                        {tourData.bestFor.map((tag, i) => (
+                          <React.Fragment key={tag}>
+                            {i > 0 && (
+                              <span className="mx-1 inline-flex shrink-0 items-center justify-center select-none leading-none" aria-hidden="true">
+                                <span className="block h-[2px] w-[2px] shrink-0 rounded-full bg-tertiary-normal-default" />
+                              </span>
+                            )}
+                            <span className="text-med-small-Medium text-tertiary-normal-default">{tag}</span>
+                          </React.Fragment>
+                        ))}
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
 
-              {tourData.tourHighlights?.length > 0 && (
+              {/* Business-only: Tour Highlights image cards */}
+              {tourData.category === "business" && tourData.tourHighlights?.length > 0 && (
                 <div className="relative mt-6 w-full rounded-[20px] border border-solid border-[#e8d9f5] bg-white px-[33px] pb-8 pt-[29px]">
-                  <h2 className="font-raleway text-xl font-bold leading-8 tracking-normal text-secondary-dark-hover">
-                    Tour Highlights
-                  </h2>
+                  <h2 className="font-raleway text-xl font-bold leading-8 tracking-normal text-secondary-dark-hover">Tour Highlights</h2>
                   <div className="mt-4 grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-x-5 md:gap-y-3">
                     {tourData.tourHighlights.map((entry, idx) => {
-                      const { title, description } =
-                        normalizeTourHighlight(entry);
+                      const { title, description } = normalizeTourHighlight(entry);
                       return (
-                        <div
-                          key={`${title}-${idx}`}
-                          className="relative min-h-[92px] rounded-[14px] bg-[#f3e8ff]/50 pl-[18px] pr-4 pt-4 pb-4"
-                        >
+                        <div key={`${title}-${idx}`} className="relative min-h-[92px] rounded-[14px] bg-[#f3e8ff]/50 pl-[18px] pr-4 pt-4 pb-4">
                           <div className="flex items-start gap-[5px]">
-                            <div
-                              className="h-[26px] w-6 shrink-0 rounded bg-secondary-light-hover"
-                              aria-hidden
-                            />
+                            <div className="h-[26px] w-6 shrink-0 rounded bg-secondary-light-hover" aria-hidden />
                             <div className="flex min-w-0 flex-1 flex-col gap-1">
-                              <div className="font-raleway text-sm font-bold leading-[20.8px] text-secondary-dark-hover">
-                                {title}
-                              </div>
+                              <div className="font-raleway text-sm font-bold leading-[20.8px] text-secondary-dark-hover">{title}</div>
                               {description ? (
-                                <p className="font-raleway text-xs font-normal leading-[18px] tracking-normal text-gray-500 whitespace-pre-line">
-                                  {description}
-                                </p>
+                                <p className="font-raleway text-xs font-normal leading-[18px] tracking-normal text-gray-500 whitespace-pre-line">{description}</p>
                               ) : null}
                             </div>
                           </div>
@@ -1955,83 +2141,45 @@ const TourDetailPage = () => {
                 </div>
               )}
 
-              {tourData.businessAmenities?.items?.length > 0 && (
+              {/* Business-only: Business Amenities */}
+              {tourData.category === "business" && tourData.businessAmenities?.items?.length > 0 && (
                 <div className="mt-6 flex w-full max-w-full flex-col items-start gap-4 self-stretch rounded-[20px] border-b-[1.2px] border-solid border-secondary-light-hover bg-white pl-5 pr-5 pt-5 pb-[21px]">
                   <div className="flex w-full flex-col items-start gap-2">
                     <div className="flex w-full items-center gap-2.5 px-0 py-1">
-                      <h2 className="text-semi-md-semibold text-secondary-dark-hover">
-                        Business Amenities
-                      </h2>
+                      <h2 className="text-semi-md-semibold text-secondary-dark-hover">Business Amenities</h2>
                     </div>
                   </div>
                   <div className="flex w-full flex-col gap-4 lg:flex-row lg:gap-x-[87px]">
-                    {splitBusinessAmenityColumns(
-                      tourData.businessAmenities.items
-                    ).map((column, colIdx) => (
-                      <div
-                        key={colIdx}
-                        className="flex min-w-0 flex-1 flex-col gap-4"
-                      >
+                    {splitBusinessAmenityColumns(tourData.businessAmenities.items).map((column, colIdx) => (
+                      <div key={colIdx} className="flex min-w-0 flex-1 flex-col gap-4">
                         {column.map((line) => (
-                          <div
-                            key={line}
-                            className="flex items-center"
-                            style={{ gap: "12px" }}
-                          >
-                            <span className="flex size-5 shrink-0 items-center justify-center">
-                              <CheckIcon />
-                            </span>
-                            <span className="text-md-Medium text-[#364153]">
-                              {line}
-                            </span>
+                          <div key={line} className="flex items-center" style={{ gap: "12px" }}>
+                            <span className="flex size-5 shrink-0 items-center justify-center"><CheckIcon /></span>
+                            <span className="text-md-Medium text-[#364153]">{line}</span>
                           </div>
                         ))}
                       </div>
                     ))}
                   </div>
-                  {(tourData.businessAmenities.corporateBookingBenefits?.items
-                    ?.length > 0 ||
-                    tourData.businessAmenities.noteHtml) && (
+                  {(tourData.businessAmenities.corporateBookingBenefits?.items?.length > 0 || tourData.businessAmenities.noteHtml) && (
                     <div className="relative min-h-44 w-full max-w-[877px] rounded-[14px] border-l-[3px] border-solid border-secondary-dark-hover bg-secondary-light-default/50 px-[21px] pb-5 pt-[19px]">
-                      {tourData.businessAmenities.corporateBookingBenefits
-                        ?.items?.length > 0 && (
+                      {tourData.businessAmenities.corporateBookingBenefits?.items?.length > 0 && (
                         <>
                           <p className="font-raleway text-sm font-bold leading-[22.4px] text-secondary-dark-hover">
-                            {tourData.businessAmenities
-                              .corporateBookingBenefits.title ??
-                              "Corporate Booking Benefits"}
+                            {tourData.businessAmenities.corporateBookingBenefits.title ?? "Corporate Booking Benefits"}
                           </p>
                           <ul className="mt-3 flex flex-col gap-0">
-                            {tourData.businessAmenities.corporateBookingBenefits.items.map(
-                              (benefit) => (
-                                <li
-                                  key={benefit}
-                                  className="flex min-h-[29px] items-center gap-[5.7px]"
-                                >
-                                  <span
-                                    className="shrink-0 font-sans text-[13px] font-bold leading-[20.8px] text-secondary-normal-default"
-                                    aria-hidden
-                                  >
-                                    →
-                                  </span>
-                                  <p className="font-raleway text-[13px] font-normal leading-[20.8px] text-[#364153]">
-                                    {benefit}
-                                  </p>
-                                </li>
-                              )
-                            )}
+                            {tourData.businessAmenities.corporateBookingBenefits.items.map((benefit) => (
+                              <li key={benefit} className="flex min-h-[29px] items-center gap-[5.7px]">
+                                <span className="shrink-0 font-sans text-[13px] font-bold leading-[20.8px] text-secondary-normal-default" aria-hidden>→</span>
+                                <p className="font-raleway text-[13px] font-normal leading-[20.8px] text-[#364153]">{benefit}</p>
+                              </li>
+                            ))}
                           </ul>
                         </>
                       )}
-                      {(!tourData.businessAmenities.corporateBookingBenefits
-                        ?.items?.length &&
-                        tourData.businessAmenities.noteHtml) && (
-                        <div
-                          className="font-raleway text-[13px] font-normal leading-relaxed text-[#364153]"
-                          dangerouslySetInnerHTML={{
-                            __html: tourData.businessAmenities.noteHtml,
-                          }}
-                        />
+                      {!tourData.businessAmenities.corporateBookingBenefits?.items?.length && tourData.businessAmenities.noteHtml && (
+                        <div className="font-raleway text-[13px] font-normal leading-relaxed text-[#364153]" dangerouslySetInnerHTML={{ __html: tourData.businessAmenities.noteHtml }} />
                       )}
                     </div>
                   )}
@@ -2039,70 +2187,123 @@ const TourDetailPage = () => {
               )}
             </div>
 
-            {/* ② WHAT'S INCLUDED ─ id=section-inclusions */}
-            <div
-              id="section-inclusions"
-              className="bg-white p-5 flex flex-col gap-4 mb-6 rounded-xl border border-secondary-light-hover"
-            >
-              <h2 className="text-semi-md-semibold text-secondary-dark-hover">
-                What's included
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2" style={{ gap: "16px 40px" }}>
-                {tourData.included.map((item, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center"
-                    style={{ gap: "12px" }}
-                  >
-                    {item.type === "check" ? <CheckIcon /> : <CrossIcon />}
-                    <span className="text-md-Medium text-[#364153]">
-                      {item.text}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* ③ ITINERARY ─ id=section-itinerary */}
-            {/* Step circles (48px) + vertical connector line + expandable days */}
-            <div
-              id="section-itinerary"
-              className="bg-white px-8.5 mb-6 py-7.5 flex flex-col gap-4 rounded-xl border border-secondary-light-hover"
-            >
-              <h2 className="text-semi-md-bold text-secondary-dark-hover">
-                Day-by-Day Itinerary
-              </h2>
-              <p className="text-[14px] font-medium text-[#6B7280]">
-                A structured 5-day programme with flexibility for your schedule
-              </p>
-              <div className="relative ">
-                {/* Vertical connector line linking all circles */}
-
-                <div className="flex flex-col gap-3">
-                  {tourData.itinerary.map((day, idx) => (
-                    <ItineraryStep
-                      key={day.day}
-                      day={day}
-                      isFirst={idx === 0}
-                    />
+            {/* ── LEISURE: What's Included comes BEFORE itinerary ─────────────── */}
+            {tourData.category !== "business" && (
+              <div id="section-inclusions" className="bg-white p-5 flex flex-col gap-4 mb-6 rounded-xl border border-secondary-light-hover">
+                <h2 className="text-semi-md-semibold text-secondary-dark-hover">What's included</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2" style={{ gap: "16px 40px" }}>
+                  {tourData.included.map((item, i) => (
+                    <div key={i} className="flex items-center" style={{ gap: "12px" }}>
+                      {item.type === "check" ? <CheckIcon /> : <CrossIcon />}
+                      <span className="text-md-Medium text-[#364153]">{item.text}</span>
+                    </div>
                   ))}
                 </div>
               </div>
+            )}
+
+            {/* ── ITINERARY ─ id=section-itinerary ───────────────────────────── */}
+            {/* Leisure: numbered highlights list | Business: expandable day accordion */}
+            <div id="section-itinerary" className="bg-white px-8 mb-6 py-7 flex flex-col gap-4 rounded-xl border border-secondary-light-hover">
+              <h2 className="text-semi-md-bold text-secondary-dark-hover">Day-by-Day Itinerary</h2>
+
+              {tourData.category !== "business" ? (
+                /* LEISURE — highlights[] mapped to ItineraryStep accordion (same component, same look) */
+                tourData.highlights.length > 0 ? (
+                  <div className="flex flex-col gap-3">
+                    {tourData.highlights.map((line, idx) => {
+                      const dashIdx = line.indexOf(" — ");
+                      const stopName = dashIdx !== -1 ? line.slice(0, dashIdx) : line;
+                      const detail   = dashIdx !== -1 ? line.slice(dashIdx + 3) : "";
+                      const stepDay = {
+                        day:          idx + 1,
+                        title:        stopName,
+                        preview:      detail.length > 60 ? detail.slice(0, 60) + "…" : detail,
+                        localContext: null,
+                        activities:   [],
+                      };
+                      return <ItineraryStep key={idx} day={stepDay} isFirst={idx === 0} />;
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-[14px] text-[#9ca3af] font-raleway">No itinerary available for this tour yet.</p>
+                )
+              ) : (
+                /* BUSINESS — structured day accordion */
+                <>
+                  <p className="text-[14px] font-medium text-[#6B7280]">A structured programme with flexibility for your schedule</p>
+                  <div className="flex flex-col gap-3">
+                    {tourData.itinerary.map((day, idx) => (
+                      <ItineraryStep key={day.day} day={day} isFirst={idx === 0} />
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
 
-            {/* ④ OPTIONAL ADD-ONS — only shown when the API provides bookingAddOns */}
+            {/* ── HOTEL / ACCOMMODATION OPTIONS TABLE ─────────────────────────── */}
+            {tourData.accommodationOptions.length > 0 && (
+              <div className="bg-white mb-6 rounded-xl px-10.5 py-5   overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full  border-collapse">
+                    <thead>
+                      <tr className=" border-[#e8d9f5]">
+                        <th className="px-6 py-4 text-left font-raleway text-md-semibold lg:text-semi-md-semibold text-secondary-dark-hover">Hotel / Option</th>
+                        <th className="px-4 py-4 text-left font-raleway text-md-semibold lg:text-semi-md-semibold text-secondary-dark-hover">Single</th>
+                        <th className="px-4 py-4 text-left font-raleway text-md-semibold lg:text-semi-md-semibold text-secondary-dark-hover">Double</th>
+                        <th className="px-6 py-4 text-left font-raleway text-md-semibold lg:text-semi-md-semibold text-secondary-dark-hover">Notes</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {tourData.accommodationOptions.map((opt, i) => {
+                        const single = opt.pricing?.find((p) => p.roomType === "single")?.pricePerPerson;
+                        const double = opt.pricing?.find((p) => p.roomType === "double")?.pricePerPerson;
+                        const isLast = i === tourData.accommodationOptions.length - 1;
+                        return (
+                          <tr key={i} className={classNames("")}>
+                            <td className="px-6 py-5 font-raleway  text-md-semibold lg:text-semi-md-semibold text-tertiary-normal-default">{opt.label}</td>
+                            <td className="px-4 py-5 font-raleway text-md-semibold lg:text-semi-md-semibold text-tertiary-normal-default tabular-nums">
+                              {single != null ? `$${Number(single).toLocaleString("en-US")}` : "—"}
+                            </td>
+                            <td className="px-4 py-5 font-raleway text-md-semibold lg:text-semi-md-semibold text-tertiary-normal-default tabular-nums">
+                              {double != null ? `$${Number(double).toLocaleString("en-US")}` : "—"}
+                            </td>
+                            <td className="px-6 py-5 font-raleway text-md-semibold lg:text-semi-md-semibold text-tertiary-normal-default">
+                              {opt.notes || "—"}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {/* ── BUSINESS: What's Included comes AFTER itinerary ─────────────── */}
+            {tourData.category === "business" && (
+              <div id="section-inclusions" className="bg-white p-5 flex flex-col gap-4 mb-6 rounded-xl border border-secondary-light-hover">
+                <h2 className="text-semi-md-semibold text-secondary-dark-hover">What's included</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2" style={{ gap: "16px 40px" }}>
+                  {tourData.included.map((item, i) => (
+                    <div key={i} className="flex items-center" style={{ gap: "12px" }}>
+                      {item.type === "check" ? <CheckIcon /> : <CrossIcon />}
+                      <span className="text-md-Medium text-[#364153]">{item.text}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* ── OPTIONAL ADD-ONS — both variants ────────────────────────────── */}
             {tourData.bookingAddOns.length > 0 && (
-              <div className="bg-white mb-6 pl-5 pr-2 pt-7.5 pb-12 flex flex-col gap-4 rounded-xl border border-secondary-light-hover">
-                <h2 className="text-semi-md-bold text-secondary-dark-hover">
-                  + Optional Add-ons
-                </h2>
+              <div className="bg-white mb-6 pl-5 pr-2 pt-7 pb-12 flex flex-col gap-4 rounded-xl border border-secondary-light-hover">
+                <h2 className="text-semi-md-bold text-secondary-dark-hover">+ Optional Add-ons</h2>
                 <div className="flex mb-6 flex-col gap-4">
                   {tourData.bookingAddOns.map((addon, i) => (
                     <div key={addon.id || i} className="flex items-center pl-1.5 pr-3 md:pr-6 justify-between gap-3">
                       <div className="min-w-0 flex-1">
-                        <p className="text-[15px] font-semibold leading-[20px] md:text-semi-md-semibold text-tertiary-normal-default">
-                          {addon.label}
-                        </p>
+                        <p className="text-[15px] font-semibold leading-[20px] md:text-semi-md-semibold text-tertiary-normal-default">{addon.label}</p>
                       </div>
                       <span style={{ fontFamily: "Raleway, sans-serif", fontWeight: 600, fontSize: "14px", color: "#7b2cbf", whiteSpace: "nowrap" }}>
                         + {addon.price}
@@ -2219,15 +2420,12 @@ const TourDetailPage = () => {
                   Get Directions
                 </Button>
               </div>
-              {/* Pickup note */}
-              <p
-              className="mt-4 rounded-[10px] bg-secondary-light-hover border border-secondary-light-active px-5 py-2.5 text-med-small-semibold text-secondary-normal-default"
-               
-              >
-                Hotel pickup available from Greater Accra and Cape Coast
-                downtown. We will contact you the day before to confirm your
-                exact pickup time.
-              </p>
+              {/* Pickup note — only shown when the tour has one */}
+              {tourData.pickupNote && (
+                <p className="mt-4 rounded-[10px] bg-secondary-light-hover border border-secondary-light-active px-5 py-2.5 text-med-small-semibold text-secondary-normal-default">
+                  {tourData.pickupNote}
+                </p>
+              )}
             </div>
 
             {/* ⑧ TRAVELLING WITH 6 OR MORE? ─ group CTA */}
@@ -2263,6 +2461,11 @@ const TourDetailPage = () => {
                   Get a Group Quote
                 </Button>
               </div>
+              <YouMightAlsoLoveSection
+                currentSlug={tour}
+                currentTags={relatedTags}
+                currentCountry={apiTour?.country || "ghana"}
+              />
             </div>
 
             {/* ⑨ YOU MIGHT ALSO LOVE — rendered when related tours are available from the API */}
@@ -2275,13 +2478,13 @@ const TourDetailPage = () => {
           {/* Mobile: full width, below content. Desktop: sticky 457px right column
               sticky top = 64px detail nav + 12px buffer = 76px   */}
           <div
-            className="z-10 lg:min-w-[457px] max-w-full flex-shrink-0 sticky"
+            className="z-10 w-full lg:min-w-[457px] lg:max-w-[457px] flex-shrink-0 lg:sticky lg:self-start"
             style={{
               top: "76px",
-              maxHeight: "calc(100vh - 200px)",
+              maxHeight: "calc(100vh - 100px)",
               overflowY: "auto",
-              scrollbarWidth: "none",   /* Firefox */
-              msOverflowStyle: "none",  /* IE 11  */
+              scrollbarWidth: "none",
+              msOverflowStyle: "none",
             }}
           >
             <BookingWidget
@@ -2300,6 +2503,16 @@ const TourDetailPage = () => {
               bookingStatus={bookingStatus}
               bookingError={bookingError}
             />
+            {/* Logo combo — shown below the widget for Achimota (hotel_selector) tours */}
+            {tourData.accommodationOptions?.length > 0 && (
+              <div className="mt-8 flex items-center justify-center">
+                <img
+                  src={logoCombo}
+                  alt="Elysium Tours featuring Akoras"
+                  className="h-auto w-full max-w-[420px] object-contain"
+                />
+              </div>
+            )}
           </div>
           
         </div>
@@ -2310,6 +2523,8 @@ const TourDetailPage = () => {
               {...partnerPromoTour}
               onCtaClick={() => setPartnerModalOpen(true)}
             />
+
+           
 
             </div>
 
@@ -2349,6 +2564,21 @@ const TourDetailPage = () => {
         <PartnerWithUsModal
           onClose={() => setPartnerModalOpen(false)}
           onSubmit={() => {}}
+        />
+      )}
+
+      {authGateOpen && (
+        <BookingAuthGateModal
+          tourName={apiTour?.title}
+          onClose={() => setAuthGateOpen(false)}
+          onSignIn={() => {
+            setAuthGateOpen(false);
+            navigate("/", { state: { openAuthModal: true, authMode: "login", from: `/${country}/${tour}` } });
+          }}
+          onRegister={() => {
+            setAuthGateOpen(false);
+            navigate("/", { state: { openAuthModal: true, authMode: "register", from: `/${country}/${tour}` } });
+          }}
         />
       )}
     </main>

@@ -6,7 +6,6 @@ import slideDotActive   from "../../../assets/ElysiumAssets/slide-dot-active.svg
 import slideDotInactive from "../../../assets/ElysiumAssets/slide-dot-inactive.svg";
 
 // ── Info bar icon assets (Figma 1942:30898) ────────────────────────────────────
-// All icons use stroke="var(--stroke-0, #D6BEEB)"
 import iconCalendar    from "../../../assets/ElysiumAssets/infobar-calendar.svg";
 import iconCurrency    from "../../../assets/ElysiumAssets/infobar-currency.svg";
 import iconLanguage    from "../../../assets/ElysiumAssets/infobar-language.svg";
@@ -14,9 +13,7 @@ import iconMainEntry   from "../../../assets/ElysiumAssets/infobar-mainentry.svg
 import iconClock       from "../../../assets/ElysiumAssets/infobar-clock.svg";
 import iconTemperature from "../../../assets/ElysiumAssets/infobar-temperature.svg";
 
-// ── Figma overlay (1914:40901) — identical to TourHero overlay ─────────────────
-// Layer 1: flat linear rgba(0,0,0,0.3) across entire slide
-// Layer 2: purple radial gradient, center ~40% 64%, ellipse 28.5% / 165%
+// ── Figma overlay (1914:40901) ─────────────────────────────────────────────────
 const OVERLAY_STYLE = {
   background: [
     "linear-gradient(90deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.3) 100%)",
@@ -24,139 +21,62 @@ const OVERLAY_STYLE = {
   ].join(", "),
 };
 
-// ── Flag strip: repeating-linear-gradient across flag colours ─────────────────
-// Each colour segment is 20px wide, with a 6px dark gap after the full group.
-// Repeat cycle: (20px × n colours) + 6px gap
-// Figma 1942:30897: strip occupies top 16px (items container starts at y=16)
-const STRIP_GAP_COLOR = "#2b0f43"; // matches infobar bg — creates visible separation
-function getFlagStripBg(colors, segmentPx = 20, gapPx = 32) {
-  const stops = [];
-  let pos = 0;
-  colors.forEach((color) => {
-    stops.push(`${color} ${pos}px`);
-    pos += segmentPx;
-    stops.push(`${color} ${pos}px`);
-  });
-  // dark gap after each complete flag group
-  stops.push(`${STRIP_GAP_COLOR} ${pos}px`);
-  pos += gapPx;
-  stops.push(`${STRIP_GAP_COLOR} ${pos}px`);
-  return `repeating-linear-gradient(90deg, ${stops.join(", ")})`;
+// ISO 3166-1 alpha-2 codes — stable, never change for sovereign nations.
+// Used to build flagcdn.com URLs: https://flagcdn.com/{iso2}.svg
+// Normalised key = lowercase, diacritics stripped, non-alpha removed, spaces collapsed.
+const COUNTRY_ISO2 = {
+  "ghana":          "gh",
+  "nigeria":        "ng",
+  "togo":           "tg",
+  "senegal":        "sn",
+  "benin":          "bj",
+  "mali":           "ml",
+  "burkina faso":   "bf",
+  "guinea":         "gn",
+  "guinea bissau":  "gw",
+  "sierra leone":   "sl",
+  "liberia":        "lr",
+  "gambia":         "gm",
+  "cameroon":       "cm",
+  "cote divoire":   "ci",
+  "ivory coast":    "ci",
+  "niger":          "ne",
+  "mauritania":     "mr",
+  "cape verde":     "cv",
+};
+
+function toFlagKey(name) {
+  return (name || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/-/g, " ")
+    .replace(/[^a-z\s]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
-// ── Slides ────────────────────────────────────────────────────────────────────
-const GHANA_SLIDES = [
-  { id: 1, image: "https://picsum.photos/seed/ghana-hero-1/1728/717", alt: "Ghana landscape" },
-  { id: 2, image: "https://picsum.photos/seed/ghana-hero-2/1728/717", alt: "Ghana coast" },
-  { id: 3, image: "https://picsum.photos/seed/ghana-hero-3/1728/717", alt: "Ghana culture" },
+const DEFAULT_SLIDES = [
+  { id: 1, image: "https://picsum.photos/seed/country-hero-1/1728/717", alt: "Country landscape" },
+  { id: 2, image: "https://picsum.photos/seed/country-hero-2/1728/717", alt: "Country culture" },
+  { id: 3, image: "https://picsum.photos/seed/country-hero-3/1728/717", alt: "Country people" },
 ];
-
-const NIGERIA_SLIDES = [
-  { id: 1, image: "https://picsum.photos/seed/nigeria-hero/1728/717",   alt: "Nigeria landscape" },
-  { id: 2, image: "https://picsum.photos/seed/nigeria-hero-2/1728/717", alt: "Nigeria city" },
-  { id: 3, image: "https://picsum.photos/seed/nigeria-hero-3/1728/717", alt: "Nigeria culture" },
-];
-
-// ── Country config ─────────────────────────────────────────────────────────────
-// Stable country-level facts (currency, language, entry, timezone, flag colours).
-// Hero images (slides) are overridden at runtime from DB destination cover images.
-// Add a new entry here whenever a new country is added to the platform.
-const COUNTRY_CONFIG = {
-  ghana: {
-    title:     "Discover Ghana Where History Breathes",
-    subtitle:  "From the Door of No Return to the canopies of Kakum, Ghana holds centuries of culture, resilience, and natural wonder. Every tour is crafted to go beyond the surface.",
-    slides:    GHANA_SLIDES,
-    stats:     { tours: "18", regions: "06", rating: "4.8", guides: "5" },
-    bestTime:  "Nov-Mar (Dry Season)",
-    currency:  "Ghanaian Cedi\n(GHS)",
-    languages: "English, Twi, Ga,\nHausa, Ewe",
-    mainEntry: "Kotoka International\nAirport",
-    timeZone:  "GMT+0 (No daylight\nSaving)",
-    climate:   "Tropical, 24–32°C avg",
-    flagColors: ["#CE1126", "#FCD116", "#006B3F"],
-  },
-  nigeria: {
-    title:     "Nigeria: Bold, Beautiful & Boundless",
-    subtitle:  "From the bustling markets of Lagos to the ancient city of Kano, Nigeria is a mosaic of over 250 ethnic groups, rich traditions, and breathtaking landscapes.",
-    slides:    NIGERIA_SLIDES,
-    stats:     { tours: "24", regions: "08", rating: "4.7", guides: "8" },
-    bestTime:  "Nov–Feb (Dry Season)",
-    currency:  "Nigerian Naira\n(NGN)",
-    languages: "English, Yoruba,\nHausa, Igbo",
-    mainEntry: "Murtala Muhammed\nInt'l Airport",
-    timeZone:  "WAT (UTC+1)",
-    climate:   "Tropical, 25–35°C avg",
-    flagColors: ["#008751", "#FFFFFF", "#008751"],
-  },
-  togo: {
-    title:     "Togo: Small Country, Big Spirit",
-    subtitle:  "From the beaches of Lomé to the misty highlands of Kpalimé, Togo packs extraordinary natural beauty and rich Ewe culture into one of West Africa's most underrated destinations.",
-    slides:    [],
-    stats:     { tours: "0", regions: "02", rating: "4.8", guides: "2" },
-    bestTime:  "Nov–Feb (Dry Season)",
-    currency:  "West African CFA\nFranc (XOF)",
-    languages: "French, Ewe,\nKabiyé",
-    mainEntry: "Gnassingbé Eyadéma\nInt'l Airport",
-    timeZone:  "GMT+0",
-    climate:   "Tropical, 26–30°C avg",
-    flagColors: ["#006A4E", "#FFCE00", "#D21034"],
-  },
-  "côte d'ivoire": {
-    title:     "Côte d'Ivoire: The Heartbeat of West Africa",
-    subtitle:  "Abidjan's skyline, the forests of the interior, and some of the finest cocoa and coffee on earth — Côte d'Ivoire rewards the curious traveller at every turn.",
-    slides:    [],
-    stats:     { tours: "0", regions: "01", rating: "4.8", guides: "2" },
-    bestTime:  "Dec–Mar (Dry Season)",
-    currency:  "West African CFA\nFranc (XOF)",
-    languages: "French, Dioula,\nBaoulé",
-    mainEntry: "Félix Houphouët-Boigny\nInt'l Airport",
-    timeZone:  "GMT+0",
-    climate:   "Tropical, 24–30°C avg",
-    flagColors: ["#F77F00", "#FFFFFF", "#009A44"],
-  },
-  senegal: {
-    title:     "Senegal: Where the Atlantic Meets Africa",
-    subtitle:  "Dakar's energy, the pink waters of Lac Rose, and the serene Casamance forest — Senegal is a sensory feast and a gateway to the soul of West Africa.",
-    slides:    [],
-    stats:     { tours: "0", regions: "01", rating: "4.8", guides: "2" },
-    bestTime:  "Nov–May (Dry Season)",
-    currency:  "West African CFA\nFranc (XOF)",
-    languages: "French, Wolof,\nPulaar, Serer",
-    mainEntry: "Blaise Diagne\nInt'l Airport",
-    timeZone:  "GMT+0",
-    climate:   "Sahel/Tropical,\n22–32°C avg",
-    flagColors: ["#00853F", "#FDEF42", "#E31B23"],
-  },
-};
-
-const DEFAULT_CONFIG = {
-  title:      "Discover This Destination",
-  subtitle:   "Explore the beauty and culture of this amazing destination with Elysium Tours.",
-  slides:     GHANA_SLIDES,
-  stats:      { tours: "0", regions: "01", rating: "4.8", guides: "0" },
-  bestTime:   "Year-round",
-  currency:   "Local Currency",
-  languages:  "Local Languages",
-  mainEntry:  "International Airport",
-  timeZone:   "UTC+0",
-  climate:    "Tropical",
-  flagColors: ["#CE1126", "#FCD116", "#006B3F"],
-};
 
 // ── TourCountryHero ────────────────────────────────────────────────────────────
 // Hero:     Figma 1914:40901 — 1728×717px
 // Info bar: Figma 1942:30897 — 1728×138px (incl. 16px flag strip at top)
-const TourCountryHero = React.forwardRef(({ country = "ghana", countryDestinations, tourCount, className, ...props }, ref) => {
+//
+// countryData — Country DB document (from countriesSlice). When null, hero shows
+//               generic title + destination slides; info bar shows placeholder text.
+const TourCountryHero = React.forwardRef(({ country = "ghana", countryData, countryDestinations, tourCount, className, ...props }, ref) => {
   const [current, setCurrent] = useState(0);
   const intervalRef = useRef(null);
 
-  const countryKey = country?.toLowerCase().replace(/-/g, " ");
   const displayName = country
     ? country.split("-").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")
     : "Country";
-  const staticConfig = COUNTRY_CONFIG[countryKey] || { ...DEFAULT_CONFIG, title: `Discover ${displayName}` };
 
-  // Build hero slides from destination cover images; fall back to static config slides
+  // Build hero slides from destination cover images; fall back to placeholder
   const slides = React.useMemo(() => {
     if (countryDestinations && countryDestinations.length > 0) {
       const built = countryDestinations
@@ -165,10 +85,10 @@ const TourCountryHero = React.forwardRef(({ country = "ghana", countryDestinatio
         .slice(0, 5);
       if (built.length > 0) return built;
     }
-    return staticConfig.slides || GHANA_SLIDES;
-  }, [countryDestinations, staticConfig.slides]);
+    return DEFAULT_SLIDES;
+  }, [countryDestinations]);
 
-  // Derive stats from live data where available
+  // Derive region count and climate hint from live destination data
   const regionCount = React.useMemo(() => {
     if (countryDestinations && countryDestinations.length > 0) {
       return new Set(countryDestinations.map((d) => d.region).filter(Boolean)).size;
@@ -178,17 +98,32 @@ const TourCountryHero = React.forwardRef(({ country = "ghana", countryDestinatio
 
   const firstDest = countryDestinations && countryDestinations[0];
 
+  // Resolve ISO2 code → flagcdn.com image URL
+  const flagUrl = React.useMemo(() => {
+    const key = toFlagKey(countryData?.name || country);
+    const iso2 = COUNTRY_ISO2[key];
+    return iso2 ? `https://flagcdn.com/${iso2}.svg` : null;
+  }, [countryData, country]);
+
+
+  // Build config: DB record is authoritative, sensible defaults where DB is empty
   const config = {
-    ...staticConfig,
-    stats: {
-      ...staticConfig.stats,
-      tours:   tourCount != null ? String(tourCount) : staticConfig.stats.tours,
-      regions: regionCount != null ? String(regionCount).padStart(2, "0") : staticConfig.stats.regions,
-    },
-    bestTime: firstDest?.bestTimeToVisit || staticConfig.bestTime,
-    climate:  firstDest?.weather?.avgTemp
+    title:      countryData?.heroTitle      || `Discover ${displayName}`,
+    subtitle:   countryData?.heroSubtitle   || `Explore the beauty and culture of ${displayName} with Elysium Tours.`,
+    currency:   countryData?.currency       || "Local Currency",
+    languages:  countryData?.languages      || "Local Languages",
+    mainEntry:  countryData?.mainAirport    || "International Airport",
+    timeZone:   countryData?.timeZone       || "UTC+0",
+    bestTime:   firstDest?.bestTimeToVisit  || "Year-round",
+    climate:    firstDest?.weather?.avgTemp
       ? `Tropical, ${firstDest.weather.avgTemp}°C avg`
-      : staticConfig.climate,
+      : "Tropical",
+    stats: {
+      tours:   tourCount != null ? String(tourCount) : "0",
+      regions: regionCount != null ? String(regionCount).padStart(2, "0") : "01",
+      rating:  "4.8",
+      guides:  "0",
+    },
   };
 
   const startAutoPlay = React.useCallback(() => {
@@ -226,7 +161,6 @@ const TourCountryHero = React.forwardRef(({ country = "ghana", countryDestinatio
             )}
           >
             <img src={slide.image} alt={slide.alt} className="w-full h-full object-cover" />
-            {/* Same overlay as TourHero: rgba(0,0,0,0.3) linear + purple radial */}
             <div className="absolute inset-0 z-[15]" style={OVERLAY_STYLE} />
           </div>
         ))}
@@ -236,30 +170,16 @@ const TourCountryHero = React.forwardRef(({ country = "ghana", countryDestinatio
 
           {/* Title + Subtitle */}
           <div className="flex flex-col items-center gap-[12px] w-full max-w-[957px]">
-            {/* Title — Raleway Bold 56px/66px #fefefe (1914:40908) */}
             <h1
               className="text-center w-full"
-              style={{
-                fontFamily: "Raleway, sans-serif",
-                fontWeight: 700,
-                color:      "#fefefe",
-              }}
+              style={{ fontFamily: "Raleway, sans-serif", fontWeight: 700, color: "#fefefe" }}
             >
               <span className="block text-[28px] leading-[36px] md:text-[40px] md:leading-[50px] lg:text-[56px] lg:leading-[66px]">
                 {config.title}
               </span>
             </h1>
-
-            {/* Subtitle — Raleway Medium 16px/26px #fefefe (1914:40910) */}
             <div className="w-full max-w-[867px]">
-              <p
-                className="text-center"
-                style={{
-                  fontFamily: "Raleway, sans-serif",
-                  fontWeight: 500,
-                  color:      "#fefefe",
-                }}
-              >
+              <p className="text-center" style={{ fontFamily: "Raleway, sans-serif", fontWeight: 500, color: "#fefefe" }}>
                 <span className="block text-[14px] leading-[22px] md:text-[16px] md:leading-[26px] px-2">
                   {config.subtitle}
                 </span>
@@ -267,7 +187,7 @@ const TourCountryHero = React.forwardRef(({ country = "ghana", countryDestinatio
             </div>
           </div>
 
-          {/* ── Stats row (1942:30741) — gap-[24px], no dividers ─────────── */}
+          {/* ── Stats row (1942:30741) — gap-[24px] ─────────────────────── */}
           <div className="grid grid-cols-2 gap-4 md:flex md:items-start md:gap-[24px]">
             {[
               { value: config.stats.tours,   label: "Tours Available" },
@@ -276,12 +196,16 @@ const TourCountryHero = React.forwardRef(({ country = "ghana", countryDestinatio
               { value: config.stats.guides,  label: "Local Guides" },
             ].map((stat) => (
               <div key={stat.label} className="flex flex-col items-center w-[120px] md:w-[180px]">
-                {/* Number — Raleway Bold #ebdff5 */}
-                <span className="text-[32px] leading-[40px] md:text-[44px] md:leading-[54px] lg:text-[56px] lg:leading-[66px]" style={{ fontFamily: "Raleway, sans-serif", fontWeight: 700, color: "#ebdff5" }}>
+                <span
+                  className="text-[32px] leading-[40px] md:text-[44px] md:leading-[54px] lg:text-[56px] lg:leading-[66px]"
+                  style={{ fontFamily: "Raleway, sans-serif", fontWeight: 700, color: "#ebdff5" }}
+                >
                   {stat.value}
                 </span>
-                {/* Label — Raleway Medium #ebdff5 */}
-                <span className="text-[12px] leading-[18px] md:text-[14px] md:leading-[22px] lg:text-[16px] lg:leading-[26px]" style={{ fontFamily: "Raleway, sans-serif", fontWeight: 500, color: "#ebdff5" }}>
+                <span
+                  className="text-[12px] leading-[18px] md:text-[14px] md:leading-[22px] lg:text-[16px] lg:leading-[26px]"
+                  style={{ fontFamily: "Raleway, sans-serif", fontWeight: 500, color: "#ebdff5" }}
+                >
                   {stat.label}
                 </span>
               </div>
@@ -289,7 +213,7 @@ const TourCountryHero = React.forwardRef(({ country = "ghana", countryDestinatio
           </div>
         </div>
 
-        {/* ── Dot navigation — bottom:22px, gap:12px (1914:40903/40904) ─── */}
+        {/* ── Dot navigation — bottom:22px (1914:40903/40904) ─────────── */}
         <div
           className="absolute left-1/2 -translate-x-1/2 flex items-center gap-[12px] z-40"
           style={{ bottom: "22px" }}
@@ -302,63 +226,53 @@ const TourCountryHero = React.forwardRef(({ country = "ghana", countryDestinatio
               className="shrink-0 transition-opacity duration-300 ease-in"
               aria-label={i === current ? "Current slide" : `Go to slide ${i + 1}`}
             >
-              <img
-                src={i === current ? slideDotActive : slideDotInactive}
-                alt=""
-                width={16}
-                height={16}
-              />
+              <img src={i === current ? slideDotActive : slideDotInactive} alt="" width={16} height={16} />
             </button>
           ))}
         </div>
       </section>
 
       {/* ── INFO BAR (Figma 1942:30897) — 1728×138px ─────────────────────── */}
-      {/* Structure: 16px flag strip at top + 109px items row + 13px bottom  */}
       <div
         className="relative w-full overflow-hidden"
         style={{ minHeight: "138px", backgroundColor: "#2b0f43" }}
       >
-        {/* Flag strip — 16px, full width, country flag colours repeating */}
+        {/* Flag strip — 20 fixed 100px tiles, overflow-hidden clips the last partial one */}
         <div
-          className="absolute top-0 left-0 w-full"
-          style={{
-            height:     "10px",
-            background: getFlagStripBg(config.flagColors),
-          }}
-        />
+          className="absolute top-0 left-0 w-full flex items-center overflow-hidden"
+          style={{ height: "10px", backgroundColor: "#2b0f43", justifyContent: "space-between" }}
+        >
+          {flagUrl && Array.from({ length: 20 }).map((_, i) => (
+            <img
+              key={i}
+              src={flagUrl}
+              alt=""
+              aria-hidden="true"
+              style={{ flex: "0 0 50px", height: "10px", objectFit: "fill", display: "block" }}
+            />
+          ))}
+        </div>
 
-        {/* Items row — centred horizontally, 109px tall, starts at y=16 */}
-        {/* gap-[32px] with 1px dividers between each item (Figma 1942:31034 etc.) */}
+        {/* Items row */}
         <div
           className="absolute left-0 right-0 flex items-center lg:justify-center gap-[20px] lg:gap-[32px] overflow-x-auto scrollbar-hide"
           style={{ top: "16px", height: "109px", paddingLeft: "24px", paddingRight: "24px" }}
         >
           {INFO_BAR_ITEMS(config).map((item, idx, arr) => (
             <React.Fragment key={item.label}>
-              {/* Info item: icon + text block */}
               <div className="flex items-center gap-[12px] shrink-0">
-                {/* Icon — 24×24px, colour #D6BEEB */}
                 <div className="shrink-0 w-[24px] h-[24px] flex items-center justify-center">
                   {item.icon}
                 </div>
-
-                {/* Text block — auto width, tighter on mobile */}
                 <div className="flex flex-col gap-[2px] items-center w-[160px] lg:w-[143px]">
-                  <p
-                    className="w-full text-center font-raleway font-semibold uppercase text-[10px] text-[#d6beeb]"
-                  >
+                  <p className="w-full text-center font-raleway font-semibold uppercase text-[10px] text-[#d6beeb]">
                     {item.label}
                   </p>
-                  <p
-                    className="text-center font-raleway font-medium text-[13px] leading-[18px] text-[#c6c6c6] whitespace-pre-line"
-                  >
+                  <p className="text-center font-raleway font-medium text-[13px] leading-[18px] text-[#c6c6c6] whitespace-pre-line">
                     {item.value}
                   </p>
                 </div>
               </div>
-
-              {/* Divider — 1px × 109px, bg-[#371456] (Figma 1942:31034 etc.) */}
               {idx < arr.length - 1 && (
                 <div
                   className="shrink-0"
@@ -374,39 +288,14 @@ const TourCountryHero = React.forwardRef(({ country = "ghana", countryDestinatio
   );
 });
 
-// ── Info bar item definitions ──────────────────────────────────────────────────
 function INFO_BAR_ITEMS(config) {
   return [
-    {
-      label: "BEST TIME TO VIST", // "VIST" typo matches Figma exactly
-      value: config.bestTime,
-      icon:  <img src={iconCalendar}    alt="" width={24} height={24} />,
-    },
-    {
-      label: "CURRENCY",
-      value: config.currency,
-      icon:  <img src={iconCurrency}    alt="" width={24} height={24} />,
-    },
-    {
-      label: "LANGUAGES",
-      value: config.languages,
-      icon:  <img src={iconLanguage}    alt="" width={24} height={24} />,
-    },
-    {
-      label: "MAIN ENTRY",
-      value: config.mainEntry,
-      icon:  <img src={iconMainEntry}   alt="" width={24} height={24} />,
-    },
-    {
-      label: "TIME ZONE",
-      value: config.timeZone,
-      icon:  <img src={iconClock}       alt="" width={24} height={24} />,
-    },
-    {
-      label: "CLIMATE",
-      value: config.climate,
-      icon:  <img src={iconTemperature} alt="" width={24} height={24} />,
-    },
+    { label: "BEST TIME TO VIST", value: config.bestTime,  icon: <img src={iconCalendar}    alt="" width={24} height={24} /> },
+    { label: "CURRENCY",          value: config.currency,  icon: <img src={iconCurrency}    alt="" width={24} height={24} /> },
+    { label: "LANGUAGES",         value: config.languages, icon: <img src={iconLanguage}    alt="" width={24} height={24} /> },
+    { label: "MAIN ENTRY",        value: config.mainEntry, icon: <img src={iconMainEntry}   alt="" width={24} height={24} /> },
+    { label: "TIME ZONE",         value: config.timeZone,  icon: <img src={iconClock}       alt="" width={24} height={24} /> },
+    { label: "CLIMATE",           value: config.climate,   icon: <img src={iconTemperature} alt="" width={24} height={24} /> },
   ];
 }
 

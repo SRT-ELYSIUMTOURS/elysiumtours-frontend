@@ -19,6 +19,7 @@ import ContactPage from "./pages/tourist/ContactPage";
 import TourPartnersPage from "./pages/tourist/TourPartnersPage";
 import TourPartnerCategoryPage from "./pages/tourist/TourPartnerCategoryPage";
 import TourPartnerListingPage from "./pages/tourist/TourPartnerListingPage";
+import TourPartnerDetailPage from "./pages/tourist/TourPartnerDetailPage";
 import GalleryPage from "./pages/tourist/GalleryPage";
 import GalleryCategoryPage from "./pages/tourist/GalleryCategoryPage";
 import NotFoundPage from "./pages/tourist/NotFoundPage";
@@ -86,6 +87,7 @@ function App() {
           <Route path="/tour-partners" element={<TourPartnersPage />} />
           <Route path="/tour-partners/:category" element={<TourPartnerCategoryPage />} />
           <Route path="/tour-partners/:category/all" element={<TourPartnerListingPage />} />
+          <Route path="/tour-partners/:category/:id" element={<TourPartnerDetailPage />} />
           <Route path="/gallery" element={<GalleryPage />} />
           <Route path="/gallery/:category/all" element={<GalleryCategoryPage />} />
         </Route>

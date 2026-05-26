@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { classNames } from "../../../utils/classNames";
-import PartnerHighlightCard from "../../cards/PartnerHighlightCard";
+import HighlightCard from "../../cards/HighlightCard";
 import Button from "../../ui/button";
 import ExploreMoreArrowIcon from "../../icons/ExploreMoreArrowIcon";
 
@@ -68,7 +68,7 @@ const PartnerHighlightsSection = React.forwardRef(
 
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-[32px]">
             {PARTNERS.map((partner) => (
-              <PartnerHighlightCard
+              <HighlightCard
                 key={partner.id}
                 image={partner.image}
                 category={partner.category}

@@ -24,7 +24,12 @@ const buildCardProps = (t, i) => {
   const minPrice = tiers && tiers.length > 0
     ? Math.min(...tiers.map((tier) => tier.pricePerPerson))
     : t.basePrice;
-  const price = minPrice != null ? `Ghs.${Number(minPrice).toFixed(2)}` : t.price || "Contact us";
+  const currency = t.displayCurrency || "GHS";
+  const CURRENCY_SYMBOLS = { USD: "$", GHS: "GHS ", EUR: "€", GBP: "£" };
+  const symbol = CURRENCY_SYMBOLS[currency] ?? `${currency} `;
+  const price = minPrice != null
+    ? `${symbol}${Number(minPrice).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
+    : t.price || "Contact us";
 
   return {
     id: t._id || t.id || i,
@@ -46,6 +51,7 @@ const buildCardProps = (t, i) => {
     reviewCount: t.reviewCount || 0,
     country: t.country || "ghana",
     tourSlug: t.slug || t.tourSlug || String(t._id || t.id || i),
+    startDate: t.startDate || null,
   };
 };
 
@@ -83,6 +89,8 @@ const FeaturedToursSection = React.forwardRef(
             reviewCount={tour.reviewCount}
             country={tour.country}
             tourSlug={tour.tourSlug}
+            startDate={tour.startDate}
+            showImageOverlays={false}
           />
         </div>
       ));
@@ -98,8 +106,8 @@ const FeaturedToursSection = React.forwardRef(
         {...props}
       >
         <div className="max-w-[1728px] mx-auto px-6 md:px-[30px] lg:px-[164px]">
-          <div className="flex flex-col lg:flex-row justify-between items-start gap-6 lg:gap-8 mb-8 lg:mb-16">
-            <div className="flex items-center justify-center lg:justify-start w-full lg:w-auto gap-sm shrink-0">
+          <div className="flex flex-col lg:flex-row justify-between items-center lg:items-start gap-6 lg:gap-8 mb-8 lg:mb-16">
+            <div className="flex items-center justify-start w-full lg:w-auto gap-sm shrink-0">
               <div className="w-[46px] h-[2px] bg-secondary-dark-darker" />
               <span className="font-raleway font-bold text-med-small-bold text-secondary-dark-darker uppercase tracking-wide">
                 Featured Tours

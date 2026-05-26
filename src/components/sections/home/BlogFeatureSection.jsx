@@ -23,11 +23,11 @@ const BlogFeatureSection = React.forwardRef(({ className, ...props }, ref) => {
   return (
     <section
       ref={ref}
-      className={classNames("bg-[#f2eaf9] py-[80px]", className)}
+      className={classNames("bg-[#f2eaf9] py-[80px] ", className)}
       {...props}
     >
       {/* White card — Figma 134:1708 */}
-      <div className="mx-6 md:mx-[30px] lg:mx-[156px] min-h-[238px] bg-[#f7f7f7] rounded-[20px] overflow-clip shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)] flex items-center justify-center p-6 md:p-0">
+      <div className="mx-6 md:mx-[30px] lg:mx-[164px] min-h-[238px] max-w-[1728px] bg-[#f7f7f7]  rounded-[20px] overflow-clip shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)] flex items-center justify-center p-6 px-[100px] ">
 
         {/* Content row — stacked on mobile, side-by-side on desktop */}
         <div className="flex flex-col md:flex-row gap-6 md:gap-[24px] items-center w-full">

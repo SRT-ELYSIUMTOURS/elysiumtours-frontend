@@ -215,8 +215,17 @@
 .shadow-lg { box-shadow: var(--box-shadow-lg) !important; }
 
 
-/* PartnerHighlightCard — frosted bottom label strip (Figma glass blend) */
-.partner-highlight-label-frost {
+/* Hide scrollbar while keeping scroll behaviour */
+.scrollbar-hide {
+  -ms-overflow-style: none;   /* IE / Edge */
+  scrollbar-width: none;      /* Firefox */
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;              /* Chrome / Safari / Opera */
+}
+
+/* HighlightCard — frosted bottom label strip (Figma glass blend) */
+.highlight-card-label-frost {
   /* Grey tint: strongest at bottom of strip, transparent toward top */
   background: linear-gradient(
     to top,

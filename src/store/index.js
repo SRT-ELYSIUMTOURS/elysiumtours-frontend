@@ -15,8 +15,10 @@ import authReducer, { setCredentials, logout } from "./slices/authSlice";
 import uiReducer from "./slices/uiSlice";
 import toursReducer from "./slices/toursSlice";
 import destinationsReducer from "./slices/destinationsSlice";
+import countriesReducer from "./slices/countriesSlice";
 import cmsReducer from "./slices/cmsSlice";
 import bookingsReducer from "./slices/bookingsSlice";
+import partnersReducer from "./slices/partnersSlice";
 import {
   setTokens,
   setLogoutCallback,
@@ -37,8 +39,10 @@ const rootReducer = combineReducers({
   ui: uiReducer,
   tours: toursReducer,
   destinations: destinationsReducer,
+  countries: countriesReducer,
   cms: cmsReducer,
   bookings: bookingsReducer,
+  partners: partnersReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

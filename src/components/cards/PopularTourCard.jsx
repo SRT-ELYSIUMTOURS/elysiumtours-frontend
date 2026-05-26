@@ -44,6 +44,13 @@ const CarIcon = () => (
   </svg>
 );
 
+const CalendarIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true" className="shrink-0">
+    <rect x="3" y="4" width="18" height="18" rx="3" stroke="#7b2cbf" strokeWidth="1.6"/>
+    <path d="M16 2v4M8 2v4M3 10h18" stroke="#7b2cbf" strokeWidth="1.6" strokeLinecap="round"/>
+  </svg>
+);
+
 // Heart / wishlist icon — exact Figma SVG; outline (#7B2CBF) by default, solid red when wishlisted
 const HeartIcon = ({ wishlisted }) => (
   <svg
@@ -97,6 +104,11 @@ const PopularTourCard = React.forwardRef(
       featureType    = null,   // "eco"|"lunch"|"business"|"pickup"|null
       featureLabel   = null,   // override text next to feature icon
       reviewCount    = 231,
+      // When provided, replaces availabilityBadge + clock with a calendar icon + formatted date
+      startDate         = null,
+      // false hides all image overlays (badges, location pin, rating, wishlist)
+      // used on home page sections where overlays are visually distracting
+      showImageOverlays = true,
       ...props
     },
     ref
@@ -159,8 +171,10 @@ return (
 
       <div className="absolute inset-0 bg-[rgba(0,0,0,0.5)] rounded-[10px]" />
 
-    {/* Top bar — badges left, heart right, all center-aligned on one row
-              Single absolute row so everything shares the same baseline */}
+     
+        <>
+          {/* Top bar — badges left, heart right, all center-aligned on one row
+                Single absolute row so everything shares the same baseline */}
           <div className="absolute top-[22px] left-[12px] right-[12px] flex items-center gap-[8px]">
             {/* Duration type badge */}
             <div className="h-[24px] backdrop-blur-[50px] bg-[rgba(254,254,254,0.9)] flex items-center justify-center px-[10px] rounded-[16px] shrink-0">
@@ -169,7 +183,7 @@ return (
               </span>
             </div>
 
-           {statusBadge && (
+            {statusBadge && (
               <div
                 className="h-[24px] backdrop-blur-[50px] flex items-center justify-center px-[10px] rounded-[16px] shrink-0"
                 style={{ backgroundColor: statusBadge.color }}
@@ -190,12 +204,9 @@ return (
             </button>
           </div>
 
-
-          {/* Location — bottom-left of image area
-              Figma: left-[12px] top-[329px] flex items-center
-                     Map icon 16px + Raleway Medium 10px/18px #fefefe p-[10px] */}
+          {/* Location — bottom-left of image area */}
           <div className="absolute left-[12px] top-[329px] flex items-center">
-            <div className="relative shrink-0 size-[16px] overflow-clip"> 
+            <div className="relative shrink-0 size-[16px] overflow-clip">
               <img src={mapPinImg} alt="" aria-hidden="true" className="block size-full max-w-none" />
             </div>
             <div className="flex items-center justify-center p-[10px]">
@@ -205,9 +216,7 @@ return (
             </div>
           </div>
 
-          {/* Rating badge — bottom-right of image area
-              Figma: left-[237px] top-[336px] h-[24px] bg-[#ebdff5] px-[10px] py-[8px] rounded-[16px]
-                     Star 18×19px + "4.9" SemiBold 10px #7b2cbf + dot 2px + "231" Medium 10px #565656 60% */}
+          {/* Rating badge — bottom-right of image area */}
           <div className="absolute right-3 top-[336px] h-[24px] bg-[#ebdff5] flex items-center justify-center px-[10px] rounded-[16px]">
             <img
               src={starImg}
@@ -224,6 +233,8 @@ return (
               </span>
             </div>
           </div>
+        </>
+      
         </div>
 
      {/* ── BODY SECTION ────────────────────────────────────────────────── */}
@@ -240,7 +251,7 @@ return (
                 Figma: flex gap-[10px] items-center
                        pill: h-[28px] px-[9px] border-[0.5px] border-[#6f6f6f] rounded-[20px]
                        text: Raleway Medium 10px/18px #565656 */}
-            <div className="flex gap-[10px] items-center flex-wrap">
+            <div className="flex gap-[10px]  items-center flex-wrap ">
               {tags.map((tag, i) => (
                 <div
                   key={i}
@@ -258,7 +269,7 @@ return (
             {/* Info row: duration | group size | feature
                 Figma: flex gap-[12px] items-start w-[303px]
                        each item: icon 16px + Raleway Medium 10px #371456 */}
-            <div className="flex gap-[12px] items-start w-full max-w-[303px] flex-wrap">
+            <div className="flex gap-[12px] items-start w-full max-w-full flex-wrap md:justify-between lg:flex-nowrap">
 
               {/* Duration */}
               <div className="flex h-[33px] items-center shrink-0">
@@ -297,45 +308,44 @@ return (
               )}
             </div>
 
-            {/* Divider line
-                Figma: h-0 w-[327px] relative, absolute inset-[-8.5px_-2.6%]
-                       SVG line (780c3c7d...) — visual only, no layout height */}
-            <div className="h-0 w-full max-w-[327px] relative shrink-0">
-              <div className="absolute" style={{ inset: "-8.5px -2.6%" }}>
-                <img
-                  src={dividerLine}
-                  alt=""
-                  aria-hidden="true"
-                  className="block size-full max-w-none"
-                />
-              </div>
-            </div>
+            
           </div>
 
           {/* ── Group 2: Title + Availability + Price ── */}
           {/* Figma: flex-col h-[129px] items-start pr-[10px] pt-[10px] w-[330px]
               mt-auto pushes this group to the bottom of the card so the price
               row is always at the same position regardless of content above. */}
-          <div className="flex flex-col h-[129px] items-start pr-[10px] pt-[10px] w-full max-w-[330px] mt-auto">
+          <div className="flex flex-col h-[129px] items-start pr-[10px] pt-[10px] w-full max-w-[330px] ">
 
             {/* Title + availability sub-group */}
             <div className="flex flex-col gap-[4px] items-start">
               {/* Title row — h-[28px], Raleway SemiBold 20px/28px #2d2d2d */}
               <div className="flex h-[28px] mb-2  items-center justify-center w-[330px]">
-                <h3 className="flex-1 font-raleway line-clamp-1 font-semibold text-[20px] leading-[28px] text-[#2d2d2d] min-h-px min-w-px">
+                <h3 className="flex-1 font-raleway  font-semibold text-[20px] leading-[28px] text-[#2d2d2d] min-h-px min-w-px">
                   {title}
                 </h3>
               </div>
 
-              {/* Availability — h-[35px], TimeCircle5 20px + SemiBold 13px/18px #7b2cbf */}
+              {/* Availability — clock + badge, or calendar + departure date when startDate is set */}
               <div className="flex gap-[16px] h-[35px] items-center">
                 <div className="flex gap-[10px] items-center justify-center py-[10px]">
-                  <div className="overflow-clip shrink-0 size-[20px]">
-                    <img src={timeCircle5} alt="" aria-hidden="true" className="block size-full max-w-none" />
-                  </div>
-                  <span className="font-raleway font-semibold text-[13px] text-[#7b2cbf] leading-[18px] whitespace-nowrap">
-                    {availabilityBadge}
-                  </span>
+                  {startDate ? (
+                    <>
+                      <CalendarIcon />
+                      <span className="font-raleway font-semibold text-[13px] text-[#7b2cbf] leading-[18px] whitespace-nowrap">
+                        Departs {new Date(startDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <div className="overflow-clip shrink-0 size-[20px]">
+                        <img src={timeCircle5} alt="" aria-hidden="true" className="block size-full max-w-none" />
+                      </div>
+                      <span className="font-raleway font-semibold text-[13px] text-[#7b2cbf] leading-[18px] whitespace-nowrap">
+                        {availabilityBadge}
+                      </span>
+                    </>
+                  )}
                 </div>
               </div>
             </div>

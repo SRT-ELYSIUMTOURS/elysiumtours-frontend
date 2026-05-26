@@ -47,6 +47,7 @@ const TourFeaturedSection = React.forwardRef(({ className, tours: toursProp, isL
       reviewCount: t.reviewCount || 0,
       country: t.country || "ghana",
       tourSlug: t.slug || t.tourSlug || String(t._id || t.id || i),
+      startDate: t.startDate || null,
     };
   });
   return (

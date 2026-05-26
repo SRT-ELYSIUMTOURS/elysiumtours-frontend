@@ -29,7 +29,11 @@ const buildCardProps = (t, i) => {
     rating: t.rating || 4.8,
     title: t.title || "Tour",
     availabilityBadge: t.availabilityBadge || "Available",
-    price: minPrice != null ? `Ghs.${Number(minPrice).toFixed(2)}` : t.price || "Contact us",
+    price: (() => {
+      const currency = t.displayCurrency || "GHS";
+      const prefix   = currency === "GHS" ? "Ghs." : `${currency} `;
+      return minPrice != null ? `${prefix}${Number(minPrice).toFixed(2)}` : t.price || "Contact us";
+    })(),
     tags: t.tags || [],
     duration: { class: durationClass, span: durationSpan },
     maxGroupSize: t.totalCapacity ?? t.maxGroupSize,
@@ -40,6 +44,7 @@ const buildCardProps = (t, i) => {
     reviewCount: t.reviewCount || 0,
     country: t.country || "ghana",
     tourSlug: t.slug || String(t._id || t.id || i),
+    startDate: t.startDate || null,
   };
 };
 
@@ -53,7 +58,7 @@ const ArrowIcon = () => (
 // Figma 1914:40952 — 1728px wide, py-[80px], px-[148px]
 // Header: left label (46px line + "ONLY IN {COUNTRY}") | right (title + "See All Tours" btn)
 // Body: 4-col grid of PopularTourCard — no sidebar, no filter trigger
-const SignatureExperiencesSection = React.forwardRef(({ country = "Ghana", tours: toursProp, isLoading = false, className, ...props }, ref) => {
+const SignatureExperiencesSection = React.forwardRef(({ country = "Ghana", tours: toursProp, isLoading = false, onSeeAll, className, ...props }, ref) => {
   const displayTours = toursProp && toursProp.length > 0
     ? toursProp.slice(0, 4).map(buildCardProps)
     : [];
@@ -113,6 +118,7 @@ const SignatureExperiencesSection = React.forwardRef(({ country = "Ghana", tours
                 boxShadow:    "0px 4px 4px 0px rgba(0,0,0,0.05)",
               }}
               endIcon={<ArrowIcon />}
+              onClick={onSeeAll}
             >
               See All Tours
             </Button>

@@ -12,13 +12,13 @@ const HERO_SLIDES = [
   },
   {
     id: 2,
-    image: "./src/assets/homeAssets/hero1.webp",
+    image: "./src/assets/homeAssets/hero2.webp",
     alt: "Cape Coast Castle",
     overlayOpacity: 0.6,
   },
   {
     id: 3,
-    image: "./src/assets/homeAssets/hero1.webp",
+    image: "./src/assets/homeAssets/Image-6.webp",
     alt: "Kakum National Park",
     overlayOpacity: 0.6,
   },

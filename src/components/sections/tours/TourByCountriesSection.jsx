@@ -3,6 +3,19 @@ import { useNavigate } from "react-router-dom";
 import { classNames } from "../../../utils/classNames";
 import CountryTourCard from "../../cards/CountryTourCard";
 
+// Replicates slugify(name, { lower: true, strict: true }) from the backend.
+// NFD decomposition strips diacritics (ô→o, é→e), then non-alphanumeric
+// chars (apostrophes, etc.) are removed, spaces become hyphens.
+function toCountrySlug(name) {
+  return name
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9\s]/g, "")
+    .trim()
+    .replace(/\s+/g, "-");
+}
+
 const buildCards = (apiDestinations) => {
   if (!apiDestinations || apiDestinations.length === 0) return null;
 
@@ -12,7 +25,7 @@ const buildCards = (apiDestinations) => {
     if (!map[key]) {
       map[key] = {
         country: dest.country || "Ghana",
-        slug: key.replace(/\s+/g, "-"),
+        slug: toCountrySlug(dest.country || "Ghana"),
         image: dest.coverImage || (dest.images && dest.images[0]) || null,
         tourCount: 0,
       };
