@@ -32,25 +32,27 @@ const DiscoverSection = React.forwardRef(({ className, ...props }, ref) => {
           <div className="w-full lg:w-[795px]">
             <p className="font-raleway text-[16px] leading-[26px] lg:text-High-md-bold lg:leading-[34px] text-center lg:text-left">
               <span className="font-bold text-secondary-normal-hover">
-                We create the best travel experience in Ghana from our featured
-                tours to exclusive offers.{" "}
+                In collaboration with Elysium Tours and Achimota School, we are
+                proud to celebrate the Motown Centenary.{" "}
               </span>
               <span className="font-medium text-primary-dark-active">
-                We are delighted in exploring iconic landmarks, hidden gems, and
-                a mix of history, nature, and culture, all at a great value,
-                inviting travelers to start their adventure.
+                We explore iconic landmarks, hidden gems, and a mix of history,
+                nature, and culture at great value, inviting travelers to start
+                their adventure.
               </span>
             </p>
           </div>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 items-start">
-          <div className="w-full lg:w-auto lg:flex-1 hidden lg:block" />
+          <div className="w-full lg:w-auto lg:flex-1 " >
+           <img src="./src/assets/Elysium+Achimota/LogoCombo.png" alt="" />
+           </div>
 
           <div className="w-full relative lg:w-[795px] h-[250px] md:h-[386px] rounded-2xl overflow-hidden shadow-[--shadow-card]">
-            <div className="bg-black/25 absolute w-full h-full"/>
+            <div className="bg-black/25 absolute w-full h-full" />
             <img
-              src="./src/assets/homeAssets/Image-1.webp"
+              src="./src/assets/Elysium+Achimota/DiscoverImg.jpg"
               alt="Ghana discovery"
               className="w-full h-full object-cover"
             />

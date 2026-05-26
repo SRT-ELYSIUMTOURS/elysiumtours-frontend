@@ -1,5 +1,12 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useAuth } from "../../context/AuthContext";
+import { useAppDispatch } from "../../hooks/useAppDispatch";
+import {
+  loginThunk,
+  registerThunk,
+  verifyOtpThunk,
+  resendOtpThunk,
+  forgotPasswordThunk,
+} from "../../store/slices/authSlice";
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
 
@@ -56,14 +63,6 @@ const MailBoxIcon = () => (
   </svg>
 );
 
-const LockBoxIcon = () => (
-  <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-    <rect x="5" y="14" width="22" height="14" rx="2" stroke="#7b2cbf" strokeWidth="1.8" />
-    <path d="M10 14v-4a6 6 0 0112 0v4" stroke="#7b2cbf" strokeWidth="1.8" strokeLinecap="round" />
-    <circle cx="16" cy="21" r="2" fill="#7b2cbf" />
-  </svg>
-);
-
 const CheckBoxIcon = () => (
   <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
     <circle cx="16" cy="16" r="12" stroke="#7b2cbf" strokeWidth="1.8" />
@@ -73,7 +72,6 @@ const CheckBoxIcon = () => (
 
 // ── Shared subcomponents ──────────────────────────────────────────────────────
 
-// Logo image only — wordmark text removed
 function ModalLogo() {
   return (
     <img src="/ElysiumAssets/Logo.png" alt="Elysium" className="w-[142px] h-[93px] object-contain" />
@@ -375,11 +373,16 @@ function OtpBoxes({ value, onChange }) {
   );
 }
 
+function ErrorBanner({ message }) {
+  if (!message) return null;
+  return (
+    <div className="self-stretch shrink-0 bg-[#fff0f0] border border-[#ffcccc] rounded-[10px] px-[14px] py-[10px]">
+      <span className="font-raleway text-[13px] font-medium text-[#cc0000]">{message}</span>
+    </div>
+  );
+}
+
 // ── View layout helpers ───────────────────────────────────────────────────────
-// Every view has 3 regions:
-//   • ViewHeader  — shrink-0, always visible (title + subtitle + OAuth if applicable)
-//   • ViewFields  — flex-1 overflow-y-auto, the only scrollable part
-//   • ViewCta     — shrink-0, always visible (button + footer)
 
 function ViewHeader({ children }) {
   return <div className="shrink-0 flex flex-col gap-[24px]">{children}</div>;
@@ -406,21 +409,26 @@ function ViewCta({ children }) {
 // ══════════════════════════════════════════════════════════════════════════════
 
 function LoginView({ onSuccess, onForgot, onSignUp }) {
+  const dispatch = useAppDispatch();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const [error, setError] = useState(null);
 
   const ready = email.trim().length > 0 && password.trim().length > 0;
 
   const handleContinue = async () => {
-    if (!ready) return;
+    if (!ready || loading) return;
+    setError(null);
     setLoading(true);
-    await new Promise(r => setTimeout(r, 800));
-    const displayName = email.split("@")[0].replace(/[._-]/g, " ").replace(/\b\w/g, c => c.toUpperCase());
-    login({ name: displayName, email: email.trim() });
-    onSuccess?.();
-    setLoading(false);
+    try {
+      await dispatch(loginThunk({ email: email.trim(), password })).unwrap();
+      onSuccess?.();
+    } catch (err) {
+      setError(typeof err === "string" ? err : "Login failed. Please check your credentials.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -460,6 +468,7 @@ function LoginView({ onSuccess, onForgot, onSignUp }) {
         >
           Forgot password?
         </button>
+        <ErrorBanner message={error} />
       </ViewFields>
 
       <ViewCta>
@@ -475,7 +484,8 @@ function LoginView({ onSuccess, onForgot, onSignUp }) {
   );
 }
 
-function SignupView({ onSuccess, onLogin }) {
+function SignupView({ onSuccess, onLogin, onOtpRequired }) {
+  const dispatch = useAppDispatch();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -483,8 +493,8 @@ function SignupView({ onSuccess, onLogin }) {
   const [password, setPassword] = useState("");
   const [retypePassword, setRetypePassword] = useState("");
   const [errors, setErrors] = useState({});
+  const [serverError, setServerError] = useState(null);
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
 
   const validate = () => {
     const e = {};
@@ -500,11 +510,22 @@ function SignupView({ onSuccess, onLogin }) {
     const e = validate();
     if (Object.keys(e).length) { setErrors(e); return; }
     setErrors({});
+    setServerError(null);
     setLoading(true);
-    await new Promise(r => setTimeout(r, 800));
-    login({ name: `${firstName.trim()} ${lastName.trim()}`, email: email.trim() });
-    onSuccess?.();
-    setLoading(false);
+    try {
+      await dispatch(registerThunk({
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        email: email.trim(),
+        password,
+        travelAs,
+      })).unwrap();
+      onOtpRequired?.(email.trim());
+    } catch (err) {
+      setServerError(typeof err === "string" ? err : "Registration failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const ready = firstName.trim() && lastName.trim() && email.trim() && password.trim() && retypePassword.trim();
@@ -525,7 +546,6 @@ function SignupView({ onSuccess, onLogin }) {
       <ViewFields>
         <OAuthButtons />
         <OrDivider />
-        {/* First Name + Last Name row */}
         <div className="flex gap-[16px] items-start self-stretch shrink-0">
           <div className="flex flex-col gap-[12px] items-start flex-1 shrink-0">
             <FieldLabel>First Name</FieldLabel>
@@ -570,6 +590,7 @@ function SignupView({ onSuccess, onLogin }) {
         <TravelSelect value={travelAs} onChange={setTravelAs} />
         <PasswordInput label="Password" value={password} onChange={e => setPassword(e.target.value)} error={errors.password} />
         <PasswordInput label="Retype Password" value={retypePassword} onChange={e => setRetypePassword(e.target.value)} error={errors.retypePassword} />
+        <ErrorBanner message={serverError} />
       </ViewFields>
 
       <ViewCta>
@@ -585,16 +606,24 @@ function SignupView({ onSuccess, onLogin }) {
   );
 }
 
-function ForgotView({ onBack, onOtp, onSignUp }) {
+function ForgotView({ onBack, onLinkSent, onSignUp }) {
+  const dispatch = useAppDispatch();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const handleSend = async () => {
-    if (!email.includes("@")) return;
+    if (!email.includes("@") || loading) return;
+    setError(null);
     setLoading(true);
-    await new Promise(r => setTimeout(r, 800));
-    onOtp?.(email.trim());
-    setLoading(false);
+    try {
+      await dispatch(forgotPasswordThunk({ email: email.trim() })).unwrap();
+      onLinkSent?.(email.trim());
+    } catch (err) {
+      setError(typeof err === "string" ? err : "Failed to send reset email. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -617,15 +646,16 @@ function ForgotView({ onBack, onOtp, onSignUp }) {
           value={email}
           onChange={e => setEmail(e.target.value)}
           placeholder="you@example.com"
-          hint="We'll send a 6-digit code to this address."
+          hint="We'll send a reset link to this address."
           autoFocus
         />
+        <ErrorBanner message={error} />
       </ViewFields>
 
       <ViewCta>
         <div className="flex flex-col gap-[12px] items-start self-stretch">
           <PrimaryButton disabled={!email.includes("@") || loading} onClick={handleSend}>
-            {loading ? "Sending…" : "Send Verification Code"}
+            {loading ? "Sending…" : "Send Reset Link"}
           </PrimaryButton>
           <OutlinedButton onClick={onBack}>Back to Log In</OutlinedButton>
         </div>
@@ -635,10 +665,45 @@ function ForgotView({ onBack, onOtp, onSignUp }) {
   );
 }
 
-function OtpView({ email, onVerify, onChangeEmail, onSignUp }) {
+function ForgotLinkSentView({ email, onLogin, onSignUp }) {
+  return (
+    <div className="flex flex-col flex-1 min-h-0">
+      <ViewHeader>
+        <div className="flex flex-col gap-[24px] items-center self-stretch">
+          <PurpleIconBox icon={<MailBoxIcon />} />
+          <div className="flex flex-col gap-[16px] items-center self-stretch">
+            <span className="self-stretch font-raleway text-[25px] font-bold leading-[27.5px] text-[#7b2cbf] text-center whitespace-nowrap">
+              Check your inbox
+            </span>
+            <div className="self-stretch font-raleway text-[20px] font-medium leading-[28px] text-center">
+              <span className="text-[#6b7280]">We sent a password reset link to </span>
+              <span className="text-[#7b2cbf]">{email}</span>
+            </div>
+            <span className="font-raleway text-[16px] font-medium leading-[24px] text-[#949494] text-center">
+              Click the link in the email to reset your password. The link expires in 1 hour.
+            </span>
+          </div>
+        </div>
+      </ViewHeader>
+
+      <div className="flex-1 min-h-[16px]" />
+
+      <ViewCta>
+        <div className="flex flex-col gap-[12px] items-center self-stretch">
+          <PrimaryButton onClick={onLogin}>Back to Log In</PrimaryButton>
+        </div>
+        <ViewFooter variant="login" onSignUp={onSignUp} />
+      </ViewCta>
+    </div>
+  );
+}
+
+function OtpView({ email, onVerifySuccess, onChangeEmail, onSignUp }) {
+  const dispatch = useAppDispatch();
   const [otp, setOtp] = useState("");
   const [countdown, setCountdown] = useState(60);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     if (countdown <= 0) return;
@@ -649,11 +714,29 @@ function OtpView({ email, onVerify, onChangeEmail, onSignUp }) {
   const formatTime = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 
   const handleVerify = async () => {
-    if (otp.length < 6) return;
+    if (otp.length < 6 || loading) return;
+    setError(null);
     setLoading(true);
-    await new Promise(r => setTimeout(r, 800));
-    onVerify?.();
-    setLoading(false);
+    try {
+      await dispatch(verifyOtpThunk({ email, otp })).unwrap();
+      onVerifySuccess?.();
+    } catch (err) {
+      setError(typeof err === "string" ? err : "Invalid or expired code. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    if (countdown > 0) return;
+    setError(null);
+    setOtp("");
+    try {
+      await dispatch(resendOtpThunk({ email })).unwrap();
+      setCountdown(60);
+    } catch (err) {
+      setError(typeof err === "string" ? err : "Failed to resend code.");
+    }
   };
 
   return (
@@ -675,6 +758,7 @@ function OtpView({ email, onVerify, onChangeEmail, onSignUp }) {
 
       <ViewFields>
         <OtpBoxes value={otp} onChange={setOtp} />
+        <ErrorBanner message={error} />
       </ViewFields>
 
       <ViewCta>
@@ -687,7 +771,7 @@ function OtpView({ email, onVerify, onChangeEmail, onSignUp }) {
               <span className="text-[#6b7280]">Didn't receive it? </span>
               <button
                 type="button"
-                onClick={() => { setCountdown(60); setOtp(""); }}
+                onClick={handleResend}
                 className="text-[#7b2cbf] cursor-pointer hover:underline"
                 disabled={countdown > 0}
                 style={{ opacity: countdown > 0 ? 0.5 : 1 }}
@@ -783,7 +867,6 @@ function ResetSuccessView({ onLogin, onSignUp }) {
         </div>
       </ViewHeader>
 
-      {/* Empty flex spacer so CTA sits at bottom */}
       <div className="flex-1 min-h-[16px]" />
 
       <ViewCta>
@@ -830,12 +913,10 @@ export default function AuthModal({ isOpen, onClose, initialView = "login", onAu
       style={{ backgroundColor: "rgba(0,0,0,0.6)" }}
       onClick={handleOverlayClick}
     >
-      {/* Card — flex column, fixed max-height, NO overflow on the card itself */}
       <div
         className="relative bg-white rounded-[30px] w-full max-w-[648px] mx-3 md:mx-4 flex flex-col"
         style={{ maxHeight: "90vh", boxShadow: "0 10px 4px 0 rgba(0,0,0,0.15)" }}
       >
-        {/* Close button — always visible, outside scroll */}
         <button
           type="button"
           onClick={onClose}
@@ -845,12 +926,10 @@ export default function AuthModal({ isOpen, onClose, initialView = "login", onAu
           <CloseIcon />
         </button>
 
-        {/* Logo — fixed, never scrolls */}
         <div className="shrink-0 flex justify-center pt-[24px] pb-2">
           <ModalLogo />
         </div>
 
-        {/* purble element */}
         <div
           className="w-[80%] mb-3 mx-auto h-[2px] border border-secondary-normal-default"
           style={{
@@ -871,29 +950,29 @@ export default function AuthModal({ isOpen, onClose, initialView = "login", onAu
           )}
           {view === "signup" && (
             <SignupView
-              onSuccess={handleAuthSuccess}
               onLogin={() => setView("login")}
+              onOtpRequired={(email) => { setOtpEmail(email); setView("otp"); }}
             />
           )}
           {view === "forgot" && (
             <ForgotView
               onBack={() => setView("login")}
-              onOtp={(email) => { setOtpEmail(email); setView("otp"); }}
+              onLinkSent={(email) => { setOtpEmail(email); setView("forgot-link-sent"); }}
+              onSignUp={() => setView("signup")}
+            />
+          )}
+          {view === "forgot-link-sent" && (
+            <ForgotLinkSentView
+              email={otpEmail}
+              onLogin={() => setView("login")}
               onSignUp={() => setView("signup")}
             />
           )}
           {view === "otp" && (
             <OtpView
               email={otpEmail}
-              onVerify={() => setView("new-password")}
-              onChangeEmail={() => setView("forgot")}
-              onSignUp={() => setView("signup")}
-            />
-          )}
-          {view === "new-password" && (
-            <NewPasswordView
-              onSave={() => setView("reset-success")}
-              onBack={() => setView("otp")}
+              onVerifySuccess={handleAuthSuccess}
+              onChangeEmail={() => setView("signup")}
               onSignUp={() => setView("signup")}
             />
           )}

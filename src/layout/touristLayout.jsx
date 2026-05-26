@@ -5,9 +5,9 @@ import Footer from "../components/ui/Footer";
 
 const TouristLayout = () => {
   return (
-    <div className="font-raleway min-h-screen flex flex-col overflow-x-hidden">
+    <div className="font-raleway min-h-screen flex flex-col">
       <Navbar />
-      <div className="flex-1">
+      <div className="flex-1 overflow-x-hidden">
         <Outlet />
       </div>
       <Footer />

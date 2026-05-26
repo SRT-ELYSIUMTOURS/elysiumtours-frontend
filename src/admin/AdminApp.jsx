@@ -24,6 +24,8 @@ import Dashboard from "./dashboard/Dashboard";
 // Resource views
 import { TourPackageList, TourPackageCreate, TourPackageEdit, TourPackageShow } from "./resources/tours";
 import { DestinationList, DestinationCreate, DestinationEdit } from "./resources/destinations";
+import { CountryList, CountryCreate, CountryEdit } from "./resources/countries";
+import PublicIcon from "@mui/icons-material/Public";
 import { BookingList, BookingShow, BookingEdit } from "./resources/bookings";
 import { CustomerList, CustomerShow } from "./resources/customers";
 import { HotelList, HotelCreate, HotelEdit } from "./resources/partners/hotels";
@@ -86,6 +88,14 @@ const AdminApp = () => (
       create={DestinationCreate}
       edit={DestinationEdit}
       icon={MapIcon}
+      recordRepresentation="name"
+    />
+    <Resource
+      name="countries"
+      list={CountryList}
+      create={CountryCreate}
+      edit={CountryEdit}
+      icon={PublicIcon}
       recordRepresentation="name"
     />
 

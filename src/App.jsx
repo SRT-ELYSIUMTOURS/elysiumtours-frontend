@@ -4,6 +4,8 @@ import "./App.css";
 import TouristLayout from "./layout/touristLayout.jsx";
 import { AuthProvider } from "./context/AuthContext";
 import ScrollToTop from "./components/utils/ScrollToTop";
+import ReduxBridge from "./components/shared/ReduxBridge";
+import ProtectedRoute from "./components/shared/ProtectedRoute";
 
 const AdminApp = lazy(() => import("./admin/AdminApp"));
 import HomePage from "./pages/tourist/HomePage";
@@ -17,14 +19,20 @@ import ContactPage from "./pages/tourist/ContactPage";
 import TourPartnersPage from "./pages/tourist/TourPartnersPage";
 import TourPartnerCategoryPage from "./pages/tourist/TourPartnerCategoryPage";
 import TourPartnerListingPage from "./pages/tourist/TourPartnerListingPage";
+import TourPartnerDetailPage from "./pages/tourist/TourPartnerDetailPage";
 import GalleryPage from "./pages/tourist/GalleryPage";
 import GalleryCategoryPage from "./pages/tourist/GalleryCategoryPage";
 import NotFoundPage from "./pages/tourist/NotFoundPage";
+import ResetPasswordPage from "./pages/tourist/ResetPasswordPage";
+import MyBookingsPage from "./pages/tourist/MyBookingsPage";
+import BookingDetailPage from "./pages/tourist/BookingDetailPage";
+import ProfilePage from "./pages/tourist/ProfilePage";
 
 function App() {
   return (
     <AuthProvider>
-    <BrowserRouter>
+      <ReduxBridge />
+      <BrowserRouter>
       <ScrollToTop />
       <div id="toast-root" />
       <Routes>
@@ -36,6 +44,37 @@ function App() {
             </Suspense>
           }
         />
+
+        {/* Standalone pages (no tourist layout) */}
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
+
+        {/* Protected standalone pages */}
+        <Route
+          path="/account/bookings"
+          element={
+            <ProtectedRoute>
+              <MyBookingsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/account/bookings/:id"
+          element={
+            <ProtectedRoute>
+              <BookingDetailPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/account/profile"
+          element={
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Tourist layout routes */}
         <Route element={<TouristLayout />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/blog" element={<BlogPage />} />
@@ -48,9 +87,11 @@ function App() {
           <Route path="/tour-partners" element={<TourPartnersPage />} />
           <Route path="/tour-partners/:category" element={<TourPartnerCategoryPage />} />
           <Route path="/tour-partners/:category/all" element={<TourPartnerListingPage />} />
+          <Route path="/tour-partners/:category/:id" element={<TourPartnerDetailPage />} />
           <Route path="/gallery" element={<GalleryPage />} />
           <Route path="/gallery/:category/all" element={<GalleryCategoryPage />} />
         </Route>
+
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>

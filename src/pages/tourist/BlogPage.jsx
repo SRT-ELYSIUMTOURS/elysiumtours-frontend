@@ -1,5 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { classNames } from "../../utils/classNames";
+import { useAppDispatch } from "../../hooks/useAppDispatch";
+import { fetchBlogPostsThunk } from "../../store/slices/cmsSlice";
 import BlogHero from "../../components/sections/blog/BlogHero";
 import BlogBreadcrumbBar from "../../components/sections/blog/BlogBreadcrumbBar";
 import BlogCategoryFilter from "../../components/sections/blog/BlogCategoryFilter";
@@ -18,8 +20,13 @@ function showBlogPreview(filter, slug) {
 }
 
 const BlogPage = React.forwardRef(({ className, ...props }, ref) => {
+  const dispatch = useAppDispatch();
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [partnerModalOpen, setPartnerModalOpen] = useState(false);
+
+  useEffect(() => {
+    dispatch(fetchBlogPostsThunk({ limit: 20 }));
+  }, [dispatch]);
 
   return (
     <main ref={ref} className={classNames("font-raleway", className)} {...props}>

@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { classNames } from "../../../utils/classNames";
-import PartnerHighlightCard from "../../cards/PartnerHighlightCard";
+import HighlightCard from "../../cards/HighlightCard";
 
 // Downloaded from Figma asset server
 import sectionLine    from "../../../assets/ElysiumAssets/section-line.svg";
@@ -19,8 +19,8 @@ import ekolureBg      from "../../../assets/ElysiumAssets/ekolure-tours-bg.png";
 const TOUR_TYPES = [
   {
     id: 1,
+    category: "leisure",
     label: "Leisure Tours",
-    subtitle: "24 experience available",
     subtitleColor: "#dedede",           // Figma: I1903:25391;98:234 — #dedede
     overlayColor: "rgba(0,0,0,0.7)",   // Figma: bg-[rgba(0,0,0,0.7)]
     image: leisureBg,
@@ -28,8 +28,8 @@ const TOUR_TYPES = [
   },
   {
     id: 2,
+    category: "business",
     label: "Business Tours",
-    subtitle: "24 curated programmes",
     subtitleColor: "#f7f7f7",           // Figma: I1903:25392;98:234 — #f7f7f7
     overlayColor: "rgba(0,0,0,0.7)",   // Figma: bg-[rgba(0,0,0,0.7)]
     image: businessBg,
@@ -37,8 +37,8 @@ const TOUR_TYPES = [
   },
   {
     id: 3,
+    category: "ekolure",
     label: "Ekolure Tours",
-    subtitle: "12 eco & cultural immersion",
     subtitleColor: "#fefefe",           // Figma: I1903:25393;98:234 — #fefefe (inherited)
     overlayColor: "rgba(0,0,0,0.5)",   // Figma: bg-[rgba(0,0,0,0.5)] — lighter than other two
     image: ekolureBg,
@@ -46,7 +46,15 @@ const TOUR_TYPES = [
   },
 ];
 
-const TourTypesSection = React.forwardRef(({ className, ...props }, ref) => {
+const TourTypesSection = React.forwardRef(({ className, tours, ...props }, ref) => {
+  const counts = React.useMemo(() => {
+    if (!tours) return null;
+    return tours.reduce((acc, t) => {
+      if (t.category) acc[t.category] = (acc[t.category] || 0) + 1;
+      return acc;
+    }, {});
+  }, [tours]);
+
   const navigate = useNavigate();
   return (
     <section
@@ -98,28 +106,36 @@ const TourTypesSection = React.forwardRef(({ className, ...props }, ref) => {
         {/* Cards */}
         <div className="
           flex flex-col md:flex-row 
-          gap-6 md:gap-8 
+          gap-6 md:gap-8 md:justify-between
           overflow-x-auto md:overflow-visible
         ">
-          {TOUR_TYPES.map((t) => (
-            <PartnerHighlightCard
-              key={t.id}
-              image={t.image}
-              category={t.label}
-              subtitle={t.subtitle}
-              subtitleColor={t.subtitleColor}
-              overlayColor={t.overlayColor}
-              labelClassName="absolute left-4 bottom-4"
-              onClick={() => navigate(`/tours?type=${t.type}`)}
-              className="
-                w-full
-                md:w-[300px] lg:w-[451px]
-                h-[400px] md:h-[500px] lg:h-[656px]
-                shrink-0
-                cursor-pointer
-              "
-            />
-          ))}
+          {TOUR_TYPES.map((t) => {
+            const n = counts ? (counts[t.category] || 0) : null;
+            const subtitle = n !== null
+              ? `${n} experience${n !== 1 ? "s" : ""} available`
+              : t.label === "Leisure Tours" ? "24 experience available"
+              : t.label === "Business Tours" ? "24 curated programmes"
+              : "12 eco & cultural immersion";
+            return (
+              <HighlightCard
+                key={t.id}
+                image={t.image}
+                category={t.label}
+                subtitle={subtitle}
+                subtitleColor={t.subtitleColor}
+                overlayColor={t.overlayColor}
+                labelClassName="absolute left-4 bottom-4"
+                className="
+                  w-full
+                  md:w-[300px] lg:w-[451px]
+                  h-[400px] md:h-[500px] lg:h-[656px]
+                  shrink-0
+                                  cursor-pointer
+
+                "
+              />
+            );
+          })}
         </div>
 
       </div>

@@ -402,7 +402,7 @@ const TYPE_OPTIONS = [
 
 // ── TourFilterBar ──────────────────────────────────────────────────────────────
 // h=147px, borderTop/Bottom 0.5px #f2eaf9, bg white, px-[156px]
-const TourFilterBar = React.forwardRef(({ resultsCount = 48, className, ...props }, ref) => {
+const TourFilterBar = React.forwardRef(({ resultsCount = 48, onFilterChange, className, ...props }, ref) => {
   const [sortValue, setSortValue]   = useState(null);
   const [duration, setDuration]     = useState("all-day");
   const [type, setType]             = useState("all");
@@ -412,6 +412,23 @@ const TourFilterBar = React.forwardRef(({ resultsCount = 48, className, ...props
   const [priceMin, setPriceMin]     = useState(0);
   const [priceMax, setPriceMax]     = useState(2000);
   const [savedPrice, setSavedPrice] = useState(null); // { min, max } once saved
+
+  // Emit current filter state to parent. Called whenever any filter changes.
+  const notify = (overrides = {}) => {
+    if (!onFilterChange) return;
+    const s = overrides.sort      !== undefined ? overrides.sort      : sortValue;
+    const d = overrides.duration  !== undefined ? overrides.duration  : duration;
+    const t = overrides.type      !== undefined ? overrides.type      : type;
+    const minP = overrides.minPrice !== undefined ? overrides.minPrice : savedPrice?.min;
+    const maxP = overrides.maxPrice !== undefined ? overrides.maxPrice : savedPrice?.max;
+    onFilterChange({
+      sortBy:   s || undefined,
+      tourType: d === "day-tours" ? "day_tour" : d === "multi-day" ? "multi_day" : undefined,
+      category: t !== "all" ? t : undefined,
+      minPrice: minP,
+      maxPrice: maxP,
+    });
+  };
 
   const wrapperRef = useRef(null);
   const barRef = useRef(null);
@@ -484,7 +501,7 @@ const TourFilterBar = React.forwardRef(({ resultsCount = 48, className, ...props
         if (typeof ref === "function") ref(el);
         else if (ref) ref.current = el;
       }}
-      className={classNames("w-full bg-white", className)}
+      className={classNames("w-full bg-white flex items-center", className)}
       style={{
         minHeight: "147px",
         borderTop: "0.5px solid #f2eaf9",
@@ -527,7 +544,8 @@ const TourFilterBar = React.forwardRef(({ resultsCount = 48, className, ...props
           <div className="flex items-center gap-[12px] shrink-0">
             <FilterLabel>DURATION</FilterLabel>
             {DURATION_OPTIONS.map((opt) => (
-              <FilterPill key={opt.value} value={opt.value} isActive={duration === opt.value} onSelect={setDuration}>
+              <FilterPill key={opt.value} value={opt.value} isActive={duration === opt.value}
+                onSelect={(v) => { setDuration(v); notify({ duration: v }); }}>
                 {opt.label}
               </FilterPill>
             ))}
@@ -539,7 +557,8 @@ const TourFilterBar = React.forwardRef(({ resultsCount = 48, className, ...props
           <div className="flex items-center gap-[12px] shrink-0">
             <FilterLabel>TYPE</FilterLabel>
             {TYPE_OPTIONS.map((opt) => (
-              <FilterPill key={opt.value} value={opt.value} isActive={type === opt.value} onSelect={setType}>
+              <FilterPill key={opt.value} value={opt.value} isActive={type === opt.value}
+                onSelect={(v) => { setType(v); notify({ type: v }); }}>
                 {opt.label}
               </FilterPill>
             ))}
@@ -568,7 +587,7 @@ const TourFilterBar = React.forwardRef(({ resultsCount = 48, className, ...props
         <SortDropdownPanel
           options={SORT_OPTIONS}
           value={sortValue}
-          onSelect={setSortValue}
+          onSelect={(v) => { setSortValue(v); notify({ sort: v }); }}
           onClose={() => setOpenPanel(null)}
           position={panelPosition}
         />
@@ -579,8 +598,8 @@ const TourFilterBar = React.forwardRef(({ resultsCount = 48, className, ...props
           maxVal={priceMax}
           setMinVal={setPriceMin}
           setMaxVal={setPriceMax}
-          onSave={(min, max) => setSavedPrice({ min, max })}
-          onClear={() => setSavedPrice(null)}
+          onSave={(min, max) => { setSavedPrice({ min, max }); notify({ minPrice: min, maxPrice: max }); }}
+          onClear={() => { setSavedPrice(null); notify({ minPrice: undefined, maxPrice: undefined }); }}
           onClose={() => setOpenPanel(null)}
           position={panelPosition}
         />

@@ -5,21 +5,21 @@ import Button from "../../ui/button";
 const GALLERY_SLIDES = [
   {
     id: 1,
-    image: "./src/assets/homeAssets/Image-15.webp",
-    title: "Waves of Serenity",
+    image: "./src/assets/Elysium+Achimota/HomeGalImg.webp",
+    title: "Moments from Motown",
     description:
-      "Feel the gentle breeze and golden sands of Busua Beach, where every sunset paints a new memory of peace and adventure.",
+      "Browse a collection of images capturing the sights, culture, and memorable experiences that make Motown a destination worth exploring.",
   },
   {
     id: 2,
-    image: "https://picsum.photos/seed/gallery2/1256/516",
+    image: "./src/assets/homeAssets/hero2.webp",
     title: "Golden Heritage",
     description:
       "Explore the rich history of Elmina Castle, where every stone tells a story of resilience and culture.",
   },
   {
     id: 3,
-    image: "https://picsum.photos/seed/gallery3/1256/516",
+    image: "./src/assets/homeAssets/hero4.webp",
     title: "Forest Canopy Walk",
     description:
       "Walk among the treetops at Kakum National Park for breathtaking views of the tropical rainforest.",
@@ -48,7 +48,7 @@ const GallerySection = React.forwardRef(({ className, ...props }, ref) => {
             </span>
           </div>
 
-          <div className="flex flex-col items-center lg:items-end gap-4 max-w-[677px]">
+          <div className="flex flex-col items-center self-center lg:self-end  lg:items-end gap-4 max-w-[677px]">
             <h2 className="font-raleway font-bold text-[22px] leading-[30px] lg:text-High-md-bold lg:leading-[34px] text-tertiary-normal-default text-center lg:text-right">
               Gallery: Moments That Tell Our Story
             </h2>

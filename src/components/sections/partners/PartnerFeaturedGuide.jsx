@@ -2,9 +2,10 @@ import React from "react";
 import ExploreMoreArrowIcon from "../../icons/ExploreMoreArrowIcon";
 import { classNames } from "../../../utils/classNames";
 
-// Figma: 940:6299 — Featured Guide callout
-// Inside: decorative rotated pill shapes (left) + guide info (center/right)
-// Guide name "Meet Yam Obeng: Your Guide Through Cape Coast History"
+const ELYSIUM_LOGO = "/ElysiumAssets/Logo.png";
+
+// Figma 940:6299 — Featured guide callout
+// Watermarks: same asset as Auth modal (`/ElysiumAssets/Logo.png`), low opacity — no external URLs.
 
 const PartnerFeaturedGuide = React.forwardRef(({
   guideName = "Yaw Obeng",

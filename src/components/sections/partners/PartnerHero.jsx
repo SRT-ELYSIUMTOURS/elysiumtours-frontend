@@ -49,8 +49,8 @@ const PartnerHero = React.forwardRef(({ onSearch, className = "", ...props }, re
           </div>
         ))}
 
-        {/* Centered content, anchored lower to avoid covering key architecture */}
-        <div className="absolute bottom-[15%] left-1/2 -translate-x-1/2 flex flex-col items-center gap-6 sm:gap-8 px-5 sm:px-8 md:px-10 z-30">
+        {/* Content centered vertically and horizontally in the hero */}
+        <div className="absolute top-1/2 left-1/2 w-full max-w-[1728px] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center gap-6 sm:gap-8 px-5 sm:px-8 md:px-10 z-30">
           {/* Title + subtitle */}
           <div className="flex flex-col items-center gap-4 text-center">
             <h1 className="font-raleway font-bold text-primary-light-default text-center text-[28px] leading-[38px] sm:text-[36px] sm:leading-[46px] md:text-[46px] md:leading-[56px] lg:text-[56px] lg:leading-[66px] max-w-[95%] sm:max-w-[90%] lg:w-[851px]">

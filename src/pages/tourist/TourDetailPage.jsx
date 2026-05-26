@@ -1,24 +1,32 @@
-import React, { useState, useEffect, useCallback, Fragment, useMemo } from "react";
-import { useParams, Link } from "react-router-dom";
+import React, { useState, useEffect, useLayoutEffect, useCallback, useRef, Fragment, useMemo } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { useAppDispatch } from "../../hooks/useAppDispatch";
+import { useAppSelector } from "../../hooks/useAppSelector";
+import { fetchTourThunk, selectCurrentTour, clearCurrentTour } from "../../store/slices/toursSlice";
+import { createBookingThunk, selectCreateBookingStatus, selectBookingsError, clearBookingError } from "../../store/slices/bookingsSlice";
+import { selectIsAuthenticated } from "../../store/slices/authSlice";
+import { incrementTourViewApi, listToursApi } from "../../api/tours.api";
+import { listReviewsByTourApi } from "../../api/reviews.api";
 import { classNames } from "../../utils/classNames";
 import { formatTimeAgo } from "../../utils/formatTimeAgo";
 import BlogBreadcrumbBar from "../../components/sections/blog/BlogBreadcrumbBar";
-import PopularTourCard from "../../components/cards/PopularTourCard";
+import Dropdown from "../../components/ui/Dropdown";
+import logoCombo from "../../assets/Elysium+Achimota/LogoCombo.png";
+import ElysiumLogo from "../../assets/Elysium-logo.svg";
+import dividerLine from "../../assets/ElysiumAssets/divider-line.svg";
 import ImageGalleryModal from "../../components/ui/ImageGalleryModal";
 import ShareModal from "../../components/ui/ShareModal";
 import PartnerWithUsModal from "../../components/ui/PartnerWithUsModal";
 import Button from "../../components/ui/button";
 import PartnerPromoCtaSection from "../../components/sections/PartnerPromoCtaSection";
 import { partnerPromoTour } from "../../data/partnerPromoCtaPresets.jsx";
+import PopularTourCard from "../../components/cards/PopularTourCard";
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
 // Route: /tours/:country/:tour
 // e.g. /tours/ghana/elmina-heritage-coastal-journey
-
-// ─── Static tour data (replace with API call later) ───────────────────────────
-const msAgo = (ms) => new Date(Date.now() - ms).toISOString();
 
 /** Fallback map center if tour has no `meetingPoint` (WGS84). */
 const DEFAULT_MEETING_POINT = { lat: 5.6037, lng: -0.187 };
@@ -195,8 +203,10 @@ const MeetingPointMapFrame = ({
       zoomControl
     >
       <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+        url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+        subdomains="abcd"
+        maxZoom={20}
       />
       <MapClickPlacePin onPlace={handleMove} />
       <Marker
@@ -213,705 +223,6 @@ const MeetingPointMapFrame = ({
     </MapContainer>
   );
 };
-
-/**
- * Per-tour page content. Optional keys control “extended” detail layout:
- * - `tourHighlights` — cards under About the Tour (`{ title, description }[]`; legacy plain strings become title-only)
- * - `businessAmenities` — two-column checklist + optional `corporateBookingBenefits` or legacy `noteHtml`
- *   (`items` order: **left** column top-to-bottom, then **right** column, so the split matches Figma)
- * - `importantInformation` — `{ blocks[], footerNote? }` above the map (`block.label` or `block.title` + `body`; optional banner)
- * - `bookingAddOns` — optional extras in the sidebar (checkboxes + subtotal)
- * Omit a field or use [] / empty `items` / `blocks` to hide that block.
- */
-const TOUR_DATA = {
-  "elmina-heritage-coastal-journey": {
-    title: "Elmina Heritage & Coastal Journey",
-    country: "Ghana",
-    location: "Cape Coast, Ghana",
-    meetingPoint: { lat: 5.6037, lng: -0.187 },
-    meetingPointLabel: "Accra, Greater Accra Region",
-    /** Optional: omit or [] to hide “Tour Highlights” on this tour */
-    tourHighlights: [
-      {
-        title: "Elmina Castle & Atlantic heritage",
-        description:
-          "UNESCO World Heritage site with expert guides and space for reflection at the Door of No Return.",
-      },
-      {
-        title: "Cape Coast communities & markets",
-        description:
-          "Coastal fishing villages, open-air markets, and everyday life along Ghana's Central Region shore.",
-      },
-      {
-        title: "Cultural context & local voices",
-        description:
-          "Certified heritage storytelling that connects the past to the living culture around you.",
-      },
-      {
-        title: "Evening ocean & downtime",
-        description:
-          "Paced days with time by the coast—well suited to photography, conversation, and rest.",
-      },
-    ],
-    /** Optional: omit or empty items[] to hide “Business Amenities” */
-    businessAmenities: {
-      items: [
-        "High-Speed WiFi Throughout",
-        "4-Star Hotel (Executive Floor)",
-        "VAT Invoices Provided",
-        "Private Chauffeured Vehicle",
-        "Corporate Group Invoicing",
-        "24/7 Concierge Support",
-        "Airport Transfers (VIP)",
-        "Hotel pickup & drop-off",
-        "Meeting Room Access",
-      ],
-      corporateBookingBenefits: {
-        title: "Corporate Booking Benefits",
-        items: [
-          "Group bookings of 5+ receive 12% corporate discount",
-          "Consolidated invoices available for company expense reporting",
-          "Dedicated corporate account manager assigned for your trip",
-          "Custom itinerary modifications for conference integration",
-        ],
-      },
-    },
-    /** Optional — appears above the map in Location */
-    importantInformation: {
-      blocks: [
-        {
-          title: "Visa:",
-          body: "Most non-Ghanaian visitors need a visa or eligible VOA; check your nationality and apply early. eVisa is available for many countries.",
-        },
-        {
-          title: "Health:",
-          body:
-            "Yellow fever vaccination is required for entry. Malaria prophylaxis is strongly recommended. Confirm plans with your healthcare provider at least 6 weeks before travel.",
-        },
-        {
-          title: "Dress code:",
-          body: "Comfortable walking shoes and modest layers for heritage sites. Smart casual for evenings; bring sun protection and a light rain layer in the rainy season.",
-        },
-        {
-          title: "Power:",
-          body: "Ghana uses Type G outlets (230V). Bring a universal adaptor; a power bank is useful for long days.",
-        },
-        {
-          title: "Connectivity:",
-          body: "Local SIM cards with data are widely available (MTN, Vodafone, AirtelTigo). Your guide can help on arrival if needed.",
-        },
-      ],
-      footerNote:
-        "Free cancellation up to 48 hours before departure. Corporate and group bookings may have dedicated terms—contact your coordinator.",
-    },
-    /** Optional: omit or [] — optional extras + subtotal in the booking sidebar */
-    bookingAddOns: [
-      { id: "airport", label: "Airport pickup / drop-off (Accra)", priceGhc: 250 },
-      { id: "photo", label: "Half-day professional photography", priceGhc: 450 },
-    ],
-    rating: 4.9,
-    duration: "3 Days / 2 Nights",
-    price: "GHC 4,590",
-    description:
-      'Stand inside the same cells that held thousands of enslaved Africans before their crossing  Elmina Castle is not just a UNESCO World Heritage Site, it is a visceral entry into history that demands to be felt, not just seen. Your certified heritage guide will walk you through every corner, courtyard, and "Door of No Return" with a depth that no audio guide can replicate. <br /><br />Beyond the castle, this journey moves through the living cultures of Ghana\'s Central Region  fishing villages that celebrate dance, open-air markets crowded with dried fish and fresh cassava, and evenings by the ocean where coconuts are shared and waves echo the unspoken. This is Ghana unfiltered.',
-    images: Array.from(
-      { length: 24 },
-      (_, i) => `https://picsum.photos/seed/tour-detail-${i + 1}/856/717`
-    ),
-    heroMainImage: "https://picsum.photos/seed/tour-hero-main/856/717",
-    heroTopRight: "https://picsum.photos/seed/tour-hero-top/867/366",
-    heroBottomLeft: "https://picsum.photos/seed/tour-hero-bl/430/347",
-    heroBottomRight: "https://picsum.photos/seed/tour-hero-bottom/432/347",
-    bestFor: [
-      "Cultural Enthusiasts",
-      "Diaspora Travelers",
-      "International Tourists",
-      "Couples",
-    ],
-    included: [
-      { type: "check", text: "All inter-continental travels" },
-      { type: "check", text: "Expert certified heritage guides" },
-      { type: "check", text: "2 nights hotel accommodation" },
-      { type: "check", text: "4 meals (2x Lunch, 2x Breakfast)" },
-      { type: "check", text: "All entrance fees" },
-      { type: "check", text: "Hotel pickup & drop-off" },
-      { type: "cross", text: "International/domestic flights" },
-      { type: "cross", text: "Personal spending & tips" },
-      { type: "cross", text: "Travel insurance" },
-      { type: "cross", text: "Alcoholic beverages" },
-      { type: "cross", text: "Dinner meals (Day 1 & 2)" },
-    ],
-    itinerary: [
-      {
-        day: 1,
-        title: "Accra Departure → Cape Coast Arrival",
-        preview: "Lagos · Airport → Victoria Island · Meals: Welcome Dinner",
-        activities: [
-          {
-            time: "08:00 AM",
-            activity: "Early drive along the coastal highway",
-          },
-          {
-            time: "10:00 AM",
-            activity: "Orientation walk through Cape Coast town",
-            tag: "Business",
-          },
-          {
-            time: "12:00 PM",
-            activity: "Traditional cuisine walk at local market",
-          },
-        ],
-        localContext:
-          " Lagos is Africa's largest city by population, home to 21M+ people and a GDP that rivals many African nations. Victoria Island is the commercial and diplomatic heartbeat.",
-      },
-      {
-        day: 2,
-        title: "Coastal Exploration",
-        preview: "Lagos · Airport → Victoria Island · Meals: Welcome Dinner",
-
-        activities: [
-          {
-            time: "08:00 AM",
-            activity: "Fort Elmina & Cape Coast Castle visits",
-          },
-          {
-            time: "10:00 AM",
-            activity: "Kakum National Park canopy walk",
-            tag: "Business",
-          },
-          { time: "12:00 PM", activity: "Local fishing harbour market tour" },
-        ],
-        localContext:
-          " Lagos is Africa's largest city by population, home to 21M+ people and a GDP that rivals many African nations. Victoria Island is the commercial and diplomatic heartbeat.",
-      },
-      {
-        day: 3,
-        title: "Return to Accra",
-        preview: "Lagos · Airport → Victoria Island · Meals: Welcome Dinner",
-
-        activities: [
-          {
-            time: "08:00 AM",
-            activity: "W.E.B Du Bois Memorial Museum visit",
-            tag: "Business",
-          },
-          {
-            time: "10:00 AM",
-            activity: "Departure and transfer back to Accra",
-          },
-        ],
-        localContext:
-          " Lagos is Africa's largest city by population, home to 21M+ people and a GDP that rivals many African nations. Victoria Island is the commercial and diplomatic heartbeat.",
-      },
-    ],
-    guide: {
-      name: "Ailsa Mensah-Asante",
-      rating: 4.9,
-      reviews: 124,
-      speciality: "Heritage Guide",
-      yearsExp: 8,
-      languages: [
-        { code: "gb", name: "English" },
-        { code: "fr", name: "French" },
-        { code: "gh", name: "Twi" }, // Twi is Ghanaian → gh
-      ],
-      certifications: ["UNESCO Certified", "History MA"],
-      image: "/tourAssets/Image-1.png",
-      testimonials: [
-        {
-          quote:
-            "Ailsa's depth of knowledge brought the castle history to life in a way no textbook ever could. A truly transformative experience.",
-          reviewer: "Estella Sackey",
-          date: "2 weeks ago",
-        },
-        {
-          quote:
-            "Her passion for Ghana's heritage is infectious. Every stop felt personal and deeply meaningful — I'll never forget it.",
-          reviewer: "James O.",
-          date: "1 month ago",
-        },
-      ],
-    },
-    reviews: [
-      {
-        id: 1,
-        name: "Sarah M.",
-        avatar: "https://picsum.photos/seed/reviewer-1/40/40",
-        rating: 5,
-        date: msAgo(50 * 1000),
-        text: "Absolutely life-changing experience. Kwame's knowledge of the history was profound and deeply moving. The castle visits were emotional but necessary. Highly recommend to every person of African descent.",
-      },
-      {
-        id: 2,
-        name: "James O.",
-        avatar: "https://picsum.photos/seed/reviewer-2/40/40",
-        rating: 5,
-        date: msAgo(5 * 60 * 1000),
-        text: "A perfect blend of history, culture, and natural beauty. The canopy walk was exhilarating and the coastal views were stunning. Elysium Tours truly exceeded our expectations.",
-      },
-      {
-        id: 3,
-        name: "Priya K.",
-        avatar: "https://picsum.photos/seed/reviewer-3/40/40",
-        rating: 4,
-        date: msAgo(14 * 24 * 60 * 60 * 1000),
-        text: "Wonderful tour with excellent organisation. The accommodations were comfortable and the meals were delicious. Would love to return for the extended tour next time.",
-      },
-    ],
-    ratingBreakdown: { 5: 85, 4: 10, 3: 3, 2: 1, 1: 1 },
-    totalReviews: 3249,
-    categoryRatings: [
-      { label: "Guide Quality", score: 4.9 },
-      { label: "Value for Money", score: 4.8 },
-      { label: "Logistical Quality", score: 4.9 },
-      { label: "Transport", score: 4.5 },
-    ],
-    addOns: [
-      {
-        icon: (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 20 20"
-            fill="none"
-          >
-            <g clip-path="url(#clip0_3749_56820)">
-              <path
-                d="M7.19104 2.49449L6.69277 1.93394L6.69277 1.93394L7.19104 2.49449ZM12.8037 2.49449L13.302 1.93394V1.93394L12.8037 2.49449ZM12.624 2.33468L12.1257 2.89523V2.89523L12.624 2.33468ZM7.37084 2.33467L7.86911 2.89523V2.89523L7.37084 2.33467ZM3.38162 17.5375L3.82246 16.9308L3.38162 17.5375ZM2.45982 16.6157L3.06659 16.1749L2.45982 16.6157ZM17.535 16.6157L16.9282 16.1749L17.535 16.6157ZM16.6132 17.5375L16.1723 16.9308L16.6132 17.5375ZM18.3307 6.65407H17.5807V10.8333H18.3307H19.0807V6.65407H18.3307ZM10.8307 18.3333V17.5833H9.16406V18.3333V19.0833H10.8307V18.3333ZM1.66406 10.8333H2.41406V6.65407H1.66406H0.914062V10.8333H1.66406ZM12.624 2.33468L12.1257 2.89523L12.3055 3.05505L12.8037 2.49449L13.302 1.93394L13.1222 1.77412L12.624 2.33468ZM7.19104 2.49449L7.68932 3.05505L7.86911 2.89523L7.37084 2.33467L6.87257 1.77412L6.69277 1.93394L7.19104 2.49449ZM4.98484 3.33329V4.08329C5.98183 4.08329 6.94416 3.71741 7.68932 3.05505L7.19104 2.49449L6.69277 1.93394C6.22219 2.35223 5.61446 2.58329 4.98484 2.58329V3.33329ZM12.8037 2.49449L12.3055 3.05505C13.0506 3.71741 14.013 4.08329 15.01 4.08329V3.33329V2.58329C14.3803 2.58329 13.7726 2.35223 13.302 1.93394L12.8037 2.49449ZM12.624 2.33468L13.1222 1.77412C11.3401 0.19004 8.65465 0.19004 6.87257 1.77412L7.37084 2.33467L7.86911 2.89523C9.08287 1.81634 10.9119 1.81634 12.1257 2.89523L12.624 2.33468ZM9.16406 18.3333V17.5833C7.58497 17.5833 6.46089 17.5823 5.59256 17.4882C4.73827 17.3956 4.22094 17.2203 3.82246 16.9308L3.38162 17.5375L2.94079 18.1443C3.63758 18.6505 4.44908 18.8731 5.43099 18.9795C6.39887 19.0843 7.61838 19.0833 9.16406 19.0833V18.3333ZM1.66406 10.8333H0.914062C0.914062 12.379 0.913033 13.5985 1.0179 14.5664C1.12428 15.5483 1.34681 16.3598 1.85306 17.0566L2.45982 16.6157L3.06659 16.1749C2.77708 15.7764 2.60173 15.2591 2.50917 14.4048C2.41509 13.5365 2.41406 12.4124 2.41406 10.8333H1.66406ZM3.38162 17.5375L3.82246 16.9308C3.53241 16.72 3.27733 16.4649 3.06659 16.1749L2.45982 16.6157L1.85306 17.0566C2.15632 17.474 2.52339 17.841 2.94079 18.1443L3.38162 17.5375ZM18.3307 10.8333H17.5807C17.5807 12.4124 17.5797 13.5365 17.4856 14.4048C17.3931 15.2591 17.2177 15.7764 16.9282 16.1749L17.535 16.6157L18.1417 17.0566C18.648 16.3598 18.8705 15.5483 18.9769 14.5664C19.0818 13.5985 19.0807 12.379 19.0807 10.8333H18.3307ZM10.8307 18.3333V19.0833C12.3764 19.0833 13.5959 19.0843 14.5638 18.9795C15.5457 18.8731 16.3572 18.6505 17.054 18.1443L16.6132 17.5375L16.1723 16.9308C15.7739 17.2203 15.2565 17.3956 14.4022 17.4882C13.5339 17.5823 12.4098 17.5833 10.8307 17.5833V18.3333ZM17.535 16.6157L16.9282 16.1749C16.7175 16.4649 16.4624 16.72 16.1723 16.9308L16.6132 17.5375L17.054 18.1443C17.4714 17.841 17.8385 17.474 18.1417 17.0566L17.535 16.6157ZM18.3307 6.65407H19.0807C19.0807 4.40584 17.2582 2.58329 15.01 2.58329V3.33329V4.08329C16.4298 4.08329 17.5807 5.23427 17.5807 6.65407H18.3307ZM1.66406 6.65407H2.41406C2.41406 5.23427 3.56504 4.08329 4.98484 4.08329V3.33329V2.58329C2.73661 2.58329 0.914062 4.40584 0.914062 6.65407H1.66406ZM6.66406 10.8333H5.91406C5.91406 13.0885 7.74223 14.9166 9.9974 14.9166V14.1666V13.4166C8.57066 13.4166 7.41406 12.26 7.41406 10.8333H6.66406ZM9.9974 14.1666V14.9166C12.2526 14.9166 14.0807 13.0885 14.0807 10.8333H13.3307H12.5807C12.5807 12.26 11.4241 13.4166 9.9974 13.4166V14.1666ZM13.3307 10.8333H14.0807C14.0807 8.57813 12.2526 6.74996 9.9974 6.74996V7.49996V8.24996C11.4241 8.24996 12.5807 9.40655 12.5807 10.8333H13.3307ZM9.9974 7.49996V6.74996C7.74223 6.74996 5.91406 8.57813 5.91406 10.8333H6.66406H7.41406C7.41406 9.40655 8.57066 8.24996 9.9974 8.24996V7.49996Z"
-                fill="#7B2CBF"
-              />
-              <path
-                d="M14.1641 6.66671C14.1641 7.12694 14.5372 7.50004 14.9974 7.50004C15.4576 7.50004 15.8307 7.12694 15.8307 6.66671C15.8307 6.20647 15.4576 5.83337 14.9974 5.83337C14.5372 5.83337 14.1641 6.20647 14.1641 6.66671Z"
-                fill="#7B2CBF"
-              />
-            </g>
-            <defs>
-              <clipPath id="clip0_3749_56820">
-                <rect width="20" height="20" fill="white" />
-              </clipPath>
-            </defs>
-          </svg>
-        ),
-        name: "Professional Photo Package",
-
-        desc: "High-resolution photos & edited highlights reel",
-        price: "GH₵ 850",
-      },
-      {
-        icon: (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="21"
-            height="20"
-            viewBox="0 0 21 20"
-            fill="none"
-          >
-            <path
-              d="M3.33594 10L5.0026 10.8333"
-              stroke="#7B2CBF"
-              stroke-width="1.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-            <path
-              d="M19.1667 10.4165L17.5 10.8332"
-              stroke="#7B2CBF"
-              stroke-width="1.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-            <path
-              d="M7.91406 14.5833L8.11879 14.0715C8.42324 13.3104 8.57546 12.9298 8.8929 12.7149C9.21034 12.5 9.62023 12.5 10.44 12.5H12.0548C12.8746 12.5 13.2845 12.5 13.6019 12.7149C13.9193 12.9298 14.0716 13.3104 14.376 14.0715L14.5807 14.5833"
-              stroke="#7B2CBF"
-              stroke-width="1.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-            <path
-              d="M2.91406 14.1665V16.5682C2.91406 16.8838 3.11469 17.1723 3.4323 17.3135C3.63838 17.4051 3.83521 17.4998 4.07288 17.4998H5.50525C5.74291 17.4998 5.93975 17.4051 6.14583 17.3135C6.46344 17.1723 6.66406 16.8838 6.66406 16.5682V14.9998"
-              stroke="#7B2CBF"
-              stroke-width="1.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-            <path
-              d="M15.8359 14.9998V16.5682C15.8359 16.8838 16.0366 17.1723 16.3542 17.3135C16.5603 17.4051 16.7571 17.4998 16.9948 17.4998H18.4271C18.6648 17.4998 18.8616 17.4051 19.0677 17.3135C19.3853 17.1723 19.5859 16.8838 19.5859 16.5682V14.1665"
-              stroke="#7B2CBF"
-              stroke-width="1.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-            <path
-              d="M17.9141 7.08317L18.7474 6.6665"
-              stroke="#7B2CBF"
-              stroke-width="1.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-            <path
-              d="M4.58333 7.08317L3.75 6.6665"
-              stroke="#7B2CBF"
-              stroke-width="1.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-            <path
-              d="M5 7.5L5.90692 4.77924C6.2736 3.67921 6.45693 3.12919 6.89342 2.8146C7.32989 2.5 7.90966 2.5 9.0692 2.5H13.4308C14.5903 2.5 15.1701 2.5 15.6066 2.8146C16.0431 3.12919 16.2264 3.67921 16.5931 4.77924L17.5 7.5"
-              stroke="#7B2CBF"
-              stroke-width="1.5"
-              stroke-linejoin="round"
-            />
-            <path
-              d="M4.9974 7.5H17.4974C18.2951 8.34458 19.5807 9.52075 19.5807 10.833V13.7252C19.5807 14.2006 19.2645 14.6007 18.8447 14.6562L16.2474 15H6.2474L3.65003 14.6562C3.23035 14.6007 2.91406 14.2006 2.91406 13.7252V10.833C2.91406 9.52075 4.19972 8.34458 4.9974 7.5Z"
-              stroke="#7B2CBF"
-              stroke-width="1.5"
-              stroke-linejoin="round"
-            />
-          </svg>
-        ),
-        name: "Private Vehicle Upgrade",
-        desc: "Exclusive private transfer throughout the tour",
-        price: "GH₵ 850",
-      },
-      {
-        icon: (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 20 20"
-            fill="none"
-          >
-            <path
-              d="M8.035 1.43875C8.385 0.73875 9.01625 0 10 0C10.9837 0 11.615 0.74 11.965 1.43875C12.3262 2.1625 12.5 3.03875 12.5 3.75V8.36375L18.9625 11.595C19.2742 11.7506 19.5364 11.99 19.7197 12.2863C19.9029 12.5826 20 12.9241 20 13.2725V15C20 15.0907 19.9802 15.1804 19.942 15.2627C19.9038 15.345 19.8482 15.418 19.779 15.4766C19.7097 15.5352 19.6286 15.5781 19.5411 15.6022C19.4537 15.6263 19.362 15.6311 19.2725 15.6162L12.3887 14.4687L11.92 17.285L13.5675 18.9325C13.6551 19.0199 13.7148 19.1314 13.739 19.2528C13.7633 19.3741 13.7509 19.5 13.7035 19.6143C13.6561 19.7287 13.5758 19.8264 13.4728 19.895C13.3698 19.9637 13.2488 20.0002 13.125 20H6.875C6.75122 20.0002 6.63017 19.9637 6.52718 19.895C6.4242 19.8264 6.34392 19.7287 6.29652 19.6143C6.24912 19.5 6.23674 19.3741 6.26095 19.2528C6.28516 19.1314 6.34487 19.0199 6.4325 18.9325L8.08125 17.285L7.61125 14.4687L0.7275 15.6162C0.638004 15.6311 0.546341 15.6263 0.45888 15.6022C0.371418 15.5781 0.290255 15.5352 0.221029 15.4766C0.151803 15.418 0.0961726 15.345 0.0580036 15.2627C0.0198346 15.1804 4.17625e-05 15.0907 0 15L0 13.2725C1.17688e-05 12.9241 0.0970907 12.5826 0.280348 12.2863C0.463605 11.99 0.725792 11.7506 1.0375 11.595L7.5 8.36375L7.5 3.75C7.5 3.04 7.675 2.16125 8.035 1.43875ZM9.1525 1.99875C8.88875 2.525 8.75 3.21125 8.75 3.75V8.75C8.75 8.86597 8.71772 8.97966 8.65679 9.07834C8.59587 9.17701 8.50868 9.25679 8.405 9.30875L1.595 12.7137C1.49132 12.7657 1.40413 12.8455 1.3432 12.9442C1.28228 13.0428 1.25 13.1565 1.25 13.2725L1.25 14.2625L8.0225 13.1337C8.18574 13.1066 8.35309 13.1453 8.48783 13.2414C8.62256 13.3375 8.7137 13.4831 8.74125 13.6462L9.36625 17.3962C9.38281 17.4947 9.37556 17.5956 9.34511 17.6906C9.31467 17.7857 9.26191 17.872 9.19125 17.9425L8.385 18.75H11.6175L10.8087 17.9425C10.7383 17.8722 10.6856 17.786 10.6552 17.6912C10.6248 17.5964 10.6174 17.4957 10.6337 17.3975L11.2587 13.6475C11.2722 13.5665 11.3016 13.4889 11.3451 13.4192C11.3886 13.3495 11.4454 13.2891 11.5122 13.2414C11.5791 13.1936 11.6547 13.1596 11.7348 13.1411C11.8148 13.1227 11.8977 13.1201 11.9787 13.1337L18.75 14.2625V13.2725C18.75 13.1565 18.7177 13.0428 18.6568 12.9442C18.5959 12.8455 18.5087 12.7657 18.405 12.7137L11.595 9.30875C11.4913 9.25679 11.4041 9.17701 11.3432 9.07834C11.2823 8.97966 11.25 8.86597 11.25 8.75V3.75C11.25 3.21 11.1125 2.52625 10.8475 1.99875C10.5725 1.44875 10.2662 1.25 10 1.25C9.73375 1.25 9.4275 1.4475 9.1525 1.99875Z"
-              fill="#7B2CBF"
-            />
-          </svg>
-        ),
-        name: "Elmwood International Flights",
-        desc: "Return flights from your home country",
-        price: "GH₵ 850",
-      },
-      {
-        icon: (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 20 20"
-            fill="none"
-          >
-            <path
-              d="M8.035 1.43875C8.385 0.73875 9.01625 0 10 0C10.9837 0 11.615 0.74 11.965 1.43875C12.3262 2.1625 12.5 3.03875 12.5 3.75V8.36375L18.9625 11.595C19.2742 11.7506 19.5364 11.99 19.7197 12.2863C19.9029 12.5826 20 12.9241 20 13.2725V15C20 15.0907 19.9802 15.1804 19.942 15.2627C19.9038 15.345 19.8482 15.418 19.779 15.4766C19.7097 15.5352 19.6286 15.5781 19.5411 15.6022C19.4537 15.6263 19.362 15.6311 19.2725 15.6162L12.3887 14.4687L11.92 17.285L13.5675 18.9325C13.6551 19.0199 13.7148 19.1314 13.739 19.2528C13.7633 19.3741 13.7509 19.5 13.7035 19.6143C13.6561 19.7287 13.5758 19.8264 13.4728 19.895C13.3698 19.9637 13.2488 20.0002 13.125 20H6.875C6.75122 20.0002 6.63017 19.9637 6.52718 19.895C6.4242 19.8264 6.34392 19.7287 6.29652 19.6143C6.24912 19.5 6.23674 19.3741 6.26095 19.2528C6.28516 19.1314 6.34487 19.0199 6.4325 18.9325L8.08125 17.285L7.61125 14.4687L0.7275 15.6162C0.638004 15.6311 0.546341 15.6263 0.45888 15.6022C0.371418 15.5781 0.290255 15.5352 0.221029 15.4766C0.151803 15.418 0.0961726 15.345 0.0580036 15.2627C0.0198346 15.1804 4.17625e-05 15.0907 0 15L0 13.2725C1.17688e-05 12.9241 0.0970907 12.5826 0.280348 12.2863C0.463605 11.99 0.725792 11.7506 1.0375 11.595L7.5 8.36375L7.5 3.75C7.5 3.04 7.675 2.16125 8.035 1.43875ZM9.1525 1.99875C8.88875 2.525 8.75 3.21125 8.75 3.75V8.75C8.75 8.86597 8.71772 8.97966 8.65679 9.07834C8.59587 9.17701 8.50868 9.25679 8.405 9.30875L1.595 12.7137C1.49132 12.7657 1.40413 12.8455 1.3432 12.9442C1.28228 13.0428 1.25 13.1565 1.25 13.2725L1.25 14.2625L8.0225 13.1337C8.18574 13.1066 8.35309 13.1453 8.48783 13.2414C8.62256 13.3375 8.7137 13.4831 8.74125 13.6462L9.36625 17.3962C9.38281 17.4947 9.37556 17.5956 9.34511 17.6906C9.31467 17.7857 9.26191 17.872 9.19125 17.9425L8.385 18.75H11.6175L10.8087 17.9425C10.7383 17.8722 10.6856 17.786 10.6552 17.6912C10.6248 17.5964 10.6174 17.4957 10.6337 17.3975L11.2587 13.6475C11.2722 13.5665 11.3016 13.4889 11.3451 13.4192C11.3886 13.3495 11.4454 13.2891 11.5122 13.2414C11.5791 13.1936 11.6547 13.1596 11.7348 13.1411C11.8148 13.1227 11.8977 13.1201 11.9787 13.1337L18.75 14.2625V13.2725C18.75 13.1565 18.7177 13.0428 18.6568 12.9442C18.5959 12.8455 18.5087 12.7657 18.405 12.7137L11.595 9.30875C11.4913 9.25679 11.4041 9.17701 11.3432 9.07834C11.2823 8.97966 11.25 8.86597 11.25 8.75V3.75C11.25 3.21 11.1125 2.52625 10.8475 1.99875C10.5725 1.44875 10.2662 1.25 10 1.25C9.73375 1.25 9.4275 1.4475 9.1525 1.99875Z"
-              fill="#7B2CBF"
-            />
-          </svg>
-        ),
-        name: "Souvenir Bundle",
-        desc: "Curated Ghanaian artisan souvenirs and gifts",
-        price: "GH₵ 850",
-      },
-    ],
-  },
-};
-
-// ─── Templated tour data (fallback) ────────────────────────────────────────
-// For tour slugs that don't have rich curated data in TOUR_DATA above, we
-// build per-tour entries by merging a shared TOUR_TEMPLATE with slug-specific
-// overrides (title, location, price, duration, description, country).
-// This way every tour link in the app routes to a detail page with at least
-// the right title and basic info, instead of falling back to Elmina.
-const TOUR_TEMPLATE = {
-  rating: 4.8,
-  reviewCount: 24,
-  maxGuests: 12,
-  languages: "English, Twi, French",
-  cancellation: "Cancellation available",
-  images: Array.from({ length: 24 }, (_, i) => `https://picsum.photos/seed/tour-detail-${i + 1}/856/717`),
-  heroMainImage: "https://picsum.photos/seed/tour-hero-main/856/717",
-  heroTopRight: "https://picsum.photos/seed/tour-hero-top/867/366",
-  heroBottomLeft: "https://picsum.photos/seed/tour-hero-bl/430/347",
-  heroBottomRight: "https://picsum.photos/seed/tour-hero-bottom/432/347",
-  bestFor: ["Cultural Enthusiasts", "Diaspora Travelers", "International Tourists", "Couples"],
-  included: [
-    { type: "check", text: "Expert certified local guides" },
-    { type: "check", text: "Hotel accommodation (where applicable)" },
-    { type: "check", text: "Daily meals as per itinerary" },
-    { type: "check", text: "All entrance fees" },
-    { type: "check", text: "Hotel pickup & drop-off" },
-    { type: "check", text: "Private comfortable transport" },
-    { type: "cross", text: "International/domestic flights" },
-    { type: "cross", text: "Personal spending & tips" },
-    { type: "cross", text: "Travel insurance" },
-    { type: "cross", text: "Alcoholic beverages" },
-  ],
-  itinerary: [
-    {
-      day: 1,
-      title: "Departure & Arrival",
-      activities: ["Hotel pickup and orientation", "Scenic transit to destination", "Traditional welcome dinner"],
-    },
-    {
-      day: 2,
-      title: "Main Exploration Day",
-      activities: ["Guided tour of key sights", "Cultural immersion experience", "Local cuisine tasting"],
-    },
-    {
-      day: 3,
-      title: "Return Journey",
-      activities: ["Optional morning excursion", "Souvenir shopping", "Departure and transfer back"],
-    },
-  ],
-  guide: {
-    name: "Ailsa Mensah-Asante",
-    rating: 4.9,
-    reviews: 124,
-    speciality: "Heritage Guide",
-    yearsExp: 8,
-    languages: [
-      { code: "gb", name: "English" },
-      { code: "fr", name: "French" },
-      { code: "gh", name: "Twi" },
-    ],
-    certifications: ["UNESCO Certified", "History MA"],
-    image: "https://picsum.photos/seed/guide-ailsa/296/393",
-    testimonials: [
-      { quote: "Ailsa's depth of knowledge brought the history to life in a way no textbook ever could.", reviewer: "Estella Sackey", date: "2 weeks ago" },
-      { quote: "Her passion for Ghana's heritage is infectious. Every stop felt personal and deeply meaningful.", reviewer: "James O.", date: "1 month ago" },
-    ],
-  },
-  reviews: [
-    { id: 1, name: "Sarah M.", avatar: "https://picsum.photos/seed/reviewer-1/40/40", rating: 5, date: "January 2025", text: "Absolutely life-changing experience. The guide's knowledge was profound and deeply moving. Highly recommend." },
-    { id: 2, name: "James O.", avatar: "https://picsum.photos/seed/reviewer-2/40/40", rating: 5, date: "December 2024", text: "A perfect blend of history, culture, and natural beauty. Elysium Tours truly exceeded our expectations." },
-    { id: 3, name: "Priya K.", avatar: "https://picsum.photos/seed/reviewer-3/40/40", rating: 4, date: "November 2024", text: "Wonderful tour with excellent organisation. Comfortable accommodations and delicious meals." },
-  ],
-  ratingBreakdown: { 5: 85, 4: 10, 3: 3, 2: 1, 1: 1 },
-  totalReviews: 3249,
-  categoryRatings: [
-    { label: "Guide Quality", score: 4.9 },
-    { label: "Value for Money", score: 4.8 },
-    { label: "Logistical Quality", score: 4.9 },
-    { label: "Transport", score: 4.5 },
-  ],
-  addOns: [
-    { name: "Professional Photo Package", desc: "High-resolution photos & edited highlights reel", price: "GH₵ 850" },
-    { name: "Private Vehicle Upgrade", desc: "Exclusive private transfer throughout the tour", price: "GH₵ 850" },
-    { name: "International Flights", desc: "Return flights from your home country", price: "GH₵ 850" },
-    { name: "Souvenir Bundle", desc: "Curated artisan souvenirs and gifts", price: "GH₵ 850" },
-  ],
-};
-
-// Per-tour overrides — only the fields that should be unique per tour.
-// Anything not specified falls back to TOUR_TEMPLATE.
-const TOUR_OVERRIDES = {
-  // ── Featured tours (TourPage's TourFeaturedSection) ──────────────────
-  "mole-national-park-safari": {
-    title: "Mole National Park Safari",
-    country: "Ghana",
-    location: "Northern Region, Ghana",
-    rating: 4.8,
-    duration: "3 Days / 2 Nights",
-    price: "GHC 5,500",
-    description: "Experience Ghana's largest wildlife sanctuary on this immersive safari adventure. Spot elephants, antelopes, baboons, and over 300 bird species across 4,840 km² of pristine savannah. Take guided walking safaris with armed rangers, swim in the lodge's pool overlooking the watering hole, and learn about traditional northern Ghanaian culture. An eco-certified experience that supports local conservation.",
-  },
-  "accra-arts-culture-food-day": {
-    title: "Accra Arts, Culture & Food Day",
-    country: "Ghana",
-    location: "Accra, Greater Accra",
-    rating: 4.7,
-    duration: "1 Day (8 hours)",
-    price: "GHC 2,500",
-    description: "A vibrant single-day immersion into Ghana's capital. Explore the Centre for National Culture for traditional crafts, visit the Kwame Nkrumah Memorial Park, sample street food at Makola Market, and enjoy a curated lunch at a local fusion restaurant. Perfect for first-time visitors looking to capture the essence of Accra in a single, memorable day.",
-  },
-  "dakar-business-immersion": {
-    title: "Dakar Business & Immersion",
-    country: "Senegal",
-    location: "Dakar, Senegal",
-    rating: 4.9,
-    duration: "3 Days / 2 Nights",
-    price: "GHC 6,500",
-    description: "A premium business-class tour of West Africa's francophone hub. Combine networking opportunities with cultural immersion: visit the historic Île de Gorée (UNESCO World Heritage Site), explore the bustling Sandaga Market, dine at Senegal's finest restaurants, and experience the warmth of Teranga hospitality.",
-  },
-
-  // ── HomePage FeaturedToursSection ────────────────────────────────────
-  "accra-bustling-city-market-tour": {
-    title: "Accra Bustling City & Market Tour",
-    country: "Ghana",
-    location: "Accra, Greater Accra",
-    rating: 4.8,
-    duration: "3 Days / 2 Nights",
-    price: "GHC 3,500",
-    description: "Dive into the energetic heart of Accra with this multi-day exploration. Wander through Makola, Kantamanto, and Madina markets to experience daily Ghanaian life. Visit Jamestown's lighthouse, the W.E.B. Du Bois Memorial Centre, and Independence Square.",
-  },
-  "kumasi-heritage-market-discovery": {
-    title: "Kumasi Heritage & Market Discovery",
-    country: "Ghana",
-    location: "Kumasi, Ashanti Region",
-    rating: 4.7,
-    duration: "2 Days / 1 Night",
-    price: "GHC 5,000",
-    description: "Experience the cultural heart of the Ashanti Kingdom. Visit the Manhyia Palace Museum, Kejetia Market (one of West Africa's largest open-air markets), and the National Cultural Centre. Watch master craftsmen weave authentic kente cloth in Bonwire village, and learn the history of the Golden Stool — sacred symbol of the Ashanti people.",
-  },
-  "wli-waterfalls-nature-exploration": {
-    title: "Wli Waterfalls & Nature Exploration",
-    country: "Ghana",
-    location: "Volta Region, Ghana",
-    rating: 4.9,
-    duration: "1 Day",
-    price: "GHC 4,500",
-    description: "Trek to West Africa's highest waterfall in the lush mountains of the Volta Region. The hike through the Agumatsa Wildlife Sanctuary takes you past tropical butterflies, fruit bats, and dense rainforest before revealing the spectacular 80-metre Wli Falls.",
-  },
-
-  // ── Country page tours ──────────────────────────────────────────────
-  "homecoming-kakum-national-park": {
-    title: "The Homecoming Experience to Kakum National Park",
-    country: "Ghana",
-    location: "Cape Coast, Ghana",
-    rating: 4.8,
-    duration: "5 Days / 4 Nights",
-    price: "GHC 4,000",
-    description: "A specially curated diaspora homecoming experience combining heritage with adventure. Walk through the Cape Coast and Elmina Castles, traverse Kakum's iconic canopy walkway high above the rainforest, and join in a naming ceremony at a traditional Akan village.",
-  },
-  "accra-city-culture-tour": {
-    title: "Accra City & Culture Full-Day Tour",
-    country: "Ghana",
-    location: "Accra, Greater Accra",
-    rating: 4.8,
-    duration: "1 Day",
-    price: "GHC 250",
-    description: "The definitive single-day introduction to Accra. From Independence Square to the National Museum, from Jamestown fishing harbour to the Arts Centre, this tour packs the highlights of Ghana's capital into one carefully-paced day.",
-  },
-  "canopy-bridges-kakum": {
-    title: "Canopy Bridges & Adventure at Kakum",
-    country: "Ghana",
-    location: "Central Region, Ghana",
-    rating: 4.6,
-    duration: "1 Day",
-    price: "GHC 350",
-    description: "An adrenaline-filled day at Kakum National Park's famous canopy walkway. Suspended 30 metres above the rainforest floor across seven swaying bridges, this is one of only three such walkways in Africa.",
-  },
-  "legacy-return-diaspora-experience": {
-    title: "Legacy & Return — Diaspora Experience",
-    country: "Ghana",
-    location: "Cape Coast, Ghana",
-    rating: 5.0,
-    duration: "4 Days / 3 Nights",
-    price: "GHC 7,500",
-    description: "An emotionally profound diaspora journey designed for travelers tracing their African roots. Visit Cape Coast and Elmina Castles with specialised heritage guides, participate in libation and naming ceremonies, meet with traditional chiefs, and explore W.E.B. Du Bois's legacy.",
-  },
-  "boti-falls-umbrella-rock": {
-    title: "Boti Falls & Umbrella Rock Day Trip",
-    country: "Ghana",
-    location: "Eastern Region, Ghana",
-    rating: 4.7,
-    duration: "1 Day",
-    price: "GHC 300",
-    description: "Discover the natural wonders of Ghana's Eastern Region. The twin Boti Falls plunge 30 metres into a serene pool — locals affectionately call them the 'male and female' falls. A short hike away, marvel at the gravity-defying Umbrella Rock and the mysterious 'three-headed' palm tree.",
-  },
-  "premium-accra-heritage-business": {
-    title: "Premium Accra Heritage & Business Tour",
-    country: "Ghana",
-    location: "Greater Accra, Ghana",
-    rating: 4.8,
-    duration: "2 Days / 1 Night",
-    price: "GHC 6,000",
-    description: "A business-class tour designed for executives visiting Accra. Combines high-quality cultural sites (Du Bois Centre, Nkrumah Mausoleum, Jamestown) with networking opportunities at Accra's premier business venues.",
-  },
-  "bolgatanga-arts-crafts-paga-crocodile": {
-    title: "Bolgatanga Arts, Crafts & Paga Crocodile",
-    country: "Ghana",
-    location: "Upper East, Ghana",
-    rating: 4.6,
-    duration: "5 Days / 4 Nights",
-    price: "GHC 8,500",
-    description: "Travel to Ghana's far north for a deep cultural immersion. Visit the famous Bolgatanga craft market for handmade leather and basketry, see the legendary Paga Crocodile Pond where sacred crocodiles coexist peacefully with humans.",
-  },
-  "bolgatanga-arts-crafts-paga": {
-    title: "Bolgatanga Arts, Crafts & Paga Crocodile",
-    country: "Ghana",
-    location: "Upper East, Ghana",
-    rating: 4.6,
-    duration: "5 Days / 4 Nights",
-    price: "GHC 8,500",
-    description: "Travel to Ghana's far north for a deep cultural immersion. Visit the famous Bolgatanga craft market for handmade leather and basketry, see the legendary Paga Crocodile Pond where sacred crocodiles coexist peacefully with humans.",
-  },
-  "kintampo-falls-rock-village": {
-    title: "Kintampo Falls & Rock Village Tour",
-    country: "Ghana",
-    location: "Brong-Ahafo, Ghana",
-    rating: 4.8,
-    duration: "1 Day",
-    price: "GHC 320",
-    description: "Visit the breathtaking Kintampo Falls — three cascading falls plunging into deep emerald pools surrounded by tropical forest. Continue to the unique Rock Village (Tongo Rocks) where traditional shrines are built into the natural rock formations.",
-  },
-  "cape-three-points-coastal-heritage": {
-    title: "Cape Three Points & Coastal Heritage",
-    country: "Ghana",
-    location: "Western Region, Ghana",
-    rating: 4.9,
-    duration: "3 Days / 2 Nights",
-    price: "GHC 5,500",
-    description: "Visit the southernmost tip of Ghana — Cape Three Points — where three coastal points meet the Atlantic. Explore the historic Fort Apollonia, walk the pristine beaches of Princes Town, and experience the slower pace of Ghana's lesser-known western coast.",
-  },
-};
-
-// Build templated tour data by merging TOUR_TEMPLATE + per-tour overrides.
-// Used as fallback for tour slugs that don't have rich curated data in TOUR_DATA above.
-const TEMPLATED_TOURS = Object.fromEntries(
-  Object.entries(TOUR_OVERRIDES).map(([slug, overrides]) => [
-    slug,
-    { ...TOUR_TEMPLATE, ...overrides },
-  ])
-);
-
-const RELATED_TOURS = [
-  {
-    id: 1,
-    image: "https://picsum.photos/seed/related-1/351/373",
-    location: "Accra/Ghana",
-    duration: { class: "Multi-Day", span: "5 Days/4 Nights" },
-    maxGroupSize: 15,
-    pickupIncluded: false,
-    tags: ["Cultural", "Diaspora"],
-    rating: 4.8,
-    title: "The Homecoming Experience to Kakum National Park",
-    availabilityBadge: "Opened Daily",
-    price: "Ghs.400.00",
-    country: "ghana",
-    slug: "homecoming-kakum-national-park",
-  },
-  {
-    id: 2,
-    image: "https://picsum.photos/seed/related-2/351/373",
-    location: "Kumasi/Ghana",
-    duration: { class: "Multi-Day", span: "4 Days/3 Nights" },
-    maxGroupSize: 10,
-    pickupIncluded: true,
-    tags: ["Heritage", "Culture"],
-    rating: 4.9,
-    title: "Kumasi Heritage & Market Discovery",
-    availabilityBadge: "Opened Daily",
-    price: "Ghs.500.00",
-    country: "ghana",
-    slug: "kumasi-heritage-market-discovery",
-  },
-  {
-    id: 3,
-    image: "https://picsum.photos/seed/related-3/351/373",
-    location: "Volta Region/Ghana",
-    duration: { class: "Day Tour", span: "1 Day" },
-    maxGroupSize: 8,
-    pickupIncluded: false,
-    tags: ["Nature", "Scenic"],
-    rating: 4.7,
-    title: "Wli Waterfalls & Nature Exploration",
-    availabilityBadge: "Opened Daily",
-    price: "Ghs.450.00",
-    country: "ghana",
-    slug: "wli-waterfalls-nature-exploration",
-  },
-];
 
 /** Figma: left column first (5 of 9), right column second — split at ceil(n/2). */
 function splitBusinessAmenityColumns(items) {
@@ -957,9 +268,9 @@ const CheckIcon = () => (
     <path
       d="M4.16406 10.833L7.4974 14.1663L15.8307 5.83301"
       stroke="#7B2CBF"
-      stroke-width="1.66667"
-      stroke-linecap="round"
-      stroke-linejoin="round"
+      strokeWidth="1.66667"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
   </svg>
 );
@@ -975,9 +286,9 @@ const CrossIcon = () => (
     <path
       d="M5 15L15 5M5 5L15 15"
       stroke="#FF3B30"
-      stroke-width="1.66667"
-      stroke-linecap="round"
-      stroke-linejoin="round"
+      strokeWidth="1.66667"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
   </svg>
 );
@@ -1054,8 +365,8 @@ const GlobeIcon = () => (
     <path
       d="M1.33594 8.00002C1.33594 8.70129 1.45624 9.37442 1.67735 10M1.67735 10H7.33594M1.67735 10C2.50102 12.3304 4.7235 14 7.33594 14C6.30648 14 5.45868 11.6666 5.34814 8.66669M8.6784 6H14.3369M14.3369 6C13.5133 3.66961 11.2908 2 8.6784 2C9.74567 2 10.6177 4.508 10.6753 7.66669M14.3369 6C14.5228 6.52578 14.6374 7.08522 14.6693 7.66669"
       stroke="#2D2D2D"
-      stroke-linecap="round"
-      stroke-linejoin="round"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
     <path
       d="M1.33594 3.53123C1.33594 2.79899 1.33594 2.43287 1.46086 2.14893C1.59334 1.84783 1.82168 1.60581 2.10578 1.46541C2.37368 1.33301 2.71912 1.33301 3.41001 1.33301H4.0026C5.25968 1.33301 5.88822 1.33301 6.27874 1.74691C6.66927 2.16081 6.66927 2.82697 6.66927 4.1593V5.66535C6.66927 6.24651 6.66927 6.53709 6.49322 6.63695C6.31718 6.73681 6.08905 6.57562 5.6328 6.25325L5.56329 6.20413C5.22984 5.96853 5.06312 5.85073 4.87417 5.79009C4.68522 5.72946 4.48484 5.72946 4.08409 5.72946H3.41001C2.71912 5.72946 2.37368 5.72946 2.10578 5.59706C1.82168 5.45665 1.59334 5.21464 1.46086 4.91353C1.33594 4.6296 1.33594 4.26348 1.33594 3.53123Z"
@@ -1079,19 +390,19 @@ const CancelIcon = () => (
     <path
       d="M7.33333 1.33301C4.81917 1.33301 3.5621 1.33301 2.78105 2.0855C2 2.83799 2 4.04911 2 6.47136V11.9869C2 13.5241 2 14.2927 2.51523 14.5679C3.51298 15.1006 5.38453 13.3231 6.27333 12.7879C6.7888 12.4775 7.04653 12.3223 7.33333 12.3223C7.62013 12.3223 7.87787 12.4775 8.39333 12.7879C9.28213 13.3231 11.1537 15.1006 12.1515 14.5679C12.6667 14.2927 12.6667 13.5241 12.6667 11.9869V7.66634"
       stroke="#141B34"
-      stroke-linecap="round"
-      stroke-linejoin="round"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
     <path
       d="M2.33594 4.66699H7.33594"
       stroke="#141B34"
-      stroke-linecap="round"
+      strokeLinecap="round"
     />
     <path
       d="M14.0026 1.33301L9.33594 5.99937M14.0026 5.99967L9.33594 1.33331"
       stroke="#141B34"
-      stroke-linecap="round"
-      stroke-linejoin="round"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
   </svg>
 );
@@ -1218,15 +529,17 @@ const TourHeroSection = React.forwardRef(({ tourData, onOpenGallery }, ref) => {
             className="absolute inset-0 h-full w-full object-cover"
           />
           <div className="pointer-events-none absolute inset-0 bg-black/30" aria-hidden />
-          <button
-            type="button"
-            onClick={(e) => { e.stopPropagation(); onOpenGallery(0); }}
-            className="absolute bottom-4 right-4 z-10 flex h-[38px] items-center gap-2 rounded-[10px] border border-secondary-light-default px-3 backdrop-blur-[7.45px]"
-            style={{ backgroundColor: "rgba(123, 44, 191, 0.5)", width: "160px" }}
-          >
-            <span className="font-sans text-sm font-semibold leading-5 tracking-[-0.15px] text-secondary-light-hover" aria-hidden>⋮⋮</span>
-            <span className="font-raleway text-med-small-semibold text-secondary-light-default">Show all photos</span>
-          </button>
+          {tourData.images.length > 1 && (
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); onOpenGallery(0); }}
+              className="absolute bottom-4 right-4 z-10 flex h-[38px] items-center gap-2 rounded-[10px] border border-secondary-light-default px-3 backdrop-blur-[7.45px]"
+              style={{ backgroundColor: "rgba(123, 44, 191, 0.5)", width: "160px" }}
+            >
+              <span className="font-sans text-sm font-semibold leading-5 tracking-[-0.15px] text-secondary-light-hover" aria-hidden>⋮⋮</span>
+              <span className="font-raleway text-med-small-semibold text-secondary-light-default">Show all photos</span>
+            </button>
+          )}
         </div>
 
         {/* Desktop: original 4-photo grid */}
@@ -1255,71 +568,74 @@ const TourHeroSection = React.forwardRef(({ tourData, onOpenGallery }, ref) => {
             <div className="flex min-h-0 min-w-0 flex-col gap-1">
               <div
                 className="relative h-[366px] min-h-0 shrink-0 cursor-pointer overflow-hidden"
-                onClick={() => onOpenGallery(1)}
+                onClick={() => tourData.heroTopRight && onOpenGallery(1)}
                 role="presentation"
               >
-                <img
-                  src={tourData.heroTopRight}
-                  alt=""
-                  className="absolute inset-0 h-full w-full object-cover"
-                />
-                <div
-                  className="pointer-events-none absolute inset-0 bg-black/30"
-                  aria-hidden
-                />
+                {tourData.heroTopRight ? (
+                  <>
+                    <img
+                      src={tourData.heroTopRight}
+                      alt=""
+                      className="absolute inset-0 h-full w-full object-cover"
+                    />
+                    <div className="pointer-events-none absolute inset-0 bg-black/30" aria-hidden />
+                  </>
+                ) : (
+                  <div className="absolute inset-0 bg-secondary-light-hover" aria-hidden />
+                )}
               </div>
               <div className="flex h-[347px] gap-1">
                 <div
-                  className="relative w-[430px] min-w-0 shrink-0 cursor-pointer overflow-hidden"
-                  onClick={() => onOpenGallery(2)}
+                  className="relative flex-1 min-w-0 min-w-0 shrink-0 cursor-pointer overflow-hidden"
+                  onClick={() => tourData.heroBottomLeft && onOpenGallery(2)}
                   role="presentation"
                 >
-                  <img
-                    src={tourData.heroBottomLeft}
-                    alt=""
-                    className="absolute inset-0 h-full w-full object-cover"
-                  />
-                  <div
-                    className="pointer-events-none absolute inset-0 bg-black/30"
-                    aria-hidden
-                  />
+                  {tourData.heroBottomLeft ? (
+                    <>
+                      <img src={tourData.heroBottomLeft} alt="" className="absolute inset-0 h-full w-full object-cover" />
+                      <div className="pointer-events-none absolute inset-0 bg-black/30" aria-hidden />
+                    </>
+                  ) : (
+                    <div className="absolute inset-0 bg-secondary-light-hover" aria-hidden />
+                  )}
                 </div>
                 <div
                   className="relative min-w-0 flex-1 cursor-pointer overflow-hidden"
-                  onClick={() => onOpenGallery(3)}
+                  onClick={() => tourData.heroBottomRight && onOpenGallery(3)}
                   role="presentation"
                 >
-                  <img
-                    src={tourData.heroBottomRight}
-                    alt=""
-                    className="absolute inset-0 h-full w-full object-cover"
-                  />
-                  <div
-                    className="pointer-events-none absolute inset-0 bg-black/30"
-                    aria-hidden
-                  />
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onOpenGallery(0);
-                    }}
-                    className="absolute bottom-[43px] right-8 z-10 flex h-[38px] items-center gap-2 rounded-[10px] border border-secondary-light-default px-3 backdrop-blur-[7.45px]"
-                    style={{
-                      backgroundColor: "rgba(123, 44, 191, 0.5)",
-                      width: "160px",
-                    }}
-                  >
-                    <span
-                      className="font-sans text-sm font-semibold leading-5 tracking-[-0.15px] text-secondary-light-hover"
-                      aria-hidden
+                  {tourData.heroBottomRight ? (
+                    <>
+                      <img src={tourData.heroBottomRight} alt="" className="absolute inset-0 h-full w-full object-cover" />
+                      <div className="pointer-events-none absolute inset-0 bg-black/30" aria-hidden />
+                    </>
+                  ) : (
+                    <div className="absolute inset-0 bg-secondary-light-hover" aria-hidden />
+                  )}
+                  {tourData.images.length > 4 && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onOpenGallery(0);
+                      }}
+                      className="absolute bottom-[43px] right-8 z-10 flex h-[38px] items-center gap-2 rounded-[10px] border border-secondary-light-default px-3 backdrop-blur-[7.45px]"
+                      style={{
+                        backgroundColor: "rgba(123, 44, 191, 0.5)",
+                        width: "160px",
+                      }}
                     >
-                      ⋮⋮
-                    </span>
-                    <span className="font-raleway text-med-small-semibold text-secondary-light-default">
-                      Show all photos
-                    </span>
-                  </button>
+                      <span
+                        className="font-sans text-sm font-semibold leading-5 tracking-[-0.15px] text-secondary-light-hover"
+                        aria-hidden
+                      >
+                        ⋮⋮
+                      </span>
+                      <span className="font-raleway text-med-small-semibold text-secondary-light-default">
+                        Show all photos
+                      </span>
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -1347,7 +663,7 @@ const DETAIL_TABS = [
 
 const TourDetailNavBar = ({ activeSection, onTabClick }) => (
   <div
-    className="w-full bg-[#fefefe] sticky z-40 top-[70px] lg:top-[112px]"
+    className="w-full bg-[#fefefe] sticky z-40 top-0"
     style={{ height: "64px", borderBottom: "2px solid #d6beeb" }}
   >
     <div className="h-full flex items-center px-6 md:px-[30px] lg:px-[156px] overflow-x-auto scrollbar-hide">
@@ -1465,15 +781,17 @@ const ItineraryStep = ({ day, isFirst }) => {
       {open && (
         <div className="flex-1">
           <div className="flex flex-col gap-3.5">
-            {/* Locoal context */}
-            <div className="border-l-3 border-secondary-normal-default px-4.5 py-3 bg-[#F3E8FF80] rounded-r-sm ">
-              <span className="text-[14px] font-bold text-secondary-dark-hover">
-                Local Context:
-                <span className="text-[14px] font-medium ">
-                  {day.localContext}
+            {/* Local context — only shown when explicitly provided */}
+            {day.localContext && (
+              <div className="border-l-3 border-secondary-normal-default px-4.5 py-3 bg-[#F3E8FF80] rounded-r-sm ">
+                <span className="text-[14px] font-bold text-secondary-dark-hover">
+                  Local Context:
+                  <span className="text-[14px] font-medium ">
+                    {day.localContext}
+                  </span>
                 </span>
-              </span>
-            </div>
+              </div>
+            )}
 
             {/* Activities */}
             <div className="flex flex-col divide-y divide-[#F3E8FF]">
@@ -1700,17 +1018,59 @@ const GuideCard = ({ guide }) => (
 
 // ─── ReviewsSection ───────────────────────────────────────────────────────────
 // Figma 3123:42908 — 4.9 score + category bars + filter tabs + 4 review cards
-const REVIEW_FILTER_TABS = [
-  "All",
-  "Cultural Interests",
-  "Cleanness",
-  "International",
-  "Business",
-  "Groups",
-];
+const STAR_FILTERS = ["All", 5, 4, 3, 2, 1];
 
-const ReviewsSection = ({ tourData }) => {
+const normalizeReview = (r, i) => ({
+  id:     r._id || r.id || i,
+  name:   r.author?.name || r.reviewerName || r.name || "Traveler",
+  avatar: r.author?.avatar || r.avatar || null,
+  rating: r.rating || 5,
+  date:   r.createdAt || r.date || new Date().toISOString(),
+  text:   r.body || r.text || r.comment || "",
+});
+
+const ReviewsSection = ({ tourData, apiReviews, apiStats, tourId }) => {
   const [activeFilter, setActiveFilter] = useState("All");
+  const [extraReviews, setExtraReviews]  = useState([]);
+  const [nextPage, setNextPage]          = useState(2);
+  const [loadingMore, setLoadingMore]    = useState(false);
+
+  const baseReviews = useMemo(
+    () => (apiReviews && apiReviews.length > 0 ? apiReviews.map(normalizeReview) : tourData.reviews),
+    [apiReviews, tourData.reviews]
+  );
+
+  const allReviews = useMemo(
+    () => [...baseReviews, ...extraReviews],
+    [baseReviews, extraReviews]
+  );
+
+  const displayReviews = activeFilter === "All"
+    ? allReviews
+    : allReviews.filter((r) => r.rating === activeFilter);
+
+  const totalReviews = apiStats?.totalReviews ?? 0;
+  const hasMore = activeFilter === "All" && allReviews.length < totalReviews;
+
+  const handleLoadMore = async () => {
+    if (!tourId || loadingMore) return;
+    setLoadingMore(true);
+    try {
+      const data = await listReviewsByTourApi(tourId, { page: nextPage, pageSize: 10 });
+      const rows = Array.isArray(data?.reviews) ? data.reviews : [];
+      setExtraReviews((prev) => [...prev, ...rows.map(normalizeReview)]);
+      setNextPage((p) => p + 1);
+    } catch {
+      // silently ignore
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
+  const displayRating = apiStats?.weightedAverageRating ?? apiStats?.averageRating ?? tourData.rating;
+  const displayTotal  = apiStats?.totalReviews ?? tourData.totalReviews ?? 0;
+  const displayBreakdown = apiStats?.ratingBreakdown ?? tourData.ratingBreakdown;
+
   return (
     <div>
       {/* Rating overview */}
@@ -1723,101 +1083,130 @@ const ReviewsSection = ({ tourData }) => {
         >
           <span
           className="text-Display-md-small-semibold mb-[2.5px] text-secondary-normal-default"
-          
+
           >
-            {tourData.rating}
+            {displayRating || "—"}
           </span>
-          <ReviewStars rating={tourData.rating} size={18} />
+          <ReviewStars rating={displayRating} size={18} />
           <span
           className="text-med-small-Medium mt-2.5 text-[#4a5565]"
-            
+
           >
-            {(tourData.totalReviews || 3249).toLocaleString()} reviews
+            {displayTotal.toLocaleString()} reviews
           </span>
         </div>
         {/* Category rating bars */}
         <div
           className="flex-1 gap-4.5 pt-2 flex flex-col"
         >
-          {(tourData.categoryRatings || []).map(({ label, score }) => (
-            <div
-              key={label}
-              className="flex items-center gap-3"
-            >
-              <span
-                style={{
-                  fontFamily: "Raleway, sans-serif",
-                  fontWeight: 500,
-                  fontSize: "13px",
-                  lineHeight: "20px",
-                  color: "#364153",
-                  width: "140px",
-                  flexShrink: 0,
-                }}
-                className="text-med-small-Medium text-tertiary-normal-default"
-              >
-                {label}
-              </span>
-              <div
-                className="flex-1 h-2 rounded-lg bg-secondary-light-hover overflow-hidden"
-                
-              >
-                <div
-                className="h-full bg-secondary-normal-default rounded-lg"
-                  style={{
-                    width: `${(score / 5) * 100}%`,
-                  
-                  }}
-                />
-              </div>
-              <span
-              className="text-[14px]  text-tertiary-normal-default  text-right flex-shrink-0"
-              
-              >
-                {score}
-              </span>
-            </div>
-          ))}
+          {displayBreakdown
+            ? [5, 4, 3, 2, 1].map((star) => {
+                const count = displayBreakdown[star] || 0;
+                const pct = displayTotal > 0 ? (count / displayTotal) * 100 : 0;
+                return (
+                  <div key={star} className="flex items-center gap-3">
+                    <span
+                      style={{ fontFamily: "Raleway, sans-serif", fontWeight: 500, fontSize: "13px", lineHeight: "20px", color: "#364153", width: "60px", flexShrink: 0 }}
+                    >
+                      {star} star{star !== 1 ? "s" : ""}
+                    </span>
+                    <div className="flex-1 h-2 rounded-lg bg-secondary-light-hover overflow-hidden">
+                      <div className="h-full bg-secondary-normal-default rounded-lg" style={{ width: `${pct}%` }} />
+                    </div>
+                    <span className="text-[14px] text-tertiary-normal-default text-right flex-shrink-0 w-8">
+                      {count}
+                    </span>
+                  </div>
+                );
+              })
+            : (tourData.categoryRatings || []).map(({ label, score }) => (
+                <div key={label} className="flex items-center gap-3">
+                  <span
+                    style={{ fontFamily: "Raleway, sans-serif", fontWeight: 500, fontSize: "13px", lineHeight: "20px", color: "#364153", width: "140px", flexShrink: 0 }}
+                    className="text-med-small-Medium text-tertiary-normal-default"
+                  >
+                    {label}
+                  </span>
+                  <div className="flex-1 h-2 rounded-lg bg-secondary-light-hover overflow-hidden">
+                    <div className="h-full bg-secondary-normal-default rounded-lg" style={{ width: `${(score / 5) * 100}%` }} />
+                  </div>
+                  <span className="text-[14px] text-tertiary-normal-default text-right flex-shrink-0">
+                    {score}
+                  </span>
+                </div>
+              ))
+          }
         </div>
       </div>
 
-      {/* Filter tabs */}
-      <div
-        className="flex items-center gap-2 mb-7 flex-wrap"
-      >
-        {REVIEW_FILTER_TABS.map((tab) => {
-          const isActive = activeFilter === tab;
-          return (
-            <button
-              key={tab}
-              type="button"
-              onClick={() => setActiveFilter(tab)}
-              className={`text-med-small-Medium py-[9px] rounded-[40px] px-4 transition-colors cursor-pointer ${isActive? `text-white bg-secondary-normal-default` : `text-primary-dark-darker bg-secondary-light-hover`} `}
-              
-            >
-              {tab}
-            </button>
-          );
-        })}
-      </div>
+      {/* Star rating filters — only shown when reviews exist */}
+      {allReviews.length > 0 && (
+        <div className="flex items-center gap-2 mb-7 flex-wrap">
+          {STAR_FILTERS.map((f) => {
+            const isActive = activeFilter === f;
+            const count = f === "All" ? allReviews.length : allReviews.filter((r) => r.rating === f).length;
+            return (
+              <button
+                key={f}
+                type="button"
+                onClick={() => setActiveFilter(f)}
+                className={`flex items-center gap-1.5 text-med-small-Medium py-[9px] rounded-[40px] px-4 transition-colors cursor-pointer ${isActive ? "text-white bg-secondary-normal-default" : "text-primary-dark-darker bg-secondary-light-hover"}`}
+              >
+                {f === "All" ? (
+                  <span>All ({count})</span>
+                ) : (
+                  <>
+                    <span>{f}</span>
+                    <StarIcon filled size={13} />
+                    <span className={isActive ? "text-white/70" : "text-[#888]"}>({count})</span>
+                  </>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {/* Review cards */}
       <div className="flex flex-col gap-4">
-        {tourData.reviews.map((review) => (
+        {allReviews.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-14 px-6 rounded-[20px] bg-primary-light-default/60 border border-secondary-light-hover gap-4">
+            <svg width="48" height="48" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+              <circle cx="24" cy="24" r="23" stroke="#D6BEEB" strokeWidth="2" />
+              <path d="M15 20h18M15 27h12" stroke="#D6BEEB" strokeWidth="2" strokeLinecap="round" />
+              <circle cx="33" cy="27" r="1.5" fill="#D6BEEB" />
+            </svg>
+            <p className="font-raleway font-semibold text-[15px] text-secondary-normal-default">No reviews yet</p>
+            <p className="font-raleway text-[13px] text-[#4a5565] text-center max-w-[280px]">
+              Be the first to share your experience on this tour.
+            </p>
+          </div>
+        ) : displayReviews.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-10 px-6 rounded-[20px] bg-primary-light-default/60 border border-secondary-light-hover gap-3">
+            <p className="font-raleway font-semibold text-[14px] text-secondary-normal-default">No {activeFilter}★ reviews</p>
+            <p className="font-raleway text-[13px] text-[#4a5565]">Try a different star filter.</p>
+          </div>
+        ) : displayReviews.map((review) => (
           <div
             key={review.id}
             className="px-5 py-7 rounded-[20px] bg-primary-light-default/60 border border-secondary-light-hover "
           >
             <div className="flex items-start gap-4" >
               <div
-              className="size-[60px] rounded-full overflow-hidden flex-shrink-0"
-               
+              className="size-[60px] rounded-full overflow-hidden flex-shrink-0 bg-secondary-light-hover flex items-center justify-center"
+
               >
-                <img
-                  src={review.avatar}
-                  alt={review.name}
-                  className="w-full h-full object-cover"
-                />
+                {review.avatar ? (
+                  <img
+                    src={review.avatar}
+                    alt={review.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="text-secondary-normal-default font-raleway font-bold text-lg select-none">
+                    {review.name ? review.name.charAt(0).toUpperCase() : "?"}
+                  </span>
+                )}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-2">
@@ -1850,30 +1239,74 @@ const ReviewsSection = ({ tourData }) => {
         ))}
       </div>
 
-      {/* See all reviews — light lavender fill, purple outline — Figma spacing 24px above */}
-      <div className="flex justify-center mt-6">
-        <Button
-          type="button"
-          variant="secondaryOutline"
-          shape="pill"
-          style={{ fontFamily: "Raleway, sans-serif" }}
-          className="!bg-secondary-light-default hover:!bg-secondary-light-hover active:!bg-secondary-light-active shadow-none min-h-14 h-14 px-8 rounded-full border-[1.5px] border-secondary-normal-default text-secondary-normal-default text-[15px] font-semibold"
-        >
-          {`see All ${(tourData.totalReviews || 3249).toLocaleString()} Reviews →`}
-        </Button>
-      </div>
+      {/* Load more — only when there are more reviews on the server */}
+      {hasMore && (
+        <div className="flex justify-center mt-6">
+          <Button
+            type="button"
+            variant="secondaryOutline"
+            shape="pill"
+            onClick={handleLoadMore}
+            disabled={loadingMore}
+            style={{ fontFamily: "Raleway, sans-serif" }}
+            className="!bg-secondary-light-default hover:!bg-secondary-light-hover active:!bg-secondary-light-active shadow-none min-h-14 h-14 px-8 rounded-full border-[1.5px] border-secondary-normal-default text-secondary-normal-default text-[15px] font-semibold disabled:opacity-50"
+          >
+            {loadingMore
+              ? "Loading..."
+              : `See All ${totalReviews.toLocaleString()} Reviews →`}
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
 
 // ─── BookingWidget ────────────────────────────────────────────────────────────
-// Figma 3156:45940 — 457×755px card; gradient header + 3-step stepper + date inputs
-// + traveler counters + Check Availability CTA + free cancellation notice
+// Two render modes (auto-detected from tourData):
+//
+//   hotel_selector  accommodationOptions[] populated
+//                   → Achimota-style: single/double dropdown, hotel dropdown,
+//                     single departure date, "Make Payment", logo combo footer
+//
+//   standard        base price only
+//                   → original layout: stepper, traveler counters, date range,
+//                     "Reserve This Tour"
+
 const BOOKING_STEPS = [
   { id: 1, label: "Dates" },
   { id: 2, label: "Review" },
   { id: 3, label: "Payment" },
 ];
+
+const ROOM_OPTIONS = [
+  { value: "single", label: "Single" },
+  { value: "double", label: "Double" },
+];
+
+const WishlistHeartIcon = ({ filled }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden>
+    <path
+      d="M6.61573 13.7362C7.75843 15.4212 10.241 15.4213 11.3837 13.7363L15.3052 7.9537C16.0346 6.87805 16.0742 5.47034 15.4143 4.35069C14.0961 2.11423 10.8298 2.14608 9.58663 4.42508C9.33322 4.88962 8.66617 4.88962 8.41277 4.42508C7.16957 2.14608 3.90334 2.11425 2.58514 4.3507C1.92521 5.47034 1.96481 6.87805 2.69426 7.95369L6.61573 13.7362Z"
+      stroke={filled ? "#7b2cbf" : "#2d2d2d"}
+      fill={filled ? "#7b2cbf" : "none"}
+      strokeWidth="1.2"
+    />
+  </svg>
+);
+
+const FreeCancelBadge = () => (
+  <div className="mx-5 mb-5 mt-2 flex h-9 items-center gap-2.5 rounded-sm border border-secondary-light-active bg-secondary-light-hover/50 px-[11px]">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden className="shrink-0">
+      <g clipPath="url(#clip-free-cancel)">
+        <path d="M8 0C3.58867 0 0 3.58867 0 8C0 12.4113 3.58867 16 8 16C12.4113 16 16 12.4113 16 8H14.2C14.2 11.4187 11.4187 14.2 8 14.2C4.58133 14.2 1.8 11.4187 1.8 8C1.8 4.58133 4.58133 1.8 8 1.8V0ZM12.9333 1.722L7.93 7.96933L5.592 6.05333L4.25733 7.67733L7.418 10.2693C7.52538 10.3579 7.64931 10.4242 7.78258 10.4644C7.91585 10.5046 8.05578 10.5178 8.19422 10.5034C8.33266 10.4889 8.46684 10.447 8.58893 10.3802C8.71102 10.3133 8.81857 10.2228 8.90533 10.114L14.5747 3.036L12.9333 1.722Z" className="fill-secondary-light-active" />
+      </g>
+      <defs><clipPath id="clip-free-cancel"><rect width="16" height="16" fill="white" /></clipPath></defs>
+    </svg>
+    <span className="whitespace-nowrap text-med-small-Medium text-secondary-normal-default">
+      Free cancellation up to 48 hours before departure
+    </span>
+  </div>
+);
 
 const BookingWidget = ({
   tourData,
@@ -1889,69 +1322,186 @@ const BookingWidget = ({
   setBookmarked,
   bookingStep: bookingStepProp,
   onBookingStepChange,
+  onBook,
+  bookingStatus,
+  bookingError,
 }) => {
+  // ── Hotel-selector mode detection ──────────────────────────────────────────
+  const accomOptions = tourData.accommodationOptions ?? [];
+  const isHotelSelector = accomOptions.length > 0;
+
+  const [selectedHotelValue, setSelectedHotelValue] = useState(String(0));
+  const [selectedRoomType, setSelectedRoomType] = useState("single");
+
+  const selectedHotelOption = accomOptions[Number(selectedHotelValue)] ?? accomOptions[0] ?? null;
+
+  const hotelDropdownOptions = accomOptions.map((o, i) => ({
+    value: String(i),
+    label: o.label,
+  }));
+
+  const getPriceRaw = useCallback((opt, roomType) => {
+    if (!opt?.pricing) return null;
+    const entry = opt.pricing.find((p) => p.roomType === roomType);
+    return entry?.pricePerPerson ?? null;
+  }, []);
+
+  const fmtPrice = (raw) =>
+    raw != null ? `$${Number(raw).toLocaleString("en-US")}` : null;
+
+  const singleRaw = getPriceRaw(selectedHotelOption, "single");
+  const doubleRaw = getPriceRaw(selectedHotelOption, "double");
+
+  // Pre-populate departure from tour startDate
+  useEffect(() => {
+    if (tourData.startDate && !departureDate) {
+      setDepartureDate(new Date(tourData.startDate).toISOString().split("T")[0]);
+    }
+  }, [tourData.startDate]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Standard mode state ────────────────────────────────────────────────────
   const [bookingStepInternal, setBookingStepInternal] = useState(1);
-  const activeStep =
-    bookingStepProp !== undefined ? bookingStepProp : bookingStepInternal;
+  const activeStep = bookingStepProp !== undefined ? bookingStepProp : bookingStepInternal;
   const setActiveStep = onBookingStepChange ?? setBookingStepInternal;
 
   const [selectedBookingAddons, setSelectedBookingAddons] = useState({});
-  const bookingAddOns = tourData.bookingAddOns ?? [];
+  const bookingAddOns = useMemo(() => tourData.bookingAddOns ?? [], [tourData.bookingAddOns]);
   const addonsSubtotal = useMemo(
-    () =>
-      bookingAddOns.reduce(
-        (sum, a) => sum + (selectedBookingAddons[a.id] ? a.priceGhc : 0),
-        0
-      ),
+    () => bookingAddOns.reduce((sum, a) => sum + (selectedBookingAddons[a.id] ? a.priceGhc : 0), 0),
     [bookingAddOns, selectedBookingAddons]
   );
-
-  const toggleBookingAddon = (id) => {
+  const toggleBookingAddon = (id) =>
     setSelectedBookingAddons((prev) => ({ ...prev, [id]: !prev[id] }));
-  };
 
+  // ── HOTEL-SELECTOR RENDER ──────────────────────────────────────────────────
+  if (isHotelSelector) {
+    const hasMultipleOptions = accomOptions.length > 1;
+    const headerPriceText = [fmtPrice(singleRaw), fmtPrice(doubleRaw)]
+      .filter(Boolean)
+      .join(" / ");
+    // Subtitle: "single/ double" always; append hotel name only if 1 option
+    const headerSubtitle = hasMultipleOptions
+      ? "single/ double"
+      : `single/ double · ${selectedHotelOption?.label ?? ""}`;
+
+    return (
+      <div className="max-w-full overflow-hidden rounded-[24px] border border-secondary-light-active bg-white">
+        {/* Gradient header */}
+        <div className="flex flex-col gap-1.5 bg-linear-to-b from-secondary-normal-default to-[#391559] px-5 py-6">
+          <p className="font-raleway text-xs font-medium uppercase tracking-[0.06em] text-secondary-light-active">FROM</p>
+          <p className="font-raleway text-[28px] font-bold leading-[34px] text-white">
+            {headerPriceText || tourData.price || "Contact us"}
+          </p>
+          <p className="font-raleway text-[13px] font-medium text-secondary-light-hover">
+            {headerSubtitle}
+          </p>
+        </div>
+
+        {/* Form */}
+        <div className="flex flex-col gap-5 px-5 pt-6 pb-2">
+          {/* Single or Double Option */}
+          <div>
+            <p className="mb-2 font-raleway text-[13px] font-semibold text-secondary-dark-hover">
+              Single or Double Option
+            </p>
+            <Dropdown
+              options={ROOM_OPTIONS}
+              value={selectedRoomType}
+              onChange={setSelectedRoomType}
+              placeholder="Choose between a single or double option."
+            />
+          </div>
+
+          {/* Hotel Option — only when multiple options exist */}
+          {hasMultipleOptions && (
+            <div>
+              <p className="mb-2 font-raleway text-[13px] font-semibold text-secondary-dark-hover">
+                Choose Hotel Option
+              </p>
+              <Dropdown
+                options={hotelDropdownOptions}
+                value={selectedHotelValue}
+                onChange={setSelectedHotelValue}
+                placeholder="Package / hotel option"
+              />
+            </div>
+          )}
+
+          {/* Departure */}
+          <div>
+            <p className="mb-2 font-raleway text-[13px] font-semibold text-secondary-dark-hover">
+              Departure
+            </p>
+            <div className="relative">
+              <input
+                type="date"
+                value={departureDate}
+                onChange={(e) => setDepartureDate(e.target.value)}
+                className="box-border h-[46px] w-full rounded-[10px] border border-[#d1d5dc] px-4 font-raleway text-[14px] text-[#374151] outline-none focus:border-[#7b2cbf] focus:ring-2 focus:ring-[#7b2cbf]/20"
+              />
+            </div>
+          </div>
+
+          {/* Error */}
+          {bookingError && (
+            <p className="rounded-sm bg-red-50 px-3 py-2 text-sm text-red-600">{bookingError}</p>
+          )}
+
+          {/* Make Payment */}
+          <Button
+            type="button"
+            variant="secondary"
+            shape="pill"
+            fullWidth
+            disabled={bookingStatus === "loading"}
+            onClick={onBook}
+            className="h-[52px] min-h-0! rounded-full border-0 font-raleway text-[15px] font-semibold leading-[22px] text-secondary-light-default! shadow-[0_4px_4px_rgba(0,0,0,0.05)] disabled:opacity-60"
+          >
+            {bookingStatus === "loading" ? "Processing…" : "Make Payment"}
+          </Button>
+
+          {/* Save to Wishlist */}
+          <Button
+            type="button"
+            variant="link"
+            onClick={() => setBookmarked(!bookmarked)}
+            startIcon={<WishlistHeartIcon filled={bookmarked} />}
+            className="w-full justify-center !no-underline p-0! py-1 font-raleway text-[13px] font-medium text-tertiary-normal-default shadow-none"
+          >
+            Save to Wishlist
+          </Button>
+        </div>
+
+        <FreeCancelBadge />
+      </div>
+    );
+  }
+
+  // ── STANDARD RENDER ────────────────────────────────────────────────────────
   return (
-  <div className="max-w-full  overflow-hidden rounded-[24px] border border-secondary-light-active bg-white">
-    {/* ── Gradient header — condensed to 110px so widget fits viewport ── */}
-    <div className="flex  flex-col gap-2 bg-linear-to-b from-secondary-normal-default to-[#391559] pl-[18px] pr-6 py-6">
-      <p className=" text-sm-Medium text-secondary-light-active">
-        FROM
-      </p>
-      <p className=" text-Display-md-small-bold  text-white">
-        {tourData?.price ?? "GH₵ 4,590"}
-      </p>
-      <p className="text-med-small-Medium text-secondary-light-hover">
-        per person · USD ~$290 equivalent
-      </p>
+  <div className="max-w-full overflow-hidden rounded-[24px] border border-secondary-light-active bg-white">
+    {/* Gradient header */}
+    <div className="flex flex-col gap-2 bg-linear-to-b from-secondary-normal-default to-[#391559] pl-[18px] pr-6 py-6">
+      <p className="text-sm-Medium text-secondary-light-active">FROM</p>
+      <p className="text-Display-md-small-bold text-white">{tourData?.price ?? "Contact us"}</p>
+      <p className="text-med-small-Medium text-secondary-light-hover">per person</p>
     </div>
 
-    {/* ── 3-step stepper — active / completed / upcoming from `activeStep` ── */}
+    {/* 3-step stepper */}
     <div className="flex py-5 px-11 items-center justify-center border-b border-secondary-light-default">
       <div className="flex items-center justify-between w-full gap-3">
         {BOOKING_STEPS.map((step, index) => {
           const isActive = activeStep === step.id;
           const isComplete = activeStep > step.id;
           const isUpcoming = activeStep < step.id;
-
           const circleClass = classNames(
-            "flex items-center justify-center rounded-full font-raleway text-med-small-semibold  transition-colors",
-            isActive &&
-              "size-[40px] bg-secondary-normal-default text-white",
-            !isActive &&
-              isComplete &&
-              "size-[40px] bg-secondary-normal-default text-white",
-            !isActive &&
-              isUpcoming &&
-              "size-[40px] bg-secondary-light-default text-secondary-light-active"
+            "flex items-center justify-center rounded-full font-raleway text-med-small-semibold transition-colors size-[40px]",
+            (isActive || isComplete) ? "bg-secondary-normal-default text-white" : "bg-secondary-light-default text-secondary-light-active"
           );
-
           const labelClass = classNames(
             "font-raleway text-xs leading-4",
-            (isActive || isComplete) &&
-              "font-bold text-secondary-normal-default",
-            isUpcoming && "font-semibold text-secondary-light-active"
+            (isActive || isComplete) ? "font-bold text-secondary-normal-default" : "font-semibold text-secondary-light-active"
           );
-
           return (
             <Fragment key={step.id}>
               <button
@@ -1959,21 +1509,12 @@ const BookingWidget = ({
                 onClick={() => setActiveStep(step.id)}
                 className="flex w-[72px] flex-col items-center gap-1.5 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-secondary-normal-default focus-visible:ring-offset-2"
                 aria-current={isActive ? "step" : undefined}
-                aria-label={`${step.label}, step ${step.id} of ${BOOKING_STEPS.length}`}
               >
                 <span className={circleClass}>{step.id}</span>
                 <span className={labelClass}>{step.label}</span>
               </button>
               {index < BOOKING_STEPS.length - 1 && (
-                <div
-                  role="presentation"
-                  className={classNames(
-                    "h-0.5 w-10 rounded-lg",
-                    activeStep > step.id
-                      ? "bg-secondary-normal-default"
-                      : "bg-secondary-light-hover"
-                  )}
-                />
+                <div role="presentation" className={classNames("h-0.5 w-10 rounded-lg", activeStep > step.id ? "bg-secondary-normal-default" : "bg-secondary-light-hover")} />
               )}
             </Fragment>
           );
@@ -1981,224 +1522,264 @@ const BookingWidget = ({
       </div>
     </div>
 
-    {/* ── Content area — tightened spacing ────────────────────────────── */}
+    {/* Content */}
     <div className="flex flex-col gap-3 px-[30px] pt-6">
-      {/* CHOOSE YOUR DATE */}
+      {/* Date range */}
       <div className="w-full">
-        <p className="mb-3.5 text-med-small-bold text-secondary-dark-hover">
-          CHOOSE YOUR DATE
-        </p>
+        <p className="mb-3.5 text-med-small-bold text-secondary-dark-hover">CHOOSE YOUR DATE</p>
         <div className="flex gap-[70px] justify-between w-full">
           <div className="flex-1">
-            <p className="mb-2 font-[Inter,sans-serif] text-xs font-medium uppercase tracking-[0.04em] text-[#6a7282]">
-              DEPARTURE
-            </p>
-            <input
-              type="date"
-              value={departureDate}
-              onChange={(e) => setDepartureDate(e.target.value)}
-              className="box-border h-9 w-full rounded-sm border border-[#d1d5dc] px-3 py-2.5 font-[Inter,sans-serif] text-[13px] text-[#0A0A0A80] outline-none"
-            />
+            <p className="mb-2 font-[Inter,sans-serif] text-xs font-medium uppercase tracking-[0.04em] text-[#6a7282]">DEPARTURE</p>
+            <input type="date" value={departureDate} onChange={(e) => setDepartureDate(e.target.value)} className="box-border h-9 w-full rounded-sm border border-[#d1d5dc] px-3 py-2.5 font-[Inter,sans-serif] text-[13px] text-[#0A0A0A80] outline-none" />
           </div>
           <div className="flex-1">
-            <p className="mb-2 font-[Inter,sans-serif] text-xs font-medium uppercase tracking-[0.04em] text-[#6a7282]">
-              RETURN
-            </p>
-            <input
-              type="date"
-              value={returnDate}
-              onChange={(e) => setReturnDate(e.target.value)}
-              className="box-border h-9 w-full rounded-sm border border-[#d1d5dc] px-2.5 font-[Inter,sans-serif] text-[13px] text-[#0A0A0A80] outline-none"
-            />
+            <p className="mb-2 font-[Inter,sans-serif] text-xs font-medium uppercase tracking-[0.04em] text-[#6a7282]">RETURN</p>
+            <input type="date" value={returnDate} onChange={(e) => setReturnDate(e.target.value)} className="box-border h-9 w-full rounded-sm border border-[#d1d5dc] px-2.5 font-[Inter,sans-serif] text-[13px] text-[#0A0A0A80] outline-none" />
           </div>
         </div>
       </div>
 
-      {/* TRAVELERS */}
+      {/* Travelers */}
       <div>
-        <p className="mb-2 font-raleway text-med-small-bold text-secondary-dark-hover">
-          Travelers
-        </p>
+        <p className="mb-2 font-raleway text-med-small-bold text-secondary-dark-hover">Travelers</p>
         <div className="flex flex-col">
-          {/* Adults */}
-          <div className="flex items-center justify-between py-[7px]">
-            <div>
-              <p className="text-med-small-semibold text-tertiary-normal-default">
-                Adults
-              </p>
-              <p className="text-sm-Medium text-secondary-normal-default">
-                Age 13+
-              </p>
+          {[{ label: "Adults", sub: "Age 13+", val: adults, setVal: setAdults, min: 1 },
+            { label: "Children", sub: "Age 4–12", val: children, setVal: setChildren, min: 0 }].map(({ label, sub, val, setVal, min }) => (
+            <div key={label} className="flex items-center justify-between py-[7px]">
+              <div>
+                <p className="text-med-small-semibold text-tertiary-normal-default">{label}</p>
+                <p className="text-sm-Medium text-secondary-normal-default">{sub}</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <Button type="button" variant="secondaryOutline" onClick={() => setVal(Math.max(min, val - 1))} className="size-8! min-h-0! border-2! rounded-full! border-secondary-light-active! bg-transparent! p-0! text-lg! font-bold! leading-none text-secondary-normal-default shadow-none! hover:bg-secondary-light-default/40">−</Button>
+                <span className="w-8 text-center text-semi-md-semibold text-secondary-dark-hover">{val}</span>
+                <Button type="button" variant="secondaryOutline" onClick={() => setVal(val + 1)} className="size-8! min-h-0! rounded-full! border-2! border-secondary-light-active! bg-transparent! p-0! text-lg! font-bold! leading-none text-secondary-normal-default shadow-none! hover:bg-secondary-light-default/40">+</Button>
+              </div>
             </div>
-            <div className="flex items-center gap-3">
-              <Button
-                type="button"
-                variant="secondaryOutline"
-                onClick={() => setAdults(Math.max(1, adults - 1))}
-                className="size-8! min-h-0! border-2! rounded-full! border-secondary-light-active! bg-transparent! p-0! text-lg! font-bold! leading-none text-secondary-normal-default shadow-none! hover:bg-secondary-light-default/40"
-              >
-                −
-              </Button>
-              <span className="w-8 text-center text-semi-md-semibold text-secondary-dark-hover">
-                {adults}
-              </span>
-              <Button
-                type="button"
-                variant="secondaryOutline"
-                onClick={() => setAdults(adults + 1)}
-                className="size-8! min-h-0!  rounded-full! border-2! border-secondary-light-active! bg-transparent! p-0! text-lg! font-bold! leading-none text-secondary-normal-default shadow-none! hover:bg-secondary-light-default/40"
-              >
-                +
-              </Button>
-            </div>
-          </div>
-          {/* Children */}
-          <div className="flex items-center justify-between py-[7px]">
-            <div>
-              <p className="text-med-small-semibold text-tertiary-normal-default">
-                Children
-              </p>
-              <p className="text-sm-Medium text-secondary-normal-default">
-                Age 4–12
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
-              <Button
-                type="button"
-                variant="secondaryOutline"
-                onClick={() => setChildren(Math.max(0, children - 1))}
-                className="size-8! min-h-0!  rounded-full! border-2! border-secondary-light-active! bg-transparent! p-0! text-lg! font-bold! leading-none text-secondary-normal-default shadow-none! hover:bg-secondary-light-default/40"
-              >
-                −
-              </Button>
-              <span className="w-8 text-center  text-semi-md-semibold text-secondary-dark-hover">
-                {children}
-              </span>
-              <Button
-                type="button"
-                variant="secondaryOutline"
-                onClick={() => setChildren(children + 1)}
-                className="size-8! min-h-0!  rounded-full! border-2! border-secondary-light-active! bg-transparent! p-0! text-lg! font-bold! leading-none text-secondary-normal-default shadow-none! hover:bg-secondary-light-default/40"
-              >
-                +
-              </Button>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
 
       {bookingAddOns.length > 0 && (
         <div className="mt-3 border-t border-secondary-light-default pt-4">
-          <p className="mb-3 font-raleway text-med-small-bold text-secondary-dark-hover">
-            Optional extras
-          </p>
+          <p className="mb-3 font-raleway text-med-small-bold text-secondary-dark-hover">Optional extras</p>
           <div className="flex flex-col gap-2">
             {bookingAddOns.map((a) => (
-              <label
-                key={a.id}
-                className="flex cursor-pointer items-start gap-3 rounded-lg border border-secondary-light-hover bg-secondary-light-default/50 px-3 py-2.5 transition-colors hover:bg-secondary-light-default/80"
-              >
-                <input
-                  type="checkbox"
-                  checked={!!selectedBookingAddons[a.id]}
-                  onChange={() => toggleBookingAddon(a.id)}
-                  className="mt-0.5 size-4 shrink-0 accent-secondary-normal-default"
-                />
-                <span className="flex-1 text-med-small-Medium text-tertiary-normal-default">
-                  {a.label}
-                </span>
-                <span className="text-med-small-semibold text-secondary-normal-default whitespace-nowrap tabular-nums">
-                  GHC {a.priceGhc.toLocaleString()}
-                </span>
+              <label key={a.id} className="flex cursor-pointer items-start gap-3 rounded-lg border border-secondary-light-hover bg-secondary-light-default/50 px-3 py-2.5 transition-colors hover:bg-secondary-light-default/80">
+                <input type="checkbox" checked={!!selectedBookingAddons[a.id]} onChange={() => toggleBookingAddon(a.id)} className="mt-0.5 size-4 shrink-0 accent-secondary-normal-default" />
+                <span className="flex-1 text-med-small-Medium text-tertiary-normal-default">{a.label}</span>
+                <span className="text-med-small-semibold text-secondary-normal-default whitespace-nowrap tabular-nums">GHC {a.priceGhc.toLocaleString()}</span>
               </label>
             ))}
           </div>
           {addonsSubtotal > 0 && (
             <div className="mt-3 flex items-center justify-between border-t border-dashed border-secondary-light-active pt-3 text-med-small-semibold text-secondary-dark-hover">
               <span>Add-ons subtotal</span>
-              <span className="tabular-nums">
-                GHC {addonsSubtotal.toLocaleString()}
-              </span>
+              <span className="tabular-nums">GHC {addonsSubtotal.toLocaleString()}</span>
             </div>
           )}
         </div>
       )}
 
-      {/* CTA ACTIONS */}
+      {bookingError && <p className="rounded-sm bg-red-50 px-3 py-2 text-sm text-red-600">{bookingError}</p>}
+
       <div className="flex flex-col gap-2">
-        <Button
-          type="button"
-          variant="secondary"
-          shape="pill"
-          fullWidth
-          className="h-[46px] min-h-0! rounded-full border-0 font-raleway text-[15px] font-semibold leading-[22px] text-secondary-light-default! shadow-[0_4px_4px_rgba(0,0,0,0.05)]"
-        >
-          Reserve This Tour
+        <Button type="button" variant="secondary" shape="pill" fullWidth disabled={bookingStatus === "loading"} onClick={onBook} className="h-[46px] min-h-0! rounded-full border-0 font-raleway text-[15px] font-semibold leading-[22px] text-secondary-light-default! shadow-[0_4px_4px_rgba(0,0,0,0.05)] disabled:opacity-60">
+          {bookingStatus === "loading" ? "Booking…" : "Reserve This Tour"}
         </Button>
-        <Button
-          type="button"
-          variant="link"
-          onClick={() => setBookmarked(!bookmarked)}
-          startIcon={
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="18"
-              height="18"
-              viewBox="0 0 18 18"
-              fill="none"
-              aria-hidden
-            >
-              <path
-                d="M6.61573 13.7362C7.75843 15.4212 10.241 15.4213 11.3837 13.7363L15.3052 7.9537C16.0346 6.87805 16.0742 5.47034 15.4143 4.35069C14.0961 2.11423 10.8298 2.14608 9.58663 4.42508C9.33322 4.88962 8.66617 4.88962 8.41277 4.42508C7.16957 2.14608 3.90334 2.11425 2.58514 4.3507C1.92521 5.47034 1.96481 6.87805 2.69426 7.95369L6.61573 13.7362Z"
-                stroke={bookmarked ? "#7b2cbf" : "#2d2d2d"}
-                fill={bookmarked ? "#7b2cbf" : "none"}
-                strokeWidth="1.2"
-              />
-            </svg>
-          }
-          className="w-full justify-center !no-underline  p-0! py-1 font-raleway text-[13px] font-medium text-tertiary-normal-default shadow-none "
-        >
+        <Button type="button" variant="link" onClick={() => setBookmarked(!bookmarked)} startIcon={<WishlistHeartIcon filled={bookmarked} />} className="w-full justify-center !no-underline p-0! py-1 font-raleway text-[13px] font-medium text-tertiary-normal-default shadow-none">
           Save to Wishlist
         </Button>
       </div>
     </div>
 
-    {/* Free cancellation notice */}
-    <div className="mx-[22px] mb-5 mt-2 flex h-9 items-center gap-2.5 rounded-sm border border-secondary-light-active bg-secondary-light-hover/50 px-[11px]">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="16"
-        height="16"
-        viewBox="0 0 16 16"
-        fill="none"
-        aria-hidden
-        className="shrink-0"
-      >
-        <g clipPath="url(#clip-booking-widget-free-cancel)">
-          <path
-            d="M8 0C3.58867 0 0 3.58867 0 8C0 12.4113 3.58867 16 8 16C12.4113 16 16 12.4113 16 8H14.2C14.2 11.4187 11.4187 14.2 8 14.2C4.58133 14.2 1.8 11.4187 1.8 8C1.8 4.58133 4.58133 1.8 8 1.8V0ZM12.9333 1.722L7.93 7.96933L5.592 6.05333L4.25733 7.67733L7.418 10.2693C7.52538 10.3579 7.64931 10.4242 7.78258 10.4644C7.91585 10.5046 8.05578 10.5178 8.19422 10.5034C8.33266 10.4889 8.46684 10.447 8.58893 10.3802C8.71102 10.3133 8.81857 10.2228 8.90533 10.114L14.5747 3.036L12.9333 1.722Z"
-            className="fill-secondary-light-active"
-          />
-        </g>
-        <defs>
-          <clipPath id="clip-booking-widget-free-cancel">
-            <rect width="16" height="16" fill="white" />
-          </clipPath>
-        </defs>
-      </svg>
-      <span className="whitespace-nowrap text-med-small-Medium text-secondary-normal-default">
-        Free cancellation up to 48 hours before departure
-      </span>
-    </div>
+    <FreeCancelBadge />
   </div>
   );
 };
 
+// ─── YouMightAlsoLoveSection ─────────────────────────────────────────────────
+// Fetches tours from the same country, filters out the current one,
+// prioritises shared tags (so Achimota tours surface together), shows 3 cards.
+const TOUR_TYPE_LABELS_YML = { day_tour: "Day Tour", multi_day: "Multi-Day", express: "Express" };
+
+function toRelatedCardProps(t, i) {
+  const typeLabel  = TOUR_TYPE_LABELS_YML[t.tourType] || "Multi-Day";
+  const days       = t.durationDays;
+  const durationSpan = days
+    ? (days === 1 ? "1 Day" : `${days} Days/${days - 1} Night${days - 1 !== 1 ? "s" : ""}`)
+    : "3 Days";
+
+  const accomOpts  = (t.accommodationOptions || []).filter((o) => o.isActive !== false);
+  const allSingles = accomOpts.flatMap((o) =>
+    (o.pricing || []).filter((p) => p.roomType === "single").map((p) => p.pricePerPerson)
+  ).filter((v) => v != null);
+  const minPrice = allSingles.length > 0 ? Math.min(...allSingles) : t.basePrice;
+  const currency = t.displayCurrency || "GHS";
+  const SYMBOLS  = { USD: "$", GHS: "GHS ", EUR: "€", GBP: "£" };
+  const sym      = SYMBOLS[currency] ?? `${currency} `;
+  const price    = minPrice != null
+    ? `${sym}${Number(minPrice).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
+    : "Contact us";
+
+  return {
+    id:                t._id || t.id || i,
+    image:             t.coverImage || t.tourHighlights?.[0]?.image,
+    location:          t.destination?.name
+      ? `${t.destination.name}, ${t.country || "Ghana"}`
+      : (t.country || "Ghana"),
+    rating:            t.rating || 0,
+    reviewCount:       t.reviewCount || 0,
+    title:             t.title || "Tour",
+    availabilityBadge: t.availabilityBadge || "Available",
+    startDate:         t.startDate || null,
+    price,
+    tags:              (t.tags || []).slice(0, 3),
+    duration:          { class: typeLabel, span: durationSpan },
+    maxGroupSize:      t.totalCapacity ?? 50,
+    pickupIncluded:    t.pickupIncluded ?? false,
+    featureType:       t.featureType ?? null,
+    featureLabel:      t.featureLabel ?? null,
+    statusBadge:       t.statusBadge || null,
+    country:           t.country || "ghana",
+    tourSlug:          t.slug || String(t._id || t.id || i),
+  };
+}
+
+const YouMightAlsoLoveSection = ({ currentSlug, currentTags = [], currentCountry = "ghana" }) => {
+  const [cards, setCards] = useState([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    listToursApi({ country: currentCountry, limit: 20 })
+      .then((payload) => {
+        if (cancelled) return;
+        const raw = Array.isArray(payload) ? payload : (payload.rows || payload.data || []);
+        const currentSeries = currentSlug.split("-")[0];
+        const scored = raw
+          .filter((t) => t.slug !== currentSlug)
+          .map((t) => {
+            const shared = (t.tags || []).filter((tag) => currentTags.includes(tag)).length;
+            // Tours from the same series (same slug prefix) always surface first
+            const seriesBonus = t.slug?.split("-")[0] === currentSeries ? 200 : 0;
+            return { t, score: shared * 10 + seriesBonus + (t.featured ? 5 : 0) + (t.rating || 0) };
+          })
+          .sort((a, b) => b.score - a.score)
+          .slice(0, 3)
+          .map(({ t }, i) => toRelatedCardProps(t, i));
+        setCards(scored);
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [currentSlug, currentCountry, currentTags]);
+
+  if (cards.length === 0) return null;
+
+  return (
+    <section className="w-full  py-12 ">
+      <h2 className="font-raleway text-xl font-bold text-secondary-dark-hover mb-6">
+        You Might Also Love
+      </h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {cards.map((card) => (
+          <PopularTourCard
+            key={card.id}
+            {...card}
+            showImageOverlays
+            className="w-full"
+          />
+        ))}
+      </div>
+    </section>
+  );
+};
+
+// ─── BookingAuthGateModal ──────────────────────────────────────────────────────
+// Shown when a logged-out user taps "Book" — introduces sign-in before redirecting.
+const BookingAuthGateModal = ({ tourName, onClose, onSignIn, onRegister }) => (
+  <div
+    className="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 px-4"
+    onClick={onClose}
+  >
+    <div
+      className="relative w-full max-w-[648px] rounded-[30px] bg-white shadow-[0_10px_4px_0_rgba(0,0,0,0.15)] overflow-hidden"
+      onClick={(e) => e.stopPropagation()}
+    >
+      {/* Close button */}
+      <button
+        type="button"
+        onClick={onClose}
+        aria-label="Close"
+        className="absolute top-6 right-6 flex items-center justify-center w-6 h-6 text-[#6b7280] hover:text-[#7b2cbf] transition-colors"
+      >
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M3 3L13 13M13 3L3 13" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
+        </svg>
+      </button>
+
+      <div className="flex flex-col items-center gap-8 px-8 pt-14 pb-10">
+        {/* Logo + divider */}
+        <div className="flex flex-col items-center gap-2 w-full">
+          <img src={ElysiumLogo} alt="Elysium Tours" className="h-[93px] w-auto object-contain" />
+          <img src={dividerLine} alt="" className="w-full max-w-[517px]" />
+        </div>
+
+        {/* Title + body */}
+        <div className="flex flex-col items-center gap-4 text-center max-w-[501px]">
+          <h2 className="font-raleway text-[25px] font-bold leading-[1.1] text-[#7b2cbf]">
+            Sign In to Reserve Your Place
+          </h2>
+          <p className="font-raleway text-[16px] font-medium leading-[26px] text-[#6b7280]">
+            To complete your booking
+            {tourName ? ` for the ${tourName}` : ""}, you'll need to sign in to
+            your Elysium account first. This allows us to securely record your
+            reservation.
+          </p>
+        </div>
+
+        {/* CTAs */}
+        <div className="flex flex-col gap-3 w-full max-w-[544px]">
+          <button
+            type="button"
+            onClick={onSignIn}
+            className="w-full h-[64px] rounded-[40px] bg-[#6f28ac] font-raleway text-[20px] font-semibold text-white shadow-[0_4px_4px_rgba(0,0,0,0.05)] hover:bg-[#5c1f96] transition-colors"
+          >
+            Sign In
+          </button>
+
+          <div className="flex justify-center border-b border-[#eeeeee] pb-6 pt-3">
+            <span className="font-raleway text-[16px] font-semibold text-[#6b7280]">
+              New to Elysium?{" "}
+            </span>
+            <button
+              type="button"
+              onClick={onRegister}
+              className="font-raleway text-[16px] font-semibold text-[#622399] hover:underline ml-1"
+            >
+              Create an account
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
 // ─── TourDetailPage ────────────────────────────────────────────────────────────
 const TourDetailPage = () => {
   const { country, tour } = useParams();
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const apiTour = useAppSelector(selectCurrentTour);
+  const relatedTags = useMemo(() => apiTour?.tags || [], [apiTour?.tags]);
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
+  const bookingStatus = useAppSelector(selectCreateBookingStatus);
+  const bookingError = useAppSelector(selectBookingsError);
   // activeSection drives the sticky nav bar tabs
   const [activeSection, setActiveSection] = useState("overview");
+  const [descExpanded, setDescExpanded] = useState(false);
+  const [descClipped, setDescClipped] = useState(false);
+  const descRef = useRef(null);
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [galleryIndex, setGalleryIndex] = useState(0);
   const [shareOpen, setShareOpen] = useState(false);
@@ -2208,38 +1789,171 @@ const TourDetailPage = () => {
   const [children, setChildren] = useState(2);
   const [departureDate, setDepartureDate] = useState("");
   const [returnDate, setReturnDate] = useState("");
+  const [apiReviews, setApiReviews] = useState(null);
+  const [apiReviewStats, setApiReviewStats] = useState(null);
 
-  // Lookup priority:
-  //   1. Rich curated data in TOUR_DATA (elmina-heritage-coastal-journey, accra-corporate-executive-tour)
-  //   2. Templated data in TEMPLATED_TOURS (per-tour title/location/price overrides on TOUR_TEMPLATE)
-  //   3. Fallback to elmina-heritage-coastal-journey
-  // Merge with TOUR_TEMPLATE so basic fields (maxGuests, languages, cancellation,
-  // images, etc.) are always present even when rich curated data omits them.
   const tourData = useMemo(() => {
-    const rich = TOUR_DATA[tour];
-    const templated = TEMPLATED_TOURS[tour];
-    const fallback = TOUR_DATA["elmina-heritage-coastal-journey"];
-    const baseData = rich || templated || fallback;
-    return { ...TOUR_TEMPLATE, ...baseData };
-  }, [tour]);
-  const importantInfo = tourData.importantInformation;
+    if (!apiTour) return null;
+
+    const days = apiTour.durationDays || 1;
+    const durationStr = days === 1
+      ? "1 Day"
+      : `${days} Days / ${days - 1} Night${days - 1 !== 1 ? "s" : ""}`;
+
+    // Derive min price: accommodationOptions → lowest single price, else basePrice
+    const accomOpts = (apiTour.accommodationOptions || []).filter((o) => o.isActive !== false);
+    const allSinglePrices = accomOpts.flatMap((o) =>
+      (o.pricing || []).filter((p) => p.roomType === "single").map((p) => p.pricePerPerson)
+    ).filter((v) => v != null);
+    const minPrice = allSinglePrices.length > 0
+      ? Math.min(...allSinglePrices)
+      : apiTour.basePrice;
+
+    const locationStr = apiTour.destination?.name
+      ? `${apiTour.destination.name}, ${apiTour.country ? (apiTour.country.charAt(0).toUpperCase() + apiTour.country.slice(1)) : "Ghana"}`
+      : apiTour.country ? (apiTour.country.charAt(0).toUpperCase() + apiTour.country.slice(1)) : null;
+
+    const included = [
+      ...(apiTour.inclusions || []).map((text) => ({ type: "check", text })),
+      ...(apiTour.exclusions || []).map((text) => ({ type: "cross", text })),
+    ];
+
+    // Highlights have hero priority; gallery images fill any remaining slots
+    const highlightImgs = (apiTour.tourHighlights || []).map(h => h.image).filter(Boolean);
+    const rawImgs = apiTour.images || [];
+    const pool = [...new Set([...highlightImgs, ...rawImgs].filter(Boolean))];
+    const heroMainImage   = pool[0] || null;
+    const heroTopRight    = pool[1] || null;
+    const heroBottomLeft  = pool[2] || null;
+    const heroBottomRight = pool[3] || null;
+    const allImages = pool;
+
+    return {
+      title:               apiTour.title        || "",
+      description:         apiTour.description  || "",
+      location:            locationStr,
+      duration:            durationStr,
+      maxGuests:           apiTour.totalCapacity ?? null,
+      languages:           apiTour.languages || [],
+      cancellable:         apiTour.cancellable ?? false,
+      cancellation:        apiTour.cancellable
+                             ? "Cancellation available"
+                             : "Cancellation not available",
+      bestFor:             apiTour.bestFor || [],
+      route:               apiTour.route || null,
+      availabilityBadge:   apiTour.availabilityBadge || null,
+      statusBadge:         apiTour.statusBadge || null,
+      rating:              apiTour.rating || 0,
+      reviewCount:         apiTour.reviewCount || 0,
+      categoryRatings:     apiTour.categoryRatings || [],
+      heroMainImage,
+      heroTopRight,
+      heroBottomLeft,
+      heroBottomRight,
+      images:              allImages,
+      tourHighlights:      apiTour.tourHighlights || [],
+      itinerary:           apiTour.itinerary || [],
+      included,
+      bookingAddOns:       (apiTour.bookingAddOns || []).map(a => ({
+        id:    a.id || a._id,
+        label: a.label,
+        price: `GHS ${Number(a.priceGhc || 0).toLocaleString()}`,
+        priceGhc: a.priceGhc || 0,
+      })),
+      importantInformation: apiTour.importantInformation || null,
+      businessAmenities:   apiTour.businessAmenities?.items?.length ? apiTour.businessAmenities : null,
+      startDate:           apiTour.startDate || null,
+      category:            apiTour.category || "leisure",
+      highlights:          apiTour.highlights || [],
+      accommodationOptions: (apiTour.accommodationOptions || []).filter((o) => o.isActive !== false),
+      meetingPoint:        apiTour.meetingPoint || null,
+      meetingPointLabel:   apiTour.meetingPointLabel || apiTour.pickupLocation || null,
+      pickupNote:          apiTour.pickupNote || null,
+      price:               (() => {
+        if (minPrice == null) return null;
+        const cur = apiTour.displayCurrency || "GHS";
+        const SYMBOLS = { USD: "$", GHS: "GHS ", EUR: "€", GBP: "£" };
+        const sym = SYMBOLS[cur] ?? `${cur} `;
+        return `${sym}${Number(minPrice).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+      })(),
+      guide:               null, // no TourGuide service yet
+      reviews:             [],   // real reviews come via apiReviews state
+      ratingBreakdown:     null,
+      totalReviews:        0,
+      addOns:              [],   // legacy static add-ons removed; use bookingAddOns
+    };
+  }, [apiTour]);
+
+  useLayoutEffect(() => {
+    const el = descRef.current;
+    if (el) setDescClipped(el.scrollHeight > el.clientHeight);
+  }, [tourData?.description]);
+
+  const importantInfo = tourData?.importantInformation;
   const importantInfoRows = importantInfo?.blocks ?? [];
   const importantInfoFooter = importantInfo?.footerNote;
-  const showImportantInformation =
-    importantInfoRows.length > 0 || !!importantInfoFooter;
-  const [meetingPin, setMeetingPin] = useState(
-    () => tourData.meetingPoint ?? DEFAULT_MEETING_POINT
-  );
+  const showImportantInformation = importantInfoRows.length > 0 || !!importantInfoFooter;
+  const [meetingPin, setMeetingPin] = useState(() => DEFAULT_MEETING_POINT);
 
   useEffect(() => {
-    const data = TOUR_DATA[tour] || TEMPLATED_TOURS[tour] || TOUR_DATA["elmina-heritage-coastal-journey"];
-    setMeetingPin(data.meetingPoint ?? DEFAULT_MEETING_POINT);
-  }, [tour]);
+    setMeetingPin(tourData?.meetingPoint ?? DEFAULT_MEETING_POINT);
+  }, [tourData?.meetingPoint]);
+
+  // Fetch tour by slug from API; clear stale data on tour change
+  useEffect(() => {
+    dispatch(clearCurrentTour());
+    setApiReviews(null);
+    setApiReviewStats(null);
+    if (tour) {
+      dispatch(fetchTourThunk(tour)).then((action) => {
+        const tourId = action.payload?._id;
+        if (tourId) {
+          incrementTourViewApi(tourId).catch(() => null);
+          listReviewsByTourApi(tourId)
+            .then((data) => {
+              const rows = Array.isArray(data?.reviews) ? data.reviews : (Array.isArray(data) ? data : []);
+              if (rows.length > 0) setApiReviews(rows);
+              if (data && !Array.isArray(data)) setApiReviewStats(data);
+            })
+            .catch(() => null);
+        }
+      });
+    }
+  }, [dispatch, tour]);
 
   // Reset scroll to top whenever the user navigates to a different tour
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [tour]);
+
+  const [authGateOpen, setAuthGateOpen] = useState(false);
+
+  const handleBook = useCallback(async () => {
+    if (!isAuthenticated) {
+      setAuthGateOpen(true);
+      return;
+    }
+    if (!departureDate) {
+      alert("Please select a departure date.");
+      return;
+    }
+    const tourPackageId = apiTour?._id;
+    if (!tourPackageId) {
+      alert("Tour details are still loading. Please try again.");
+      return;
+    }
+    dispatch(clearBookingError());
+    const result = await dispatch(
+      createBookingThunk({
+        packageId: tourPackageId,
+        groupSize: adults + children,
+        tourDate: departureDate,
+      })
+    );
+    if (createBookingThunk.fulfilled.match(result)) {
+      navigate("/account/bookings");
+    }
+  }, [isAuthenticated, apiTour, adults, children, departureDate, dispatch, navigate]);
 
   const countryDisplay = country
     ? country.charAt(0).toUpperCase() + country.slice(1)
@@ -2283,6 +1997,17 @@ const TourDetailPage = () => {
     return () => observer.disconnect();
   }, []);
 
+  if (!tourData) {
+    return (
+      <main className="w-full bg-secondary-light-default min-h-screen" style={{ fontFamily: "Raleway, sans-serif" }}>
+        <BlogBreadcrumbBar items={[{ label: "Home", href: "/" }, { label: "Tours", href: "/tours" }]} />
+        <div className="flex items-center justify-center min-h-[50vh]">
+          <span className="text-secondary-normal-default font-raleway text-base">Loading tour details...</span>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main
       className="w-full bg-secondary-light-default min-h-screen"
@@ -2315,109 +2040,97 @@ const TourDetailPage = () => {
       {/* ── Main content — Figma Frame 1000006773 ────────────────────────────────
            Mobile: stacked (booking widget below content)
            Desktop: two-column (left content + sticky right widget)            */}
-      <div className="px-6 md:px-[30px] lg:px-[156px] pt-8 lg:pt-[56px] pb-12 lg:pb-[80px]">
+      <div className="px-6 md:px-[30px] lg:px-[156px] pt-8 lg:pt-[102px] pb-12 lg:pb-[80px]">
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-[32px] items-start">
           {/* ── LEFT CONTENT — full width on mobile, max-w-928px on desktop */}
           <div className="w-full lg:flex-1 lg:min-w-[70%] lg:max-w-[928px] min-w-0 flex flex-col">
-            {/* ① OVERVIEW: Tour Meta Bar + About The Tour ─ id=section-overview */}
+            {/* ── SHARED: Overview block (About + meta bar) ─ id=section-overview ─── */}
             <div id="section-overview" className="mb-6">
-              {/* Meta subtitle — "3-day tour hosted by Heritage Guides" */}
               <p className="text-semi-md-semibold text-secondary-dark-hover mb-3">
-                3-day tour hosted by Heritage Guides
+                {tourData.duration} guided tour
               </p>
-              {/* Info bar: Users · Duration · Languages · Cancellation */}
-              <div
-                className="flex items-center flex-wrap"
-                style={{ gap: "8px" }}
-              >
+              <div className="flex items-center flex-wrap" style={{ gap: "8px" }}>
                 <span className="flex items-center gap-2 text-med-small-semibold text-tertiary-normal-default">
                   <UsersIcon /> <span>Max {tourData.maxGuests} guests</span>
                 </span>
                 <span style={{ color: "#99a1af" }}>·</span>
-                <span className="flex items-center  gap-2 text-med-small-semibold text-tertiary-normal-default">
+                <span className="flex items-center gap-2 text-med-small-semibold text-tertiary-normal-default">
                   <ClockIcon /> <span>{tourData.duration}</span>
                 </span>
                 <span style={{ color: "#99a1af" }}>·</span>
-                <span className="flex items-center  gap-2 text-med-small-semibold text-tertiary-normal-default">
+                <span className="flex items-center gap-2 text-med-small-semibold text-tertiary-normal-default">
                   <GlobeIcon /> <span>{tourData.languages}</span>
                 </span>
                 <span style={{ color: "#99a1af" }}>·</span>
-                <span className="flex items-center  gap-2 text-med-small-semibold text-tertiary-normal-default">
+                <span className="flex items-center gap-2 text-med-small-semibold text-tertiary-normal-default">
                   <CancelIcon /> <span>{tourData.cancellation}</span>
                 </span>
               </div>
 
-              {/* Divider */}
               <div className="h-[1.5px] mt-[21px] mb-6 bg-secondary-light-hover" />
 
-              {/* About The Tour heading */}
-              <div className="bg-white p-5 flex flex-col gap-4 rounded-xl border border-secondary-light-hover ">
-                <h2 className="text-semi-md-semibold text-secondary-dark-hover">
-                  About The Tour
-                </h2>
-                {/* Description */}
-                <p
-                  dangerouslySetInnerHTML={{ __html: tourData.description }}
-                  className="text-md-regular text-[#364153]"
-                />
-
-                {/* Read More button */}
-                <Button href="/" variant="link" className="w-fit  " size="link">
-                  Read More
-                </Button>
-
-                {/* Best For tags */}
-                <div className="flex bg-[#EBDFF580] border  mb-4 border-secondary-light-active rounded-[10px] flex-wrap p-2.5 gap-1 items-center">
-                  <span className="text-med-small-semibold text-secondary-normal-default">
-                    Best For:
-                  </span>
-                  <div className="flex flex-wrap items-center gap-1">
-                    {tourData.bestFor.map((tag, i) => (
-                      <React.Fragment key={tag}>
-                        {i > 0 && (
-                          <span
-                            className="mx-1 inline-flex shrink-0 items-center justify-center select-none leading-none"
-                            aria-hidden="true"
-                          >
-                            <span className="block h-[2px] w-[2px] shrink-0 rounded-full bg-tertiary-normal-default" />
-                          </span>
-                        )}
-                        <span className="text-med-small-Medium text-tertiary-normal-default">
-                          {tag}
-                        </span>
-                      </React.Fragment>
-                    ))}
-                  </div>
+              <div className="bg-white p-5 flex flex-col gap-4 rounded-xl border border-secondary-light-hover">
+                <h2 className="text-semi-md-semibold text-secondary-dark-hover">About The Tour</h2>
+                <div>
+                  <p
+                    ref={descRef}
+                    dangerouslySetInnerHTML={{ __html: tourData.description }}
+                    className={classNames(
+                      "text-md-regular text-[#364153]",
+                      !descExpanded && "line-clamp-3"
+                    )}
+                  />
+                  {descClipped && !descExpanded && (
+                    <button
+                      type="button"
+                      onClick={() => setDescExpanded(true)}
+                      className="mt-1 font-raleway text-sm font-semibold text-[#7b2cbf] hover:underline focus-visible:outline-none"
+                    >
+                      Read More
+                    </button>
+                  )}
+                </div>
+                <div className="flex bg-[#EBDFF580] border mb-4 border-secondary-light-active rounded-[10px] flex-wrap p-2.5 gap-1 items-center">
+                  {tourData.route ? (
+                    <>
+                      <span className="text-med-small-semibold text-secondary-normal-default">Route:</span>
+                      <span className="text-med-small-Medium text-tertiary-normal-default">{tourData.route}</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-med-small-semibold text-secondary-normal-default">Best For:</span>
+                      <div className="flex flex-wrap items-center gap-1">
+                        {tourData.bestFor.map((tag, i) => (
+                          <React.Fragment key={tag}>
+                            {i > 0 && (
+                              <span className="mx-1 inline-flex shrink-0 items-center justify-center select-none leading-none" aria-hidden="true">
+                                <span className="block h-[2px] w-[2px] shrink-0 rounded-full bg-tertiary-normal-default" />
+                              </span>
+                            )}
+                            <span className="text-med-small-Medium text-tertiary-normal-default">{tag}</span>
+                          </React.Fragment>
+                        ))}
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
 
-              {tourData.tourHighlights?.length > 0 && (
+              {/* Business-only: Tour Highlights image cards */}
+              {tourData.category === "business" && tourData.tourHighlights?.length > 0 && (
                 <div className="relative mt-6 w-full rounded-[20px] border border-solid border-[#e8d9f5] bg-white px-[33px] pb-8 pt-[29px]">
-                  <h2 className="font-raleway text-xl font-bold leading-8 tracking-normal text-secondary-dark-hover">
-                    Tour Highlights
-                  </h2>
+                  <h2 className="font-raleway text-xl font-bold leading-8 tracking-normal text-secondary-dark-hover">Tour Highlights</h2>
                   <div className="mt-4 grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-x-5 md:gap-y-3">
                     {tourData.tourHighlights.map((entry, idx) => {
-                      const { title, description } =
-                        normalizeTourHighlight(entry);
+                      const { title, description } = normalizeTourHighlight(entry);
                       return (
-                        <div
-                          key={`${title}-${idx}`}
-                          className="relative min-h-[92px] rounded-[14px] bg-[#f3e8ff]/50 pl-[18px] pr-4 pt-4 pb-4"
-                        >
+                        <div key={`${title}-${idx}`} className="relative min-h-[92px] rounded-[14px] bg-[#f3e8ff]/50 pl-[18px] pr-4 pt-4 pb-4">
                           <div className="flex items-start gap-[5px]">
-                            <div
-                              className="h-[26px] w-6 shrink-0 rounded bg-secondary-light-hover"
-                              aria-hidden
-                            />
+                            <div className="h-[26px] w-6 shrink-0 rounded bg-secondary-light-hover" aria-hidden />
                             <div className="flex min-w-0 flex-1 flex-col gap-1">
-                              <div className="font-raleway text-sm font-bold leading-[20.8px] text-secondary-dark-hover">
-                                {title}
-                              </div>
+                              <div className="font-raleway text-sm font-bold leading-[20.8px] text-secondary-dark-hover">{title}</div>
                               {description ? (
-                                <p className="font-raleway text-xs font-normal leading-[18px] tracking-normal text-gray-500 whitespace-pre-line">
-                                  {description}
-                                </p>
+                                <p className="font-raleway text-xs font-normal leading-[18px] tracking-normal text-gray-500 whitespace-pre-line">{description}</p>
                               ) : null}
                             </div>
                           </div>
@@ -2428,83 +2141,45 @@ const TourDetailPage = () => {
                 </div>
               )}
 
-              {tourData.businessAmenities?.items?.length > 0 && (
+              {/* Business-only: Business Amenities */}
+              {tourData.category === "business" && tourData.businessAmenities?.items?.length > 0 && (
                 <div className="mt-6 flex w-full max-w-full flex-col items-start gap-4 self-stretch rounded-[20px] border-b-[1.2px] border-solid border-secondary-light-hover bg-white pl-5 pr-5 pt-5 pb-[21px]">
                   <div className="flex w-full flex-col items-start gap-2">
                     <div className="flex w-full items-center gap-2.5 px-0 py-1">
-                      <h2 className="text-semi-md-semibold text-secondary-dark-hover">
-                        Business Amenities
-                      </h2>
+                      <h2 className="text-semi-md-semibold text-secondary-dark-hover">Business Amenities</h2>
                     </div>
                   </div>
                   <div className="flex w-full flex-col gap-4 lg:flex-row lg:gap-x-[87px]">
-                    {splitBusinessAmenityColumns(
-                      tourData.businessAmenities.items
-                    ).map((column, colIdx) => (
-                      <div
-                        key={colIdx}
-                        className="flex min-w-0 flex-1 flex-col gap-4"
-                      >
+                    {splitBusinessAmenityColumns(tourData.businessAmenities.items).map((column, colIdx) => (
+                      <div key={colIdx} className="flex min-w-0 flex-1 flex-col gap-4">
                         {column.map((line) => (
-                          <div
-                            key={line}
-                            className="flex items-center"
-                            style={{ gap: "12px" }}
-                          >
-                            <span className="flex size-5 shrink-0 items-center justify-center">
-                              <CheckIcon />
-                            </span>
-                            <span className="text-md-Medium text-[#364153]">
-                              {line}
-                            </span>
+                          <div key={line} className="flex items-center" style={{ gap: "12px" }}>
+                            <span className="flex size-5 shrink-0 items-center justify-center"><CheckIcon /></span>
+                            <span className="text-md-Medium text-[#364153]">{line}</span>
                           </div>
                         ))}
                       </div>
                     ))}
                   </div>
-                  {(tourData.businessAmenities.corporateBookingBenefits?.items
-                    ?.length > 0 ||
-                    tourData.businessAmenities.noteHtml) && (
+                  {(tourData.businessAmenities.corporateBookingBenefits?.items?.length > 0 || tourData.businessAmenities.noteHtml) && (
                     <div className="relative min-h-44 w-full max-w-[877px] rounded-[14px] border-l-[3px] border-solid border-secondary-dark-hover bg-secondary-light-default/50 px-[21px] pb-5 pt-[19px]">
-                      {tourData.businessAmenities.corporateBookingBenefits
-                        ?.items?.length > 0 && (
+                      {tourData.businessAmenities.corporateBookingBenefits?.items?.length > 0 && (
                         <>
                           <p className="font-raleway text-sm font-bold leading-[22.4px] text-secondary-dark-hover">
-                            {tourData.businessAmenities
-                              .corporateBookingBenefits.title ??
-                              "Corporate Booking Benefits"}
+                            {tourData.businessAmenities.corporateBookingBenefits.title ?? "Corporate Booking Benefits"}
                           </p>
                           <ul className="mt-3 flex flex-col gap-0">
-                            {tourData.businessAmenities.corporateBookingBenefits.items.map(
-                              (benefit) => (
-                                <li
-                                  key={benefit}
-                                  className="flex min-h-[29px] items-center gap-[5.7px]"
-                                >
-                                  <span
-                                    className="shrink-0 font-sans text-[13px] font-bold leading-[20.8px] text-secondary-normal-default"
-                                    aria-hidden
-                                  >
-                                    →
-                                  </span>
-                                  <p className="font-raleway text-[13px] font-normal leading-[20.8px] text-[#364153]">
-                                    {benefit}
-                                  </p>
-                                </li>
-                              )
-                            )}
+                            {tourData.businessAmenities.corporateBookingBenefits.items.map((benefit) => (
+                              <li key={benefit} className="flex min-h-[29px] items-center gap-[5.7px]">
+                                <span className="shrink-0 font-sans text-[13px] font-bold leading-[20.8px] text-secondary-normal-default" aria-hidden>→</span>
+                                <p className="font-raleway text-[13px] font-normal leading-[20.8px] text-[#364153]">{benefit}</p>
+                              </li>
+                            ))}
                           </ul>
                         </>
                       )}
-                      {(!tourData.businessAmenities.corporateBookingBenefits
-                        ?.items?.length &&
-                        tourData.businessAmenities.noteHtml) && (
-                        <div
-                          className="font-raleway text-[13px] font-normal leading-relaxed text-[#364153]"
-                          dangerouslySetInnerHTML={{
-                            __html: tourData.businessAmenities.noteHtml,
-                          }}
-                        />
+                      {!tourData.businessAmenities.corporateBookingBenefits?.items?.length && tourData.businessAmenities.noteHtml && (
+                        <div className="font-raleway text-[13px] font-normal leading-relaxed text-[#364153]" dangerouslySetInnerHTML={{ __html: tourData.businessAmenities.noteHtml }} />
                       )}
                     </div>
                   )}
@@ -2512,79 +2187,145 @@ const TourDetailPage = () => {
               )}
             </div>
 
-            {/* ② WHAT'S INCLUDED ─ id=section-inclusions */}
-            <div
-              id="section-inclusions"
-              className="bg-white p-5 flex flex-col gap-4 mb-6 rounded-xl border border-secondary-light-hover"
-            >
-              <h2 className="text-semi-md-semibold text-secondary-dark-hover">
-                What's included
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2" style={{ gap: "16px 40px" }}>
-                {tourData.included.map((item, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center"
-                    style={{ gap: "12px" }}
-                  >
-                    {item.type === "check" ? <CheckIcon /> : <CrossIcon />}
-                    <span className="text-md-Medium text-[#364153]">
-                      {item.text}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* ③ ITINERARY ─ id=section-itinerary */}
-            {/* Step circles (48px) + vertical connector line + expandable days */}
-            <div
-              id="section-itinerary"
-              className="bg-white px-8.5 mb-6 py-7.5 flex flex-col gap-4 rounded-xl border border-secondary-light-hover"
-            >
-              <h2 className="text-semi-md-bold text-secondary-dark-hover">
-                Day-by-Day Itinerary
-              </h2>
-              <p className="text-[14px] font-medium text-[#6B7280]">
-                A structured 5-day programme with flexibility for your schedule
-              </p>
-              <div className="relative ">
-                {/* Vertical connector line linking all circles */}
-
-                <div className="flex flex-col gap-3">
-                  {tourData.itinerary.map((day, idx) => (
-                    <ItineraryStep
-                      key={day.day}
-                      day={day}
-                      isFirst={idx === 0}
-                    />
+            {/* ── LEISURE: What's Included comes BEFORE itinerary ─────────────── */}
+            {tourData.category !== "business" && (
+              <div id="section-inclusions" className="bg-white p-5 flex flex-col gap-4 mb-6 rounded-xl border border-secondary-light-hover">
+                <h2 className="text-semi-md-semibold text-secondary-dark-hover">What's included</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2" style={{ gap: "16px 40px" }}>
+                  {tourData.included.map((item, i) => (
+                    <div key={i} className="flex items-center" style={{ gap: "12px" }}>
+                      {item.type === "check" ? <CheckIcon /> : <CrossIcon />}
+                      <span className="text-md-Medium text-[#364153]">{item.text}</span>
+                    </div>
                   ))}
                 </div>
               </div>
+            )}
+
+            {/* ── ITINERARY ─ id=section-itinerary ───────────────────────────── */}
+            {/* Leisure: numbered highlights list | Business: expandable day accordion */}
+            <div id="section-itinerary" className="bg-white px-8 mb-6 py-7 flex flex-col gap-4 rounded-xl border border-secondary-light-hover">
+              <h2 className="text-semi-md-bold text-secondary-dark-hover">Day-by-Day Itinerary</h2>
+
+              {tourData.category !== "business" ? (
+                /* LEISURE — highlights[] mapped to ItineraryStep accordion (same component, same look) */
+                tourData.highlights.length > 0 ? (
+                  <div className="flex flex-col gap-3">
+                    {tourData.highlights.map((line, idx) => {
+                      const dashIdx = line.indexOf(" — ");
+                      const stopName = dashIdx !== -1 ? line.slice(0, dashIdx) : line;
+                      const detail   = dashIdx !== -1 ? line.slice(dashIdx + 3) : "";
+                      const stepDay = {
+                        day:          idx + 1,
+                        title:        stopName,
+                        preview:      detail.length > 60 ? detail.slice(0, 60) + "…" : detail,
+                        localContext: null,
+                        activities:   [],
+                      };
+                      return <ItineraryStep key={idx} day={stepDay} isFirst={idx === 0} />;
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-[14px] text-[#9ca3af] font-raleway">No itinerary available for this tour yet.</p>
+                )
+              ) : (
+                /* BUSINESS — structured day accordion */
+                <>
+                  <p className="text-[14px] font-medium text-[#6B7280]">A structured programme with flexibility for your schedule</p>
+                  <div className="flex flex-col gap-3">
+                    {tourData.itinerary.map((day, idx) => (
+                      <ItineraryStep key={day.day} day={day} isFirst={idx === 0} />
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
 
-            {/* ④ OPTIONAL ADD-ONS */}
-            <div className="bg-white mb-6 pl-5 pr-2 pt-7.5 pb-12 flex flex-col gap-4 rounded-xl border border-secondary-light-hover">
-              <h2 className="text-semi-md-bold text-secondary-dark-hover">
-                + Optional Add-ons
-              </h2>
-              <div className="flex mb-6 flex-col gap-4">
-                {tourData.addOns.map((addon, i) => (
-                  <AddOnRow key={i} addon={addon} />
-                ))}
+            {/* ── HOTEL / ACCOMMODATION OPTIONS TABLE ─────────────────────────── */}
+            {tourData.accommodationOptions.length > 0 && (
+              <div className="bg-white mb-6 rounded-xl px-10.5 py-5   overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full  border-collapse">
+                    <thead>
+                      <tr className=" border-[#e8d9f5]">
+                        <th className="px-6 py-4 text-left font-raleway text-md-semibold lg:text-semi-md-semibold text-secondary-dark-hover">Hotel / Option</th>
+                        <th className="px-4 py-4 text-left font-raleway text-md-semibold lg:text-semi-md-semibold text-secondary-dark-hover">Single</th>
+                        <th className="px-4 py-4 text-left font-raleway text-md-semibold lg:text-semi-md-semibold text-secondary-dark-hover">Double</th>
+                        <th className="px-6 py-4 text-left font-raleway text-md-semibold lg:text-semi-md-semibold text-secondary-dark-hover">Notes</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {tourData.accommodationOptions.map((opt, i) => {
+                        const single = opt.pricing?.find((p) => p.roomType === "single")?.pricePerPerson;
+                        const double = opt.pricing?.find((p) => p.roomType === "double")?.pricePerPerson;
+                        const isLast = i === tourData.accommodationOptions.length - 1;
+                        return (
+                          <tr key={i} className={classNames("")}>
+                            <td className="px-6 py-5 font-raleway  text-md-semibold lg:text-semi-md-semibold text-tertiary-normal-default">{opt.label}</td>
+                            <td className="px-4 py-5 font-raleway text-md-semibold lg:text-semi-md-semibold text-tertiary-normal-default tabular-nums">
+                              {single != null ? `$${Number(single).toLocaleString("en-US")}` : "—"}
+                            </td>
+                            <td className="px-4 py-5 font-raleway text-md-semibold lg:text-semi-md-semibold text-tertiary-normal-default tabular-nums">
+                              {double != null ? `$${Number(double).toLocaleString("en-US")}` : "—"}
+                            </td>
+                            <td className="px-6 py-5 font-raleway text-md-semibold lg:text-semi-md-semibold text-tertiary-normal-default">
+                              {opt.notes || "—"}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
               </div>
-            </div>
+            )}
+
+            {/* ── BUSINESS: What's Included comes AFTER itinerary ─────────────── */}
+            {tourData.category === "business" && (
+              <div id="section-inclusions" className="bg-white p-5 flex flex-col gap-4 mb-6 rounded-xl border border-secondary-light-hover">
+                <h2 className="text-semi-md-semibold text-secondary-dark-hover">What's included</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2" style={{ gap: "16px 40px" }}>
+                  {tourData.included.map((item, i) => (
+                    <div key={i} className="flex items-center" style={{ gap: "12px" }}>
+                      {item.type === "check" ? <CheckIcon /> : <CrossIcon />}
+                      <span className="text-md-Medium text-[#364153]">{item.text}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* ── OPTIONAL ADD-ONS — both variants ────────────────────────────── */}
+            {tourData.bookingAddOns.length > 0 && (
+              <div className="bg-white mb-6 pl-5 pr-2 pt-7 pb-12 flex flex-col gap-4 rounded-xl border border-secondary-light-hover">
+                <h2 className="text-semi-md-bold text-secondary-dark-hover">+ Optional Add-ons</h2>
+                <div className="flex mb-6 flex-col gap-4">
+                  {tourData.bookingAddOns.map((addon, i) => (
+                    <div key={addon.id || i} className="flex items-center pl-1.5 pr-3 md:pr-6 justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[15px] font-semibold leading-[20px] md:text-semi-md-semibold text-tertiary-normal-default">{addon.label}</p>
+                      </div>
+                      <span style={{ fontFamily: "Raleway, sans-serif", fontWeight: 600, fontSize: "14px", color: "#7b2cbf", whiteSpace: "nowrap" }}>
+                        + {addon.price}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* ⑤ MEET YOUR TOUR GUIDE ─ id=section-tour-guide */}
-            <div
-              id="section-tour-guide"
-              className="pb-[50px] border-b border-secondary-light-hover"
-            >
-              <h2 className="text-semi-md-semibold text-secondary-dark-hover mb-5 ml-5">
-                Meet Your Tour Guide
-              </h2>
-              <GuideCard guide={tourData.guide} />
-            </div>
+            {tourData.guide && (
+              <div
+                id="section-tour-guide"
+                className="pb-[50px] border-b border-secondary-light-hover"
+              >
+                <h2 className="text-semi-md-semibold text-secondary-dark-hover mb-5 ml-5">
+                  Meet Your Tour Guide
+                </h2>
+                <GuideCard guide={tourData.guide} />
+              </div>
+            )}
 
             {/* ⑥ WHAT OUR TRAVELERS SAY ─ id=section-reviews */}
             <div
@@ -2595,7 +2336,7 @@ const TourDetailPage = () => {
 
                 What Our Travelers Say
               </h2>
-              <ReviewsSection tourData={tourData} />
+              <ReviewsSection tourData={tourData} apiReviews={apiReviews} apiStats={apiReviewStats} tourId={apiTour?._id} />
             </div>
 
             {/* ⑦ IMPORTANT INFO + MEETING POINT & LOCATION ─ id=section-location */}
@@ -2679,15 +2420,12 @@ const TourDetailPage = () => {
                   Get Directions
                 </Button>
               </div>
-              {/* Pickup note */}
-              <p
-              className="mt-4 rounded-[10px] bg-secondary-light-hover border border-secondary-light-active px-5 py-2.5 text-med-small-semibold text-secondary-normal-default"
-               
-              >
-                Hotel pickup available from Greater Accra and Cape Coast
-                downtown. We will contact you the day before to confirm your
-                exact pickup time.
-              </p>
+              {/* Pickup note — only shown when the tour has one */}
+              {tourData.pickupNote && (
+                <p className="mt-4 rounded-[10px] bg-secondary-light-hover border border-secondary-light-active px-5 py-2.5 text-med-small-semibold text-secondary-normal-default">
+                  {tourData.pickupNote}
+                </p>
+              )}
             </div>
 
             {/* ⑧ TRAVELLING WITH 6 OR MORE? ─ group CTA */}
@@ -2723,49 +2461,30 @@ const TourDetailPage = () => {
                   Get a Group Quote
                 </Button>
               </div>
+              <YouMightAlsoLoveSection
+                currentSlug={tour}
+                currentTags={relatedTags}
+                currentCountry={apiTour?.country || "ghana"}
+              />
             </div>
 
-            {/* ⑨ YOU MIGHT ALSO LOVE — flex-wrap: 351px cards × 3 exceeds 928px col; avoid overflow under sidebar */}
-            <div className="pt-10 w-full min-w-0">
-            <h2 className="text-semi-md-semibold text-secondary-dark-hover mb-5.5 ml-5">
-
-                You Might Also Love
-              </h2>
-              <div className="flex w-full min-w-0 flex-wrap justify-start gap-5">
-                {RELATED_TOURS.map((t) => (
-                  <PopularTourCard
-                    key={t.id}
-                    image={t.image}
-                    location={t.location}
-                    rating={t.rating}
-                    title={t.title}
-                    availabilityBadge={t.availabilityBadge}
-                    price={t.price}
-                    tags={t.tags}
-                    duration={t.duration}
-                    pickupIncluded={t.pickupIncluded}
-                    maxGroupSize={t.maxGroupSize}
-                    country={t.country}
-                    tourSlug={t.slug}
-                  />
-                ))}
-              </div>
-            </div>
+            {/* ⑨ YOU MIGHT ALSO LOVE — rendered when related tours are available from the API */}
+            {/* No static related tours; this section will be populated via API in a future iteration */}
 
             
           </div>
 
           {/* ── RIGHT: Booking Widget — Figma 3156:45940 ─────────────────── */}
           {/* Mobile: full width, below content. Desktop: sticky 457px right column
-              sticky top = 112px navbar + 64px detail nav + 12px buffer = 188px   */}
+              sticky top = 64px detail nav + 12px buffer = 76px   */}
           <div
-            className="z-10 lg:min-w-[457px] max-w-full flex-shrink-0 sticky"
+            className="z-10 w-full lg:min-w-[457px] lg:max-w-[457px] flex-shrink-0 lg:sticky lg:self-start"
             style={{
-              top: "188px",
-              maxHeight: "calc(100vh - 200px)",
+              top: "76px",
+              maxHeight: "calc(100vh - 100px)",
               overflowY: "auto",
-              scrollbarWidth: "none",   /* Firefox */
-              msOverflowStyle: "none",  /* IE 11  */
+              scrollbarWidth: "none",
+              msOverflowStyle: "none",
             }}
           >
             <BookingWidget
@@ -2780,7 +2499,20 @@ const TourDetailPage = () => {
               setReturnDate={setReturnDate}
               bookmarked={bookmarked}
               setBookmarked={setBookmarked}
+              onBook={handleBook}
+              bookingStatus={bookingStatus}
+              bookingError={bookingError}
             />
+            {/* Logo combo — shown below the widget for Achimota (hotel_selector) tours */}
+            {tourData.accommodationOptions?.length > 0 && (
+              <div className="mt-8 flex items-center justify-center">
+                <img
+                  src={logoCombo}
+                  alt="Elysium Tours featuring Akoras"
+                  className="h-auto w-full max-w-[420px] object-contain"
+                />
+              </div>
+            )}
           </div>
           
         </div>
@@ -2791,6 +2523,8 @@ const TourDetailPage = () => {
               {...partnerPromoTour}
               onCtaClick={() => setPartnerModalOpen(true)}
             />
+
+           
 
             </div>
 
@@ -2818,8 +2552,8 @@ const TourDetailPage = () => {
             url: typeof window !== "undefined" ? window.location.href : "",
             locationTag: "Ghana",
             author: {
-              name: "Danielle Cousin",
-              avatar: "https://picsum.photos/seed/author-avatar/48/48",
+              name: "Elysium Tours",
+              avatar: null,
               subtitle: tourData.title,
             },
           }}
@@ -2830,6 +2564,21 @@ const TourDetailPage = () => {
         <PartnerWithUsModal
           onClose={() => setPartnerModalOpen(false)}
           onSubmit={() => {}}
+        />
+      )}
+
+      {authGateOpen && (
+        <BookingAuthGateModal
+          tourName={apiTour?.title}
+          onClose={() => setAuthGateOpen(false)}
+          onSignIn={() => {
+            setAuthGateOpen(false);
+            navigate("/", { state: { openAuthModal: true, authMode: "login", from: `/${country}/${tour}` } });
+          }}
+          onRegister={() => {
+            setAuthGateOpen(false);
+            navigate("/", { state: { openAuthModal: true, authMode: "register", from: `/${country}/${tour}` } });
+          }}
         />
       )}
     </main>

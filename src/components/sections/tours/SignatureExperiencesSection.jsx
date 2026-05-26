@@ -1,78 +1,52 @@
 import React from "react";
 import { classNames } from "../../../utils/classNames";
 import PopularTourCard from "../../cards/PopularTourCard";
+import PopularTourCardSkeleton from "../../cards/PopularTourCardSkeleton";
 import Button from "../../ui/button";
 
-// Figma: 1914:40952 — Signature Experiences section (Tours country page)
-// Header: "ONLY IN {COUNTRY}" left label + "Signature Experiences" title + "See All Tours" btn right
-// Grid: 4 cards, fixed — "See All Tours" navigates to the full listing
+const TOUR_TYPE_LABELS = { day_tour: "Day Tour", multi_day: "Multi-Day", express: "Express" };
 
-// Use the slug as the picsum seed so the same tour always shows the same image,
-// regardless of which section it appears in (Signature, All Tours, etc.)
-const tourImage = (slug) => `https://picsum.photos/seed/${slug}/351/373`;
-
-const TOURS = [
-  {
-    id: 1,
-    image: tourImage("homecoming-kakum-national-park"),
-    location: "Cape Coast/Central Region",
-    duration: { class: "Multi-Day", span: "3 Days/2 Nights" },
-    maxGroupSize: 12,
-    pickupIncluded: true,
-    tags: ["Cultural", "Diaspora"],
-    rating: 4.9,
-    title: "The Homecoming Experience to Kakum National Park",
-    availabilityBadge: "Opened Daily",
-    price: "Ghs.400.00",
-    country: "ghana",
-    slug: "homecoming-kakum-national-park",
-  },
-  {
-    id: 2,
-    image: tourImage("elmina-heritage-coastal-journey"),
-    location: "Accra/Ghana",
-    duration: { class: "Day Tour", span: "1 Day" },
-    maxGroupSize: 8,
-    pickupIncluded: false,
-    tags: ["Heritage", "Nature"],
-    rating: 4.8,
-    title: "Elmina Heritage & Coastal Journey Tour",
-    availabilityBadge: "Opened Daily",
-    price: "Ghs.350.00",
-    country: "ghana",
-    slug: "elmina-heritage-coastal-journey",
-  },
-  {
-    id: 3,
-    image: tourImage("kumasi-heritage-market-discovery"),
-    location: "Ashanti/Ghana",
-    duration: { class: "Multi-Day", span: "5 Days/4 Nights" },
-    maxGroupSize: 15,
-    pickupIncluded: false,
-    tags: ["Cultural", "Adventure"],
-    rating: 4.7,
-    title: "Kumasi Heritage & Market Discovery",
-    availabilityBadge: "Opened Daily",
-    price: "Ghs.500.00",
-    country: "ghana",
-    slug: "kumasi-heritage-market-discovery",
-  },
-  {
-    id: 4,
-    image: tourImage("wli-waterfalls-nature-exploration"),
-    location: "Volta Region/Ghana",
-    duration: { class: "Day Tour", span: "1 Day" },
-    maxGroupSize: 10,
-    pickupIncluded: false,
-    tags: ["Nature", "Scenic"],
-    rating: 4.9,
-    title: "Wli Waterfalls & Nature Exploration",
-    availabilityBadge: "Opened Daily",
-    price: "Ghs.450.00",
-    country: "ghana",
-    slug: "wli-waterfalls-nature-exploration",
-  },
-];
+const buildCardProps = (t, i) => {
+  const typeLabel = TOUR_TYPE_LABELS[t.tourType] || t.duration?.class || "Multi-Day";
+  const seats = t.remainingCapacity;
+  const durationClass = seats != null
+    ? `${typeLabel}: ${seats} Seat${seats !== 1 ? "s" : ""} Available`
+    : typeLabel;
+  const days = t.durationDays;
+  const durationSpan = days
+    ? (days === 1 ? "1 Day" : `${days} Days/${days - 1} Night${days - 1 !== 1 ? "s" : ""}`)
+    : (t.duration?.span || "3 Days");
+  const tiers = t.pricingTiers;
+  const minPrice = tiers && tiers.length > 0
+    ? Math.min(...tiers.map((tier) => tier.pricePerPerson))
+    : t.basePrice;
+  return {
+    id: t._id || t.id || i,
+    image: t.coverImage || t.image,
+    location: t.destination?.name
+      ? `${t.destination.name}/${t.country || "Ghana"}`
+      : (t.location || t.country || "Ghana"),
+    rating: t.rating || 4.8,
+    title: t.title || "Tour",
+    availabilityBadge: t.availabilityBadge || "Available",
+    price: (() => {
+      const currency = t.displayCurrency || "GHS";
+      const prefix   = currency === "GHS" ? "Ghs." : `${currency} `;
+      return minPrice != null ? `${prefix}${Number(minPrice).toFixed(2)}` : t.price || "Contact us";
+    })(),
+    tags: t.tags || [],
+    duration: { class: durationClass, span: durationSpan },
+    maxGroupSize: t.totalCapacity ?? t.maxGroupSize,
+    pickupIncluded: t.pickupIncluded ?? false,
+    featureType: t.featureType ?? null,
+    featureLabel: t.featureLabel ?? null,
+    statusBadge: t.statusBadge || null,
+    reviewCount: t.reviewCount || 0,
+    country: t.country || "ghana",
+    tourSlug: t.slug || String(t._id || t.id || i),
+    startDate: t.startDate || null,
+  };
+};
 
 const ArrowIcon = () => (
   <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -84,7 +58,11 @@ const ArrowIcon = () => (
 // Figma 1914:40952 — 1728px wide, py-[80px], px-[148px]
 // Header: left label (46px line + "ONLY IN {COUNTRY}") | right (title + "See All Tours" btn)
 // Body: 4-col grid of PopularTourCard — no sidebar, no filter trigger
-const SignatureExperiencesSection = React.forwardRef(({ country = "Ghana", className, ...props }, ref) => {
+const SignatureExperiencesSection = React.forwardRef(({ country = "Ghana", tours: toursProp, isLoading = false, onSeeAll, className, ...props }, ref) => {
+  const displayTours = toursProp && toursProp.length > 0
+    ? toursProp.slice(0, 4).map(buildCardProps)
+    : [];
+
   return (
     <section
       ref={ref}
@@ -140,6 +118,7 @@ const SignatureExperiencesSection = React.forwardRef(({ country = "Ghana", class
                 boxShadow:    "0px 4px 4px 0px rgba(0,0,0,0.05)",
               }}
               endIcon={<ArrowIcon />}
+              onClick={onSeeAll}
             >
               See All Tours
             </Button>
@@ -148,23 +127,32 @@ const SignatureExperiencesSection = React.forwardRef(({ country = "Ghana", class
 
         {/* ── 4-card grid — Figma 1914:40952 body ────────────────────────── */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-x-[8px] gap-y-6 md:gap-y-[20px]">
-          {TOURS.map((tour) => (
-            <PopularTourCard
-              key={tour.id}
-              image={tour.image}
-              location={tour.location}
-              rating={tour.rating}
-              title={tour.title}
-              availabilityBadge={tour.availabilityBadge}
-              price={tour.price}
-              tags={tour.tags}
-              duration={tour.duration}
-              pickupIncluded={tour.pickupIncluded}
-              maxGroupSize={tour.maxGroupSize}
-              country={tour.country}
-              tourSlug={tour.slug}
-            />
-          ))}
+          {isLoading
+            ? Array.from({ length: 4 }).map((_, i) => (
+                <PopularTourCardSkeleton key={i} />
+              ))
+            : displayTours.map((tour) => (
+                <PopularTourCard
+                  key={tour.id}
+                  image={tour.image}
+                  location={tour.location}
+                  rating={tour.rating}
+                  title={tour.title}
+                  availabilityBadge={tour.availabilityBadge}
+                  price={tour.price}
+                  tags={tour.tags}
+                  duration={tour.duration}
+                  pickupIncluded={tour.pickupIncluded}
+                  maxGroupSize={tour.maxGroupSize}
+                  featureType={tour.featureType}
+                  featureLabel={tour.featureLabel}
+                  statusBadge={tour.statusBadge}
+                  reviewCount={tour.reviewCount}
+                  country={tour.country}
+                  tourSlug={tour.tourSlug}
+                />
+              ))
+          }
         </div>
 
       </div>

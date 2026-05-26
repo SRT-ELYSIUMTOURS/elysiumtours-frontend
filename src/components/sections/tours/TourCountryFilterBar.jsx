@@ -1,19 +1,14 @@
 import React, { useState, useRef, useEffect } from "react";
 import { classNames } from "../../../utils/classNames";
 
-// ── Shared asset ──────────────────────────────────────────────────────────────
 import closeCircle from "../../../assets/ElysiumAssets/close-circle.svg";
 
-// ── Chevron Down (reused from TourFilterBar pattern) ─────────────────────────
 const ChevronDown = ({ stroke = "#949494" }) => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
     <path d="M7 10l5 4 5-4" stroke={stroke} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
-// ── Checkbox icons for region selection (Figma 1950:38657 = checkmark-square-01)
-// Unchecked: #d6beeb rounded-square border
-// Checked:   #7b2cbf fill + white tick
 const CheckboxUnchecked = () => (
   <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
     <rect x="1.5" y="1.5" width="17" height="17" rx="3.5" stroke="#d6beeb" strokeWidth="1.5" />
@@ -27,9 +22,6 @@ const CheckboxChecked = () => (
   </svg>
 );
 
-// ── Region trigger pill ────────────────────────────────────────────────────────
-// Figma 1942:34261 — same pattern as SortTrigger in TourFilterBar
-// border #949494→#d6beeb when open, rounded-[20px], p-[10px], gap-[8px]
 const RegionTrigger = React.forwardRef(({ label, isOpen, onClick }, ref) => (
   <button
     ref={ref}
@@ -59,13 +51,8 @@ const RegionTrigger = React.forwardRef(({ label, isOpen, onClick }, ref) => (
 ));
 RegionTrigger.displayName = "RegionTrigger";
 
-// ── Region dropdown panel (Figma 1950:38623) ──────────────────────────────────
-// White card, rounded-[20px], border #e9eaeb, shadow/lg, py-[22px]
-// Structure: Close + divider | "Select Location" title | country row + checkbox grid | button row
-// Panel width ~460px; region grid is 2-column flex-wrap (w-[369px] from Figma)
 const RegionDropdownPanel = ({
   country,
-  countryCode,
   regions,
   selected,
   onToggle,
@@ -89,30 +76,24 @@ const RegionDropdownPanel = ({
       boxShadow: "0px 12px 16px -4px rgba(10,13,18,0.08), 0px 4px 6px -2px rgba(10,13,18,0.03)",
     }}
   >
-    {/* ── Main content section ─────────────────────────────────────────────── */}
     <div
       className="flex flex-col items-start"
       style={{ gap: "24px", paddingLeft: "26px", paddingRight: "26px" }}
     >
-      {/* Close button + divider */}
       <div className="flex flex-col w-full" style={{ gap: "8px" }}>
         <div className="flex justify-end w-full">
           <button type="button" onClick={onClose} className="cursor-pointer shrink-0">
             <img src={closeCircle} alt="Close" width={24} height={24} />
           </button>
         </div>
-        {/* Figma 1950:38628 — bg #d6beeb, h-[2px], opacity 18% */}
         <div
           className="w-full h-[2px] rounded-[20px]"
           style={{ backgroundColor: "#d6beeb", opacity: 0.18 }}
         />
       </div>
 
-      {/* Country row + region grid */}
       <div className="flex flex-col" style={{ gap: "16px" }}>
         <div className="flex flex-col" style={{ gap: "16px" }}>
-          {/* Country header row (Figma 1950:38635) */}
-          {/* flag circle (20×20 bg-[#7b2cbf] rounded-full) + country name SemiBold 16px #2d2d2d */}
           <div className="flex items-center gap-[8px]">
             <div
               className="shrink-0 rounded-full"
@@ -131,8 +112,6 @@ const RegionDropdownPanel = ({
             </span>
           </div>
 
-          {/* Region checkbox grid — Figma 1950:38651: flex-wrap, 2-col, gap-[16px 0] */}
-          {/* Each item is ~183px wide so 2 × 183 = 366 ≈ 369px total (matches Figma w-[369px]) */}
           <div
             className="flex flex-wrap"
             style={{ gap: "4px 0", maxWidth: "408px", width: "100%" }}
@@ -168,16 +147,13 @@ const RegionDropdownPanel = ({
       </div>
     </div>
 
-    {/* ── Button row (Figma 1950:38832) ──────────────────────────────────── */}
-    {/* px-[26px], justify-between */}
     <div
       className="flex items-center justify-between shrink-0"
       style={{ paddingLeft: "26px", paddingRight: "26px" }}
     >
-      {/* Clear All — Raleway Bold 16px #2d2d2d underline (Figma 1950:38833) */}
       <button
         type="button"
-        onClick={() => { onClear(); }}
+        onClick={onClear}
         style={{
           height: "56px",
           fontFamily: "Raleway, sans-serif",
@@ -198,7 +174,6 @@ const RegionDropdownPanel = ({
         Clear All
       </button>
 
-      {/* See N Results — bg #7b2cbf, Raleway SemiBold 16px #fefefe (Figma 1950:38834) */}
       <button
         type="button"
         onClick={() => { onApply(); onClose(); }}
@@ -222,10 +197,6 @@ const RegionDropdownPanel = ({
   </div>
 );
 
-// ── Filter pill ────────────────────────────────────────────────────────────────
-// NOTE: active colour is #6f28ac (var(--violet-secondary-30%/normal:hover)) —
-// intentionally lighter than TourFilterBar's #622399 (pressed state).
-// This matches Figma 1942:34266 (TYPE) and 1942:34276 (CATEGORY) active states.
 const FilterPill = ({ children, isActive, onSelect, value }) => (
   <button
     type="button"
@@ -253,8 +224,6 @@ const FilterPill = ({ children, isActive, onSelect, value }) => (
   </button>
 );
 
-// ── Section label — Figma 1942:33998 / 1942:34263 etc. ────────────────────────
-// Raleway Bold 13px/18px #2b0f43, p-[10px]
 const FilterLabel = ({ children }) => (
   <div className="flex items-center justify-center p-[10px] shrink-0">
     <span
@@ -272,13 +241,10 @@ const FilterLabel = ({ children }) => (
   </div>
 );
 
-// ── Divider — Figma 1942:34269 — same spec as TourFilterBar ───────────────────
-// bg #d6beeb, 2px × 42px, rounded-[10px]
 const FilterDivider = () => (
   <div className="w-[2px] h-[42px] bg-[#d6beeb] rounded-[10px] shrink-0" />
 );
 
-// ── Filter option sets — labels match Figma exactly (including typos) ─────────
 const TYPE_OPTIONS = [
   { value: "all",      label: "All"      },
   { value: "leisure",  label: "Lesiure"  }, // "Lesiure" typo matches Figma 1942:34266
@@ -286,17 +252,7 @@ const TYPE_OPTIONS = [
   { value: "ekolure",  label: "Ekolure"  },
 ];
 
-const CATEGORY_OPTIONS = [
-  { value: "day-tour",  label: "Day Tour"  }, // Figma 1942:34273
-  { value: "multi-day", label: "Multi-Day" }, // Figma 1942:34274
-  { value: "heritage",  label: "Heritage"  }, // Figma 1942:34275
-  { value: "cultural",  label: "Cultural"  }, // Figma 1942:34276 — active state shown
-  { value: "festival",  label: "Festival"  }, // Figma 1942:34277
-];
-
-// ── Country-specific region lists (Figma 1950:38623 Ghana example) ─────────────
-// When wiring this up functionally, pass `regions` as a prop from the page
-// using route/country data. The config here serves as a static fallback.
+// Static region fallback — used when destination data isn't loaded yet
 const COUNTRY_REGION_CONFIG = {
   ghana: {
     displayName: "Ghana",
@@ -331,37 +287,58 @@ const DEFAULT_REGION_CONFIG = {
   regions: [],
 };
 
-// ── TourCountryFilterBar ───────────────────────────────────────────────────────
-// Figma 1942:34242 — 1728×113px
-// Groups: REGION (dropdown) + TYPE pills + [divider] + CATEGORY pills + results
-//
-// WHY a separate component (not extending TourFilterBar):
-//   • Different filter groups, different height, different active-pill colour
-//   • When functional: different URL params (?region=&type=&category= vs
-//     ?sort=&price=&duration=&type=) — keeping them separate avoids prop-soup
-//   • Country-specific region data that doesn't belong in a global filter
 const TourCountryFilterBar = React.forwardRef(
-  ({ country = "ghana", resultsCount = 0, className, ...props }, ref) => {
-    const config =
-      COUNTRY_REGION_CONFIG[country?.toLowerCase()] || {
+  (
+    {
+      country = "ghana",
+      countryDestinations,
+      resultsCount = 0,
+      tourTags = [],
+      onFilterChange,
+      className,
+      ...props
+    },
+    ref
+  ) => {
+    // Prefer live destination regions; fall back to static country config
+    const config = React.useMemo(() => {
+      const base = COUNTRY_REGION_CONFIG[country?.toLowerCase()] || {
         ...DEFAULT_REGION_CONFIG,
-        displayName:
-          country
-            ? country.charAt(0).toUpperCase() + country.slice(1)
-            : "Country",
+        displayName: country
+          ? country.charAt(0).toUpperCase() + country.slice(1)
+          : "Country",
       };
+      if (countryDestinations && countryDestinations.length > 0) {
+        const liveRegions = [...new Set(
+          countryDestinations.map((d) => d.region).filter(Boolean)
+        )].sort();
+        if (liveRegions.length > 0) return { ...base, regions: liveRegions };
+      }
+      return base;
+    }, [country, countryDestinations]);
 
     const [selectedRegions, setSelectedRegions] = useState([]);
     const [type,            setType]            = useState("all");
-    const [category,        setCategory]        = useState(null);
+    const [selectedTags,    setSelectedTags]    = useState([]);
     const [regionOpen,      setRegionOpen]      = useState(false);
     const [panelPosition,   setPanelPosition]   = useState(null);
+    const [canScrollLeft,   setCanScrollLeft]   = useState(false);
+    const [canScrollRight,  setCanScrollRight]  = useState(false);
 
-    const wrapperRef    = useRef(null);
-    const barRef        = useRef(null);
+    const wrapperRef     = useRef(null);
+    const barRef         = useRef(null);
     const regionAnchorRef = useRef(null);
 
-    // Close dropdown on outside click (excluding clicks inside the dropdown panel)
+    // Reset all filter state when the country changes
+    useEffect(() => {
+      setSelectedRegions([]);
+      setType("all");
+      setSelectedTags([]);
+      setRegionOpen(false);
+      onFilterChange?.({ regions: [], type: "all", tags: [] });
+    }, [country]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    // Close region dropdown on outside click
     useEffect(() => {
       const handler = (e) => {
         if (wrapperRef.current?.contains(e.target)) return;
@@ -372,12 +349,9 @@ const TourCountryFilterBar = React.forwardRef(
       return () => document.removeEventListener("mousedown", handler);
     }, []);
 
-    // Compute fixed-positioning coordinates for the open dropdown panel
+    // Compute fixed-position coordinates for the region dropdown panel
     useEffect(() => {
-      if (!regionOpen) {
-        setPanelPosition(null);
-        return;
-      }
+      if (!regionOpen) { setPanelPosition(null); return; }
       const computePosition = () => {
         if (!regionAnchorRef.current) return;
         const rect = regionAnchorRef.current.getBoundingClientRect();
@@ -389,27 +363,59 @@ const TourCountryFilterBar = React.forwardRef(
         setPanelPosition({ top: rect.bottom + 6, left });
       };
       computePosition();
-      const handler = () => computePosition();
-      window.addEventListener("scroll", handler, true);
-      window.addEventListener("resize", handler);
+      window.addEventListener("scroll", computePosition, true);
+      window.addEventListener("resize", computePosition);
       return () => {
-        window.removeEventListener("scroll", handler, true);
-        window.removeEventListener("resize", handler);
+        window.removeEventListener("scroll", computePosition, true);
+        window.removeEventListener("resize", computePosition);
       };
     }, [regionOpen]);
 
-    const toggleRegion = (region) => {
+    // Track whether the pill row has overflowed left or right
+    useEffect(() => {
+      const el = barRef.current;
+      if (!el) return;
+      const check = () => {
+        setCanScrollLeft(el.scrollLeft > 1);
+        setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 1);
+      };
+      const raf = requestAnimationFrame(check);
+      el.addEventListener("scroll", check, { passive: true });
+      window.addEventListener("resize", check);
+      return () => {
+        cancelAnimationFrame(raf);
+        el.removeEventListener("scroll", check);
+        window.removeEventListener("resize", check);
+      };
+    }, [tourTags]); // re-run when pill count changes
+
+    const toggleRegion = (region) =>
       setSelectedRegions((prev) =>
         prev.includes(region) ? prev.filter((r) => r !== region) : [...prev, region]
       );
-    };
 
     const clearRegions = () => setSelectedRegions([]);
 
-    // Future: call onFilter({ regions: selectedRegions, type, category })
-    const applyFilters = () => {};
+    // TYPE pills — apply immediately
+    const handleTypeChange = (value) => {
+      setType(value);
+      onFilterChange?.({ regions: selectedRegions, type: value, tags: selectedTags });
+    };
 
-    // Trigger label reflects current selection
+    // CATEGORY (tag) pills — multi-select, apply immediately
+    const toggleTag = (tag) => {
+      const newTags = selectedTags.includes(tag)
+        ? selectedTags.filter((t) => t !== tag)
+        : [...selectedTags, tag];
+      setSelectedTags(newTags);
+      onFilterChange?.({ regions: selectedRegions, type, tags: newTags });
+    };
+
+    // Region "See Results" — apply region selection
+    const applyFilters = () => {
+      onFilterChange?.({ regions: selectedRegions, type, tags: selectedTags });
+    };
+
     const regionLabel =
       selectedRegions.length === 0
         ? "Select Region"
@@ -424,17 +430,49 @@ const TourCountryFilterBar = React.forwardRef(
           if (typeof ref === "function") ref(el);
           else if (ref) ref.current = el;
         }}
-        className={classNames("w-full", className)}
-        style={{
-          minHeight: "113px",
-          backgroundColor: "#f2eaf9",
-        }}
+        className={classNames("w-full flex items-center", className)}
+        style={{ minHeight: "113px", backgroundColor: "#f2eaf9" }}
         {...props}
       >
-        <div className="h-full flex items-center px-6 md:px-[30px] lg:px-[156px] py-4 lg:py-0">
-          <div ref={barRef} className="flex items-center gap-[12px] flex-1 overflow-x-auto scrollbar-hide py-2 -my-2 px-1 -mx-1">
-
-            {/* ── REGION — Figma 1942:34258 ───────────────────────────────── */}
+        <div className="h-full flex flex-1 min-w-0 items-center px-6 md:px-[30px] lg:px-[156px] py-4 lg:py-0">
+          <div className="relative flex-1 min-w-0">
+            {/* Left fade + scroll button */}
+            {canScrollLeft && (
+              <>
+                <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-10 z-10 bg-gradient-to-r from-[#f2eaf9] to-transparent" />
+                <button
+                  type="button"
+                  aria-label="Scroll left"
+                  onClick={() => barRef.current?.scrollBy({ left: -220, behavior: "smooth" })}
+                  className="absolute left-0 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center w-7 h-7 rounded-full bg-white shadow-sm border border-[#e4d0f7]"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M15 18l-6-6 6-6" stroke="#7b2cbf" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+              </>
+            )}
+            {/* Right fade + scroll button */}
+            {canScrollRight && (
+              <>
+                <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-10 z-10 bg-gradient-to-l from-[#f2eaf9] to-transparent" />
+                <button
+                  type="button"
+                  aria-label="Scroll right"
+                  onClick={() => barRef.current?.scrollBy({ left: 220, behavior: "smooth" })}
+                  className="absolute right-0 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center w-7 h-7 rounded-full bg-white shadow-sm border border-[#e4d0f7]"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M9 18l6-6-6-6" stroke="#7b2cbf" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+              </>
+            )}
+            <div
+              ref={barRef}
+              className="flex items-center gap-[12px] overflow-x-auto scrollbar-hide py-2 -my-2 px-1 -mx-1"
+            >
+            {/* ── REGION ──────────────────────────────────────────────────────── */}
             <div className="flex items-center gap-[12px] shrink-0">
               <FilterLabel>REGION</FilterLabel>
               <div ref={regionAnchorRef} style={{ minWidth: "137px", height: "44px" }}>
@@ -446,7 +484,7 @@ const TourCountryFilterBar = React.forwardRef(
               </div>
             </div>
 
-            {/* ── TYPE — Figma 1942:34262 ─────────────────────────────────── */}
+            {/* ── TYPE ────────────────────────────────────────────────────────── */}
             <div className="flex items-center gap-[12px] shrink-0">
               <FilterLabel>TYPE</FilterLabel>
               {TYPE_OPTIONS.map((opt) => (
@@ -454,52 +492,54 @@ const TourCountryFilterBar = React.forwardRef(
                   key={opt.value}
                   value={opt.value}
                   isActive={type === opt.value}
-                  onSelect={setType}
+                  onSelect={handleTypeChange}
                 >
                   {opt.label}
                 </FilterPill>
               ))}
             </div>
 
-            {/* ── Divider — Figma 1942:34269 ──────────────────────────────── */}
-            <FilterDivider />
+            {/* ── CATEGORY — derived from tour tags; hidden until tours load ── */}
+            {tourTags.length > 0 && (
+              <>
+                <FilterDivider />
+                <div className="flex items-center gap-[12px] shrink-0">
+                  <FilterLabel>CATEGORY</FilterLabel>
+                  {tourTags.map((tag) => (
+                    <FilterPill
+                      key={tag}
+                      value={tag}
+                      isActive={selectedTags.includes(tag)}
+                      onSelect={toggleTag}
+                    >
+                      {tag}
+                    </FilterPill>
+                  ))}
+                </div>
+              </>
+            )}
 
-            {/* ── CATEGORY — Figma 1942:34270 ─────────────────────────────── */}
-            <div className="flex items-center gap-[12px] shrink-0">
-              <FilterLabel>CATEGORY</FilterLabel>
-              {CATEGORY_OPTIONS.map((opt) => (
-                <FilterPill
-                  key={opt.value}
-                  value={opt.value}
-                  isActive={category === opt.value}
-                  onSelect={setCategory}
-                >
-                  {opt.label}
-                </FilterPill>
-              ))}
-            </div>
+            </div>{/* end scrollable barRef */}
+          </div>{/* end relative wrapper */}
 
-            {/* ── Results count — right-aligned ───────────────────────────── */}
-            <div className="ml-auto shrink-0 flex items-center justify-center p-[10px]">
-              <span
-                style={{
-                  fontFamily: "Raleway, sans-serif",
-                  fontWeight: 700,
-                  fontSize: "13px",
-                  lineHeight: "18px",
-                  color: "#7b2cbf",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {resultsCount > 0 ? `${resultsCount} results` : "all results"}
-              </span>
-            </div>
-
+          {/* ── Results count — outside scroll container, always visible ── */}
+          <div className="shrink-0 flex items-center justify-center pl-[16px]">
+            <span
+              style={{
+                fontFamily: "Raleway, sans-serif",
+                fontWeight: 700,
+                fontSize: "13px",
+                lineHeight: "18px",
+                color: "#7b2cbf",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {resultsCount > 0 ? `${resultsCount} results` : "all results"}
+            </span>
           </div>
-        </div>
+        </div>{/* end padding container */}
 
-        {/* Region dropdown panel — rendered with position: fixed so it
-            escapes the bar's overflow-x-auto scroll container */}
+        {/* Region dropdown — position:fixed to escape the scrollable bar */}
         {regionOpen && panelPosition && (
           <RegionDropdownPanel
             country={config.displayName}

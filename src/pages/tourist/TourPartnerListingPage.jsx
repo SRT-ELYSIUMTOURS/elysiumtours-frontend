@@ -1,16 +1,20 @@
-import React, { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useParams, useSearchParams } from "react-router-dom";
 import BlogBreadcrumbBar from "../../components/sections/blog/BlogBreadcrumbBar";
-import PartnerCategoryFilterBar from "../../components/sections/partners/PartnerCategoryFilterBar";
+import PartnerHero from "../../components/sections/partners/PartnerHero";
 import PartnerListingFilterBar from "../../components/sections/partners/PartnerListingFilterBar";
 import PartnerListingGrid from "../../components/sections/partners/PartnerListingGrid";
 import PartnerStoriesSection from "../../components/sections/partners/PartnerStoriesSection";
 import PartnerPromoCtaSection from "../../components/sections/PartnerPromoCtaSection";
 import { partnerPromoGallery } from "../../data/partnerPromoCtaPresets.jsx";
 import PartnerWithUsModal from "../../components/ui/PartnerWithUsModal";
+import { useAppDispatch } from "../../hooks/useAppDispatch";
+import { useAppSelector } from "../../hooks/useAppSelector";
+import { fetchPartnersThunk, selectPartnerList, selectPartnerStatus } from "../../store/slices/partnersSlice";
+import { normalizeForListingGrid, PARTNER_API_MAP, submitPartnerApplicationApi } from "../../api/partners.api";
 
 // Route: /tour-partners/:category/all
-// Full listing page with sort/filter/date controls + grid of PartnerListingCard
+// Hero + listing toolbar + grid (same highlight/guide cards as category page + meta below)
 
 const CATEGORY_LABELS = {
   "tour-sites": "Tour Sites & Events",
@@ -22,59 +26,85 @@ const CATEGORY_LABELS = {
   insurance: "Insurance & Other Services",
 };
 
+const SORT_MAP = {
+  "price-asc":  "price_asc",
+  "price-desc": "price_desc",
+  rating:       "rating_desc",
+  "name-asc":   "name_asc",
+};
+
 const TourPartnerListingPage = () => {
   const { category } = useParams();
-  const navigate = useNavigate();
-  const [filters, setFilters] = useState(null);
-  const [sort, setSort] = useState("recommended");
+  const [searchParams] = useSearchParams();
+  const [filters, setFilters]             = useState(null);
+  const [searchQuery, setSearchQuery]     = useState(() => searchParams.get("q") ?? "");
+  const [sortKey, setSortKey]             = useState(null);
+  const [guideCountry, setGuideCountry]   = useState(null);
   const [partnerModalOpen, setPartnerModalOpen] = useState(false);
 
+  const dispatch = useAppDispatch();
+  const raw      = useAppSelector(selectPartnerList(category));
+  const status   = useAppSelector(selectPartnerStatus(category));
+  const isWired  = Boolean(PARTNER_API_MAP[category]);
+  const isGuide  = category === "guides";
+
+  useEffect(() => {
+    if (!category || !isWired) return;
+    const params = { pageSize: 100 };
+    if (sortKey) params.sort = sortKey;
+    if (isGuide && guideCountry) params.country = guideCountry;
+    dispatch(fetchPartnersThunk({ category, params }));
+  }, [dispatch, category, isWired, sortKey, guideCountry, isGuide]);
+
+  const handleSortChange = (value) => {
+    setSortKey(SORT_MAP[value] ?? null);
+  };
+
+  const handleLocationChange = (payload) => {
+    // payload = { regions: [...] } from PartnerLocationDropdown
+    setGuideCountry(payload?.regions?.[0] ?? null);
+  };
+
+  // Wired: always pass an array (empty while loading, real rows when succeeded).
+  // Non-wired: pass undefined so the grid falls back to its built-in mock data.
+  const partners = isWired
+    ? (status === "succeeded" ? raw.map((p) => normalizeForListingGrid(p, category)) : [])
+    : undefined;
+
+  const mergedFilters = searchQuery
+    ? { ...(filters || {}), search: searchQuery }
+    : filters;
+
   const categoryLabel = CATEGORY_LABELS[category] ?? category;
-  const isGuide = category === "guides";
 
   return (
     <main className="w-full">
-
-      {/* Breadcrumb — full width, BlogBreadcrumbBar handles internal padding */}
       <BlogBreadcrumbBar
         items={[
           { label: "Home", href: "/" },
           { label: "Tour Partners", href: "/tour-partners" },
           { label: categoryLabel, href: `/tour-partners/${category}` },
-          { label: "All" },
         ]}
       />
 
-      {/* Category filter bar */}
-      <PartnerCategoryFilterBar
-        activeCategory={category}
-        onCategoryChange={(cat) => {
-          if (cat === "all") navigate("/tour-partners");
-          else navigate(`/tour-partners/${cat}/all`);
-        }}
-      />
+      <PartnerHero onSearch={setSearchQuery} />
 
-      {/* Filters — filter bar handles its own responsive padding internally */}
       <PartnerListingFilterBar
         category={category}
         showLocationFilter={isGuide}
-        onSortChange={setSort}
         onFiltersApply={setFilters}
+        onSortChange={handleSortChange}
+        onLocationChange={handleLocationChange}
       />
 
-      {/* Heading */}
-      <div className="px-4 md:px-8 lg:px-16 pt-6 md:pt-10 pb-2">
-        <h1 className="font-raleway font-bold text-xl md:text-2xl lg:text-3xl text-tertiary-normal-default">
-          {categoryLabel}
-        </h1>
+      <div className="px-4 lg:px-[156px] bg-secondary-light-default py-12 lg:pb-20">
+        <PartnerListingGrid
+          category={category}
+          filters={mergedFilters}
+          partners={partners}
+          onResetFilters={() => { setFilters(null); setSearchQuery(""); }}
+        />
       </div>
-
-      {/* Grid — PartnerListingGrid handles its own responsive padding */}
-      <PartnerListingGrid
-        category={category}
-        filters={filters}
-        sort={sort}
-      />
 
       <PartnerStoriesSection />
 
@@ -86,10 +116,11 @@ const TourPartnerListingPage = () => {
       {partnerModalOpen && (
         <PartnerWithUsModal
           onClose={() => setPartnerModalOpen(false)}
-          onSubmit={() => {}}
+          onSubmit={submitPartnerApplicationApi}
         />
       )}
     </main>
   );
 };
+
 export default TourPartnerListingPage;

@@ -3,22 +3,66 @@ import { useNavigate } from "react-router-dom";
 import { classNames } from "../../../utils/classNames";
 import CountryTourCard from "../../cards/CountryTourCard";
 
-// Figma: 1903:25307 — section, bg secondary-light-default
-// Header: left = line(46px) + "TOUR BY COUNTRIES" label / right = heading w-[795px] text-right
-// Grid: 4×2, card 331×192, gap-x-[32px] gap-y-[40px]
-const COUNTRIES = [
-  { country: "Ghana",       slug: "ghana",        image: "https://picsum.photos/seed/country-ghana/331/192",    tourCount: 14 },
-  { country: "Nigeria",     slug: "nigeria",      image: "https://picsum.photos/seed/country-nigeria/331/192",  tourCount: 10 },
-  { country: "Togo",        slug: "togo",         image: "https://picsum.photos/seed/country-togo/331/192",     tourCount: 6  },
-  { country: "Benin",       slug: "benin",        image: "https://picsum.photos/seed/country-benin/331/192",    tourCount: 5  },
-  { country: "Ivory Coast", slug: "ivory-coast",  image: "https://picsum.photos/seed/country-ivory/331/192",   tourCount: 8  },
-  { country: "Senegal",     slug: "senegal",      image: "https://picsum.photos/seed/country-senegal/331/192", tourCount: 7  },
-  { country: "Sierra Leone",slug: "sierra-leone", image: "https://picsum.photos/seed/country-sierra/331/192",  tourCount: 4  },
-  { country: "Cameroon",    slug: "cameroon",     image: "https://picsum.photos/seed/country-cameroon/331/192",tourCount: 9  },
-];
+// Replicates slugify(name, { lower: true, strict: true }) from the backend.
+// NFD decomposition strips diacritics (ô→o, é→e), then non-alphanumeric
+// chars (apostrophes, etc.) are removed, spaces become hyphens.
+function toCountrySlug(name) {
+  return name
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9\s]/g, "")
+    .trim()
+    .replace(/\s+/g, "-");
+}
 
-const TourByCountriesSection = React.forwardRef(({ className, ...props }, ref) => {
+const buildCards = (apiDestinations) => {
+  if (!apiDestinations || apiDestinations.length === 0) return null;
+
+  const map = {};
+  apiDestinations.forEach((dest) => {
+    const key = (dest.country || "Ghana").toLowerCase();
+    if (!map[key]) {
+      map[key] = {
+        country: dest.country || "Ghana",
+        slug: toCountrySlug(dest.country || "Ghana"),
+        image: dest.coverImage || (dest.images && dest.images[0]) || null,
+        tourCount: 0,
+      };
+    }
+    if (!map[key].image) {
+      map[key].image = dest.coverImage || (dest.images && dest.images[0]) || null;
+    }
+  });
+
+  const seen = new Set();
+  return Object.values(map).filter((c) => {
+    const k = c.country.toLowerCase();
+    if (seen.has(k)) return false;
+    seen.add(k);
+    return true;
+  });
+};
+
+const TourByCountriesSection = React.forwardRef(({ className, destinations: apiDestinations, tours, ...props }, ref) => {
   const navigate = useNavigate();
+
+  const cards = React.useMemo(() => {
+    const base = buildCards(apiDestinations);
+    if (!base) return null;
+    if (!tours) return base;
+
+    const countMap = {};
+    tours.forEach((t) => {
+      const key = (t.country || "ghana").toLowerCase();
+      countMap[key] = (countMap[key] || 0) + 1;
+    });
+
+    return base.map((card) => ({
+      ...card,
+      tourCount: countMap[card.country.toLowerCase()] ?? card.tourCount,
+    }));
+  }, [apiDestinations, tours]);
 
   return (
     <section
@@ -65,7 +109,7 @@ const TourByCountriesSection = React.forwardRef(({ className, ...props }, ref) =
 
         {/* Responsive grid: 2 cols mobile, 3 tablet, 4 desktop */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 md:gap-x-6 lg:gap-x-[32px] gap-y-6 lg:gap-y-[40px]">
-          {COUNTRIES.map((c) => (
+          {cards && cards.map((c) => (
             <CountryTourCard
               key={c.slug}
               country={c.country}

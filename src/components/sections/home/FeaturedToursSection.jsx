@@ -1,74 +1,101 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { classNames } from "../../../utils/classNames";
 import { SectionHeadline } from "../../ui/SectionHeadline";
 import PopularTourCard from "../../cards/PopularTourCard";
+import PopularTourCardSkeleton from "../../cards/PopularTourCardSkeleton";
 import Button from "../../ui/button";
 import ExploreMoreArrowIcon from "../../icons/ExploreMoreArrowIcon";
 
-const TOUR_DATA = [
-  {
-    id: 1,
-    image: "./src/assets/homeAssets/Image-2.webp",
-    location: "Cape coast/Ghana",
-    duration: { class: "Multi-Day", span: "3 Days/2 days" },
-    maxGroupSize: 12,
-    pickupIncluded: true,
-    tags: ["Cultural", "Diaspora", "International"],
-    rating: 4.9,
-    title: "Elmina Heritage & Coastal Journey",
-    availabilityBadge: "Opened Daily",
-    price: "Ghs.400.00",
-    country: "ghana",
-    tourSlug: "elmina-heritage-coastal-journey",
-  },
-  {
-    id: 2,
-    image: "./src/assets/homeAssets/Image-3.webp",
-    location: "Accra/Ghana",
-    duration: { class: "Multi-Day", span: "3 Days/2 days" },
-    tags: ["Cultural", "Diaspora", "International"],
-    pickupIncluded: true,
+const TOUR_TYPE_LABELS = { day_tour: "Day Tour", multi_day: "Multi-Day", express: "Express" };
 
-    rating: 4.8,
-    title: "Accra Bustling City & Market Tour",
-    availabilityBadge: "Opened Daily",
-    price: "Ghs.350.00",
-    country: "ghana",
-    tourSlug: "accra-bustling-city-market-tour",
-  },
-  {
-    id: 3,
-    image: "./src/assets/homeAssets/Image-4.webp",
-    location: "Ashanti/Ghana",
-    maxGroupSize: 12,
-    tags: ["Cultural", "Diaspora", "International"],
-    pickupIncluded: true,
+const buildCardProps = (t, i) => {
+  const typeLabel = TOUR_TYPE_LABELS[t.tourType] || t.duration?.class || "Multi-Day";
+  const seats = t.remainingCapacity;
+  const durationClass = seats != null
+    ? `${typeLabel}: ${seats} Seat${seats !== 1 ? "s" : ""} Available`
+    : typeLabel;
+  const days = t.durationDays;
+  const durationSpan = days
+    ? (days === 1 ? "1 Day" : `${days} Days/${days - 1} Night${days - 1 !== 1 ? "s" : ""}`)
+    : (t.duration?.span || "3 Days");
 
-    rating: 4.7,
-    title: "Kumasi Heritage & Market Discovery",
-    availabilityBadge: "Opened Daily",
-    price: "Ghs.500.00",
-    country: "ghana",
-    tourSlug: "kumasi-heritage-market-discovery",
-  },
-  {
-    id: 4,
-    image: "./src/assets/homeAssets/Image-5.webp",
-    location: "Volta Region/Ghana",
-    pickupIncluded: true,
-    tags: ["Cultural", "Diaspora", "International"],
+  const tiers = t.pricingTiers;
+  const minPrice = tiers && tiers.length > 0
+    ? Math.min(...tiers.map((tier) => tier.pricePerPerson))
+    : t.basePrice;
+  const currency = t.displayCurrency || "GHS";
+  const CURRENCY_SYMBOLS = { USD: "$", GHS: "GHS ", EUR: "€", GBP: "£" };
+  const symbol = CURRENCY_SYMBOLS[currency] ?? `${currency} `;
+  const price = minPrice != null
+    ? `${symbol}${Number(minPrice).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
+    : t.price || "Contact us";
 
-    rating: 4.9,
-    title: "Wli Waterfalls & Nature Exploration",
-    availabilityBadge: "Opened Daily",
-    price: "Ghs.450.00",
-    country: "ghana",
-    tourSlug: "wli-waterfalls-nature-exploration",
-  },
-];
+  return {
+    id: t._id || t.id || i,
+    image: t.coverImage || t.image,
+    location: t.destination?.name
+      ? `${t.destination.name}/${t.country || "Ghana"}`
+      : (t.location || t.country || "Ghana"),
+    rating: t.rating || 4.8,
+    title: t.title || t.name || "Tour",
+    availabilityBadge: t.availabilityBadge || "Available",
+    price,
+    tags: t.tags || [],
+    duration: { class: durationClass, span: durationSpan },
+    maxGroupSize: t.totalCapacity ?? t.maxGroupSize,
+    pickupIncluded: t.pickupIncluded ?? false,
+    featureType: t.featureType ?? null,
+    featureLabel: t.featureLabel ?? null,
+    statusBadge: t.statusBadge || null,
+    reviewCount: t.reviewCount || 0,
+    country: t.country || "ghana",
+    tourSlug: t.slug || t.tourSlug || String(t._id || t.id || i),
+    startDate: t.startDate || null,
+  };
+};
 
 const FeaturedToursSection = React.forwardRef(
-  ({ className, ...props }, ref) => {
+  ({ className, tours: toursProp, isLoading = false, ...props }, ref) => {
+    const navigate = useNavigate();
+    const displayTours = toursProp && toursProp.length > 0
+      ? toursProp.slice(0, 4).map(buildCardProps)
+      : [];
+
+    const renderCards = (wrapperClass) => {
+      if (isLoading) {
+        return Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className={wrapperClass}>
+            <PopularTourCardSkeleton className="w-full" />
+          </div>
+        ));
+      }
+      return displayTours.map((tour) => (
+        <div key={tour.id} className={wrapperClass}>
+          <PopularTourCard
+            image={tour.image}
+            location={tour.location}
+            rating={tour.rating}
+            title={tour.title}
+            availabilityBadge={tour.availabilityBadge}
+            price={tour.price}
+            tags={tour.tags}
+            duration={tour.duration}
+            pickupIncluded={tour.pickupIncluded}
+            maxGroupSize={tour.maxGroupSize}
+            featureType={tour.featureType}
+            featureLabel={tour.featureLabel}
+            statusBadge={tour.statusBadge}
+            reviewCount={tour.reviewCount}
+            country={tour.country}
+            tourSlug={tour.tourSlug}
+            startDate={tour.startDate}
+            showImageOverlays={false}
+          />
+        </div>
+      ));
+    };
+
     return (
       <section
         ref={ref}
@@ -79,8 +106,8 @@ const FeaturedToursSection = React.forwardRef(
         {...props}
       >
         <div className="max-w-[1728px] mx-auto px-6 md:px-[30px] lg:px-[164px]">
-          <div className="flex flex-col lg:flex-row justify-between items-start gap-6 lg:gap-8 mb-8 lg:mb-16">
-            <div className="flex items-center justify-center lg:justify-start w-full lg:w-auto gap-sm shrink-0">
+          <div className="flex flex-col lg:flex-row justify-between items-center lg:items-start gap-6 lg:gap-8 mb-8 lg:mb-16">
+            <div className="flex items-center justify-start w-full lg:w-auto gap-sm shrink-0">
               <div className="w-[46px] h-[2px] bg-secondary-dark-darker" />
               <span className="font-raleway font-bold text-med-small-bold text-secondary-dark-darker uppercase tracking-wide">
                 Featured Tours
@@ -103,6 +130,7 @@ const FeaturedToursSection = React.forwardRef(
                 variant="secondaryOutline"
                 size="small"
                 shape="pill"
+                onClick={() => navigate("/tours#featured")}
               >
                 Explore More
               </Button>
@@ -111,47 +139,14 @@ const FeaturedToursSection = React.forwardRef(
 
           {/* Mobile: horizontal scroll */}
           <div className="overflow-hidden md:hidden -mx-6">
-          <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-4 px-6 scrollbar-hide">
-            {TOUR_DATA.map((tour) => (
-              <div key={tour.id} className="min-w-[280px] snap-start shrink-0">
-                <PopularTourCard
-                  image={tour.image}
-                  location={tour.location}
-                  rating={tour.rating}
-                  title={tour.title}
-                  availabilityBadge={tour.availabilityBadge}
-                  price={tour.price}
-                  tags={tour.tags}
-                  duration={tour.duration}
-                  pickupIncluded={tour.pickupIncluded}
-                  maxGroupSize={tour.maxGroupSize}
-                  country={tour.country}
-                  tourSlug={tour.tourSlug}
-                />
-              </div>
-            ))}
-          </div>
+            <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-4 px-6 scrollbar-hide">
+              {renderCards("min-w-[280px] snap-start shrink-0")}
+            </div>
           </div>
 
           {/* Tablet/Desktop: grid layout */}
           <div className="hidden md:grid md:grid-cols-2 xl:grid-cols-4 gap-md">
-            {TOUR_DATA.map((tour) => (
-              <PopularTourCard
-                key={tour.id}
-                image={tour.image}
-                location={tour.location}
-                rating={tour.rating}
-                title={tour.title}
-                availabilityBadge={tour.availabilityBadge}
-                price={tour.price}
-                tags={tour.tags}
-                duration={tour.duration}
-                pickupIncluded={tour.pickupIncluded}
-                maxGroupSize={tour.maxGroupSize}
-                country={tour.country}
-                tourSlug={tour.tourSlug}
-              />
-            ))}
+            {renderCards("")}
           </div>
         </div>
       </section>

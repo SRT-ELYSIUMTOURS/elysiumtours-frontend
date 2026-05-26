@@ -2,45 +2,44 @@ import React from "react";
 import { classNames } from "../../../utils/classNames";
 import FeaturedDestinationCard from "../../cards/FeaturedDestinationCard";
 
-const DESTINATIONS = {
-  leftCol: [
-    {
-      id: 1,
-      name: "Kakum National Park",
-      subtitle: "Discover Ghana's most captivating destinations",
-      image: "./src/assets/homeAssets/Image-6.webp",
-    },
-    {
-      id: 2,
-      name: "National Theater",
-      subtitle: "Discover Ghana's most captivating destinations",
-      image: "./src/assets/homeAssets/Image-7.webp",
-    },
-  ],
-  center: {
-    id: 3,
-    name: "Independence Square",
-    subtitle: "Discover Ghana's most captivating destinations",
-    image: "./src/assets/homeAssets/Image-8.webp",
-  },
-  rightCol: [
-    {
-      id: 4,
-      name: "Kakum National Park",
-      subtitle: "Discover Ghana's most captivating destinations",
-      image: "./src/assets/homeAssets/Image-9.webp",
-    },
-    {
-      id: 5,
-      name: "Boti Falls",
-      subtitle: "Discover Ghana's most captivating destinations",
-      image: "./src/assets/homeAssets/Image-10.webp",
-    },
-  ],
-};
+/**
+ * FeaturedDestinationsSection
+ *
+ * Displays up to 5 tour highlight stops from featured tour packages in a
+ * 3-column masonry layout (desktop) / horizontal scroll (mobile) / 2-col grid (tablet).
+ *
+ * Props:
+ *   highlights  — array of { id, name, subtitle, image } from the parent page.
+ *                 Sourced by flattening tourHighlights[] from featured tour packages.
+ *                 Index 0-1 → left column, index 2 → centre (tall), index 3-4 → right column.
+ *   isLoading   — show skeleton cards while the API call is in flight.
+ */
+
+// ── Skeleton card placeholder shown while highlights are loading ────────────
+const SkeletonCard = ({ size = "default" }) => (
+  <div
+    className={classNames(
+      "w-full rounded-[var(--radius-md)] bg-gray-200 animate-pulse",
+      size === "large" ? "h-[656px]" : "h-[316px]"
+    )}
+    aria-hidden="true"
+  />
+);
+
+// ── Splits the flat highlights array into the 3-column layout positions ─────
+function toColumns(items = []) {
+  return {
+    left:   items.slice(0, 2),
+    center: items[2] ?? null,
+    right:  items.slice(3, 5),
+  };
+}
 
 const FeaturedDestinationsSection = React.forwardRef(
-  ({ className, ...props }, ref) => {
+  ({ className, highlights = [], isLoading = false, ...props }, ref) => {
+    const { left, center, right } = toColumns(highlights);
+    const allItems = [...left, ...(center ? [center] : []), ...right];
+
     return (
       <section
         ref={ref}
@@ -51,6 +50,8 @@ const FeaturedDestinationsSection = React.forwardRef(
         {...props}
       >
         <div className="max-w-[1728px] mx-auto px-6 md:px-[30px] lg:px-[164px]">
+
+          {/* ── Section header ─────────────────────────────────────────────── */}
           <div className="flex flex-col lg:flex-row justify-between items-start gap-6 lg:gap-8 mb-8 lg:mb-16">
             <div className="flex items-center justify-center lg:justify-start w-full lg:w-auto gap-sm shrink-0">
               <div className="w-[46px] h-[2px] bg-secondary-dark-darker" />
@@ -73,80 +74,90 @@ const FeaturedDestinationsSection = React.forwardRef(
             </div>
           </div>
 
-          {/* Desktop masonry grid */}
+          {/* ── Desktop: 3-column masonry grid ─────────────────────────────── */}
           <div className="hidden lg:grid lg:grid-cols-3 gap-[29px] items-start">
-            {/* Left column — 2 short cards */}
-            <div className="flex flex-col gap-2xl ">
-              {DESTINATIONS.leftCol.map((dest) => (
-                <FeaturedDestinationCard
-                  key={dest.id}
-                  image={dest.image}
-                  name={dest.name}
-                  subtitle={dest.subtitle}
-                  size="default"
-                />
-              ))}
+
+            {/* Left column — 2 short cards (indices 0, 1) */}
+            <div className="flex flex-col gap-2xl">
+              {isLoading
+                ? [0, 1].map((i) => <SkeletonCard key={i} />)
+                : left.map((item) => (
+                    <FeaturedDestinationCard
+                      key={item.id}
+                      image={item.image}
+                      name={item.name}
+                      subtitle={item.subtitle}
+                      size="default"
+                    />
+                  ))}
             </div>
 
-            {/* Center — 1 tall card */}
-            <FeaturedDestinationCard
-              image={DESTINATIONS.center.image}
-              name={DESTINATIONS.center.name}
-              subtitle={DESTINATIONS.center.subtitle}
-              size="large"
-              className=" lg:h-full"
-            />
+            {/* Centre — 1 tall card (index 2) */}
+            <div className="lg:h-full">
+              {isLoading
+                ? <SkeletonCard size="large" />
+                : center && (
+                    <FeaturedDestinationCard
+                      image={center.image}
+                      name={center.name}
+                      subtitle={center.subtitle}
+                      size="large"
+                      className="lg:h-full"
+                    />
+                  )}
+            </div>
 
-            {/* Right column — 2 short cards */}
+            {/* Right column — 2 short cards (indices 3, 4) */}
             <div className="flex flex-col gap-2xl">
-              {DESTINATIONS.rightCol.map((dest) => (
-                <FeaturedDestinationCard
-                  key={dest.id}
-                  image={dest.image}
-                  name={dest.name}
-                  subtitle={dest.subtitle}
-                  size="default"
-                />
-              ))}
+              {isLoading
+                ? [0, 1].map((i) => <SkeletonCard key={i} />)
+                : right.map((item) => (
+                    <FeaturedDestinationCard
+                      key={item.id}
+                      image={item.image}
+                      name={item.name}
+                      subtitle={item.subtitle}
+                      size="default"
+                    />
+                  ))}
             </div>
           </div>
 
-          {/* Mobile: horizontal scroll */}
+          {/* ── Mobile: horizontal scroll ───────────────────────────────────── */}
           <div className="overflow-hidden md:hidden -mx-6">
             <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-4 px-6 scrollbar-hide">
-              {[
-                ...DESTINATIONS.leftCol,
-                DESTINATIONS.center,
-                ...DESTINATIONS.rightCol,
-              ].map((dest) => (
-                <div key={dest.id} className="min-w-[200px] snap-start shrink-0">
-                  <FeaturedDestinationCard
-                    image={dest.image}
-                    name={dest.name}
-                    subtitle={dest.subtitle}
-                    size="default"
-                  />
+              {(isLoading ? [0, 1, 2, 3, 4] : allItems).map((item, i) => (
+                <div key={isLoading ? i : item.id} className="min-w-[200px] snap-start shrink-0">
+                  {isLoading
+                    ? <SkeletonCard />
+                    : (
+                        <FeaturedDestinationCard
+                          image={item.image}
+                          name={item.name}
+                          subtitle={item.subtitle}
+                          size="default"
+                        />
+                      )}
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Tablet: 2-col grid */}
+          {/* ── Tablet: 2-column grid ───────────────────────────────────────── */}
           <div className="hidden md:grid md:grid-cols-2 md:gap-6 lg:hidden">
-            {[
-              ...DESTINATIONS.leftCol,
-              DESTINATIONS.center,
-              ...DESTINATIONS.rightCol,
-            ].map((dest) => (
-              <FeaturedDestinationCard
-                key={dest.id}
-                image={dest.image}
-                name={dest.name}
-                subtitle={dest.subtitle}
-                size="default"
-              />
-            ))}
+            {isLoading
+              ? [0, 1, 2, 3, 4].map((i) => <SkeletonCard key={i} />)
+              : allItems.map((item) => (
+                  <FeaturedDestinationCard
+                    key={item.id}
+                    image={item.image}
+                    name={item.name}
+                    subtitle={item.subtitle}
+                    size="default"
+                  />
+                ))}
           </div>
+
         </div>
       </section>
     );
@@ -154,5 +165,4 @@ const FeaturedDestinationsSection = React.forwardRef(
 );
 
 FeaturedDestinationsSection.displayName = "FeaturedDestinationsSection";
-
 export default FeaturedDestinationsSection;

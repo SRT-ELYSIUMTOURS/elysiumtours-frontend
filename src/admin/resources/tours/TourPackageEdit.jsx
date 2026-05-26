@@ -86,7 +86,6 @@ const TourPackageEdit = () => (
       {/* Media Tab */}
       <TabbedForm.Tab label="Media">
         <ImageUploadField source="coverImage" label="Cover Image" />
-        <ImageUploadField source="heroImages" label="Hero Images" multiple />
       </TabbedForm.Tab>
 
       {/* Group & Pricing Tab */}

@@ -37,6 +37,81 @@ const ClockCircleIcon = () => (
   </svg>
 );
 
+/** Info block below PartnerHighlightCard / GuideSpotlightCard or legacy listing image card */
+export const PartnerListingMeta = ({
+  location = "",
+  rating,
+  title,
+  availability,
+  price,
+  specialties,
+  language,
+  variant = "default",
+  className = "",
+}) => (
+  <div className={classNames("flex flex-col gap-[8px]", className)}>
+    <div className="flex items-center gap-[6px]">
+      <MapPinIcon />
+      <span className="font-raleway font-bold text-[13px] leading-[18px] text-primary-dark-active">
+        {location}
+      </span>
+    </div>
+
+    <div className="flex items-center gap-[6px]">
+      <StarIcon />
+      <span className="font-raleway font-medium text-[16px] leading-[22px] text-secondary-normal-default">
+        {rating}
+      </span>
+    </div>
+
+    <h3 className="font-raleway font-semibold text-[20px] leading-[28px] text-tertiary-normal-default w-full line-clamp-2">
+      {title}
+    </h3>
+
+    {variant === "guide" ? (
+      <>
+        {specialties && (
+          <div className="flex items-start gap-[4px]">
+            <span className="font-raleway font-bold text-[13px] leading-[18px] text-tertiary-normal-default shrink-0">
+              Specialties:
+            </span>
+            <span className="font-raleway font-medium text-[13px] leading-[18px] text-primary-dark-active">
+              {specialties}
+            </span>
+          </div>
+        )}
+        {language && (
+          <div className="flex items-center gap-[4px]">
+            <span className="font-raleway font-bold text-[13px] leading-[18px] text-tertiary-normal-default">
+              Language:
+            </span>
+            <span className="font-raleway font-medium text-[13px] leading-[18px] text-primary-dark-active">
+              {language}
+            </span>
+          </div>
+        )}
+      </>
+    ) : (
+      <>
+        <div className="flex items-center gap-[6px]">
+          <ClockCircleIcon />
+          <span className="font-raleway font-semibold text-[13px] leading-[18px] text-secondary-normal-default">
+            {availability}
+          </span>
+        </div>
+        <div className="flex items-baseline gap-[8px]">
+          <span className="font-raleway font-medium text-[13px] leading-[18px] text-tertiary-normal-default">
+            From
+          </span>
+          <span className="font-raleway font-bold text-[20px] leading-[28px] text-secondary-dark-default">
+            {price}
+          </span>
+        </div>
+      </>
+    )}
+  </div>
+);
+
 const PartnerListingCard = React.forwardRef(({
   image,
   partnerName = "Cape Coast Castle Museum",
@@ -47,7 +122,7 @@ const PartnerListingCard = React.forwardRef(({
   price = "Ghs.400.00",
   specialties,
   language,
-  variant = "default",  // "default" | "guide"
+  variant = "default",
   onClick,
   className = "",
   ...props
@@ -59,7 +134,6 @@ const PartnerListingCard = React.forwardRef(({
       className={classNames("flex flex-col gap-[22px]", className)}
       {...props}
     >
-      {/* Image card */}
       <div
         onClick={onClick}
         className={classNames(
@@ -70,17 +144,12 @@ const PartnerListingCard = React.forwardRef(({
           "hover:shadow-xl hover:-translate-y-0.5"
         )}
       >
-        {/* Background image */}
         {image ? (
           <img src={image} alt={partnerName} className="w-full h-full object-cover" />
         ) : (
           <div className="w-full h-full bg-secondary-light-default" />
         )}
-
-        {/* Gradient overlay for footer */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-
-        {/* Footer blur strip — partner name */}
         <div
           className={classNames(
             "absolute bottom-0 left-0 right-0 px-[24px] py-[20px]",
@@ -93,76 +162,16 @@ const PartnerListingCard = React.forwardRef(({
         </div>
       </div>
 
-      {/* Info section below card */}
-      <div className="flex flex-col gap-[8px]">
-        {/* Location */}
-        <div className="flex items-center gap-[6px]">
-          <MapPinIcon />
-          <span className="font-raleway font-bold text-[13px] leading-[18px] text-primary-dark-active">
-            {location}
-          </span>
-        </div>
-
-        {/* Rating */}
-        <div className="flex items-center gap-[6px]">
-          <StarIcon />
-          <span className="font-raleway font-medium text-[16px] leading-[22px] text-secondary-normal-default">
-            {rating}
-          </span>
-        </div>
-
-        {/* Title */}
-        <h3 className="font-raleway font-semibold text-[20px] leading-[28px] text-tertiary-normal-default w-full line-clamp-2">
-          {title}
-        </h3>
-
-        {variant === "guide" ? (
-          <>
-            {/* Specialties */}
-            {specialties && (
-              <div className="flex items-start gap-[4px]">
-                <span className="font-raleway font-bold text-[13px] leading-[18px] text-tertiary-normal-default shrink-0">
-                  Specialties:
-                </span>
-                <span className="font-raleway font-medium text-[13px] leading-[18px] text-primary-dark-active">
-                  {specialties}
-                </span>
-              </div>
-            )}
-            {/* Language */}
-            {language && (
-              <div className="flex items-center gap-[4px]">
-                <span className="font-raleway font-bold text-[13px] leading-[18px] text-tertiary-normal-default">
-                  Language:
-                </span>
-                <span className="font-raleway font-medium text-[13px] leading-[18px] text-primary-dark-active">
-                  {language}
-                </span>
-              </div>
-            )}
-          </>
-        ) : (
-          <>
-            {/* Availability */}
-            <div className="flex items-center gap-[6px]">
-              <ClockCircleIcon />
-              <span className="font-raleway font-semibold text-[13px] leading-[18px] text-secondary-normal-default">
-                {availability}
-              </span>
-            </div>
-
-            {/* Price */}
-            <div className="flex items-baseline gap-[8px]">
-              <span className="font-raleway font-medium text-[13px] leading-[18px] text-tertiary-normal-default">
-                From
-              </span>
-              <span className="font-raleway font-bold text-[20px] leading-[28px] text-secondary-dark-default">
-                {price}
-              </span>
-            </div>
-          </>
-        )}
-      </div>
+      <PartnerListingMeta
+        location={location}
+        rating={rating}
+        title={title}
+        availability={availability}
+        price={price}
+        specialties={specialties}
+        language={language}
+        variant={variant}
+      />
     </div>
   );
 });

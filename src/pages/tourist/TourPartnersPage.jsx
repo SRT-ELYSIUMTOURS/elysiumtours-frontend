@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import BlogBreadcrumbBar from "../../components/sections/blog/BlogBreadcrumbBar";
 import PartnerHero from "../../components/sections/partners/PartnerHero";
@@ -9,6 +9,12 @@ import PartnerStoriesSection from "../../components/sections/partners/PartnerSto
 import PartnerPromoCtaSection from "../../components/sections/PartnerPromoCtaSection";
 import { partnerPromoGallery } from "../../data/partnerPromoCtaPresets.jsx";
 import PartnerWithUsModal from "../../components/ui/PartnerWithUsModal";
+import { useAppDispatch } from "../../hooks/useAppDispatch";
+import { useAppSelector } from "../../hooks/useAppSelector";
+import { fetchPartnersThunk, selectPartnerList, selectPartnerStatus } from "../../store/slices/partnersSlice";
+import { normalizeForCategorySection, submitPartnerApplicationApi } from "../../api/partners.api";
+
+const WIRED = ["tour-sites", "restaurants", "transportation", "guides", "accommodation", "photographers", "insurance"];
 
 // Route: /tour-partners
 // Section order from Figma (13 nodes):
@@ -26,29 +32,45 @@ import PartnerWithUsModal from "../../components/ui/PartnerWithUsModal";
 // 12. Partner Stories section (939:6017)
 // 13. CTA section (772:10509)
 
-const CATEGORY_TO_SECTION_KEY = {
-  "all": null,
-  "tour-sites": "tour-sites",
-  "accommodation": "accommodation",
-  "transportation": "transportation",
-  "guides": "guides",
-  "restaurants": "restaurants",
-  "photographers": "photographers",
-  "insurance": "insurance",
-};
-
 const TourPartnersPage = () => {
   const [activeCategory, setActiveCategory] = useState("all");
   const [partnerModalOpen, setPartnerModalOpen] = useState(false);
   const navigate = useNavigate();
 
-  const handleCategoryChange = (cat) => {
-    if (cat === "all") {
-      setActiveCategory("all");
-    } else {
-      navigate(`/tour-partners/${cat}`);
-    }
-  };
+  const dispatch = useAppDispatch();
+
+  const attractionsRaw    = useAppSelector(selectPartnerList("tour-sites"));
+  const attractionsStatus = useAppSelector(selectPartnerStatus("tour-sites"));
+  const restaurantsRaw    = useAppSelector(selectPartnerList("restaurants"));
+  const restaurantsStatus = useAppSelector(selectPartnerStatus("restaurants"));
+  const transportRaw      = useAppSelector(selectPartnerList("transportation"));
+  const transportStatus   = useAppSelector(selectPartnerStatus("transportation"));
+  const guidesRaw         = useAppSelector(selectPartnerList("guides"));
+  const guidesStatus      = useAppSelector(selectPartnerStatus("guides"));
+  const hotelsRaw           = useAppSelector(selectPartnerList("accommodation"));
+  const hotelsStatus        = useAppSelector(selectPartnerStatus("accommodation"));
+  const photographersRaw    = useAppSelector(selectPartnerList("photographers"));
+  const photographersStatus = useAppSelector(selectPartnerStatus("photographers"));
+  const insuranceRaw        = useAppSelector(selectPartnerList("insurance"));
+  const insuranceStatus     = useAppSelector(selectPartnerStatus("insurance"));
+
+  useEffect(() => {
+    WIRED.forEach((cat) => {
+      dispatch(fetchPartnersThunk({ category: cat, params: { pageSize: 8 } }));
+    });
+  }, [dispatch]);
+
+  // Always returns an array — empty while loading/failed (shows nothing), real data when ready.
+  const mkCards = (raw, status, cat) =>
+    status === "succeeded"
+      ? raw.slice(0, 4).map((p) => normalizeForCategorySection(p, cat))
+      : [];
+
+  const featuredGuide = guidesStatus === "succeeded" && guidesRaw.length > 0
+    ? [...guidesRaw].sort((a, b) => (b.rating || 0) - (a.rating || 0))[0]
+    : null;
+
+  const showCategory = (key) => activeCategory === "all" || activeCategory === key;
 
   return (
     <main>
@@ -61,27 +83,71 @@ const TourPartnersPage = () => {
       />
 
       {/* 2. Hero */}
-      <PartnerHero />
+      <PartnerHero onSearch={(q) => q && navigate(`/tour-partners/tour-sites/all?q=${encodeURIComponent(q)}`)} />
 
       {/* 3. Category filter bar */}
       <PartnerCategoryFilterBar
         activeCategory={activeCategory}
-        onCategoryChange={handleCategoryChange}
+        onCategoryChange={setActiveCategory}
       />
 
       {/* 4–7. First four category sections */}
-      <PartnerCategorySection category="tour-sites" />
-      <PartnerCategorySection category="accommodation" />
-      <PartnerCategorySection category="transportation" />
-      <PartnerCategorySection category="guides" />
+      {showCategory("tour-sites") && (
+        <PartnerCategorySection
+          category="tour-sites"
+          cardsOverride={mkCards(attractionsRaw, attractionsStatus, "tour-sites")}
+        />
+      )}
+      {showCategory("accommodation") && (
+        <PartnerCategorySection
+          category="accommodation"
+          cardsOverride={mkCards(hotelsRaw, hotelsStatus, "accommodation")}
+        />
+      )}
+      {showCategory("transportation") && (
+        <PartnerCategorySection
+          category="transportation"
+          cardsOverride={mkCards(transportRaw, transportStatus, "transportation")}
+        />
+      )}
+      {showCategory("guides") && (
+        <PartnerCategorySection
+          category="guides"
+          cardsOverride={mkCards(guidesRaw, guidesStatus, "guides")}
+        />
+      )}
 
       {/* 8. Featured Guide callout */}
-      <PartnerFeaturedGuide />
+      {showCategory("guides") && (
+        <PartnerFeaturedGuide
+          {...(featuredGuide ? {
+            guideName:        featuredGuide.name,
+            guideTitle:       featuredGuide.bio ? `Meet ${featuredGuide.name}: ${featuredGuide.bio.slice(0, 60)}` : `Meet ${featuredGuide.name}`,
+            guideDescription: featuredGuide.bio || undefined,
+            guideImage:       featuredGuide.avatar || undefined,
+          } : {})}
+        />
+      )}
 
       {/* 9–11. Remaining category sections */}
-      <PartnerCategorySection category="restaurants" />
-      <PartnerCategorySection category="photographers" />
-      <PartnerCategorySection category="insurance" />
+      {showCategory("restaurants") && (
+        <PartnerCategorySection
+          category="restaurants"
+          cardsOverride={mkCards(restaurantsRaw, restaurantsStatus, "restaurants")}
+        />
+      )}
+      {showCategory("photographers") && (
+        <PartnerCategorySection
+          category="photographers"
+          cardsOverride={mkCards(photographersRaw, photographersStatus, "photographers")}
+        />
+      )}
+      {showCategory("insurance") && (
+        <PartnerCategorySection
+          category="insurance"
+          cardsOverride={mkCards(insuranceRaw, insuranceStatus, "insurance")}
+        />
+      )}
 
       {/* 12. Partner Stories */}
       <PartnerStoriesSection />
@@ -95,7 +161,7 @@ const TourPartnersPage = () => {
       {partnerModalOpen && (
         <PartnerWithUsModal
           onClose={() => setPartnerModalOpen(false)}
-          onSubmit={() => {}}
+          onSubmit={submitPartnerApplicationApi}
         />
       )}
     </main>

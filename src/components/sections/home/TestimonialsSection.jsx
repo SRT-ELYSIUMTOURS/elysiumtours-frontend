@@ -36,7 +36,19 @@ const TESTIMONIALS = [
 ];
 
 const TestimonialsSection = React.forwardRef(
-  ({ className, ...props }, ref) => {
+  ({ className, testimonials: testimonialsProp, ...props }, ref) => {
+    const displayTestimonials = testimonialsProp && testimonialsProp.length > 0
+      ? testimonialsProp.map((t, i) => ({
+          id: t._id || t.id || i,
+          quote: t.quote || t.title || t.body?.slice(0, 80) || "",
+          body: t.body || t.content || t.review || "",
+          attribution: t.attribution || t.location || "",
+          reviewerName: t.reviewerName || t.author?.name || t.name || "Traveler",
+          timestamp: t.timestamp || t.createdAt || "",
+          rating: t.rating || 5,
+          avatar: t.avatar || t.author?.avatar || `https://picsum.photos/seed/avatar-${i}/60/60`,
+        }))
+      : TESTIMONIALS;
     return (
       <section
         ref={ref}
@@ -63,7 +75,7 @@ const TestimonialsSection = React.forwardRef(
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-lg [&>*]:min-w-0">
-            {TESTIMONIALS.map((testimonial) => (
+            {displayTestimonials.map((testimonial) => (
               <TestimonialCard
                 key={testimonial.id}
                 quote={testimonial.quote}

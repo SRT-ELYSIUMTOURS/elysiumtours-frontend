@@ -10,23 +10,20 @@ import { classNames } from "../../utils/classNames";
 //   Line 2: 0×107 vertical divider stroke:#d6beeb
 
 // Single stat item
-const StatItem = ({ value, label, hideDivider = false }) => (
-  <div className="flex items-center gap-[20px] md:gap-[40px]">
+const StatItem = ({ value, label}) => (
+  <div className="flex items-center  gap-[20px] md:gap-[40px]">
     {/* Value + label — VERTICAL gap:8 */}
-    <div className="flex flex-col gap-[8px] w-auto md:w-[182px] items-center md:items-start">
+    <div className="flex flex-col gap-[8px] w-auto md:w-[182px] items-center ">
       {/* Value — [56px/600] #7b2cbf */}
       <span className="text-[36px] font-semibold md:text-Display-xl-semibold text-secondary-normal-default leading-none">
         {value}
       </span>
       {/* Label — [16px/500] #565656 */}
-      <span className="text-[13px] md:text-md-Medium text-primary-dark-darker text-center md:text-left">
+      <span className="text-[13px] md:text-md-Medium text-primary-dark-darker text-center ">
         {label}
       </span>
     </div>
-    {/* Vertical divider — Line 2: 0×107 stroke:#d6beeb (hidden on mobile, shown on desktop) */}
-    {!hideDivider && (
-      <div className="hidden md:block w-px h-[107px] bg-secondary-light-active shrink-0" />
-    )}
+   
   </div>
 );
 
@@ -47,7 +44,7 @@ const StatCounter = React.forwardRef(({
       ref={ref}
       className={classNames(
         // Mobile: 2×2 grid with dividers; Desktop: horizontal row
-        "grid grid-cols-2 gap-y-6 gap-x-4 md:flex md:items-center md:gap-[170px]",
+        "grid grid-cols-2 gap-y-6 gap-x-4 md:flex  md:items-center ",
         className
       )}
       {...props}
@@ -56,9 +53,9 @@ const StatCounter = React.forwardRef(({
         <div
           key={i}
           className={classNames(
-            "flex items-center justify-center md:justify-start",
+            "flex items-center md:flex-1 justify-center ",
             // Mobile: right border on left-column items, bottom border on top-row items
-            i % 2 === 0 ? "border-r border-secondary-light-active md:border-r-0" : "",
+            !(i  === stats.length-1) ? "border-r border-secondary-light-active " : "",
             i < 2 ? "border-b border-secondary-light-active pb-6 md:border-b-0 md:pb-0" : ""
           )}
         >

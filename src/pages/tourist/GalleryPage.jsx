@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useAppDispatch } from "../../hooks/useAppDispatch";
+import { fetchGalleryThunk } from "../../store/slices/cmsSlice";
 import BlogBreadcrumbBar from "../../components/sections/blog/BlogBreadcrumbBar";
 import GalleryHero from "../../components/sections/gallery/GalleryHero";
 import GalleryCategoryFilterBar from "../../components/sections/gallery/GalleryCategoryFilterBar";
@@ -18,8 +20,13 @@ import PartnerWithUsModal from "../../components/ui/PartnerWithUsModal";
 // 5. CTA (Plan Your West African Adventure)
 
 const GalleryPage = () => {
+  const dispatch = useAppDispatch();
   const [activeTab, setActiveTab] = useState("all");
   const [partnerModalOpen, setPartnerModalOpen] = useState(false);
+
+  useEffect(() => {
+    dispatch(fetchGalleryThunk());
+  }, [dispatch]);
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
