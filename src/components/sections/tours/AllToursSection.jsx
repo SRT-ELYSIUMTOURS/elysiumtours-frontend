@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { classNames } from "../../../utils/classNames";
+import { deriveTourTags } from "../../../utils/tourTags";
 import PopularTourCard from "../../cards/PopularTourCard";
 import PopularTourCardSkeleton from "../../cards/PopularTourCardSkeleton";
 
@@ -101,7 +102,7 @@ const AllToursSection = React.forwardRef(
         title:             t.title || t.name || "Tour",
         availabilityBadge: t.availabilityBadge || "Available",
         price,
-        tags:              t.tags || [],
+        tags:              deriveTourTags(t),
         duration:          { class: durationClass, span: durationSpan },
         maxGroupSize:      t.totalCapacity ?? t.maxGroupSize,
         pickupIncluded:    t.pickupIncluded ?? false,

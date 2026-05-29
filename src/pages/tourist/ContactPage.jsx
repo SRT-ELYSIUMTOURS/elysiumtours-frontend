@@ -139,6 +139,7 @@ const ContactPage = React.forwardRef(({ className, ...props }, ref) => {
   const dispatch = useAppDispatch();
   const apiFaqs = useAppSelector(selectFAQs);
   const [showToast, setShowToast] = useState(false);
+  const [toastError, setToastError] = useState(false);
   const [activeTab, setActiveTab] = useState("General FAQs");
   const [faqSearch, setFaqSearch] = useState("");
   const [partnerModalOpen, setPartnerModalOpen] = useState(false);
@@ -150,14 +151,17 @@ const ContactPage = React.forwardRef(({ className, ...props }, ref) => {
   const handleFormSubmit = async (formData) => {
     try {
       await submitContactApi({
-        name: `${formData.firstName} ${formData.lastName}`.trim(),
+        firstName: formData.firstName,
+        lastName: formData.lastName,
         email: formData.email,
-        phone: formData.phone ? `${formData.phoneCode} ${formData.phone}` : undefined,
+        phoneCode: formData.phoneCode || undefined,
+        phone: formData.phone || undefined,
         subject: formData.subject,
         message: formData.message,
       });
+      setToastError(false);
     } catch {
-      // Show toast regardless - message may have gone through
+      setToastError(true);
     }
     setShowToast(true);
   };
@@ -208,7 +212,7 @@ const ContactPage = React.forwardRef(({ className, ...props }, ref) => {
 
       {/* ── 2. QUICK ASSISTANCE ─────────────────────────────────────────────── */}
       <section className="w-full bg-[#f2eaf9] overflow-hidden">
-        <div className="px-4 md:px-8 lg:px-[156px] py-10 lg:pt-[80px] lg:pb-[60px]">
+        <div className="px-4 md:px-8 lg:px-[60px] xl:px-[156px] py-10 lg:pt-[80px] lg:pb-[60px]">
           {/* Top row: label + title+body, stacks on mobile */}
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between lg:gap-0">
             <SectionLabel text="Help Desk" />
@@ -247,7 +251,7 @@ const ContactPage = React.forwardRef(({ className, ...props }, ref) => {
 
       {/* ── 3. CONTACT FORM ─────────────────────────────────────────────────── */}
       <section className="w-full bg-[#fefefe] overflow-hidden">
-        <div className="px-4 md:px-8 lg:px-[156px] py-10 lg:py-[80px]">
+        <div className="px-4 md:px-8 lg:px-[60px] xl:px-[156px] py-10 lg:py-[80px]">
           {/* Section header — stacks on mobile */}
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between lg:gap-0">
             <SectionLabel text="Contact Us" />
@@ -265,10 +269,10 @@ const ContactPage = React.forwardRef(({ className, ...props }, ref) => {
           </div>
 
           {/* Image + form — stacks on mobile, row on lg+ */}
-          <div className="mt-10 lg:mt-[80px] flex flex-col lg:flex-row gap-8 lg:gap-[160px] lg:items-stretch lg:justify-between">
+          <div className="mt-10 lg:mt-[80px] flex flex-col xl:flex-row gap-8 xl:gap-[160px] lg:items-stretch lg:justify-between">
             {/* Mobile/tablet: single clean image */}
             <div
-              className="relative w-full overflow-hidden rounded-[24px] h-[240px] sm:h-[360px] lg:hidden"
+              className="relative w-full overflow-hidden rounded-[24px] h-[240px] sm:h-[360px] xl:hidden"
               style={{ boxShadow: "0px 4px 20px 0px rgba(0,0,0,0.05)" }}
             >
               <img
@@ -280,7 +284,7 @@ const ContactPage = React.forwardRef(({ className, ...props }, ref) => {
 
             {/* Desktop: original layered collage */}
             <div
-              className="hidden lg:block relative w-[697px] shrink-0 self-stretch overflow-hidden rounded-[40px]"
+              className="hidden xl:block relative w-[697px]  shrink-0 self-stretch overflow-hidden rounded-[40px]"
               style={{ boxShadow: "0px 4px 20px 0px rgba(0,0,0,0.05)" }}
             >
               <img
@@ -305,7 +309,7 @@ const ContactPage = React.forwardRef(({ className, ...props }, ref) => {
             </div>
 
             {/* Right form */}
-            <div className="flex flex-col gap-[16px] w-full lg:w-[576px]">
+            <div className="flex flex-col gap-[16px] w-full xl:w-[576px]">
               <ContactForm onSubmit={handleFormSubmit} />
             </div>
           </div>
@@ -315,7 +319,7 @@ const ContactPage = React.forwardRef(({ className, ...props }, ref) => {
       {/* ── 4. FAQ ──────────────────────────────────────────────────────────── */}
       <section className="w-full bg-[#f2eaf9] overflow-hidden">
         {/* Section header */}
-        <div className="px-4 md:px-8 lg:px-[156px] pt-10 lg:pt-[80px]">
+        <div className="px-4 md:px-8 lg:px-[60px] xl:px-[156px] pt-10 lg:pt-[80px]">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between lg:gap-0">
             <SectionLabel text="FAQs" />
             <div className="flex flex-col items-start lg:items-end gap-[16px] w-full lg:w-[677px]">
@@ -332,9 +336,9 @@ const ContactPage = React.forwardRef(({ className, ...props }, ref) => {
         </div>
 
         {/* Tabs + search — stacks on mobile, row on lg+ */}
-        <div className="w-full flex flex-col lg:flex-row lg:items-center lg:justify-between px-4 md:px-8 lg:px-[156px] mt-8 lg:mt-[40px] gap-4 lg:gap-0">
+        <div className="w-full flex flex-col xl:flex-row xl:items-center lg:justify-between px-4 md:px-8 lg:px-[60px] xl:px-[156px] mt-8 lg:mt-[40px] gap-4 xl:gap-0">
           {/* Tabs — horizontally scrollable on mobile */}
-          <div className="flex items-center gap-[12px] lg:gap-[16px] overflow-x-auto scrollbar-hide pb-1 lg:pb-0 lg:px-5">
+          <div className="flex items-center gap-[12px] lg:gap-[16px] overflow-x-auto scrollbar-hide pb-1 xl:pb-0 xl:px-5">
             {FAQ_TABS.map((tab) => (
               <button
                 key={tab}
@@ -354,7 +358,7 @@ const ContactPage = React.forwardRef(({ className, ...props }, ref) => {
           </div>
 
           {/* Search */}
-          <div className="flex w-full lg:w-auto justify-start lg:justify-end">
+          <div className="flex w-full xl:w-auto justify-start xl:justify-end">
             <div className="flex items-center overflow-hidden w-full lg:w-[379px] h-[44px] lg:h-[48px] border border-[#c6c6c6] rounded-[40px]">
               <input
                 type="text"
@@ -375,14 +379,14 @@ const ContactPage = React.forwardRef(({ className, ...props }, ref) => {
         </div>
 
         {/* FAQ grid */}
-        <div className="px-4 md:px-8 lg:px-[156px] mt-8 lg:mt-[32px] pb-10 lg:pb-[80px]">
+        <div className="px-4 md:px-8 lg:px-[60px] xl:px-[156px] mt-8 lg:mt-[32px] pb-10 lg:pb-[80px]">
           <FAQAccordion items={visibleFaqs} columns={2} />
         </div>
       </section>
 
       {/* ── 5. MAP ──────────────────────────────────────────────────────────── */}
       <section className="w-full bg-[#fefefe] flex items-center py-10 lg:py-[41px]">
-        <div className="px-4 md:px-8 lg:px-[156px] w-full">
+        <div className="px-4 md:px-8 lg:px-[60px] xl:px-[156px] w-full">
           <MapEmbed
             height={420}
             className="!h-[280px] md:!h-[400px] lg:!h-[521px]"
@@ -406,25 +410,22 @@ const ContactPage = React.forwardRef(({ className, ...props }, ref) => {
         />
       )}
 
-      {/* ── TOAST OVERLAY ───────────────────────────────────────────────────── */}
+      {/* ── TOAST ───────────────────────────────────────────────────────────── */}
       {showToast && (
-        <>
-          <div
-            className="fixed inset-0 z-[90]"
-            style={{ background: "#2d2d2d", opacity: 0.6 }}
-            onClick={dismissToast}
-          />
-          <div className="fixed top-6 right-6 z-[100]">
+        <div className="fixed top-6 right-6 z-[100]">
             <ToastItem
-              variant="success"
-              Heading="Message Sent Successfully!"
-              text="Thanks for getting in touch! One of our travel experts will reply within 24 hours."
+              variant={toastError ? "error" : "success"}
+              Heading={toastError ? "Message Not Sent" : "Message Sent Successfully!"}
+              text={
+                toastError
+                  ? "Something went wrong. Please try again or email us directly."
+                  : "Thanks for getting in touch! One of our travel experts will reply within 24 hours."
+              }
               duration={4000}
               onDismiss={dismissToast}
               onCancel={dismissToast}
             />
-          </div>
-        </>
+        </div>
       )}
     </div>
   );

@@ -1,7 +1,13 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { classNames } from "../../utils/classNames";
-import { openBlogPost } from "../../utils/blogPostRoute";
+import { useAppDispatch } from "../../hooks/useAppDispatch";
+import { useAppSelector } from "../../hooks/useAppSelector";
+import {
+  fetchBlogPostsThunk,
+  selectBlogPosts,
+  selectBlogStatus,
+} from "../../store/slices/cmsSlice";
 import BlogHero from "../../components/sections/blog/BlogHero";
 import BlogBreadcrumbBar from "../../components/sections/blog/BlogBreadcrumbBar";
 import BlogCategoryFilter from "../../components/sections/blog/BlogCategoryFilter";
@@ -57,53 +63,117 @@ const CATEGORY_CONFIG = {
   },
 };
 
-// Generate placeholder cards for each grid layout
-function generateCards(layout, seed = "cat") {
-  switch (layout) {
-    case "masonry-2col":
-      return Array.from({ length: 8 }, (_, i) => ({
-        id: i + 1,
-        title: `8 ways to enjoy Ghana in fall`,
-        category: "Leisure Tours",
-        image: `https://picsum.photos/seed/${seed}-${i}/600/400`,
-      }));
-    case "grid-4col":
-      return Array.from({ length: 12 }, (_, i) => ({
-        id: i + 1,
-        title: `Destination ${i + 1}`,
-        category: "Explore",
-        image: `https://picsum.photos/seed/${seed}-${i}/340/364`,
-      }));
-    case "masonry-3col":
-      return Array.from({ length: 12 }, (_, i) => ({
-        id: i + 1,
-        title: `Guide Story ${i + 1}`,
-        category: "Behind the Scenes",
-        image: `https://picsum.photos/seed/${seed}-${i}/457/400`,
-      }));
-    case "grid-3x3":
-      return Array.from({ length: 9 }, (_, i) => ({
-        id: i + 1,
-        title: `Travel Story ${i + 1}`,
-        category: "Personal",
-        image: `https://picsum.photos/seed/${seed}-${i}/461/364`,
-      }));
-    case "partner-3col":
-      return [
-        { id: 1, category: "Accommodation", image: `https://picsum.photos/seed/${seed}-acc/451/656` },
-        { id: 2, category: "Transportation", image: `https://picsum.photos/seed/${seed}-trans/451/656` },
-        { id: 3, category: "Dining", image: `https://picsum.photos/seed/${seed}-din/451/656` },
-      ];
-    default:
-      return [];
+const PAGE_SIZE = 12;
+
+// Map a real DB post to the card shape all grid components expect
+function postToCard(post) {
+  return {
+    id: post._id,
+    title: post.title,
+    category: post.category,
+    image: post.coverImage,
+    slug: post.slug,
+  };
+}
+
+// Navigate using the real DB slug when available, synthetic slug otherwise
+function goCard(navigate, card) {
+  if (card.slug) {
+    navigate(`/blog/post/${card.slug}`, {
+      state: { title: card.title, heroImage: card.image },
+    });
   }
 }
 
-// Render the 2-column masonry grid
+// ─── Grid states ──────────────────────────────────────────────────────────────
+
+function SkeletonGrid({ layout }) {
+  // Mirror the real grid structure with shimmer placeholders
+  if (layout === "masonry-2col") {
+    const rows = [];
+    for (let i = 0; i < 6; i += 3) {
+      rows.push(
+        <div key={`sa-${i}`} className="flex flex-col md:flex-row gap-[15px]">
+          <div className="w-full md:w-[70%] h-[220px] md:h-[371px] rounded-[16px] bg-[#e5e7eb] animate-pulse" />
+          <div className="w-full md:w-[30%] h-[220px] md:h-[371px] rounded-[16px] bg-[#e5e7eb] animate-pulse" />
+        </div>
+      );
+      rows.push(
+        <div key={`sb-${i}`} className="flex gap-[15px]">
+          <div className="w-full h-[220px] md:h-[415px] rounded-[16px] bg-[#e5e7eb] animate-pulse" />
+        </div>
+      );
+    }
+    return <div className="flex flex-col gap-[15px]">{rows}</div>;
+  }
+  if (layout === "partner-3col") {
+    return (
+      <div className="mx-auto flex w-full flex-col gap-xl lg:flex-row lg:items-stretch">
+        {[0, 1, 2].map((i) => (
+          <div key={i} className="h-[400px] w-full md:h-[500px] lg:h-[656px] lg:flex-1 rounded-[16px] bg-[#e5e7eb] animate-pulse" />
+        ))}
+      </div>
+    );
+  }
+  // All other layouts: simple responsive grid
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[15px]">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div key={i} className="w-full h-[240px] md:h-[364px] rounded-[16px] bg-[#e5e7eb] animate-pulse" />
+      ))}
+    </div>
+  );
+}
+
+function ErrorState({ onRetry }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-[80px] gap-4 text-center">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="12" cy="12" r="9" stroke="#d1d5db" strokeWidth="1.5" />
+        <path d="M12 8v4" stroke="#d1d5db" strokeWidth="1.5" strokeLinecap="round" />
+        <circle cx="12" cy="15.5" r=".75" fill="#d1d5db" />
+      </svg>
+      <p className="font-raleway font-semibold text-[16px] text-tertiary-normal-default">
+        Could not load posts
+      </p>
+      <p className="font-raleway text-[14px] text-[#949494] max-w-[280px]">
+        Something went wrong fetching articles. Please try again.
+      </p>
+      {onRetry && (
+        <button
+          type="button"
+          onClick={onRetry}
+          className="h-[44px] px-6 rounded-[22px] border border-secondary-normal-default font-raleway font-semibold text-[14px] text-secondary-dark-darker cursor-pointer hover:opacity-80 transition-opacity"
+        >
+          Retry
+        </button>
+      )}
+    </div>
+  );
+}
+
+function EmptyState() {
+  return (
+    <div className="flex flex-col items-center justify-center py-[80px] gap-4 text-center">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <rect x="3" y="5" width="18" height="14" rx="2" stroke="#d1d5db" strokeWidth="1.5" />
+        <path d="M8 10h8M8 14h5" stroke="#d1d5db" strokeWidth="1.5" strokeLinecap="round" />
+      </svg>
+      <p className="font-raleway font-semibold text-[16px] text-tertiary-normal-default">
+        No posts yet
+      </p>
+      <p className="font-raleway text-[14px] text-[#949494] max-w-[280px]">
+        There are no articles in this category yet — check back soon.
+      </p>
+    </div>
+  );
+}
+
+// ─── Grid components (layouts preserved exactly) ─────────────────────────────
+
 function Masonry2ColGrid({ cards, navigate }) {
   const rows = [];
   for (let i = 0; i < cards.length; i += 3) {
-    // Row A: wide + short — stacks on mobile
     if (cards[i]) {
       rows.push(
         <div key={`row-a-${i}`} className="flex flex-col md:flex-row gap-[15px]">
@@ -112,7 +182,7 @@ function Masonry2ColGrid({ cards, navigate }) {
             category={cards[i].category}
             image={cards[i].image}
             className="!w-full md:!w-[70%] !h-[220px] md:!h-[371px]"
-            onClick={() => navigate && openBlogPost(navigate, { ...cards[i], uniqueKey: cards[i].id })}
+            onClick={() => navigate && goCard(navigate, cards[i])}
           />
           {cards[i + 1] && (
             <BlogContentCard
@@ -120,13 +190,12 @@ function Masonry2ColGrid({ cards, navigate }) {
               category={cards[i + 1].category}
               image={cards[i + 1].image}
               className="!w-full md:!w-[30%] !h-[220px] md:!h-[371px]"
-              onClick={() => navigate && openBlogPost(navigate, { ...cards[i + 1], uniqueKey: cards[i + 1].id })}
+              onClick={() => navigate && goCard(navigate, cards[i + 1])}
             />
           )}
         </div>
       );
     }
-    // Row B: full width
     if (cards[i + 2]) {
       rows.push(
         <div key={`row-b-${i}`} className="flex gap-[15px]">
@@ -135,7 +204,7 @@ function Masonry2ColGrid({ cards, navigate }) {
             category={cards[i + 2].category}
             image={cards[i + 2].image}
             className="!w-full !h-[220px] md:!h-[415px]"
-            onClick={() => navigate && openBlogPost(navigate, { ...cards[i + 2], uniqueKey: cards[i + 2].id })}
+            onClick={() => navigate && goCard(navigate, cards[i + 2])}
           />
         </div>
       );
@@ -144,7 +213,6 @@ function Masonry2ColGrid({ cards, navigate }) {
   return <div className="flex flex-col gap-[15px]">{rows}</div>;
 }
 
-// Destination highlights: 4-col staggered grid on desktop, simple 2-col grid on mobile/tablet
 function Grid4Col({ cards, navigate }) {
   return (
     <>
@@ -157,7 +225,7 @@ function Grid4Col({ cards, navigate }) {
             category={card.category}
             image={card.image}
             className="!w-full !h-[220px] shadow-card"
-            onClick={() => navigate && openBlogPost(navigate, { ...card, uniqueKey: card.id })}
+            onClick={() => navigate && goCard(navigate, card)}
           />
         ))}
       </div>
@@ -171,15 +239,15 @@ function Grid4Col({ cards, navigate }) {
             const [a, b, c, d, e, f] = band;
             return (
               <div key={bandIdx} className="flex w-full justify-between gap-[15px] items-start">
-                {a && <BlogContentCard key={a.id} title={a.title} category={a.category} image={a.image} size="tall" className="shrink-0 shadow-card" onClick={() => navigate && openBlogPost(navigate, { ...a, uniqueKey: a.id })} />}
+                {a && <BlogContentCard key={a.id} title={a.title} category={a.category} image={a.image} size="tall" className="shrink-0 shadow-card" onClick={() => navigate && goCard(navigate, a)} />}
                 <div className="flex max-w-[341px] shrink-0 flex-col gap-[15px] mt-[32px]">
-                  {b && <BlogContentCard key={b.id} title={b.title} category={b.category} image={b.image} size="small" className="shrink-0 self-stretch shadow-card" onClick={() => navigate && openBlogPost(navigate, { ...b, uniqueKey: b.id })} />}
-                  {c && <BlogContentCard key={c.id} title={c.title} category={c.category} image={c.image} size="small" className="shrink-0 self-stretch shadow-card" onClick={() => navigate && openBlogPost(navigate, { ...c, uniqueKey: c.id })} />}
+                  {b && <BlogContentCard key={b.id} title={b.title} category={b.category} image={b.image} size="small" className="shrink-0 self-stretch shadow-card" onClick={() => navigate && goCard(navigate, b)} />}
+                  {c && <BlogContentCard key={c.id} title={c.title} category={c.category} image={c.image} size="small" className="shrink-0 self-stretch shadow-card" onClick={() => navigate && goCard(navigate, c)} />}
                 </div>
-                {d && <BlogContentCard key={d.id} title={d.title} category={d.category} image={d.image} size="tall" className="shrink-0 shadow-card" onClick={() => navigate && openBlogPost(navigate, { ...d, uniqueKey: d.id })} />}
+                {d && <BlogContentCard key={d.id} title={d.title} category={d.category} image={d.image} size="tall" className="shrink-0 shadow-card" onClick={() => navigate && goCard(navigate, d)} />}
                 <div className="flex max-w-[341px] shrink-0 flex-col gap-[15px] mt-[32px]">
-                  {e && <BlogContentCard key={e.id} title={e.title} category={e.category} image={e.image} size="small" className="shrink-0 self-stretch shadow-card" onClick={() => navigate && openBlogPost(navigate, { ...e, uniqueKey: e.id })} />}
-                  {f && <BlogContentCard key={f.id} title={f.title} category={f.category} image={f.image} size="small" className="shrink-0 self-stretch shadow-card" onClick={() => navigate && openBlogPost(navigate, { ...f, uniqueKey: f.id })} />}
+                  {e && <BlogContentCard key={e.id} title={e.title} category={e.category} image={e.image} size="small" className="shrink-0 self-stretch shadow-card" onClick={() => navigate && goCard(navigate, e)} />}
+                  {f && <BlogContentCard key={f.id} title={f.title} category={f.category} image={f.image} size="small" className="shrink-0 self-stretch shadow-card" onClick={() => navigate && goCard(navigate, f)} />}
                 </div>
               </div>
             );
@@ -190,7 +258,6 @@ function Grid4Col({ cards, navigate }) {
   );
 }
 
-// Render 3-column masonry grid — desktop only; mobile/tablet uses simple grid
 function Masonry3ColGrid({ cards, navigate }) {
   const heights = [419, 339, 734, 734, 814, 419, 419, 339, 734, 734, 814, 419];
   const cols = [[], [], []];
@@ -209,7 +276,7 @@ function Masonry3ColGrid({ cards, navigate }) {
             category={card.category}
             image={card.image}
             className="!w-full !h-[240px]"
-            onClick={() => navigate && openBlogPost(navigate, { ...card, uniqueKey: card.id })}
+            onClick={() => navigate && goCard(navigate, card)}
           />
         ))}
       </div>
@@ -228,7 +295,7 @@ function Masonry3ColGrid({ cards, navigate }) {
                   image={card.image}
                   className="!w-full rounded-[40px]"
                   style={{ height: `${card.height}px` }}
-                  onClick={() => navigate && openBlogPost(navigate, { ...card, uniqueKey: card.id })}
+                  onClick={() => navigate && goCard(navigate, card)}
                 />
               ))}
             </div>
@@ -239,7 +306,6 @@ function Masonry3ColGrid({ cards, navigate }) {
   );
 }
 
-// Render 3x3 equal grid — 1 col on mobile, 2 on tablet, 3 on desktop
 function Grid3x3({ cards, navigate }) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[15px]">
@@ -250,14 +316,13 @@ function Grid3x3({ cards, navigate }) {
           category={card.category}
           image={card.image}
           className="!w-full !h-[240px] md:!h-[300px] lg:!h-[364px]"
-          onClick={() => navigate && openBlogPost(navigate, { ...card, uniqueKey: card.id })}
+          onClick={() => navigate && goCard(navigate, card)}
         />
       ))}
     </div>
   );
 }
 
-// Render 3-column partner cards (HighlightCard needs explicit height — same as PartnerSpotlightPreview)
 function Partner3Col({ cards, navigate }) {
   return (
     <div className="mx-auto flex w-full flex-col gap-xl lg:flex-row lg:items-stretch">
@@ -265,17 +330,9 @@ function Partner3Col({ cards, navigate }) {
         <HighlightCard
           key={card.id}
           image={card.image}
-          category={card.category}
+          category={card.title || card.category}
           className="h-[400px] w-full min-w-0 md:h-[500px] lg:h-[656px] lg:flex-1"
-          onClick={() =>
-            navigate &&
-            openBlogPost(navigate, {
-              title: card.category,
-              image: card.image,
-              category: card.category,
-              uniqueKey: card.id,
-            })
-          }
+          onClick={() => navigate && goCard(navigate, card)}
         />
       ))}
     </div>
@@ -290,30 +347,55 @@ const GRID_COMPONENTS = {
   "partner-3col": Partner3Col,
 };
 
+// ─── Page ─────────────────────────────────────────────────────────────────────
+
 const BlogCategoryPage = React.forwardRef(({ className, ...props }, ref) => {
   const { category } = useParams();
   const navigate = useNavigate();
-  const [currentPage, setCurrentPage] = useState(1);
-  const [batches, setBatches] = useState(1);
+  const dispatch = useAppDispatch();
+  const allPosts = useAppSelector(selectBlogPosts);
+  const blogStatus = useAppSelector(selectBlogStatus);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [partnerModalOpen, setPartnerModalOpen] = useState(false);
   const gridTopRef = useRef(null);
 
+  useEffect(() => {
+    dispatch(fetchBlogPostsThunk({ category, pageSize: 30 }));
+    setVisibleCount(PAGE_SIZE);
+  }, [dispatch, category]);
+
   const config = CATEGORY_CONFIG[category];
+
+  const cards = useMemo(
+    () => allPosts.filter((p) => p.category === category).map(postToCard),
+    [allPosts, category]
+  );
+
+  const visibleCards = cards.slice(0, visibleCount);
+  const hasMore = cards.length > visibleCount;
+  const canShowLess = visibleCount > PAGE_SIZE;
+  const totalPages = Math.ceil(cards.length / PAGE_SIZE);
+  const GridComponent = config ? GRID_COMPONENTS[config.gridLayout] : null;
+
+  const isLoading = blogStatus === "idle" || blogStatus === "loading";
+  const isError = blogStatus === "failed";
+
+  const handleRetry = () => dispatch(fetchBlogPostsThunk({ category, pageSize: 30 }));
 
   // Fallback for unknown categories
   if (!config) {
     return (
       <main ref={ref} className={classNames("font-raleway", className)} {...props}>
         <BlogBreadcrumbBar
-        items={[
-        { label: "Home", href: "/" },
-        { label: "Blog", href: "/blog" },
-        { label: "Not Found" },
-        ]}
+          items={[
+            { label: "Home", href: "/" },
+            { label: "Blog", href: "/blog" },
+            { label: "Not Found" },
+          ]}
         />
         <BlogHero />
         <BlogCategoryFilter />
-      <div className="flex items-center justify-center py-[120px]">
+        <div className="flex items-center justify-center py-[120px]">
           <p className="font-raleway font-medium text-[20px] text-primary-dark-darker">
             Category not found
           </p>
@@ -321,25 +403,6 @@ const BlogCategoryPage = React.forwardRef(({ className, ...props }, ref) => {
       </main>
     );
   }
-
-  // Generate one batch to learn its size, then cap total batches based on TOTAL_RESULTS
-  const TOTAL_RESULTS = 20;
-  const batchSize = generateCards(config.gridLayout, `${category}-0`).length;
-  const maxBatches = Math.max(1, Math.ceil(TOTAL_RESULTS / batchSize));
-
-  const cards = Array.from({ length: batches }, (_, b) =>
-    generateCards(config.gridLayout, `${category}-${b}`).map((c, idx) => ({
-      ...c,
-      id: b * 100 + idx + 1,
-    }))
-  )
-    .flat()
-    .slice(0, TOTAL_RESULTS);
-
-  const canLoadMore = batches < maxBatches;
-  const canShowLess = batches > 1;
-  const totalPages = Math.ceil(TOTAL_RESULTS / batchSize);
-  const GridComponent = GRID_COMPONENTS[config.gridLayout];
 
   return (
     <main ref={ref} className={classNames("font-raleway", className)} {...props}>
@@ -364,25 +427,42 @@ const BlogCategoryPage = React.forwardRef(({ className, ...props }, ref) => {
 
           {/* Card grid */}
           <div ref={gridTopRef} className="mt-10 lg:mt-[80px] scroll-mt-24">
-            {GridComponent && <GridComponent cards={cards} navigate={navigate} />}
+            {isLoading ? (
+              <SkeletonGrid layout={config.gridLayout} />
+            ) : isError ? (
+              <ErrorState onRetry={handleRetry} />
+            ) : cards.length === 0 ? (
+              <EmptyState />
+            ) : (
+              GridComponent && <GridComponent cards={visibleCards} navigate={navigate} />
+            )}
           </div>
         </div>
 
-        {/* Pagination */}
-        <div className="mt-10 lg:mt-[80px]">
-          <BlogPaginationBar
-            currentPage={currentPage}
-            totalPages={totalPages}
-            totalResults={TOTAL_RESULTS}
-            visibleResults={cards.length}
-            onPageChange={setCurrentPage}
-            onLoadMore={canLoadMore ? () => setBatches((b) => b + 1) : undefined}
-            onShowLess={canShowLess ? () => {
-              setBatches(1);
-              gridTopRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-            } : undefined}
-          />
-        </div>
+        {/* Pagination — only when we have real data */}
+        {!isLoading && !isError && cards.length > 0 && (
+          <div className="mt-10 lg:mt-[80px]">
+            <BlogPaginationBar
+              currentPage={Math.ceil(visibleCount / PAGE_SIZE)}
+              totalPages={totalPages}
+              totalResults={cards.length}
+              visibleResults={visibleCards.length}
+              onLoadMore={
+                hasMore
+                  ? () => setVisibleCount((c) => Math.min(c + PAGE_SIZE, cards.length))
+                  : undefined
+              }
+              onShowLess={
+                canShowLess
+                  ? () => {
+                      setVisibleCount(PAGE_SIZE);
+                      gridTopRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+                    }
+                  : undefined
+              }
+            />
+          </div>
+        )}
       </section>
 
       <PartnerPromoCtaSection

@@ -105,7 +105,7 @@ const TourTypesSection = React.forwardRef(({ className, tours, ...props }, ref) 
 
         {/* Cards */}
         <div className="
-          flex flex-col md:flex-row 
+          flex flex-col md:flex-row flex-wrap
           gap-6 md:gap-8 md:justify-between
           overflow-x-auto md:overflow-visible
         ">

@@ -65,10 +65,13 @@ const TourPartnerListingPage = () => {
     setGuideCountry(payload?.regions?.[0] ?? null);
   };
 
-  // Wired: always pass an array (empty while loading, real rows when succeeded).
-  // Non-wired: pass undefined so the grid falls back to its built-in mock data.
-  const partners = isWired
-    ? (status === "succeeded" ? raw.map((p) => normalizeForListingGrid(p, category)) : [])
+  const isLoading = isWired && (status === "idle" || status === "loading");
+  const isError   = isWired && status === "failed";
+
+  // Wired + succeeded: pass normalized rows. Wired + not yet: undefined (skeleton shown instead).
+  // Non-wired: undefined (grid falls back to built-in mock).
+  const partners = isWired && status === "succeeded"
+    ? raw.map((p) => normalizeForListingGrid(p, category))
     : undefined;
 
   const mergedFilters = searchQuery
@@ -98,12 +101,50 @@ const TourPartnerListingPage = () => {
       />
 
       <div className="px-4 lg:px-[156px] bg-secondary-light-default py-12 lg:pb-20">
-        <PartnerListingGrid
-          category={category}
-          filters={mergedFilters}
-          partners={partners}
-          onResetFilters={() => { setFilters(null); setSearchQuery(""); }}
-        />
+        {isError ? (
+          <div className="flex flex-col items-center justify-center gap-4 py-[120px] text-center">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" aria-hidden>
+              <circle cx="12" cy="12" r="9" stroke="#d1d5db" strokeWidth="1.5" />
+              <path d="M12 8v4" stroke="#d1d5db" strokeWidth="1.5" strokeLinecap="round" />
+              <circle cx="12" cy="15.5" r=".75" fill="#d1d5db" />
+            </svg>
+            <p className="font-raleway font-semibold text-[18px] text-[#2d2d2d]">
+              Could not load partners
+            </p>
+            <p className="font-raleway text-[14px] text-[#949494] max-w-[300px]">
+              Something went wrong fetching this listing. Please try again.
+            </p>
+            <button
+              type="button"
+              onClick={() => dispatch(fetchPartnersThunk({ category, params: { pageSize: 100 } }))}
+              className="h-[44px] px-6 rounded-[22px] border border-secondary-normal-default font-raleway font-semibold text-[14px] text-secondary-dark-darker cursor-pointer hover:opacity-80 transition-opacity"
+            >
+              Try Again
+            </button>
+          </div>
+        ) : isLoading ? (
+          <div className="px-4 md:px-10 lg:px-[80px] py-10 lg:py-[60px]">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-x-[24px] gap-y-8 lg:gap-y-12">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="flex flex-col gap-[22px]">
+                  <div className="w-full h-[568px] rounded-[40px] bg-[#e5e7eb] animate-pulse" />
+                  <div className="flex flex-col gap-2">
+                    <div className="h-4 w-3/4 rounded bg-[#e5e7eb] animate-pulse" />
+                    <div className="h-3 w-1/2 rounded bg-[#e5e7eb] animate-pulse" />
+                    <div className="h-3 w-2/3 rounded bg-[#e5e7eb] animate-pulse" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <PartnerListingGrid
+            category={category}
+            filters={mergedFilters}
+            partners={partners}
+            onResetFilters={() => { setFilters(null); setSearchQuery(""); }}
+          />
+        )}
       </div>
 
       <PartnerStoriesSection />

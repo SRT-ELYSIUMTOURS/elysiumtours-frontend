@@ -51,6 +51,7 @@ const TourPartnerDetailPage = () => {
 
   const partner = raw ? normalizeForDetail(raw, category) : null;
   const loading = status === "idle" || status === "loading";
+  const isError = status === "failed";
   const categoryLabel = CATEGORY_LABELS[category] ?? category;
 
   const handleBook = (pkg) => {
@@ -74,39 +75,66 @@ const TourPartnerDetailPage = () => {
         ]}
       />
 
-      <div className="w-full px-6 md:px-[30px] lg:px-[156px] py-[60px]">
-        <div className="flex flex-col gap-[70px] max-w-[1408px] mx-auto">
-          <PartnerDetailHero
-            category={category}
-            partner={partner}
-            loading={loading}
-            onViewAllFeatures={() => setFeaturesOpen(true)}
-          />
-          {!loading && partner && (
-            <PartnerContactActions partner={partner} />
-          )}
-          {!loading && partner && (
-            <PartnerPackagesSection
-              category={category}
-              packages={partner.packages ?? undefined}
-              onBook={handleBook}
-              onCustomBooking={() => {
-                document.getElementById("contact-section")?.scrollIntoView({ behavior: "smooth" });
-              }}
-            />
-          )}
+      {isError && (
+        <div className="flex flex-col items-center justify-center gap-4 py-[120px] text-center px-6">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" aria-hidden>
+            <circle cx="12" cy="12" r="9" stroke="#d1d5db" strokeWidth="1.5" />
+            <path d="M12 8v4" stroke="#d1d5db" strokeWidth="1.5" strokeLinecap="round" />
+            <circle cx="12" cy="15.5" r=".75" fill="#d1d5db" />
+          </svg>
+          <p className="font-raleway font-semibold text-[18px] text-[#2d2d2d]">
+            This partner couldn't be loaded
+          </p>
+          <p className="font-raleway text-[14px] text-[#949494] max-w-[300px]">
+            Something went wrong fetching this listing. Please try again.
+          </p>
+          <button
+            type="button"
+            onClick={() => dispatch(fetchPartnerDetailThunk({ category, id }))}
+            className="h-[44px] px-6 rounded-[22px] border border-secondary-normal-default font-raleway font-semibold text-[14px] text-secondary-dark-darker cursor-pointer hover:opacity-80 transition-opacity"
+          >
+            Try Again
+          </button>
         </div>
-      </div>
+      )}
 
-      {!loading && <PartnerHowItWorksSection category={category} />}
-      {!loading && (
-        <PartnerGallerySection category={category} items={partner?.gallery} />
-      )}
-      {!loading && (
-        <PartnerReviewsSection reviews={partner?.reviews} />
-      )}
-      {!loading && (
-        <PartnerRelatedSection category={category} currentId={id} />
+      {!isError && (
+        <>
+          <div className="w-full px-6 md:px-[30px] lg:px-[156px] py-[60px]">
+            <div className="flex flex-col gap-[70px] max-w-[1408px] mx-auto">
+              <PartnerDetailHero
+                category={category}
+                partner={partner}
+                loading={loading}
+                onViewAllFeatures={() => setFeaturesOpen(true)}
+              />
+              {!loading && partner && (
+                <PartnerContactActions partner={partner} />
+              )}
+              {!loading && partner && (
+                <PartnerPackagesSection
+                  category={category}
+                  packages={partner.packages ?? undefined}
+                  onBook={handleBook}
+                  onCustomBooking={() => {
+                    document.getElementById("contact-section")?.scrollIntoView({ behavior: "smooth" });
+                  }}
+                />
+              )}
+            </div>
+          </div>
+
+          {!loading && <PartnerHowItWorksSection category={category} />}
+          {!loading && (
+            <PartnerGallerySection category={category} items={partner?.gallery} />
+          )}
+          {!loading && (
+            <PartnerReviewsSection reviews={partner?.reviews} />
+          )}
+          {!loading && (
+            <PartnerRelatedSection category={category} currentId={id} />
+          )}
+        </>
       )}
 
       <FeaturesModal

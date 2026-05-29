@@ -1,5 +1,6 @@
 import React from "react";
 import { classNames } from "../../../utils/classNames";
+import { deriveTourTags } from "../../../utils/tourTags";
 import PopularTourCard from "../../cards/PopularTourCard";
 import PopularTourCardSkeleton from "../../cards/PopularTourCardSkeleton";
 
@@ -37,7 +38,7 @@ const TourFeaturedSection = React.forwardRef(({ className, tours: toursProp, isL
       title: t.title || t.name || "Tour",
       availabilityBadge: t.availabilityBadge || "Available",
       price,
-      tags: t.tags || [],
+      tags: deriveTourTags(t),
       duration: { class: durationClass, span: durationSpan },
       maxGroupSize: t.totalCapacity ?? t.maxGroupSize,
       pickupIncluded: t.pickupIncluded ?? false,
@@ -64,7 +65,7 @@ const TourFeaturedSection = React.forwardRef(({ className, tours: toursProp, isL
         <div className="flex flex-col md:flex-row md:justify-between gap-6">
 
           {/* Left */}
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center h-fit gap-2 shrink-0">
             <img src={sectionLine} alt="" className="w-[46px] h-[2px]" />
             <span className="font-bold text-sm text-[#2b0f43] uppercase">
               Featured Tours

@@ -6,6 +6,9 @@ import { classNames } from "../../../utils/classNames";
 // Inactive (44:189): stroke #EBDFF5, no fill
 import slideDotActive   from "../../../assets/ElysiumAssets/slide-dot-active.svg";
 import slideDotInactive from "../../../assets/ElysiumAssets/slide-dot-inactive.svg";
+import hero1 from "../../../assets/tourAssets/tour-hero-1.jpg";
+import hero2 from "../../../assets/tourAssets/tour-hero-2.jpg";
+
 
 // ── Figma overlay (node I1903:25269;44:203) ───────────────────────────────────
 // Layer 1: flat linear rgba(0,0,0,0.3) across entire slide
@@ -19,9 +22,8 @@ const OVERLAY_STYLE = {
 };
 
 const SLIDES = [
-  { id: 1, image: "https://picsum.photos/seed/tour-hero-1/1728/717", alt: "Ghana landscape" },
-  { id: 2, image: "https://picsum.photos/seed/tour-hero-2/1728/717", alt: "West Africa tour" },
-  { id: 3, image: "https://picsum.photos/seed/tour-hero-3/1728/717", alt: "Ghana cultural experience" },
+  { id: 1, image: hero1, alt: "Ghana landscape" },
+  { id: 2, image: hero2, alt: "West Africa tour" },
 ];
 
 const UP_NEXT = {

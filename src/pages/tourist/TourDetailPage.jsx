@@ -9,6 +9,7 @@ import { incrementTourViewApi, listToursApi } from "../../api/tours.api";
 import { listReviewsByTourApi } from "../../api/reviews.api";
 import { classNames } from "../../utils/classNames";
 import { formatTimeAgo } from "../../utils/formatTimeAgo";
+import { deriveTourTags } from "../../utils/tourTags";
 import BlogBreadcrumbBar from "../../components/sections/blog/BlogBreadcrumbBar";
 import Dropdown from "../../components/ui/Dropdown";
 import logoCombo from "../../assets/Elysium+Achimota/LogoCombo.png";
@@ -17,6 +18,7 @@ import dividerLine from "../../assets/ElysiumAssets/divider-line.svg";
 import ImageGalleryModal from "../../components/ui/ImageGalleryModal";
 import ShareModal from "../../components/ui/ShareModal";
 import PartnerWithUsModal from "../../components/ui/PartnerWithUsModal";
+import AuthModal from "../../components/ui/AuthModal";
 import Button from "../../components/ui/button";
 import PartnerPromoCtaSection from "../../components/sections/PartnerPromoCtaSection";
 import { partnerPromoTour } from "../../data/partnerPromoCtaPresets.jsx";
@@ -1659,7 +1661,7 @@ const YouMightAlsoLoveSection = ({ currentSlug, currentTags = [], currentCountry
         const scored = raw
           .filter((t) => t.slug !== currentSlug)
           .map((t) => {
-            const shared = (t.tags || []).filter((tag) => currentTags.includes(tag)).length;
+            const shared = deriveTourTags(t).filter((tag) => currentTags.includes(tag)).length;
             // Tours from the same series (same slug prefix) always surface first
             const seriesBonus = t.slug?.split("-")[0] === currentSeries ? 200 : 0;
             return { t, score: shared * 10 + seriesBonus + (t.featured ? 5 : 0) + (t.rating || 0) };
@@ -1721,7 +1723,15 @@ const BookingAuthGateModal = ({ tourName, onClose, onSignIn, onRegister }) => (
         {/* Logo + divider */}
         <div className="flex flex-col items-center gap-2 w-full">
           <img src={ElysiumLogo} alt="Elysium Tours" className="h-[93px] w-auto object-contain" />
-          <img src={dividerLine} alt="" className="w-full max-w-[517px]" />
+{/* Purple Divider */}
+<div
+          className="w-[80%] mb-3 mx-auto h-[2px] border border-secondary-normal-default"
+          style={{
+            opacity: 0.7,
+            background: "var(--violet-secondary-30-normal, #7B2CBF)",
+            filter: "blur(10px)",
+          }}
+        />
         </div>
 
         {/* Title + body */}
@@ -1747,7 +1757,7 @@ const BookingAuthGateModal = ({ tourName, onClose, onSignIn, onRegister }) => (
             Sign In
           </button>
 
-          <div className="flex justify-center border-b border-[#eeeeee] pb-6 pt-3">
+          <div className="flex justify-center border-t border-[#eeeeee] pb-6 pt-3">
             <span className="font-raleway text-[16px] font-semibold text-[#6b7280]">
               New to Elysium?{" "}
             </span>
@@ -1771,7 +1781,7 @@ const TourDetailPage = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const apiTour = useAppSelector(selectCurrentTour);
-  const relatedTags = useMemo(() => apiTour?.tags || [], [apiTour?.tags]);
+  const relatedTags = useMemo(() => deriveTourTags(apiTour), [apiTour]);
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const bookingStatus = useAppSelector(selectCreateBookingStatus);
   const bookingError = useAppSelector(selectBookingsError);
@@ -1927,6 +1937,8 @@ const TourDetailPage = () => {
   }, [tour]);
 
   const [authGateOpen, setAuthGateOpen] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authModalView, setAuthModalView] = useState("login");
 
   const handleBook = useCallback(async () => {
     if (!isAuthenticated) {
@@ -2573,14 +2585,23 @@ const TourDetailPage = () => {
           onClose={() => setAuthGateOpen(false)}
           onSignIn={() => {
             setAuthGateOpen(false);
-            navigate("/", { state: { openAuthModal: true, authMode: "login", from: `/${country}/${tour}` } });
+            setAuthModalView("login");
+            setAuthModalOpen(true);
           }}
           onRegister={() => {
             setAuthGateOpen(false);
-            navigate("/", { state: { openAuthModal: true, authMode: "register", from: `/${country}/${tour}` } });
+            setAuthModalView("signup");
+            setAuthModalOpen(true);
           }}
         />
       )}
+
+      <AuthModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        initialView={authModalView}
+        onAuthSuccess={() => setAuthModalOpen(false)}
+      />
     </main>
   );
 };

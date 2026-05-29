@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { classNames } from "../../utils/classNames";
 import ctaGlowRight from "../../assets/ElysiumAssets/cta-glow-right.svg";
 import ctaGlowLeft from "../../assets/ElysiumAssets/cta-glow-left.svg";
@@ -17,6 +18,7 @@ const PartnerPromoCtaSection = React.forwardRef(
       imageSrc,
       imageAlt = "",
       onCtaClick,
+      ctaHref,
       /** @deprecated use onCtaClick */
       onPartnerClick,
       /** @deprecated use onCtaClick */
@@ -26,14 +28,16 @@ const PartnerPromoCtaSection = React.forwardRef(
     },
     ref
   ) => {
-    const handleCta = onCtaClick ?? onPartnerClick ?? onBecomePartnerClick;
+    const navigate = useNavigate();
+    const explicitCallback = onCtaClick ?? onPartnerClick ?? onBecomePartnerClick;
+    const handleCta = explicitCallback ?? (ctaHref ? () => navigate(ctaHref) : undefined);
 
     return (
       <section
         ref={ref}
         className={classNames(
           "relative w-full overflow-hidden bg-secondary-dark-darker",
-          "h-auto lg:h-[732px] py-12 lg:py-0",
+          "h-auto xl:h-[732px] py-12 xl:py-0",
           className
         )}
         {...props}
@@ -53,7 +57,7 @@ const PartnerPromoCtaSection = React.forwardRef(
         />
 
         {/* Mobile / tablet — stacked, centered */}
-        <div className="relative z-10 flex flex-col lg:hidden items-center gap-6 px-4 md:px-8">
+        <div className="relative z-10 flex flex-col xl:hidden items-center gap-6 px-4 md:px-8">
           <div className="w-full max-w-[600px] overflow-hidden rounded-[24px] md:rounded-[40px] shadow-[0px_4px_20px_0px_rgba(0,0,0,0.2)]">
             <img
               src={imageSrc}
@@ -79,7 +83,7 @@ const PartnerPromoCtaSection = React.forwardRef(
         </div>
 
         {/* Desktop — original Figma absolute layout */}
-        <div className="hidden lg:block">
+        <div className="hidden xl:block">
           <div
             className="absolute overflow-hidden rounded-[40px] shadow-card"
             style={{

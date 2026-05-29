@@ -1,12 +1,13 @@
 import client from "./client";
 
 const BASE = "/cms";
+const BLOG_BASE = "/tourist/blog";
 
 export const listBlogPostsApi = (params = {}) =>
-  client.get(`${BASE}/blog`, { params }).then((r) => r.data);
+  client.get(BLOG_BASE, { params }).then((r) => r.data);
 
 export const getBlogPostApi = (slug) =>
-  client.get(`${BASE}/blog/${slug}`).then((r) => r.data);
+  client.get(`${BLOG_BASE}/slug/${slug}`).then((r) => r.data);
 
 export const listFAQsApi = () =>
   client.get(`${BASE}/faqs`).then((r) => r.data);

@@ -56,54 +56,6 @@ const CATEGORY_CONFIG = {
   },
 };
 
-// ── Mock fallback items ───────────────────────────────────────────────────────
-const MOCK_ITEMS = {
-  transportation: [
-    { id: "t1", image: "https://picsum.photos/seed/camry2023/352/568",       name: "Toyota Camry 2023" },
-    { id: "t2", image: "https://picsum.photos/seed/highlander2023/352/568",  name: "Toyota Highlander 2023" },
-    { id: "t3", image: "https://picsum.photos/seed/mercedeseclass/352/568",  name: "Mercedes E-Class 2024" },
-    { id: "t4", image: "https://picsum.photos/seed/hiace2023/352/568",       name: "Toyota HiAce 2023" },
-    { id: "t5", image: "https://picsum.photos/seed/bmw5series/352/568",      name: "BMW 5 Series 2024" },
-  ],
-  accommodation: [
-    { id: "a1", image: "https://picsum.photos/seed/room-std/352/568",   name: "Standard Room" },
-    { id: "a2", image: "https://picsum.photos/seed/room-dlx/352/568",   name: "Deluxe Room" },
-    { id: "a3", image: "https://picsum.photos/seed/room-suite/352/568", name: "Junior Suite" },
-    { id: "a4", image: "https://picsum.photos/seed/room-exec/352/568",  name: "Executive Suite" },
-    { id: "a5", image: "https://picsum.photos/seed/room-pres/352/568",  name: "Presidential Suite" },
-  ],
-  "tour-sites": [
-    { id: "ts1", image: "https://picsum.photos/seed/site-gate/352/568",    name: "Main Entrance" },
-    { id: "ts2", image: "https://picsum.photos/seed/site-view/352/568",    name: "Scenic Overlook" },
-    { id: "ts3", image: "https://picsum.photos/seed/site-exhibit/352/568", name: "Cultural Exhibit" },
-    { id: "ts4", image: "https://picsum.photos/seed/site-trail/352/568",   name: "Heritage Trail" },
-  ],
-  guides: [
-    { id: "g1", image: "https://picsum.photos/seed/guide-trail/352/568",   name: "On the Trail" },
-    { id: "g2", image: "https://picsum.photos/seed/guide-city/352/568",    name: "City Walking Tour" },
-    { id: "g3", image: "https://picsum.photos/seed/guide-culture/352/568", name: "Cultural Experience" },
-    { id: "g4", image: "https://picsum.photos/seed/guide-hike/352/568",    name: "Nature Hike" },
-  ],
-  restaurants: [
-    { id: "r1", image: "https://picsum.photos/seed/dining-main/352/568",    name: "Main Dining" },
-    { id: "r2", image: "https://picsum.photos/seed/dining-food/352/568",    name: "Signature Dishes" },
-    { id: "r3", image: "https://picsum.photos/seed/dining-bar/352/568",     name: "Bar & Lounge" },
-    { id: "r4", image: "https://picsum.photos/seed/dining-terrace/352/568", name: "Outdoor Terrace" },
-  ],
-  photographers: [
-    { id: "p1", image: "https://picsum.photos/seed/port-land/352/568",    name: "Landscape Series" },
-    { id: "p2", image: "https://picsum.photos/seed/port-portrait/352/568", name: "Portrait Work" },
-    { id: "p3", image: "https://picsum.photos/seed/port-event/352/568",   name: "Cultural Events" },
-    { id: "p4", image: "https://picsum.photos/seed/port-travel/352/568",  name: "Travel Docs" },
-    { id: "p5", image: "https://picsum.photos/seed/port-wild/352/568",    name: "Wildlife" },
-  ],
-  insurance: [
-    { id: "i1", image: "https://picsum.photos/seed/svc-office/352/568",  name: "Our Office" },
-    { id: "i2", image: "https://picsum.photos/seed/svc-team/352/568",    name: "Our Team" },
-    { id: "i3", image: "https://picsum.photos/seed/svc-claims/352/568",  name: "Claims Process" },
-    { id: "i4", image: "https://picsum.photos/seed/svc-network/352/568", name: "Partner Network" },
-  ],
-};
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
 const ArrowRightIcon = () => (
@@ -148,8 +100,8 @@ const PartnerGallerySection = ({ category, items }) => {
 
   const config = CATEGORY_CONFIG[category];
   const cards  = useMemo(
-    () => (items && items.length > 0) ? items : (MOCK_ITEMS[category] || []),
-    [items, category]
+    () => (items && items.length > 0) ? items : [],
+    [items]
   );
 
   const updateScrollState = useCallback(() => {
