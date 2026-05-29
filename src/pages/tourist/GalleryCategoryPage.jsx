@@ -1,8 +1,19 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  fetchCategoryGalleryThunk,
+  fetchPartnerGallerySummaryThunk,
+  selectCategoryGalleryImages,
+  selectPartnerSummary,
+  selectCategoryGalleryStatus,
+  selectPartnerSummaryStatus,
+  clearCategoryImages,
+} from "../../store/slices/gallerySlice";
+import GalleryCardSkeleton from "../../components/sections/gallery/GalleryCardSkeleton";
+import GallerySectionEmptyState from "../../components/sections/gallery/GallerySectionEmptyState";
+import GallerySectionErrorState from "../../components/sections/gallery/GallerySectionErrorState";
 import BlogBreadcrumbBar from "../../components/sections/blog/BlogBreadcrumbBar";
-import GalleryCategoryFilterBar from "../../components/sections/gallery/GalleryCategoryFilterBar";
-import GalleryVideoCard from "../../components/cards/GalleryVideoCard";
 import GalleryCategoryPhotoMasonry, {
   GALLERY_PHOTO_PAGE_SIZE,
 } from "../../components/sections/gallery/GalleryCategoryPhotoMasonry";
@@ -13,7 +24,6 @@ import SocialShareModal from "../../components/ui/SocialShareModal";
 import GalleryBecomePartSection from "../../components/sections/gallery/GalleryBecomePartSection";
 import PartnerPromoCtaSection from "../../components/sections/PartnerPromoCtaSection";
 import { partnerPromoGallery } from "../../data/partnerPromoCtaPresets.jsx";
-import PartnerWithUsModal from "../../components/ui/PartnerWithUsModal";
 
 // Route: /gallery/:category/all
 // Sub-category listing page — photo masonry or video 3-col grid
@@ -29,31 +39,28 @@ const CATEGORY_LABELS = {
   "captured-by-you": "Captured by You",
 };
 
-// Generate mock photo items for a category
-const generatePhotoItems = (catKey, count = 42) =>
-  Array.from({ length: count }, (_, i) => ({
-    id: i + 1,
-    image: `https://picsum.photos/seed/${catKey}-item-${i}/600/600`,
-    title: `${CATEGORY_LABELS[catKey] ?? catKey} ${i + 1}`,
-    count: `${Math.floor(Math.random() * 40 + 10)} Photos`,
-  }));
+// Skeleton grid for loading state — 12 shimmer cards in a responsive grid
+const PhotoSkeletonGrid = () => (
+  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 w-full">
+    {Array.from({ length: 12 }).map((_, i) => (
+      <GalleryCardSkeleton key={i} className="aspect-[4/5]" />
+    ))}
+  </div>
+);
 
-/** Short CC0 clips so the viewer shows real playback (same layout as photo viewer). */
-const SAMPLE_VIDEO_URLS = [
-  "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
-  "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-  "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
-];
-
-// Generate mock video items
-const generateVideoItems = (catKey, count = 9) =>
-  Array.from({ length: count }, (_, i) => ({
-    id: i + 1,
-    image: `https://picsum.photos/seed/${catKey}-vid-${i}/600/400`,
-    video: SAMPLE_VIDEO_URLS[i % SAMPLE_VIDEO_URLS.length],
-    title: `${CATEGORY_LABELS[catKey] ?? catKey} Video ${i + 1}`,
-    count: `${Math.floor(Math.random() * 5 + 1)}:${String(Math.floor(Math.random() * 60)).padStart(2, "0")} min`,
-  }));
+// "Coming Soon" state for videos category
+const VideoComingSoon = () => (
+  <div className="flex flex-col items-center justify-center py-[80px] gap-[16px]">
+    <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle cx="12" cy="12" r="9" stroke="#d1d5db" strokeWidth="1.5" />
+      <path d="M12 8v4l2.5 2.5" stroke="#d1d5db" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+    <p className="font-raleway font-semibold text-[16px] leading-[22px] text-[#b9b9b9]">Coming Soon</p>
+    <p className="font-raleway font-normal text-[14px] leading-[22px] text-[#b9b9b9] text-center max-w-[280px]">
+      Videos are on their way — check back soon.
+    </p>
+  </div>
+);
 
 const DownIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -71,11 +78,44 @@ const SearchIcon = () => (
 const GalleryCategoryPage = () => {
   const { category } = useParams();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const isVideoCategory = category === "videos";
+  const isPartnersCategory = category === "partners";
 
-  const items = isVideoCategory
-    ? generateVideoItems(category)
-    : generatePhotoItems(category);
+  const rawImages = useSelector(selectCategoryGalleryImages);
+  const partnerSummary = useSelector(selectPartnerSummary);
+  const categoryStatus = useSelector(selectCategoryGalleryStatus);
+  const partnerSummaryStatus = useSelector(selectPartnerSummaryStatus);
+
+  useEffect(() => {
+    dispatch(clearCategoryImages());
+    if (!isVideoCategory) {
+      dispatch(fetchCategoryGalleryThunk(category));
+    }
+    if (isPartnersCategory) {
+      dispatch(fetchPartnerGallerySummaryThunk());
+    }
+  }, [category, dispatch, isVideoCategory, isPartnersCategory]);
+
+  const activeStatus = isPartnersCategory ? partnerSummaryStatus : categoryStatus;
+
+  const items = useMemo(() => {
+    if (isVideoCategory) return [];
+    if (isPartnersCategory) {
+      return partnerSummary.map((p, i) => ({
+        id: i + 1,
+        image: p.coverImage,
+        title: p.label,
+        count: `${p.count} Partners`,
+      }));
+    }
+    return rawImages.map((img, i) => ({
+      id: i + 1,
+      image: img.image,
+      title: img.title,
+      count: img.tourTitle,
+    }));
+  }, [isVideoCategory, isPartnersCategory, rawImages, partnerSummary]);
 
   const [viewerOpen, setViewerOpen] = useState(false);
   const [viewerIndex, setViewerIndex] = useState(0);
@@ -83,7 +123,6 @@ const GalleryCategoryPage = () => {
   const [galleryIndex, setGalleryIndex] = useState(0);
   const [shareOpen, setShareOpen] = useState(false);
   const [shareItem, setShareItem] = useState(null);
-  const [partnerModalOpen, setPartnerModalOpen] = useState(false);
   const [photoVisibleCount, setPhotoVisibleCount] = useState(GALLERY_PHOTO_PAGE_SIZE);
 
   const categoryLabel = CATEGORY_LABELS[category] ?? category;
@@ -154,19 +193,18 @@ const GalleryCategoryPage = () => {
 
         {/* Grid */}
         {isVideoCategory ? (
-          // Video grid — 1-col on mobile, 2-col on md, 3-col on lg+
-          <div className="grid grid-cols-1 bg-secondary-light-default md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-[24px]">
-            {items.map((item, i) => (
-              <GalleryVideoCard
-                key={item.id}
-                image={item.image}
-                title={item.title}
-                count={item.count}
-                className="h-[220px] md:h-[280px] lg:h-[364px]"
-                onClick={() => handleItemClick(i)}
-              />
-            ))}
-          </div>
+          <VideoComingSoon />
+        ) : activeStatus === "loading" || activeStatus === "idle" ? (
+          <PhotoSkeletonGrid />
+        ) : activeStatus === "failed" ? (
+          <GallerySectionErrorState
+            onRetry={() => {
+              if (isPartnersCategory) dispatch(fetchPartnerGallerySummaryThunk());
+              else dispatch(fetchCategoryGalleryThunk(category));
+            }}
+          />
+        ) : items.length === 0 ? (
+          <GallerySectionEmptyState />
         ) : (
           <>
             <GalleryCategoryPhotoMasonry
@@ -196,10 +234,7 @@ const GalleryCategoryPage = () => {
       <GalleryBecomePartSection />
 
       {/* CTA */}
-      <PartnerPromoCtaSection
-        {...partnerPromoGallery}
-        onCtaClick={() => setPartnerModalOpen(true)}
-      />
+      <PartnerPromoCtaSection {...partnerPromoGallery} />
 
       {/* Image/Video Viewer Modal */}
       {isVideoCategory ? (
@@ -256,12 +291,6 @@ const GalleryCategoryPage = () => {
         userSubtitle={shareItem?.title}
       />
 
-      {partnerModalOpen && (
-        <PartnerWithUsModal
-          onClose={() => setPartnerModalOpen(false)}
-          onSubmit={() => {}}
-        />
-      )}
     </main>
   );
 };

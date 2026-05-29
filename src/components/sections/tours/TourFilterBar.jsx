@@ -501,7 +501,7 @@ const TourFilterBar = React.forwardRef(({ resultsCount = 48, onFilterChange, cla
         if (typeof ref === "function") ref(el);
         else if (ref) ref.current = el;
       }}
-      className={classNames("w-full bg-white flex items-center", className)}
+      className={classNames("w-full overflow-x-auto bg-white flex items-center", className)}
       style={{
         minHeight: "147px",
         borderTop: "0.5px solid #f2eaf9",
@@ -509,7 +509,7 @@ const TourFilterBar = React.forwardRef(({ resultsCount = 48, onFilterChange, cla
       }}
       {...props}
     >
-      <div className="h-full flex items-center px-6 md:px-[30px] lg:px-[156px] py-4 lg:py-0">
+      <div className="h-full flex items-center px-6 md:px-[30px] lg:px-[60px] xl:px-[156px] py-4 lg:py-0">
         <div ref={barRef} className="flex items-center gap-[12px] flex-1 overflow-x-auto scrollbar-hide py-2 -my-2 px-1 -mx-1">
 
           {/* SORT — Figma 1914:37476 */}

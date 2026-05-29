@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { classNames } from "../../utils/classNames";
 import { useAppDispatch } from "../../hooks/useAppDispatch";
-import { fetchBlogPostsThunk } from "../../store/slices/cmsSlice";
+import { useAppSelector } from "../../hooks/useAppSelector";
+import {
+  fetchBlogPostsThunk,
+  selectBlogPosts,
+  selectBlogStatus,
+} from "../../store/slices/cmsSlice";
 import BlogHero from "../../components/sections/blog/BlogHero";
 import BlogBreadcrumbBar from "../../components/sections/blog/BlogBreadcrumbBar";
 import BlogCategoryFilter from "../../components/sections/blog/BlogCategoryFilter";
@@ -21,12 +26,16 @@ function showBlogPreview(filter, slug) {
 
 const BlogPage = React.forwardRef(({ className, ...props }, ref) => {
   const dispatch = useAppDispatch();
+  const allPosts = useAppSelector(selectBlogPosts);
+  const blogStatus = useAppSelector(selectBlogStatus);
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [partnerModalOpen, setPartnerModalOpen] = useState(false);
 
   useEffect(() => {
-    dispatch(fetchBlogPostsThunk({ limit: 20 }));
+    dispatch(fetchBlogPostsThunk({ pageSize: 30 }));
   }, [dispatch]);
+
+  const byCategory = (cat) => allPosts.filter((p) => p.category === cat);
 
   return (
     <main ref={ref} className={classNames("font-raleway", className)} {...props}>
@@ -41,15 +50,21 @@ const BlogPage = React.forwardRef(({ className, ...props }, ref) => {
         selectedCategory={categoryFilter}
         onCategoryChange={setCategoryFilter}
       />
-      {showBlogPreview(categoryFilter, "travel-guides") && <TravelGuidesPreview />}
-      {showBlogPreview(categoryFilter, "destination-highlights") && (
-        <DestinationHighlightsPreview />
+      {showBlogPreview(categoryFilter, "travel-guides") && (
+        <TravelGuidesPreview posts={byCategory("travel-guides")} status={blogStatus} />
       )}
-      {showBlogPreview(categoryFilter, "local-guides") && <LocalGuidesPreview />}
-      {showBlogPreview(categoryFilter, "travel-stories") && <TravelStoriesPreview />}
+      {showBlogPreview(categoryFilter, "destination-highlights") && (
+        <DestinationHighlightsPreview posts={byCategory("destination-highlights")} status={blogStatus} />
+      )}
+      {showBlogPreview(categoryFilter, "local-guides") && (
+        <LocalGuidesPreview posts={byCategory("local-guides")} status={blogStatus} />
+      )}
+      {showBlogPreview(categoryFilter, "travel-stories") && (
+        <TravelStoriesPreview posts={byCategory("travel-stories")} status={blogStatus} />
+      )}
       {showBlogPreview(categoryFilter, "festival-calendar") && <FestivalCalendarCta />}
       {showBlogPreview(categoryFilter, "partner-spotlight") && (
-        <PartnerSpotlightPreview />
+        <PartnerSpotlightPreview posts={byCategory("partner-spotlight")} status={blogStatus} />
       )}
       <PartnerPromoCtaSection
         {...partnerPromoBlogContact}

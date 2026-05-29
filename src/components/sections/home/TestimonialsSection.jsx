@@ -68,7 +68,7 @@ const TestimonialsSection = React.forwardRef(
             </div>
 
             <div className="flex flex-col items-center lg:items-end max-w-[677px]">
-              <h2 className="font-raleway font-bold text-[22px] leading-[30px] lg:text-High-md-bold lg:leading-[34px] text-tertiary-normal-default text-center lg:text-right">
+              <h2 className="font-raleway font-bold ml-5 lg:ml-0 text-[22px] leading-[30px] lg:text-High-md-bold lg:leading-[34px] text-tertiary-normal-default text-center lg:text-right">
                 What Our Travelers Say
               </h2>
             </div>

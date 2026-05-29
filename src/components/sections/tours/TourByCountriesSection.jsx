@@ -72,7 +72,7 @@ const TourByCountriesSection = React.forwardRef(({ className, destinations: apiD
     >
       <div className="px-6 md:px-[30px] lg:px-[156px]">
         {/* Section header */}
-        <div className="flex flex-col lg:flex-row items-center lg:items-start justify-between w-full mb-10 lg:mb-[94px] gap-4">
+        <div className="flex flex-col lg:flex-row items-start justify-between w-full mb-10 lg:mb-[94px] gap-4">
           {/* Left — line + label */}
           <div className="flex items-center gap-[8px] shrink-0">
             <div className="w-[46px] h-[1px] bg-secondary-dark-darker" />

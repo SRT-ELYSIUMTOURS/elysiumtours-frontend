@@ -47,7 +47,7 @@ const PartnerCategoryFilterBar = React.forwardRef(({
           Desktop: px-[156px]
           scrollbar-none hides the native scrollbar on all browsers
         */}
-        <div className="w-full px-4 sm:px-10 lg:px-[156px] flex items-center gap-[12px] sm:gap-[16px] overflow-x-auto scrollbar-none touch-pan-x">
+        <div className="w-full px-4 sm:px-10 lg:px-[156px]  flex items-center gap-[12px] sm:gap-[16px] overflow-x-auto scrollbar-none touch-pan-x">
           {PARTNER_CATEGORIES.map((cat) => {
             const isActive = activeCategory === cat.key;
             return (

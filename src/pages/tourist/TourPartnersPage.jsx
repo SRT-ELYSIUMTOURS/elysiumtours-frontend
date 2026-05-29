@@ -7,7 +7,7 @@ import PartnerCategorySection from "../../components/sections/partners/PartnerCa
 import PartnerFeaturedGuide from "../../components/sections/partners/PartnerFeaturedGuide";
 import PartnerStoriesSection from "../../components/sections/partners/PartnerStoriesSection";
 import PartnerPromoCtaSection from "../../components/sections/PartnerPromoCtaSection";
-import { partnerPromoGallery } from "../../data/partnerPromoCtaPresets.jsx";
+import { partnerPromoTourPartners } from "../../data/partnerPromoCtaPresets.jsx";
 import PartnerWithUsModal from "../../components/ui/PartnerWithUsModal";
 import { useAppDispatch } from "../../hooks/useAppDispatch";
 import { useAppSelector } from "../../hooks/useAppSelector";
@@ -96,24 +96,28 @@ const TourPartnersPage = () => {
         <PartnerCategorySection
           category="tour-sites"
           cardsOverride={mkCards(attractionsRaw, attractionsStatus, "tour-sites")}
+          status={attractionsStatus}
         />
       )}
       {showCategory("accommodation") && (
         <PartnerCategorySection
           category="accommodation"
           cardsOverride={mkCards(hotelsRaw, hotelsStatus, "accommodation")}
+          status={hotelsStatus}
         />
       )}
       {showCategory("transportation") && (
         <PartnerCategorySection
           category="transportation"
           cardsOverride={mkCards(transportRaw, transportStatus, "transportation")}
+          status={transportStatus}
         />
       )}
       {showCategory("guides") && (
         <PartnerCategorySection
           category="guides"
           cardsOverride={mkCards(guidesRaw, guidesStatus, "guides")}
+          status={guidesStatus}
         />
       )}
 
@@ -134,18 +138,21 @@ const TourPartnersPage = () => {
         <PartnerCategorySection
           category="restaurants"
           cardsOverride={mkCards(restaurantsRaw, restaurantsStatus, "restaurants")}
+          status={restaurantsStatus}
         />
       )}
       {showCategory("photographers") && (
         <PartnerCategorySection
           category="photographers"
           cardsOverride={mkCards(photographersRaw, photographersStatus, "photographers")}
+          status={photographersStatus}
         />
       )}
       {showCategory("insurance") && (
         <PartnerCategorySection
           category="insurance"
           cardsOverride={mkCards(insuranceRaw, insuranceStatus, "insurance")}
+          status={insuranceStatus}
         />
       )}
 
@@ -154,7 +161,7 @@ const TourPartnersPage = () => {
 
       {/* 13. CTA */}
       <PartnerPromoCtaSection
-        {...partnerPromoGallery}
+        {...partnerPromoTourPartners}
         onCtaClick={() => setPartnerModalOpen(true)}
       />
 

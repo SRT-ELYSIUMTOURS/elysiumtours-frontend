@@ -19,6 +19,7 @@ import countriesReducer from "./slices/countriesSlice";
 import cmsReducer from "./slices/cmsSlice";
 import bookingsReducer from "./slices/bookingsSlice";
 import partnersReducer from "./slices/partnersSlice";
+import galleryReducer from "./slices/gallerySlice";
 import {
   setTokens,
   setLogoutCallback,
@@ -43,6 +44,7 @@ const rootReducer = combineReducers({
   cms: cmsReducer,
   bookings: bookingsReducer,
   partners: partnersReducer,
+  gallery: galleryReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

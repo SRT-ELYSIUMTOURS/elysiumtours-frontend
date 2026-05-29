@@ -930,6 +930,7 @@ export default function AuthModal({ isOpen, onClose, initialView = "login", onAu
           <ModalLogo />
         </div>
 
+{/* Purple Divider */}
         <div
           className="w-[80%] mb-3 mx-auto h-[2px] border border-secondary-normal-default"
           style={{

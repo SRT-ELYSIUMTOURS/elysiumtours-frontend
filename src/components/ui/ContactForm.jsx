@@ -50,6 +50,13 @@ const ArrowIcon = () => (
   </svg>
 );
 
+const SpinnerIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="animate-spin">
+    <circle cx="12" cy="12" r="9" stroke="#fefefe" strokeWidth="2" strokeOpacity="0.3" />
+    <path d="M12 3a9 9 0 0 1 9 9" stroke="#fefefe" strokeWidth="2" strokeLinecap="round" />
+  </svg>
+);
+
 const ContactForm = React.forwardRef(({
   onSubmit,
   className = "",
@@ -61,14 +68,20 @@ const ContactForm = React.forwardRef(({
     subject: "", message: ""
   });
   const [submitted, setSubmitted] = useState(false);
+  const [sending, setSending] = useState(false);
 
   const set = (field) => (e) => setForm(prev => ({ ...prev, [field]: e.target.value }));
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (onSubmit) {
-      onSubmit(form);
-      setForm({ firstName: "", lastName: "", email: "", phoneCode: "GH +233", phone: "", subject: "", message: "" });
+      setSending(true);
+      try {
+        await onSubmit(form);
+      } finally {
+        setSending(false);
+        setForm({ firstName: "", lastName: "", email: "", phoneCode: "GH +233", phone: "", subject: "", message: "" });
+      }
     } else {
       setSubmitted(true);
     }
@@ -106,7 +119,7 @@ const ContactForm = React.forwardRef(({
           <label style={{ fontSize:"16px", fontWeight:500, color:"#2d2d2d", fontFamily:"Raleway,sans-serif" }}>
             Full Name<span style={{ color:"#7b2cbf" }}>*</span>
           </label>
-          <div className="flex gap-[24px]">
+          <div className="flex flex-wrap gap-[24px]">
             <input value={form.firstName} onChange={set("firstName")} placeholder="First Name" required
               className={classNames(
                 "flex-1 rounded-[10px] border border-primary-dark-default px-4 outline-none transition-all duration-300 ease-in",
@@ -190,11 +203,16 @@ const ContactForm = React.forwardRef(({
 
         {/* Send Message button — fill:#7b2cbf r:40 169×56, right-aligned */}
         <div className="flex justify-end">
-          <button type="submit"
-            className="flex items-center gap-3 rounded-[40px] bg-secondary-normal-default hover:bg-secondary-normal-hover active:bg-secondary-normal-active transition-all duration-300 ease-in"
+          <button type="submit" disabled={sending}
+            className={classNames(
+              "flex items-center gap-3 rounded-[40px] bg-secondary-normal-default transition-all duration-300 ease-in",
+              sending
+                ? "opacity-70 cursor-not-allowed"
+                : "hover:bg-secondary-normal-hover active:bg-secondary-normal-active"
+            )}
             style={{ height:"56px", padding:"0 24px", fontSize:"16px", fontWeight:600, color:"#fefefe", fontFamily:"Raleway,sans-serif" }}>
-            Send Message
-            <ArrowIcon />
+            {sending ? "Sending..." : "Send Message"}
+            {sending ? <SpinnerIcon /> : <ArrowIcon />}
           </button>
         </div>
       </form>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useParams } from "react-router-dom";
+import { deriveTourTags } from "../../utils/tourTags";
 import { useAppDispatch } from "../../hooks/useAppDispatch";
 import { useAppSelector } from "../../hooks/useAppSelector";
 import { fetchToursThunk, selectToursList, selectToursListStatus } from "../../store/slices/toursSlice";
@@ -58,7 +59,7 @@ const TourCountryPage = () => {
 
   // Unique tags across all loaded tours — drives the CATEGORY filter pills
   const tourTags = useMemo(
-    () => (tours.length ? [...new Set(tours.flatMap((t) => t.tags || []))].sort() : []),
+    () => (tours.length ? [...new Set(tours.flatMap((t) => deriveTourTags(t)))].sort() : []),
     [tours]
   );
 
@@ -68,7 +69,7 @@ const TourCountryPage = () => {
     return tours.filter((t) => {
       if (filters.type !== "all" && t.category !== filters.type) return false;
       if (filters.tags.length > 0) {
-        const tTags = (t.tags || []).map((x) => x.toLowerCase());
+        const tTags = deriveTourTags(t).map((x) => x.toLowerCase());
         if (!filters.tags.some((tag) => tTags.includes(tag.toLowerCase()))) return false;
       }
       if (filters.regions.length > 0) {

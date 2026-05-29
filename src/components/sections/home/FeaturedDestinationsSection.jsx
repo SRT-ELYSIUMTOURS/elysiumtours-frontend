@@ -52,8 +52,8 @@ const FeaturedDestinationsSection = React.forwardRef(
         <div className="max-w-[1728px] mx-auto px-6 md:px-[30px] lg:px-[164px]">
 
           {/* ── Section header ─────────────────────────────────────────────── */}
-          <div className="flex flex-col lg:flex-row justify-between items-start gap-6 lg:gap-8 mb-8 lg:mb-16">
-            <div className="flex items-center justify-center lg:justify-start w-full lg:w-auto gap-sm shrink-0">
+          <div className="flex flex-col lg:flex-row justify-between items-center lg:items-start gap-6 lg:gap-8 mb-8 lg:mb-16">
+            <div className="flex items-center justify-start w-full lg:w-auto gap-sm shrink-0">
               <div className="w-[46px] h-[2px] bg-secondary-dark-darker" />
               <span className="font-bold text-med-small-bold text-secondary-dark-darker uppercase tracking-wide">
                 Featured Destinations

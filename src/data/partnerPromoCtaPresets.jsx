@@ -12,13 +12,24 @@ export const partnerPromoTour = {
 };
 
 /** Gallery + partner hub pages */
-export const partnerPromoGallery = {
+export const partnerPromoTourPartners = {
   title: "Join Ghana's Most Trusted Travel Network",
   description:
     "Are you a tour guide, hotel, restaurant, or service provider? Partner with Elysium Tours and connect your business to thousands of travellers exploring West Africa.",
   buttonText: "Become a Partner",
   imageSrc: "https://picsum.photos/seed/partner-cta/711/559",
   imageAlt: "Tour partners in West Africa",
+};
+
+/** Gallery Pages */
+export const partnerPromoGallery = {
+  title: "Plan Your West African Adventure",
+  description:
+    "Ready to explore West Africa? Whether you’re looking to book a tour, customize your itinerary, or make a simple inquiry, our team is here to help. We’ll guide you every step of the way to make your travel experience smooth, personal, and unforgettable.",
+  buttonText: "Contact Us",
+  ctaHref: "/contact",
+  imageSrc: ctaSafariImg,
+  imageAlt: "Exploration in West Africa",
 };
 
 /** Blog + Contact — line break in headline */

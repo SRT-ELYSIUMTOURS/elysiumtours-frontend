@@ -8,14 +8,14 @@ const ELYSIUM_LOGO = "/ElysiumAssets/Logo.png";
 // Watermarks: same asset as Auth modal (`/ElysiumAssets/Logo.png`), low opacity — no external URLs.
 
 const PartnerFeaturedGuide = React.forwardRef(({
-  guideName = "Yaw Obeng",
-  guideTitle = "Meet Yaw Obeng: Your Guide Through Cape Coast History",
-  guideDescription = "A certified heritage guide with over 12 years of experience leading tours through Cape Coast Castle, Elmina, and beyond. Yaw brings history to life with firsthand accounts, community connections, and a deep passion for Ghana's story.",
-  // Black male portrait from Unsplash (free use, focused face, centered)
-  guideImage = "/tourCountryAssets/yaw-obeng.jpg",
+  guideName,
+  guideTitle,
+  guideDescription,
+  guideImage,
   className = "",
   ...props
 }, ref) => {
+  if (!guideName) return null;
 
   return (
     <section

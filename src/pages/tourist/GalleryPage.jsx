@@ -7,7 +7,6 @@ import GalleryCategoryFilterBar from "../../components/sections/gallery/GalleryC
 import GalleryCategorySection from "../../components/sections/gallery/GalleryCategorySection";
 import PartnerPromoCtaSection from "../../components/sections/PartnerPromoCtaSection";
 import { partnerPromoGallery } from "../../data/partnerPromoCtaPresets.jsx";
-import PartnerWithUsModal from "../../components/ui/PartnerWithUsModal";
 
 // Route: /gallery
 // Gallery main page — Figma nodes 616:6236 (Videos tab) + variants for other tabs
@@ -22,8 +21,6 @@ import PartnerWithUsModal from "../../components/ui/PartnerWithUsModal";
 const GalleryPage = () => {
   const dispatch = useAppDispatch();
   const [activeTab, setActiveTab] = useState("all");
-  const [partnerModalOpen, setPartnerModalOpen] = useState(false);
-
   useEffect(() => {
     dispatch(fetchGalleryThunk());
   }, [dispatch]);
@@ -59,17 +56,7 @@ const GalleryPage = () => {
       )}
 
       {/* 5. CTA */}
-      <PartnerPromoCtaSection
-        {...partnerPromoGallery}
-        onCtaClick={() => setPartnerModalOpen(true)}
-      />
-
-      {partnerModalOpen && (
-        <PartnerWithUsModal
-          onClose={() => setPartnerModalOpen(false)}
-          onSubmit={() => {}}
-        />
-      )}
+      <PartnerPromoCtaSection {...partnerPromoGallery} />
     </main>
   );
 };

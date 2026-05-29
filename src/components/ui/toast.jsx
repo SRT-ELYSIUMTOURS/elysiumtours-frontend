@@ -130,15 +130,17 @@ const Toast = ({
   ...props
 }) => {
   return ReactDOM.createPortal(
-    <ToastItem
-      variant={variant}
-      Heading={Heading}
-      text={text}
-      className={className}
-      onCancel={onCancel}
-      duration={duration}
-      {...props}
-    />,
+    <div className="fixed top-6 right-6 z-[100]">
+      <ToastItem
+        variant={variant}
+        Heading={Heading}
+        text={text}
+        className={className}
+        onCancel={onCancel}
+        duration={duration}
+        {...props}
+      />
+    </div>,
     document.getElementById("toast-root")
   );
 };

@@ -536,7 +536,7 @@ const Navbar = () => {
       {/* ── Desktop / Mobile top bar ─────────────────────────────────────── */}
       <div className="h-[70px] lg:h-[112px] mx-auto flex items-center justify-between px-6 md:px-[30px] lg:px-[60px] xl:px-[100px]">
         {/* Left side: Logo + Nav links grouped together */}
-        <div className="flex items-center gap-6 xl:gap-10">
+        <div className="flex items-center gap-6 xl:gap-10  w-full">
           <Link
             to="/"
             onClick={() => { setOpenDropdown(null); setMobileOpen(false); }}
@@ -546,7 +546,7 @@ const Navbar = () => {
           </Link>
 
           {/* Desktop: Nav links */}
-          <div className="hidden lg:flex items-center">
+          <div className="hidden xl:flex mx-auto items-center">
             <div className="flex" style={{ gap: "20px" }}>
             <Link to="/" onClick={() => setOpenDropdown(null)}>
               <NavLink label="Home" isActive={location.pathname === "/"} hasDropdown={false} isOpen={false} />
@@ -606,7 +606,7 @@ const Navbar = () => {
         {/* Mobile: hamburger button */}
         <button
           type="button"
-          className="lg:hidden flex flex-col justify-center items-center w-10 h-10 gap-[5px] shrink-0"
+          className="xl:hidden flex flex-col justify-center items-center w-10 h-10 gap-[5px] shrink-0"
           onClick={() => { setMobileOpen(v => !v); setOpenDropdown(null); }}
           aria-label={mobileOpen ? "Close menu" : "Open menu"}
           aria-expanded={mobileOpen}
@@ -616,7 +616,7 @@ const Navbar = () => {
           <span className={`block w-6 h-[2px] bg-secondary-dark-darker transition-all duration-300 ${mobileOpen ? "-rotate-45 -translate-y-[7px]" : ""}`} />
         </button>
         {/* Desktop: CTA buttons */}
-        <div className="hidden lg:flex items-center gap-4">
+        <div className="hidden xl:flex items-center gap-4">
           {/* Language */}
           <Button
             className=" bg-transparent! px-0! shadow-none!"
@@ -712,7 +712,7 @@ const Navbar = () => {
 
       {/* ── Mobile menu panel — slides down when mobileOpen ─────────────── */}
       {mobileOpen && (
-        <div className="lg:hidden bg-primary-light-default border-t border-primary-normal-default px-6 py-4 flex flex-col gap-1 shadow-md">
+        <div className="xl:hidden bg-primary-light-default border-t border-primary-normal-default px-6 py-4 flex flex-col gap-1 shadow-md">
           {/* Simple link list */}
           {[
             { label: "Home", to: "/" },

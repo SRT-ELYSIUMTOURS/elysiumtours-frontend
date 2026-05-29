@@ -23,7 +23,7 @@ const FAQItem = ({ question, answer }) => (
     <div className="shrink-0 w-10 h-10 rounded-[10px] border border-secondary-light-active flex items-center justify-center">
       <QuestionIcon />
     </div>
-    <div className="flex flex-col gap-2 md:gap-[18px] min-w-0">
+    <div className="flex flex-col gap-2  min-w-0">
       <p className="font-raleway font-semibold text-[#2d2d2d] text-[16px] md:text-[20px] leading-[22px] md:leading-[28px]">
         {question}
       </p>
@@ -52,14 +52,14 @@ const FAQAccordion = React.forwardRef(({
       {...props}
     >
       {/* Column 1 — Frame 176: VERTICAL gap:19 */}
-      <div className="flex-1 flex flex-col gap-[19px]">
+      <div className="flex-1 flex flex-col gap-6">
         {col1.map((item, i) => (
           <FAQItem key={i} question={item.question} answer={item.answer} />
         ))}
       </div>
       {/* Column 2 — Frame 175: VERTICAL gap:19 */}
       {columns === 2 && col2.length > 0 && (
-        <div className="flex-1 flex flex-col gap-[19px]">
+        <div className="flex-1 flex flex-col gap-6">
           {col2.map((item, i) => (
             <FAQItem key={i} question={item.question} answer={item.answer} />
           ))}

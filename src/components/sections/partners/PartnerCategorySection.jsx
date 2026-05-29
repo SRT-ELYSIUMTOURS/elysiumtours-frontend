@@ -67,13 +67,14 @@ const OVERVIEW_ORDER = [
   "insurance",
 ];
 
-const CategorySectionBlock = ({ catKey, navigate, cardsOverride }) => {
+const CategorySectionBlock = ({ catKey, navigate, cardsOverride, status }) => {
   const data = CATEGORY_DATA[catKey];
   if (!data) return null;
 
-  // When cardsOverride is explicitly provided (even an empty array), use it — no mock fallback.
-  // Only fall back to data.cards when the prop is absent (non-wired categories).
+  const isLoading = status === "idle" || status === "loading";
   const cards = cardsOverride !== undefined ? cardsOverride : (data.cards || []);
+
+  const cardRow = "flex gap-[24px] overflow-x-auto scrollbar-hide -mx-6 px-6 md:-mx-[30px] md:px-[30px] lg:mx-0 lg:px-0 lg:overflow-visible pb-4 lg:pb-0";
 
   return (
     <section className={classNames("w-full py-12 md:py-16 lg:py-[80px]", data.bg)}>
@@ -86,36 +87,55 @@ const CategorySectionBlock = ({ catKey, navigate, cardsOverride }) => {
           onExploreClick={() => navigate(`/tour-partners/${catKey}/all`)}
         />
 
-        {/* 4 cards — Guides use Meet-the-Experts (purple + lighting); others HighlightCard
-            Mobile: horizontal scroll. Desktop: row of 4. */}
-        <div className="flex gap-[24px] overflow-x-auto scrollbar-hide -mx-6 px-6 md:-mx-[30px] md:px-[30px] lg:mx-0 lg:px-0 lg:overflow-visible pb-4 lg:pb-0">
-          {cards.map((card, index) => {
-            const stagger = index === 0 || index === 3 ? "lg:mt-[74px]" : "";
-            const cardLayout = classNames(
-              "flex-1 min-w-[335px] h-[568px]",
-              stagger
-            );
-            if (catKey === "guides") {
+        {/* 4 cards — Guides use GuideSpotlightCard; others HighlightCard
+            Mobile: horizontal scroll. Desktop: row of 4.
+            Loading: 4 skeleton shimmer cards in same stagger layout.
+            Empty: inline message, section header stays visible. */}
+        {isLoading ? (
+          <div className={cardRow}>
+            {[0, 1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className={classNames(
+                  "flex-1 shrink-0 min-w-[335px] h-[568px] rounded-[40px] bg-[#e5e7eb] animate-pulse",
+                  i === 0 || i === 3 ? "lg:mt-[74px]" : ""
+                )}
+              />
+            ))}
+          </div>
+        ) : cards.length === 0 ? (
+          <div className="flex items-center justify-center py-10">
+            <p className="font-raleway text-[15px] text-[#949494]">
+              No partners listed in this category yet.
+            </p>
+          </div>
+        ) : (
+          <div className={cardRow}>
+            {cards.map((card, index) => {
+              const stagger = index === 0 || index === 3 ? "lg:mt-[74px]" : "";
+              const cardLayout = classNames("flex-1 min-w-[335px] h-[568px]", stagger);
+              if (catKey === "guides") {
+                return (
+                  <GuideSpotlightCard
+                    key={card.id}
+                    image={card.image}
+                    title={card.name}
+                    alt={card.name}
+                    className={cardLayout}
+                  />
+                );
+              }
               return (
-                <GuideSpotlightCard
+                <HighlightCard
                   key={card.id}
                   image={card.image}
-                  title={card.name}
-                  alt={card.name}
+                  category={card.name}
                   className={cardLayout}
                 />
               );
-            }
-            return (
-              <HighlightCard
-                key={card.id}
-                image={card.image}
-                category={card.name}
-                className={cardLayout}
-              />
-            );
-          })}
-        </div>
+            })}
+          </div>
+        )}
       </div>
     </section>
   );
@@ -125,6 +145,7 @@ const PartnerCategorySection = React.forwardRef(({
   category,
   showAll = false,
   cardsOverride,
+  status,
   className = "",
   ...props
 }, ref) => {
@@ -136,7 +157,7 @@ const PartnerCategorySection = React.forwardRef(({
         ? OVERVIEW_ORDER.map((catKey) => (
             <CategorySectionBlock key={catKey} catKey={catKey} navigate={navigate} />
           ))
-        : <CategorySectionBlock catKey={category} navigate={navigate} cardsOverride={cardsOverride} />
+        : <CategorySectionBlock catKey={category} navigate={navigate} cardsOverride={cardsOverride} status={status} />
       }
     </div>
   );

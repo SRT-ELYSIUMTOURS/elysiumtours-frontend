@@ -20,7 +20,7 @@ const BlogBreadcrumbBar = React.forwardRef(({
       style={{ boxShadow: "0px 4px 4px 0px rgba(0,0,0,0.25)" }}
       {...props}
     >
-      <div className="min-h-[53px] flex items-center px-6 md:px-[30px] lg:px-[156px]">
+      <div className="min-h-[53px] flex items-center px-6 md:px-[30px] lg:px-[60px] xl:px-[156px]">
         <Breadcrumb className="flex-wrap lg:flex-nowrap">
           {items.map((item, index) => (
             <BreadcrumbItem
