@@ -37,6 +37,7 @@ const TourPartnerListingPage = () => {
   const { category } = useParams();
   const [searchParams] = useSearchParams();
   const [filters, setFilters]             = useState(null);
+  const [dateRange, setDateRange]         = useState(null);
   const [searchQuery, setSearchQuery]     = useState(() => searchParams.get("q") ?? "");
   const [sortKey, setSortKey]             = useState(null);
   const [guideCountry, setGuideCountry]   = useState(null);
@@ -74,9 +75,11 @@ const TourPartnerListingPage = () => {
     ? raw.map((p) => normalizeForListingGrid(p, category))
     : undefined;
 
-  const mergedFilters = searchQuery
-    ? { ...(filters || {}), search: searchQuery }
-    : filters;
+  const mergedFilters = {
+    ...(filters || {}),
+    ...(searchQuery ? { search: searchQuery } : {}),
+    ...(dateRange   ? { dateRange }           : {}),
+  };
 
   const categoryLabel = CATEGORY_LABELS[category] ?? category;
 
@@ -98,6 +101,7 @@ const TourPartnerListingPage = () => {
         onFiltersApply={setFilters}
         onSortChange={handleSortChange}
         onLocationChange={handleLocationChange}
+        onDatesApply={({ start, end }) => setDateRange({ start, end })}
       />
 
       <div className="px-4 lg:px-[156px] bg-secondary-light-default py-12 lg:pb-20">

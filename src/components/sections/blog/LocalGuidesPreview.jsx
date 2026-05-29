@@ -18,7 +18,6 @@ const LocalGuidesPreview = React.forwardRef(
       });
 
     const isLoading = status === "idle" || status === "loading";
-    if (!isLoading && !posts.length) return null;
 
     // Desktop slot mapping: col1→posts[0,3], col2→posts[1,4], col3→posts[2,5]
     const p = posts;
@@ -38,6 +37,11 @@ const LocalGuidesPreview = React.forwardRef(
           />
 
           {/* Mobile/tablet: 2-col grid. Desktop: 3-col masonry */}
+          {!isLoading && posts.length === 0 ? (
+            <p className="mt-10 lg:mt-[80px] font-raleway text-[15px] text-[#949494] text-center py-10">
+              No posts in this category yet — check back soon.
+            </p>
+          ) : (
           <div className="mt-10 lg:mt-[80px]">
             {/* Desktop: 3-col masonry */}
             <div className="hidden lg:flex gap-[22px]">
@@ -93,6 +97,7 @@ const LocalGuidesPreview = React.forwardRef(
               )}
             </div>
           </div>
+          )}
         </div>
       </section>
     );

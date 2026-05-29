@@ -18,7 +18,6 @@ const TravelGuidesPreview = React.forwardRef(
       });
 
     const isLoading = status === "idle" || status === "loading";
-    if (!isLoading && !posts.length) return null;
 
     return (
       <section
@@ -35,6 +34,11 @@ const TravelGuidesPreview = React.forwardRef(
           />
 
           {/* Card grid — stacks on mobile, side-by-side on md+ */}
+          {!isLoading && posts.length === 0 ? (
+            <p className="mt-10 lg:mt-[80px] font-raleway text-[15px] text-[#949494] text-center py-10">
+              No posts in this category yet — check back soon.
+            </p>
+          ) : (
           <div className="mt-10 lg:mt-[80px] flex flex-col gap-[15px]">
             {/* Row 1 */}
             <div className="flex flex-col md:flex-row gap-[15px]">
@@ -81,6 +85,7 @@ const TravelGuidesPreview = React.forwardRef(
               )
             )}
           </div>
+          )}
         </div>
       </section>
     );

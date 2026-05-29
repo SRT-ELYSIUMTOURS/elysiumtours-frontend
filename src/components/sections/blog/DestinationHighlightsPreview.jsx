@@ -18,7 +18,6 @@ const DestinationHighlightsPreview = React.forwardRef(
       });
 
     const isLoading = status === "idle" || status === "loading";
-    if (!isLoading && !posts.length) return null;
 
     // Slot indices: 0=tall-left, 1=stacked-top, 2=stacked-bottom, 3=tall-mid, 4=stacked-top, 5=stacked-bottom
     const p = posts;
@@ -37,7 +36,12 @@ const DestinationHighlightsPreview = React.forwardRef(
             onButtonClick={() => navigate("/blog/destination-highlights")}
           />
 
-          {/* Mobile/tablet: 2-col grid. Desktop: 4-col bento */}
+          {!isLoading && posts.length === 0 ? (
+            <p className="mt-10 lg:mt-[80px] font-raleway text-[15px] text-[#949494] text-center py-10">
+              No posts in this category yet — check back soon.
+            </p>
+          ) : (
+          /* Mobile/tablet: 2-col grid. Desktop: 4-col bento */
           <div className="mt-10 lg:mt-[80px]">
             {/* Desktop layout */}
             <div className="hidden lg:flex items-center gap-[15px]">
@@ -93,6 +97,7 @@ const DestinationHighlightsPreview = React.forwardRef(
               )}
             </div>
           </div>
+          )}
         </div>
       </section>
     );

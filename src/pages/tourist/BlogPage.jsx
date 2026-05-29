@@ -45,7 +45,7 @@ const BlogPage = React.forwardRef(({ className, ...props }, ref) => {
           { label: "Blog", href: "/blog" },
         ]}
       />
-      <BlogHero />
+      <BlogHero posts={allPosts.slice(0, 3)} />
       <BlogCategoryFilter
         selectedCategory={categoryFilter}
         onCategoryChange={setCategoryFilter}

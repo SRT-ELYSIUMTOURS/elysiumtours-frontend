@@ -138,45 +138,44 @@ const PartnerListingFilterBar = React.forwardRef(({
         )}
         {...props}
       >
-        <div className="flex items-center justify-between gap-[16px]">
-          {/* Left controls — horizontal scroll on mobile so all filter buttons
-              (Sort, Date, Filters) are reachable even on narrow screens */}
-          <div className="flex items-center gap-[12px] overflow-x-auto scrollbar-hide -mx-4 px-4 md:-mx-0 md:px-0 w-full md:w-auto">
-            {/* Sort dropdown */}
-            <div className="relative">
-              <button
-                onClick={() => { setSortOpen((v) => !v); setLocationOpen(false); }}
-                className={classNames(
-                  "flex items-center gap-[8px] px-[14px] h-[42px] rounded-[8px]",
-                  "border border-primary-dark-default bg-primary-light-default",
-                  "font-raleway font-medium text-[14px] leading-[20px] text-tertiary-normal-default",
-                  "hover:border-secondary-normal-default transition-all duration-300 ease-in cursor-pointer",
-                  "min-w-[129px]"
-                )}
-              >
-                <span className="flex-1 text-left">{currentSortLabel}</span>
-                <ChevronDownSm />
-              </button>
-              {sortOpen && (
-                <div className="absolute top-full left-0 mt-[4px] w-[200px] bg-primary-light-default border border-primary-normal-default rounded-[10px] shadow-[0px_4px_20px_0px_rgba(0,0,0,0.08)] z-20 overflow-hidden">
-                  {SORT_OPTIONS.map((opt) => (
-                    <button
-                      key={opt.value}
-                      onClick={() => handleSort(opt.value)}
-                      className={classNames(
-                        "w-full px-[16px] py-[10px] text-left",
-                        "font-raleway font-medium text-[14px] leading-[20px]",
-                        "hover:bg-secondary-light-default transition-all duration-300 ease-in cursor-pointer",
-                        sort === opt.value ? "text-secondary-normal-default font-semibold bg-secondary-light-default" : "text-tertiary-normal-default"
-                      )}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
+        <div className="flex items-center gap-[16px]">
+          {/* Sort — sits outside the scroll container so its dropdown isn't clipped by overflow */}
+          <div className="relative shrink-0">
+            <button
+              onClick={() => { setSortOpen((v) => !v); setLocationOpen(false); setDatesOpen(false); setFiltersOpen(false); }}
+              className={classNames(
+                "flex items-center gap-[8px] px-[14px] h-[42px] rounded-[8px]",
+                "border border-primary-dark-default bg-primary-light-default",
+                "font-raleway font-medium text-[14px] leading-[20px] text-tertiary-normal-default",
+                "hover:border-secondary-normal-default transition-all duration-300 ease-in cursor-pointer",
+                "min-w-[129px]"
               )}
-            </div>
+            >
+              <span className="flex-1 text-left">{currentSortLabel}</span>
+              <ChevronDownSm />
+            </button>
+            {sortOpen && (
+              <div className="absolute top-full left-0 mt-[4px] w-[200px] bg-primary-light-default border border-primary-normal-default rounded-[10px] shadow-[0px_4px_20px_0px_rgba(0,0,0,0.08)] z-20 overflow-hidden">
+                {SORT_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => handleSort(opt.value)}
+                    className={classNames(
+                      "w-full px-[16px] py-[10px] text-left",
+                      "font-raleway font-medium text-[14px] leading-[20px]",
+                      "hover:bg-secondary-light-default transition-all duration-300 ease-in cursor-pointer",
+                      sort === opt.value ? "text-secondary-normal-default font-semibold bg-secondary-light-default" : "text-tertiary-normal-default"
+                    )}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
 
+          {/* Scrollable filter buttons + tag pills */}
+          <div className="flex items-center gap-[12px] overflow-x-auto scrollbar-hide flex-1 min-w-0">
             {/* Location filter — Tour Guides only */}
             {showLocationFilter && (
                 <div className="relative" ref={locationTriggerRef}>
@@ -273,7 +272,7 @@ const PartnerListingFilterBar = React.forwardRef(({
                 );
               })}
             </div>
-          </div>
+          </div>{/* end scrollable */}
         </div>
       </div>
 
