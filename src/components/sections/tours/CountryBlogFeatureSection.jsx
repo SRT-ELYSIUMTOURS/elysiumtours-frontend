@@ -2,7 +2,7 @@ import React from "react";
 import { classNames } from "../../../utils/classNames";
 
 // Reuse the same deco SVG asset and positions as BlogCtaSection
-import blogCtaDeco from "../../../assets/ElysiumAssets/blog-cta-deco.svg";
+const blogCtaDeco = "/ElysiumAssets/blog-cta-deco.svg";
 
 // Figma: 1914:41116 — "Country Blog Feature" section (Tours country page)
 // Sits right after WhyCountrySection on the tour country page.

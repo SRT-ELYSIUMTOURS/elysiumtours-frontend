@@ -4,20 +4,20 @@ import { classNames } from "../../utils/classNames";
 
 const variants = {
   warning: {
-    icon: "src/assets/Warning.svg",
-    bg: "src/assets/Yellow-warning.svg",
+    icon: "/Warning.svg",
+    bg: "/Yellow-warning.svg",
   },
   error: {
-    icon: "src/assets/Danger.svg",
-    bg: "src/assets/Red-Error.svg",
+    icon: "/Danger.svg",
+    bg: "/Red-Error.svg",
   },
   info: {
-    icon: "src/assets/Information.svg",
-    bg: "src/assets/Blue-info.svg",
+    icon: "/Information.svg",
+    bg: "/Blue-info.svg",
   },
   success: {
-    icon: "src/assets/checkmark.svg",
-    bg: "src/assets/Green-success.svg",
+    icon: "/checkmark.svg",
+    bg: "/Green-success.svg",
   },
 };
 
@@ -72,7 +72,7 @@ const ToastItem = React.forwardRef(({
       {/* Background decorative SVGs */}
       <img
         className="absolute right-0"
-        src="src/assets/toastBg.svg"
+        src="/toastBg.svg"
         alt=""
         aria-hidden="true"
       />
@@ -100,7 +100,7 @@ const ToastItem = React.forwardRef(({
           aria-label="Dismiss"
         >
           <img
-            src="src/assets/XSquare.svg"
+            src="/XSquare.svg"
             width="20"
             height="20"
             alt="close icon"

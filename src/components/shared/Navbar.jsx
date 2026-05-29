@@ -7,17 +7,17 @@ import AuthModal from "../ui/AuthModal";
 import Toast from "../ui/toast";
 
 // ── Figma icon assets (node 1073:10307) — downloaded from Figma MCP ──────────
-import iconBackpack from "../../assets/ElysiumAssets/menu-icons/backpack.svg";
-import iconHome2 from "../../assets/ElysiumAssets/menu-icons/home2.svg";
-import iconCar from "../../assets/ElysiumAssets/menu-icons/car.svg";
-import iconMentoring from "../../assets/ElysiumAssets/menu-icons/mentoring.svg";
-import iconServingFood from "../../assets/ElysiumAssets/menu-icons/serving-food.svg";
-import iconAlbum from "../../assets/ElysiumAssets/menu-icons/album.svg";
-import iconMoneyJar from "../../assets/ElysiumAssets/menu-icons/money-jar.svg";
+const iconBackpack = "/ElysiumAssets/menu-icons/backpack.svg";
+const iconHome2 = "/ElysiumAssets/menu-icons/home2.svg";
+const iconCar = "/ElysiumAssets/menu-icons/car.svg";
+const iconMentoring = "/ElysiumAssets/menu-icons/mentoring.svg";
+const iconServingFood = "/ElysiumAssets/menu-icons/serving-food.svg";
+const iconAlbum = "/ElysiumAssets/menu-icons/album.svg";
+const iconMoneyJar = "/ElysiumAssets/menu-icons/money-jar.svg";
 
 // ── Right-panel card assets (node 1073:10379–10381) ──────────────────────────
-import menuCardBg from "../../assets/ElysiumAssets/menu-card-bg.png";
-import menuCardPhoto from "../../assets/ElysiumAssets/menu-card-photo.png";
+const menuCardBg = "/ElysiumAssets/menu-card-bg.png";
+const menuCardPhoto = "/ElysiumAssets/menu-card-photo.png";
 
 // ── Logo SVG — matches Figma cursive Elysium script ──────────────────────────
 const ElysiumLogo = () => (

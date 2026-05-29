@@ -2,8 +2,8 @@ import React, { useState, useRef, useEffect } from "react";
 import { classNames } from "../../../utils/classNames";
 
 // ── Figma SVG assets ──────────────────────────────────────────────────────────
-import charmTick    from "../../../assets/ElysiumAssets/charm-tick.svg";
-import closeCircle  from "../../../assets/ElysiumAssets/close-circle.svg";
+const charmTick = "/ElysiumAssets/charm-tick.svg";
+const closeCircle = "/ElysiumAssets/close-circle.svg";
 
 // ── Chevron Down icon — Figma "Hicon / Linear / Down 2" ──────────────────────
 const ChevronDown = ({ stroke = "#949494" }) => (

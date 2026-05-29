@@ -4,15 +4,15 @@ import { classNames } from "../../utils/classNames";
 
 // ── Figma asset imports ──────────────────────────────────────────────────────
 // All SVGs downloaded from Figma asset server (localhost:3845)
-import mapPinImg    from "../../assets/ElysiumAssets/map-pin.svg";
-import starImg      from "../../assets/ElysiumAssets/star.svg";
-import timeCircle5  from "../../assets/ElysiumAssets/time-circle5.svg";
-import dividerLine  from "../../assets/ElysiumAssets/divider-line.svg";
-import timeCircle3  from "../../assets/ElysiumAssets/time-circle3.svg";
-import peopleIcon   from "../../assets/ElysiumAssets/people-icon.svg";
-import award4       from "../../assets/ElysiumAssets/award4.svg";
-import flashDisk2   from "../../assets/ElysiumAssets/flash-disk2.svg";
-import bag4         from "../../assets/ElysiumAssets/bag4.svg";
+const mapPinImg = "/ElysiumAssets/map-pin.svg";
+const starImg = "/ElysiumAssets/star.svg";
+const timeCircle5 = "/ElysiumAssets/time-circle5.svg";
+const dividerLine = "/ElysiumAssets/divider-line.svg";
+const timeCircle3 = "/ElysiumAssets/time-circle3.svg";
+const peopleIcon = "/ElysiumAssets/people-icon.svg";
+const award4 = "/ElysiumAssets/award4.svg";
+const flashDisk2 = "/ElysiumAssets/flash-disk2.svg";
+const bag4 = "/ElysiumAssets/bag4.svg";
 
 // ── Feature icon map ─────────────────────────────────────────────────────────
 // Maps featureType string → Figma SVG asset

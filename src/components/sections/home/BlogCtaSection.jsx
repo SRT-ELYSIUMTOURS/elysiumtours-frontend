@@ -2,9 +2,9 @@ import React from "react";
 import { classNames } from "../../../utils/classNames";
 
 // ── Figma asset imports ───────────────────────────────────────────────────────
-import blogCtaBg from "../../../assets/ElysiumAssets/blog-cta-bg.png";
+const blogCtaBg = "/ElysiumAssets/blog-cta-bg.png";
 // Single SVG containing the full concentric dot-ring decoration (486×437, fill="#D6BEEB")
-import blogCtaDeco from "../../../assets/ElysiumAssets/blog-cta-deco.svg";
+const blogCtaDeco = "/ElysiumAssets/blog-cta-deco.svg";
 
 // ── BlogCtaSection ────────────────────────────────────────────────────────────
 // Figma: "Frame 103" node 1914-37707 — appears on HomePage

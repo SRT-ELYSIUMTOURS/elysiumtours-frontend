@@ -1,5 +1,5 @@
 import React from "react";
-import ctaSafariImg from "../assets/ElysiumAssets/cta-safari.png";
+const ctaSafariImg = "/ElysiumAssets/cta-safari.png";
 
 /** Tours / tour detail / tour country — safari hero image */
 export const partnerPromoTour = {

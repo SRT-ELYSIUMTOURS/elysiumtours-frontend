@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { classNames } from "../../../utils/classNames";
 
-import closeCircle from "../../../assets/ElysiumAssets/close-circle.svg";
+const closeCircle = "/ElysiumAssets/close-circle.svg";
 
 const ChevronDown = ({ stroke = "#949494" }) => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none">

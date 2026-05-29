@@ -1,8 +1,8 @@
 import React from "react";
 import { classNames } from "../../../utils/classNames";
 import GuideSpotlightCard from "../../cards/GuideSpotlightCard";
-import mapIcon from "../../../assets/ElysiumAssets/map-pin.svg";
-import starIcon from "../../../assets/ElysiumAssets/star.svg";
+const mapIcon = "/ElysiumAssets/map-pin.svg";
+const starIcon = "/ElysiumAssets/star.svg";
 
 // Figma: 1942:31180
 

@@ -3,8 +3,8 @@ import React from "react";
 import { classNames } from "../../../utils/classNames";
 import Button from "../../ui/button";
 import ExploreMoreArrowIcon from "../../icons/ExploreMoreArrowIcon";
-import sectionLineImg from "../../../assets/ElysiumAssets/section-line.svg";
-import whyChooseBg    from "../../../assets/ElysiumAssets/why-choose-bg.png";
+const sectionLineImg = "/ElysiumAssets/section-line.svg";
+const whyChooseBg = "/ElysiumAssets/why-choose-bg.png";
 
 // ── WhyChooseSection ─────────────────────────────────────────────────────────
 // Figma frame: 1914:37693  (bg-[#f2eaf9], relative, full-width)

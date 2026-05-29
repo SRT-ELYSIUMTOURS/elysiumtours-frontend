@@ -5,19 +5,19 @@ import HeroImageSlider from "../../ui/HeroImageSlider";
 const GALLERY_HERO_SLIDES = [
   {
     id: 1,
-    image: "./src/assets/galleryAssets/gallery-hero-1.jpg",
+    image: "/galleryAssets/gallery-hero-1.jpg",
     alt: "Ghana gallery hero 1",
     overlayOpacity: 0.55,
   },
   {
     id: 2,
-    image: "./src/assets/galleryAssets/gallery-hero-2.png",
+    image: "/galleryAssets/gallery-hero-2.png",
     alt: "Ghana gallery hero 2",
     overlayOpacity: 0.55,
   },
   {
     id: 3,
-    image: "./src/assets/galleryAssets/gallery-hero-3.jpg",
+    image: "/galleryAssets/gallery-hero-3.jpg",
     alt: "Ghana gallery hero 3",
     overlayOpacity: 0.55,
   },
