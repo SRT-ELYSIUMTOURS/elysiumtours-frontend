@@ -18,7 +18,6 @@ const TravelStoriesPreview = React.forwardRef(
       });
 
     const isLoading = status === "idle" || status === "loading";
-    if (!isLoading && !posts.length) return null;
 
     return (
       <section
@@ -35,24 +34,30 @@ const TravelStoriesPreview = React.forwardRef(
           />
 
           {/* 1-col on mobile, 3-col on md+ */}
-          <div className="mt-10 lg:mt-[80px] grid grid-cols-1 md:grid-cols-3 gap-[15px]">
-            {isLoading ? (
-              [0, 1, 2].map((i) => (
-                <SkeletonCard key={i} className="w-full h-[240px] md:h-[364px]" />
-              ))
-            ) : (
-              posts.slice(0, 3).map((post) => (
-                <BlogContentCard
-                  key={post._id}
-                  title={post.title}
-                  category={post.category}
-                  image={post.coverImage}
-                  className="!w-full !h-[240px] md:!h-[364px]"
-                  onClick={goToPost(post)}
-                />
-              ))
-            )}
-          </div>
+          {!isLoading && posts.length === 0 ? (
+            <p className="mt-10 lg:mt-[80px] font-raleway text-[15px] text-[#949494] text-center py-10">
+              No posts in this category yet — check back soon.
+            </p>
+          ) : (
+            <div className="mt-10 lg:mt-[80px] grid grid-cols-1 md:grid-cols-3 gap-[15px]">
+              {isLoading ? (
+                [0, 1, 2].map((i) => (
+                  <SkeletonCard key={i} className="w-full h-[240px] md:h-[364px]" />
+                ))
+              ) : (
+                posts.slice(0, 3).map((post) => (
+                  <BlogContentCard
+                    key={post._id}
+                    title={post.title}
+                    category={post.category}
+                    image={post.coverImage}
+                    className="!w-full !h-[240px] md:!h-[364px]"
+                    onClick={goToPost(post)}
+                  />
+                ))
+              )}
+            </div>
+          )}
         </div>
       </section>
     );

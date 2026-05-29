@@ -32,23 +32,28 @@ function parseGhPrice(priceStr) {
 export function partnerMatchesFilters(partner, filters) {
   if (!filters) return true;
 
-  if (filters.minRating != null && typeof partner.rating === "number") {
+  // Rating: only filter partners that have been rated (rating > 0).
+  // A rating of 0 means "no reviews yet" — don't penalise unreviewed listings.
+  if (filters.minRating != null && typeof partner.rating === "number" && partner.rating > 0) {
     if (partner.rating < filters.minRating) return false;
   }
 
+  // Price range: skip for partners whose price string can't be parsed (e.g. "Contact us", "Free").
   const pr = filters.priceRange;
   if (pr && partner.price) {
     const p = parseGhPrice(partner.price);
     if (p != null) {
-      const maxCap = typeof pr.max === "number" ? pr.max : FILTER_PRICE_MAX_DEFAULT;
+      const maxCap  = typeof pr.max === "number" ? pr.max  : FILTER_PRICE_MAX_DEFAULT;
       const minBound = typeof pr.min === "number" ? pr.min : 0;
       if (p < minBound || p > maxCap) return false;
     }
   }
 
+  // Text search across name, title and location.
   if (filters.search) {
     const q = filters.search.toLowerCase();
-    const haystack = [partner.partnerName, partner.title, partner.location]
+    const haystack = [partner.partnerName, partner.title, partner.location, partner.specialties]
+      .flat()
       .filter(Boolean)
       .join(" ")
       .toLowerCase();

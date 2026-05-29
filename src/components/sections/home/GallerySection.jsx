@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { classNames } from "../../../utils/classNames";
 import Button from "../../ui/button";
 
@@ -28,6 +28,22 @@ const GALLERY_SLIDES = [
 
 const GallerySection = React.forwardRef(({ className, ...props }, ref) => {
   const [activeSlide, setActiveSlide] = useState(0);
+  const [paused, setPaused] = useState(false);
+
+  const goTo = useCallback((idx) => {
+    setActiveSlide(idx);
+  }, []);
+
+  // Auto-advance every 5s. Resets whenever activeSlide changes (manual or auto).
+  // Pauses while the user hovers over the image.
+  useEffect(() => {
+    if (paused) return;
+    const id = setInterval(() => {
+      setActiveSlide((prev) => (prev + 1) % GALLERY_SLIDES.length);
+    }, 5000);
+    return () => clearInterval(id);
+  }, [activeSlide, paused]);
+
   const slide = GALLERY_SLIDES[activeSlide];
 
   return (
@@ -67,7 +83,11 @@ const GallerySection = React.forwardRef(({ className, ...props }, ref) => {
 
         {/* Gallery showcase */}
         <div className="relative">
-          <div className="relative noise rounded-xl w-full h-[300px] md:h-[450px] lg:h-[654px] overflow-hidden shadow-[--shadow-card] bg-tertiary-light-default">
+          <div
+            className="relative noise rounded-xl w-full h-[300px] md:h-[450px] lg:h-[654px] overflow-hidden shadow-[--shadow-card] bg-tertiary-light-default"
+            onMouseEnter={() => setPaused(true)}
+            onMouseLeave={() => setPaused(false)}
+          >
             <img
               src={slide.image}
               alt={slide.title}
@@ -92,7 +112,7 @@ const GallerySection = React.forwardRef(({ className, ...props }, ref) => {
                     <button
                       key={idx}
                       type="button"
-                      onClick={() => setActiveSlide(idx)}
+                      onClick={() => goTo(idx)}
                       className={classNames(
                         "w-[10px] h-[10px] cursor-pointer rounded-full transition-all duration-300 ease-in",
                         idx === activeSlide

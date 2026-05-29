@@ -26,11 +26,6 @@ const SLIDES = [
   { id: 2, image: hero2, alt: "West Africa tour" },
 ];
 
-const UP_NEXT = {
-  category: "Travel Tips",
-  title: "Cape Coast Uncovered: History, Heritage & the Sea",
-  image: "https://picsum.photos/seed/tour-upnext/337/178",
-};
 
 // Figma: 1903:25269 — 1728×717 hero carousel
 // Title:    Raleway Bold 56px/66px #fefefe, max-w-[957px] centered
@@ -95,18 +90,6 @@ const TourHero = React.forwardRef(({ className, ...props }, ref) => {
           max-w-[90%] md:max-w-[600px]">
           Discover the beauty, culture, and adventure of Ghana and West Africa.
         </p>
-      </div>
-
-      {/* Up Next Card — hidden on mobile to avoid crowding the hero */}
-      <div className="
-        hidden md:block
-        absolute bottom-4 right-4
-        md:w-[280px] md:h-[150px]
-        lg:w-[337px] lg:h-[178px]
-        bg-black/50 text-white p-2 rounded z-30
-      ">
-        <p className="text-xs md:text-sm font-bold">Up Next</p>
-        <p className="text-xs md:text-sm">{UP_NEXT.title}</p>
       </div>
 
       {/* Dots */}

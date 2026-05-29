@@ -13,7 +13,7 @@ import CtaSection from "../../components/sections/home/CtaSection";
 import { useAppDispatch } from "../../hooks/useAppDispatch";
 import { useAppSelector } from "../../hooks/useAppSelector";
 import { fetchFeaturedToursThunk, selectFeaturedTours, selectFeaturedToursStatus } from "../../store/slices/toursSlice";
-import { fetchTestimonialsThunk, selectTestimonials } from "../../store/slices/cmsSlice";
+import { fetchTestimonialsThunk, selectTestimonials, selectTestimonialsStatus } from "../../store/slices/cmsSlice";
 
 // Tours with a future startDate (e.g. Achimota Jan 2027) sort to the top.
 // Tours with no startDate fall to the bottom. Preserves relative order within each group.
@@ -55,7 +55,8 @@ const HomePage = React.forwardRef(({ className, ...props }, ref) => {
   const dispatch          = useAppDispatch();
   const featuredTours     = useAppSelector(selectFeaturedTours);
   const featuredStatus    = useAppSelector(selectFeaturedToursStatus);
-  const testimonials      = useAppSelector(selectTestimonials);
+  const testimonials         = useAppSelector(selectTestimonials);
+  const testimonialsStatus   = useAppSelector(selectTestimonialsStatus);
 
   useEffect(() => {
     dispatch(fetchFeaturedToursThunk());
@@ -92,7 +93,7 @@ const HomePage = React.forwardRef(({ className, ...props }, ref) => {
       />
       <PartnerHighlightsSection />
       <BlogFeatureSection />
-      <TestimonialsSection testimonials={testimonials.length > 0 ? testimonials : undefined} />
+      <TestimonialsSection testimonials={testimonials} status={testimonialsStatus} />
       <CtaSection />
     </main>
   );

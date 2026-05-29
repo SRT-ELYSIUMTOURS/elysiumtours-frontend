@@ -13,7 +13,6 @@ const PartnerSpotlightPreview = React.forwardRef(
     const navigate = useNavigate();
 
     const isLoading = status === "idle" || status === "loading";
-    if (!isLoading && !posts.length) return null;
 
     return (
       <section
@@ -30,27 +29,33 @@ const PartnerSpotlightPreview = React.forwardRef(
           />
 
           {/* 1-col on mobile, 3-col on md+ */}
-          <div className="mt-10 lg:mt-[80px] grid grid-cols-1 md:grid-cols-3 gap-xl">
-            {isLoading ? (
-              [0, 1, 2].map((i) => (
-                <SkeletonCard key={i} className="h-[400px] md:h-[500px] w-full lg:h-[656px]" />
-              ))
-            ) : (
-              posts.slice(0, 3).map((post) => (
-                <HighlightCard
-                  key={post._id}
-                  image={post.coverImage}
-                  category={post.title}
-                  className="h-[400px] md:h-[500px] w-full lg:h-[656px]"
-                  onClick={() =>
-                    navigate(`/blog/post/${post.slug}`, {
-                      state: { title: post.title, heroImage: post.coverImage },
-                    })
-                  }
-                />
-              ))
-            )}
-          </div>
+          {!isLoading && posts.length === 0 ? (
+            <p className="mt-10 lg:mt-[80px] font-raleway text-[15px] text-[#949494] text-center py-10">
+              No posts in this category yet — check back soon.
+            </p>
+          ) : (
+            <div className="mt-10 lg:mt-[80px] grid grid-cols-1 md:grid-cols-3 gap-xl">
+              {isLoading ? (
+                [0, 1, 2].map((i) => (
+                  <SkeletonCard key={i} className="h-[400px] md:h-[500px] w-full lg:h-[656px]" />
+                ))
+              ) : (
+                posts.slice(0, 3).map((post) => (
+                  <HighlightCard
+                    key={post._id}
+                    image={post.coverImage}
+                    category={post.title}
+                    className="h-[400px] md:h-[500px] w-full lg:h-[656px]"
+                    onClick={() =>
+                      navigate(`/blog/post/${post.slug}`, {
+                        state: { title: post.title, heroImage: post.coverImage },
+                      })
+                    }
+                  />
+                ))
+              )}
+            </div>
+          )}
         </div>
       </section>
     );

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { classNames } from "../../../utils/classNames";
 
 const SLIDES = [
@@ -16,7 +16,18 @@ const SearchIcon = () => (
 
 const PartnerHero = React.forwardRef(({ onSearch, className = "", ...props }, ref) => {
   const [current, setCurrent] = useState(0);
+  const [paused, setPaused] = useState(false);
   const [query, setQuery] = useState("");
+
+  // Auto-advance every 5s. Resets whenever current changes (manual or auto).
+  // Pauses on hover so users can read without the slide flipping.
+  useEffect(() => {
+    if (paused) return;
+    const id = setInterval(() => {
+      setCurrent((prev) => (prev + 1) % SLIDES.length);
+    }, 5000);
+    return () => clearInterval(id);
+  }, [current, paused]);
 
   const handleSearch = () => {
     onSearch?.(query);
@@ -29,7 +40,11 @@ const PartnerHero = React.forwardRef(({ onSearch, className = "", ...props }, re
   return (
     <div ref={ref} className={classNames("w-full", className)} {...props}>
       {/* Hero container — taller aspect ratio on mobile so title + search fit comfortably */}
-      <section className="relative w-full overflow-hidden h-[500px] sm:h-[600px] md:aspect-[16/9] md:h-auto">
+      <section
+        className="relative w-full overflow-hidden h-[500px] sm:h-[600px] md:aspect-[16/9] md:h-auto"
+        onMouseEnter={() => setPaused(true)}
+        onMouseLeave={() => setPaused(false)}
+      >
         {/* Slides */}
         {SLIDES.map((slide, i) => (
           <div
@@ -91,10 +106,8 @@ const PartnerHero = React.forwardRef(({ onSearch, className = "", ...props }, re
               type="button"
               onClick={() => setCurrent(i)}
               className={classNames(
-                "w-4 h-4 rounded-full border border-solid transition-all duration-300 ease-in",
-                i === current
-                  ? "bg-secondary-normal-default border-secondary-normal-default"
-                  : "bg-transparent border-primary-dark-default hover:border-secondary-normal-hover"
+                "w-4 h-4 rounded-full border-2 border-solid border-[#F7F7F7] transition-all duration-300 ease-in",
+                i === current ? "bg-[#D6BEEB]" : "bg-transparent hover:border-secondary-normal-hover"
               )}
               aria-label={i === current ? "Current slide" : `Go to slide ${i + 1}`}
             />

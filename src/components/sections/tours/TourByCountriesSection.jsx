@@ -108,17 +108,23 @@ const TourByCountriesSection = React.forwardRef(({ className, destinations: apiD
         </div>
 
         {/* Responsive grid: 2 cols mobile, 3 tablet, 4 desktop */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 md:gap-x-6 lg:gap-x-[32px] gap-y-6 lg:gap-y-[40px]">
-          {cards && cards.map((c) => (
-            <CountryTourCard
-              key={c.slug}
-              country={c.country}
-              image={c.image}
-              tourCount={c.tourCount}
-              onClick={() => navigate(`/tours/${c.slug}`)}
-            />
-          ))}
-        </div>
+        {!cards || cards.length === 0 ? (
+          <p className="font-raleway text-[15px] text-[#949494] text-center py-10">
+            No destinations available yet — check back soon.
+          </p>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 md:gap-x-6 lg:gap-x-[32px] gap-y-6 lg:gap-y-[40px]">
+            {cards.map((c) => (
+              <CountryTourCard
+                key={c.slug}
+                country={c.country}
+                image={c.image}
+                tourCount={c.tourCount}
+                onClick={() => navigate(`/tours/${c.slug}`)}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

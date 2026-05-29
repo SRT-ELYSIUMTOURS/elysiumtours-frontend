@@ -1,16 +1,12 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import { classNames } from "../../utils/classNames";
-import Button from "./button";
 import NewsletterInput from "./NewsletterInput";
 import PartnerWithUsModal from "./PartnerWithUsModal";
 import Toast from "./toast";
-const ElysiumLogo = "/Elysium-logo.svg";
+import { subscribeNewsletterApi } from "../../api/contact.api";
 
-// From Figma: Footer — Frame 75 (1728×399, padding:16 all sides)
-// Frame 96: Horizontal, Hug×Hug (1416.5×227), gap:118px, top:73, left:155.5
-// Frame 95 (Newsletter): Vertical, width:379, Hug height, gap:14
-// Frame 94 (Email pill): 379×56, r:40, border 1px #D6BEEB
-// Bottom bar: copyright + Privacy Policy + Terms Of Use
+const ElysiumLogo = "/Elysium-logo.svg";
 
 // ─── Sub-components ────────────────────────────────────────────────────────────
 
@@ -23,50 +19,89 @@ const FooterColHeading = ({ children, className = "" }) => (
   </h4>
 );
 
-const FooterLink = ({ href = "#", children, className = "" }) => (
-  <a
-    href={href}
-    className={classNames(
-      "block text-md-regular text-tertiary-normal-default",
-      "hover:text-secondary-normal-default transition-colors duration-200",
-      className
-    )}
-  >
-    {children}
-  </a>
-);
+// Internal routes use React Router <Link> to avoid full page reloads.
+// External URLs use a regular <a>.
+const FooterLink = ({ href = "#", children, className = "" }) => {
+  const isInternal = href.startsWith("/") || href === "#";
+  const base = classNames(
+    "block text-md-regular text-tertiary-normal-default",
+    "hover:text-secondary-normal-default transition-colors duration-200",
+    className
+  );
+  if (isInternal) {
+    return <Link to={href} className={base}>{children}</Link>;
+  }
+  return (
+    <a href={href} target="_blank" rel="noopener noreferrer" className={base}>
+      {children}
+    </a>
+  );
+};
 
-// ─── Partner CTA Strip ─────────────────────────────────────────────────────────
+// ─── Default link sets ────────────────────────────────────────────────────────
 
+const DEFAULT_COMPANY_LINKS = [
+  { label: "Home",          href: "/" },
+  { label: "Tours",         href: "/tours" },
+  { label: "Tour Partners", href: "/tour-partners" },
+  { label: "Gallery",       href: "/gallery" },
+  { label: "Blog",          href: "/blog" },
+  { label: "Contact",       href: "/contact" },
+];
+
+// FAQs and general enquiries live on the Contact page.
+const DEFAULT_SUPPORT_LINKS = [
+  { label: "Contact Us", href: "/contact" },
+  { label: "FAQs",       href: "/contact" },
+  { label: "Feedback",   href: "/contact" },
+];
+
+// Legal pages not yet created — placeholder hrefs until they exist.
+const DEFAULT_LEGAL_LINKS = [
+  { label: "Privacy Policy",   href: "#" },
+  { label: "Terms of Service", href: "#" },
+  { label: "Cookie Policy",    href: "#" },
+];
 
 // ─── Main Footer ───────────────────────────────────────────────────────────────
 
 const Footer = ({
   logo,
   tagline = "Celebrating Ghana's stories, people, and places through meaningful travel experiences.",
-  companyLinks = [],
-  supportLinks = [],
-  legalLinks = [],
-  onSubscribe,
+  companyLinks,
+  supportLinks,
+  legalLinks,
   copyrightText,
   className = "",
 }) => {
   const year = new Date().getFullYear();
   const [partnerModalOpen, setPartnerModalOpen] = useState(false);
-  const [prefillEmail, setPrefillEmail] = useState("");
   const [toast, setToast] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
 
-  // Default newsletter handler: open Partner With Us modal so the button does
-  // something instead of being a dead form. The typed email is forwarded so the
-  // modal's email field is pre-filled — the user doesn't have to type it again.
-  // Pages can still override with their own onSubscribe prop.
-  const handleNewsletterSubmit = (email) => {
-    if (onSubscribe) {
-      onSubscribe(email);
-      return;
+  const resolvedCompany = companyLinks?.length ? companyLinks : DEFAULT_COMPANY_LINKS;
+  const resolvedSupport = supportLinks?.length ? supportLinks : DEFAULT_SUPPORT_LINKS;
+  const resolvedLegal   = legalLinks?.length   ? legalLinks   : DEFAULT_LEGAL_LINKS;
+
+  const handleNewsletterSubmit = async (email) => {
+    if (!email?.trim()) return;
+    setSubmitting(true);
+    try {
+      await subscribeNewsletterApi(email.trim());
+      setToast({
+        variant: "success",
+        Heading: "Subscribed!",
+        text: "You're on the list. We'll keep you updated on the latest from Elysium.",
+      });
+    } catch {
+      setToast({
+        variant: "error",
+        Heading: "Subscription failed",
+        text: "Something went wrong. Please try again.",
+      });
+    } finally {
+      setSubmitting(false);
     }
-    setPrefillEmail(email || "");
-    setPartnerModalOpen(true);
   };
 
   const handlePartnerSubmit = () => {
@@ -103,13 +138,7 @@ const Footer = ({
             <div className="flex-1 md:flex-none md:shrink-0">
               <FooterColHeading>Company</FooterColHeading>
               <div className="flex flex-col gap-2 md:gap-4">
-                {(companyLinks.length ? companyLinks : [
-                  { label: "Home",          href: "#" },
-                  { label: "Tour",          href: "#" },
-                  { label: "Tour Partners", href: "#" },
-                  { label: "Gallery",       href: "#" },
-                  { label: "Blogs",         href: "#" },
-                ]).map(link => (
+                {resolvedCompany.map(link => (
                   <FooterLink key={link.label} href={link.href}>{link.label}</FooterLink>
                 ))}
               </div>
@@ -119,12 +148,7 @@ const Footer = ({
             <div className="flex-1 md:flex-none md:shrink-0">
               <FooterColHeading>Support</FooterColHeading>
               <div className="flex flex-col gap-2 md:gap-3">
-                {(supportLinks.length ? supportLinks : [
-                  { label: "Support Center",  href: "#" },
-                  { label: "FAQS",            href: "#" },
-                  { label: "Troubleshooting", href: "#" },
-                  { label: "Feedback",        href: "#" },
-                ]).map(link => (
+                {resolvedSupport.map(link => (
                   <FooterLink key={link.label} href={link.href}>{link.label}</FooterLink>
                 ))}
               </div>
@@ -136,11 +160,7 @@ const Footer = ({
           <div className="shrink-0">
             <FooterColHeading>Legal</FooterColHeading>
             <div className="flex flex-col gap-2 md:gap-3">
-              {(legalLinks.length ? legalLinks : [
-                { label: "Privacy Policy",   href: "#" },
-                { label: "Terms of Service", href: "#" },
-                { label: "Cookie Policy",    href: "#" },
-              ]).map(link => (
+              {resolvedLegal.map(link => (
                 <FooterLink key={link.label} href={link.href}>{link.label}</FooterLink>
               ))}
             </div>
@@ -150,7 +170,7 @@ const Footer = ({
           <div className="w-full md:w-auto md:max-w-[379px]">
             <NewsletterInput
               onSubmit={handleNewsletterSubmit}
-              buttonText="Partner With Us"
+              buttonText={submitting ? "Submitting…" : "Submit Email"}
               className="w-full"
             />
           </div>
@@ -162,7 +182,7 @@ const Footer = ({
       <div className="w-full border-t border-solid border-primary-normal-active bg-primary-light-default px-6 md:px-20 py-4">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
           <p className="text-med-small-regular text-primary-dark-hover">
-            {copyrightText || `Copyright © ElysiumTours`}
+            {copyrightText || `Copyright © ${year} ElysiumTours`}
           </p>
           <div className="flex items-center gap-6">
             <FooterLink className="text-med-small-regular text-primary-dark-hover" href="#">Privacy Policy</FooterLink>
@@ -171,18 +191,14 @@ const Footer = ({
         </div>
       </div>
 
-      {/* Partner With Us modal — opened by the newsletter "Partner With Us" button.
-          The email typed in the newsletter input is forwarded as `initialEmail`
-          so the modal opens with the email field already filled. */}
+      {/* Partner With Us modal */}
       {partnerModalOpen && (
         <PartnerWithUsModal
           onClose={() => setPartnerModalOpen(false)}
           onSubmit={handlePartnerSubmit}
-          initialEmail={prefillEmail}
         />
       )}
 
-      {/* Toast notification */}
       {toast && (
         <Toast
           variant={toast.variant}

@@ -393,7 +393,11 @@ const BlogCategoryPage = React.forwardRef(({ className, ...props }, ref) => {
             { label: "Not Found" },
           ]}
         />
-        <BlogHero />
+        <BlogHero posts={
+          allPosts.filter((p) => p.category === category).length > 0
+            ? allPosts.filter((p) => p.category === category).slice(0, 3)
+            : allPosts.slice(0, 3)
+        } />
         <BlogCategoryFilter />
         <div className="flex items-center justify-center py-[120px]">
           <p className="font-raleway font-medium text-[20px] text-primary-dark-darker">
