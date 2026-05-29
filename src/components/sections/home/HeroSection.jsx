@@ -6,19 +6,19 @@ import SearchBar from "../../ui/SearchBar";
 const HERO_SLIDES = [
   {
     id: 1,
-    image: "./src/assets/homeAssets/hero1.webp",
+    image: "/homeAssets/hero1.webp",
     alt: "Ghana landmark",
     overlayOpacity: 0.6,
   },
   {
     id: 2,
-    image: "./src/assets/homeAssets/hero2.webp",
+    image: "/homeAssets/hero2.webp",
     alt: "Cape Coast Castle",
     overlayOpacity: 0.6,
   },
   {
     id: 3,
-    image: "./src/assets/homeAssets/Image-6.webp",
+    image: "/homeAssets/Image-6.webp",
     alt: "Kakum National Park",
     overlayOpacity: 0.6,
   },

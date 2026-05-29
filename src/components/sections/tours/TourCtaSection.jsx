@@ -1,8 +1,8 @@
 import React from "react";
 import { classNames } from "../../../utils/classNames";
 
-import blogCtaBg from "../../../assets/ElysiumAssets/blog-cta-bg.png";
-import blogCtaDeco from "../../../assets/ElysiumAssets/blog-cta-deco.svg";
+const blogCtaBg = "/ElysiumAssets/blog-cta-bg.png";
+const blogCtaDeco = "/ElysiumAssets/blog-cta-deco.svg";
 
 // Featured-blog teaser CTA used on Tour, TourCountry, BlogCategory, Blog, Home pages.
 // Mobile/tablet: stacked card — image on top, text below.

@@ -4,10 +4,10 @@ import { classNames } from "../../../utils/classNames";
 // ── Slide dot assets — Figma node 1903:25270 ─────────────────────────────────
 // Active   (44:191): fill #D6BEEB, stroke #F7F7F7  (SVG fallback via <img>)
 // Inactive (44:189): stroke #EBDFF5, no fill
-import slideDotActive   from "../../../assets/ElysiumAssets/slide-dot-active.svg";
-import slideDotInactive from "../../../assets/ElysiumAssets/slide-dot-inactive.svg";
-import hero1 from "../../../assets/tourAssets/tour-hero-1.jpg";
-import hero2 from "../../../assets/tourAssets/tour-hero-2.jpg";
+const slideDotActive = "/ElysiumAssets/slide-dot-active.svg";
+const slideDotInactive = "/ElysiumAssets/slide-dot-inactive.svg";
+const hero1 = "/tourAssets/tour-hero-1.jpg";
+const hero2 = "/tourAssets/tour-hero-2.jpg";
 
 
 // ── Figma overlay (node I1903:25269;44:203) ───────────────────────────────────

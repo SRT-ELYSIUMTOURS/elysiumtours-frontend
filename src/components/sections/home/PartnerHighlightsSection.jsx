@@ -9,17 +9,17 @@ const PARTNERS = [
   {
     id: 1,
     category: "Accommodation",
-    image: "./src/assets/homeAssets/Image-11.webp",
+    image: "/homeAssets/Image-11.webp",
   },
   {
     id: 2,
     category: "Transportation",
-    image: "./src/assets/homeAssets/Image-12.webp",
+    image: "/homeAssets/Image-12.webp",
   },
   {
     id: 3,
     category: "Tour Guides",
-    image: "./src/assets/homeAssets/Image-13.webp",
+    image: "/homeAssets/Image-13.webp",
   },
 ];
 

@@ -4,10 +4,10 @@ import { classNames } from "../../../utils/classNames";
 import HighlightCard from "../../cards/HighlightCard";
 
 // Downloaded from Figma asset server
-import sectionLine    from "../../../assets/ElysiumAssets/section-line.svg";
-import leisureBg      from "../../../assets/ElysiumAssets/leisure-tours-bg.png";
-import businessBg     from "../../../assets/ElysiumAssets/business-tours-bg.png";
-import ekolureBg      from "../../../assets/ElysiumAssets/ekolure-tours-bg.png";
+const sectionLine = "/ElysiumAssets/section-line.svg";
+const leisureBg = "/ElysiumAssets/leisure-tours-bg.png";
+const businessBg = "/ElysiumAssets/business-tours-bg.png";
+const ekolureBg = "/ElysiumAssets/ekolure-tours-bg.png";
 
 // Figma node 1903-25379 — TourTypesSection
 // Section bg: #f2eaf9 (Violet-Secondary 30%/Light)

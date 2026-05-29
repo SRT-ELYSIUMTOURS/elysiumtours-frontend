@@ -1,8 +1,8 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { classNames } from "../../utils/classNames";
-import ctaGlowRight from "../../assets/ElysiumAssets/cta-glow-right.svg";
-import ctaGlowLeft from "../../assets/ElysiumAssets/cta-glow-left.svg";
+const ctaGlowRight = "/ElysiumAssets/cta-glow-right.svg";
+const ctaGlowLeft = "/ElysiumAssets/cta-glow-left.svg";
 
 /**
  * Shared purple-band partner / promo CTA — used on Tour, Gallery, Blog, Contact.

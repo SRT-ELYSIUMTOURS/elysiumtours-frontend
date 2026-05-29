@@ -2,16 +2,16 @@ import React, { useState, useRef, useEffect } from "react";
 import { classNames } from "../../../utils/classNames";
 
 // ── Slide dot assets — same as TourHero (Figma 1914:40903/40904) ──────────────
-import slideDotActive   from "../../../assets/ElysiumAssets/slide-dot-active.svg";
-import slideDotInactive from "../../../assets/ElysiumAssets/slide-dot-inactive.svg";
+const slideDotActive = "/ElysiumAssets/slide-dot-active.svg";
+const slideDotInactive = "/ElysiumAssets/slide-dot-inactive.svg";
 
 // ── Info bar icon assets (Figma 1942:30898) ────────────────────────────────────
-import iconCalendar    from "../../../assets/ElysiumAssets/infobar-calendar.svg";
-import iconCurrency    from "../../../assets/ElysiumAssets/infobar-currency.svg";
-import iconLanguage    from "../../../assets/ElysiumAssets/infobar-language.svg";
-import iconMainEntry   from "../../../assets/ElysiumAssets/infobar-mainentry.svg";
-import iconClock       from "../../../assets/ElysiumAssets/infobar-clock.svg";
-import iconTemperature from "../../../assets/ElysiumAssets/infobar-temperature.svg";
+const iconCalendar = "/ElysiumAssets/infobar-calendar.svg";
+const iconCurrency = "/ElysiumAssets/infobar-currency.svg";
+const iconLanguage = "/ElysiumAssets/infobar-language.svg";
+const iconMainEntry = "/ElysiumAssets/infobar-mainentry.svg";
+const iconClock = "/ElysiumAssets/infobar-clock.svg";
+const iconTemperature = "/ElysiumAssets/infobar-temperature.svg";
 
 // ── Figma overlay (1914:40901) ─────────────────────────────────────────────────
 const OVERLAY_STYLE = {

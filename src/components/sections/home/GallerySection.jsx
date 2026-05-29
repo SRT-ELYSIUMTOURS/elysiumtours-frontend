@@ -5,21 +5,21 @@ import Button from "../../ui/button";
 const GALLERY_SLIDES = [
   {
     id: 1,
-    image: "./src/assets/Elysium+Achimota/HomeGalImg.webp",
+    image: "/Elysium+Achimota/HomeGalImg.webp",
     title: "Moments from Motown",
     description:
       "Browse a collection of images capturing the sights, culture, and memorable experiences that make Motown a destination worth exploring.",
   },
   {
     id: 2,
-    image: "./src/assets/homeAssets/hero2.webp",
+    image: "/homeAssets/hero2.webp",
     title: "Golden Heritage",
     description:
       "Explore the rich history of Elmina Castle, where every stone tells a story of resilience and culture.",
   },
   {
     id: 3,
-    image: "./src/assets/homeAssets/hero4.webp",
+    image: "/homeAssets/hero4.webp",
     title: "Forest Canopy Walk",
     description:
       "Walk among the treetops at Kakum National Park for breathtaking views of the tropical rainforest.",

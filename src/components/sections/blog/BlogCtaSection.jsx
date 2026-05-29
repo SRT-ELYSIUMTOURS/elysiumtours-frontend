@@ -1,8 +1,8 @@
 import React from "react";
 import { classNames } from "../../../utils/classNames";
 
-import ctaGlowRight   from "../../../assets/ElysiumAssets/cta-glow-right.svg";
-import ctaGlowLeft    from "../../../assets/ElysiumAssets/cta-glow-left.svg";
+const ctaGlowRight = "/ElysiumAssets/cta-glow-right.svg";
+const ctaGlowLeft = "/ElysiumAssets/cta-glow-left.svg";
 
 const BlogCtaSection = React.forwardRef(({ className, ...props }, ref) => {
   return (

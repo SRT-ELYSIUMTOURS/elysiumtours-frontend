@@ -1,6 +1,6 @@
 import React from "react";
 import { classNames } from "../../../utils/classNames";
-import blogCtaBg from "../../../assets/ElysiumAssets/blog-cta-bg.png";
+const blogCtaBg = "/ElysiumAssets/blog-cta-bg.png";
 
 // ── BlogFeatureSection ────────────────────────────────────────────────────────
 // Figma: frame 134:1706 — Homepage "CTA section"

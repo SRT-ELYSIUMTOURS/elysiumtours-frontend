@@ -5,7 +5,7 @@ import PopularTourCard from "../../cards/PopularTourCard";
 import PopularTourCardSkeleton from "../../cards/PopularTourCardSkeleton";
 
 // Figma assets
-import sectionLine from "../../../assets/ElysiumAssets/section-line.svg";
+const sectionLine = "/ElysiumAssets/section-line.svg";
 
 const TourFeaturedSection = React.forwardRef(({ className, tours: toursProp, isLoading = false, ...props }, ref) => {
   const displayTours = (toursProp && toursProp.length > 0 ? toursProp : []).map((t, i) => {

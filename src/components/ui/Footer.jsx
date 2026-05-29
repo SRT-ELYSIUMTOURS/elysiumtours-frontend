@@ -4,7 +4,7 @@ import Button from "./button";
 import NewsletterInput from "./NewsletterInput";
 import PartnerWithUsModal from "./PartnerWithUsModal";
 import Toast from "./toast";
-import ElysiumLogo from "../../assets/Elysium-logo.svg";
+const ElysiumLogo = "/Elysium-logo.svg";
 
 // From Figma: Footer — Frame 75 (1728×399, padding:16 all sides)
 // Frame 96: Horizontal, Hug×Hug (1416.5×227), gap:118px, top:73, left:155.5

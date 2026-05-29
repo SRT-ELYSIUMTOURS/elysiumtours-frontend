@@ -18,9 +18,9 @@ import PartnerWithUsModal from "../../components/ui/PartnerWithUsModal";
 
 // ─── Hero slides ─────────────────────────────────────────────────────────────
 const CONTACT_HERO_SLIDES = [
-  { id: 1, image: "./src/assets/homeAssets/hero1.webp", alt: "Accra skyline", overlayOpacity: 0.6 },
-  { id: 2, image: "./src/assets/homeAssets/hero1.webp", alt: "Ghana landmark", overlayOpacity: 0.6 },
-  { id: 3, image: "./src/assets/homeAssets/hero1.webp", alt: "Ghana nature", overlayOpacity: 0.6 },
+  { id: 1, image: "/homeAssets/hero1.webp", alt: "Accra skyline", overlayOpacity: 0.6 },
+  { id: 2, image: "/homeAssets/hero1.webp", alt: "Ghana landmark", overlayOpacity: 0.6 },
+  { id: 3, image: "/homeAssets/hero1.webp", alt: "Ghana nature", overlayOpacity: 0.6 },
 ];
 
 // ─── FAQ data — 10 items interleaved so col1=even indices, col2=odd indices ──
@@ -288,7 +288,7 @@ const ContactPage = React.forwardRef(({ className, ...props }, ref) => {
               style={{ boxShadow: "0px 4px 20px 0px rgba(0,0,0,0.05)" }}
             >
               <img
-                src="./src/assets/homeAssets/hero1.webp"
+                src="/homeAssets/hero1.webp"
                 alt=""
                 className="absolute inset-0 w-full h-full object-cover"
                 style={{ filter: "blur(10px)", transform: "scale(1.1)" }}

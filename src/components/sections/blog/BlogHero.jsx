@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { classNames } from "../../../utils/classNames";
 import Button from "../../ui/button";
-import blogHeroImage1 from "../../../assets/blogAssets/Image-1.webp";
+const blogHeroImage1 = "/blogAssets/Image-1.webp";
 
 const SLIDES = [
   {

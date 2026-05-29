@@ -1,8 +1,8 @@
 import React from "react";
 import { classNames } from "../../../utils/classNames";
-import ctaSafariImg   from "../../../assets/ElysiumAssets/cta-safari.png";
-import ctaGlowRight   from "../../../assets/ElysiumAssets/cta-glow-right.svg";
-import ctaGlowLeft    from "../../../assets/ElysiumAssets/cta-glow-left.svg";
+const ctaSafariImg = "/ElysiumAssets/cta-safari.png";
+const ctaGlowRight = "/ElysiumAssets/cta-glow-right.svg";
+const ctaGlowLeft = "/ElysiumAssets/cta-glow-left.svg";
 
 // ── CtaSection ────────────────────────────────────────────────────────────────
 // Figma frame: 1903:25290 — 1728×732px, bg=#2b0f43
